@@ -116,12 +116,12 @@ src/
     format.ts           coordenadas, fechas y números con el formato de DESIGN.md
     wcs.ts              proyección gnomónica: píxel a cielo y cielo a píxel
     fov.ts              vistas de 5′, 10′ y 30′ y el escalón de campo que les corresponde
-  features/             una carpeta por funcionalidad; hoy, los marcadores de posición de entrada y visor
+  features/             una carpeta por funcionalidad: entry/ (pantalla de entrada) y viewer/ (pantalla del visor)
   test/                 preparación de Vitest, guardas y ejemplos del contrato
     fixtures/           datos de muestra generados por el backend
 ```
 
-Todavía falta unir las piezas: `App.tsx` y `src/features/` siguen mostrando los marcadores de posición, y no usan el store, los componentes ni el visor. Llega con la tarea siguiente (modos, paneles, capa de flags, entrada).
+`App.tsx` llama a `useFieldUrlSync()` una vez y muestra `features/entry` o `features/viewer` según la URL. En `features/viewer`, `ViewerPage` arma la pantalla con `useViewerController` (estado de modo, época, contraste y capa de flags) y `viewModel.ts` (qué se compone en cada modo); `viewerPage.testkit.ts` es el apoyo para los tests de una pantalla con campo.
 
 ## Páginas de desarrollo
 

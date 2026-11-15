@@ -2,7 +2,7 @@
   "code": {
     "invalid_request": "El pedido no es válido. Hay que revisar las coordenadas y el campo de visión.",
     "not_resolved": "No se encontró ningún objeto con ese nombre.",
-    "not_found": "Ese campo no existe o ya no está disponible.",
+    "not_found": "Ese campo no está disponible en este servidor.",
     "not_ready": "Los datos todavía no están listos.",
     "no_coverage": "SPHEREx todavía no observó esa zona del cielo.",
     "queue_full": "Hay muchos pedidos en espera.",
