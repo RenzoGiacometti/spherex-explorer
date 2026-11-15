@@ -1,0 +1,28 @@
+{
+  "stage": {
+    "label": "Celestial sphere. Drag or use the arrow keys to rotate it, and the plus and minus keys to zoom."
+  },
+  "hint": "Drag to rotate the sky",
+  "center": "Center",
+  "search": {
+    "label": "Search by name or coordinates",
+    "submit": "Search",
+    "example": "{{name}} · {{coordinates}}",
+    "resolving": "Searching for {{query}}…",
+    "advice": {
+      "not_resolved": "Try another name or the coordinates.",
+      "upstream_unavailable": "Searching by coordinates still works."
+    }
+  },
+  "random": "Random place",
+  "markers": {
+    "nav": "Featured objects",
+    "open": "Open {{name}} in the viewer"
+  },
+  "opening": "Opening {{name}}…",
+  "status": {
+    "noWebgl": "This browser could not draw the sphere. Search and the featured objects still work.",
+    "textureError": "The sky image could not be loaded. The markers and search still work."
+  },
+  "credit": "Sky: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC"
+}
