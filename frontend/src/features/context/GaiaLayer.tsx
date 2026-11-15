@@ -144,6 +144,11 @@ export interface GaiaControlsProps {
   readonly disabled?: boolean;
   /** Frase corta que explica por que esta deshabilitada. Solo en `inline`. */
   readonly disabledNote?: string | undefined;
+  /**
+   * Por que no se puede prender, ya traducido: el conmutador lo muestra al
+   * pasarle el cursor, tocarlo o enfocarlo, y lo da como descripcion accesible.
+   */
+  readonly disabledReason?: string | undefined;
   readonly className?: string | undefined;
 }
 
@@ -165,6 +170,7 @@ export function GaiaControls({
   variant = "panel",
   disabled = false,
   disabledNote,
+  disabledReason,
   className,
 }: GaiaControlsProps) {
   const { t } = useTranslation("context");
@@ -217,6 +223,7 @@ export function GaiaControls({
           checked={shownOn}
           onChange={onVisibleChange}
           disabled={disabled}
+          disabledReason={disabledReason}
         />
         {disabled && disabledNote !== undefined ? (
           <p className={styles.note}>{disabledNote}</p>
@@ -238,6 +245,7 @@ export function GaiaControls({
         checked={visible}
         onChange={onVisibleChange}
         disabled={disabled}
+        disabledReason={disabledReason}
       />
       {sliders}
     </GlassPanel>

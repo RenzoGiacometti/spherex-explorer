@@ -20,7 +20,8 @@
     "noImage": "Sin imagen para esta fecha",
     "target": "Posición esperada del objeto",
     "outside": "En {{year}}, {{name}} estaba fuera de este campo: a {{distance}} hacia el {{direction}}. Por eso no aparece en esta placa.",
-    "outsideObject": "el objeto de este campo"
+    "outsideObject": "el objeto de este campo",
+    "transportDisabled": "Hacen falta al menos dos imágenes para recorrer el viaje."
   },
   "gaia": {
     "title": "Gaia DR3",

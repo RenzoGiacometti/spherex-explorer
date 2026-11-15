@@ -135,7 +135,12 @@ export function LoadStatus() {
           {completeError === null ? null : (
             <QualityNotice>{tErrors(`code.${completeError}`)}</QualityNotice>
           )}
-          <Button className={styles.complete} disabled={completing} onClick={handleComplete}>
+          <Button
+            className={styles.complete}
+            disabled={completing}
+            disabledReason={t("disabled.completing")}
+            onClick={handleComplete}
+          >
             {t("load.complete")}
           </Button>
         </div>

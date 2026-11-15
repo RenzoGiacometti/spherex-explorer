@@ -61,7 +61,7 @@
   outline-offset: 2px;
 }
 
-.toggle:hover .input:not(:disabled):not(:checked) + .track {
+.toggle:hover .input:not(:disabled):not([aria-disabled="true"]):not(:checked) + .track {
   border-color: var(--color-text);
 }
 

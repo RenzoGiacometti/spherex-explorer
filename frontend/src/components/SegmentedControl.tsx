@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import a11y from "./a11y.module.css";
 import { ControlHeader } from "./ControlHeader";
 import { classNames } from "./classNames";
+import { useDisabledReason } from "./DisabledReason";
 import styles from "./SegmentedControl.module.css";
 
 export interface SegmentedOption<T extends string | number> {
@@ -15,6 +16,12 @@ export interface SegmentedOption<T extends string | number> {
   readonly ariaLabel?: string | undefined;
   /** No se puede elegir. */
   readonly disabled?: boolean | undefined;
+  /**
+   * Por que no se puede elegir, ya traducido. Con esto la opcion deshabilitada
+   * muestra el motivo al pasarle el cursor, tocarla o enfocarla, y lo da como
+   * descripcion accesible (DisabledReason.tsx).
+   */
+  readonly disabledReason?: string | undefined;
   /**
    * Sin datos: se muestra atenuada pero sigue siendo elegible (una banda sin
    * datos en la epoca actual).
@@ -97,35 +104,64 @@ export function SegmentedControl<T extends string | number>({
       ) : null}
       <div className={styles.grid} style={gridStyle}>
         {options.map((option) => (
-          <label
+          <OptionCell
             key={String(option.value)}
-            className={classNames(styles.option, option.noData === true && styles.noData)}
-            data-no-data={option.noData === true ? "true" : undefined}
-          >
-            <input
-              type="radio"
-              className={styles.input}
-              name={groupName}
-              value={String(option.value)}
-              checked={option.value === value}
-              disabled={option.disabled === true}
-              aria-label={optionName(option, noDataText)}
-              onChange={() => {
-                // Un control deshabilitado no avisa cambios, tampoco ante un evento sintetico.
-                if (!disabled && option.disabled !== true) onChange(option.value);
-              }}
-            />
-            <span
-              className={classNames(styles.cell, option.detail !== undefined && styles.twoLine)}
-            >
-              <span className={styles.name}>{option.label}</span>
-              {option.detail === undefined ? null : (
-                <span className={styles.detail}>{option.detail}</span>
-              )}
-            </span>
-          </label>
+            option={option}
+            groupName={groupName}
+            checked={option.value === value}
+            name={optionName(option, noDataText)}
+            onSelect={() => {
+              // Un control deshabilitado no avisa cambios, tampoco ante un evento sintetico.
+              if (!disabled && option.disabled !== true) onChange(option.value);
+            }}
+          />
         ))}
       </div>
     </fieldset>
+  );
+}
+
+interface OptionCellProps<T extends string | number> {
+  readonly option: SegmentedOption<T>;
+  readonly groupName: string;
+  readonly checked: boolean;
+  /** Nombre accesible del radio. */
+  readonly name: string;
+  readonly onSelect: () => void;
+}
+
+/** Una celda: el radio nativo y lo que se ve de el. */
+function OptionCell<T extends string | number>({
+  option,
+  groupName,
+  checked,
+  name,
+  onSelect,
+}: OptionCellProps<T>) {
+  const reason = useDisabledReason(option.disabled === true, option.disabledReason);
+  return (
+    <label
+      className={classNames(styles.option, option.noData === true && styles.noData)}
+      data-no-data={option.noData === true ? "true" : undefined}
+    >
+      <input
+        type="radio"
+        className={styles.input}
+        name={groupName}
+        value={String(option.value)}
+        checked={checked}
+        disabled={reason.active ? undefined : option.disabled === true}
+        aria-label={name}
+        onChange={onSelect}
+        {...reason.props}
+      />
+      <span className={classNames(styles.cell, option.detail !== undefined && styles.twoLine)}>
+        <span className={styles.name}>{option.label}</span>
+        {option.detail === undefined ? null : (
+          <span className={styles.detail}>{option.detail}</span>
+        )}
+      </span>
+      {reason.bubble}
+    </label>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, GlassPanel, IconButton, QualityNotice, Toggle } from "@/components";
 import type { Language } from "@/i18n/languages";
@@ -17,8 +17,10 @@ import { WAVE_MAX_UM, WAVE_MIN_UM } from "./chartScale";
 import { SpectrumChart } from "./SpectrumChart";
 import styles from "./SpectrumPanel.module.css";
 import {
+  BASE_FREQUENCY_HZ,
   buildSoundPlan,
   canPlaySound,
+  OCTAVES,
   playSpectrum,
   SOUND_DURATION_S,
   type SoundPlayback,
@@ -135,6 +137,7 @@ export function SpectrumPanel({
   const [showExposures, setShowExposures] = useState(true);
   const [playhead, setPlayhead] = useState<number | null>(null);
   const playback = useRef<SoundPlayback | null>(null);
+  const soundRuleId = useId();
 
   const noSource = spectrum.status === "no_source";
   const nearest = spectrum.nearest ?? null;
@@ -279,6 +282,8 @@ export function SpectrumPanel({
               icon="sound"
               aria-pressed={playing}
               disabled={!soundAvailable || plan === null}
+              disabledReason={soundAvailable ? t("listen.noData") : t("listen.unsupported")}
+              aria-describedby={soundRuleId}
               onClick={toggleSound}
             >
               {playing ? t("listen.stop") : t("listen.play")}
@@ -289,11 +294,15 @@ export function SpectrumPanel({
               onChange={setShowExposures}
             />
           </div>
-          <p className={styles.note}>
-            {soundAvailable
-              ? t("listen.description", { seconds: formatInteger(SOUND_DURATION_S) })
-              : t("listen.unsupported")}
+          {/* La regla del sonido, junto al boton: es el grafico hecho sonido, no el sonido del objeto. */}
+          <p id={soundRuleId} className={styles.note}>
+            {t("listen.description", {
+              seconds: formatInteger(SOUND_DURATION_S),
+              octaves: formatInteger(OCTAVES),
+              hz: formatInteger(BASE_FREQUENCY_HZ),
+            })}
           </p>
+          {soundAvailable ? null : <p className={styles.note}>{t("listen.unsupported")}</p>}
         </>
       ) : (
         <div className={styles.empty}>

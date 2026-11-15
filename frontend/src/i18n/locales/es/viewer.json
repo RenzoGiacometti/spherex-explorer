@@ -209,5 +209,31 @@
   },
   "error": {
     "title": "No se pudo cargar el campo"
+  },
+  "disabled": {
+    "context": {
+      "loading": "El contexto del campo todavía se está cargando.",
+      "unavailable": "Disponible solo en los campos guardados: este campo no tiene imágenes de otras misiones.",
+      "error": "No se pudo cargar el contexto del campo.",
+      "embed": "No está disponible en la vista incrustada."
+    },
+    "curtain": {
+      "loading": "La placa en luz visible todavía se está cargando.",
+      "unavailable": "Disponible solo en los campos guardados: este campo no tiene placa en luz visible.",
+      "noPlate": "Este campo no tiene una placa en luz visible que se pueda mostrar."
+    },
+    "gaia": {
+      "loading": "El catálogo de Gaia todavía se está cargando.",
+      "unavailable": "Disponible solo en los campos guardados: este campo no tiene catálogo de Gaia.",
+      "none": "El catálogo de Gaia de este campo todavía no llegó, o el campo no tiene."
+    },
+    "reference": "Es la época que se está viendo (A): no se compara una época consigo misma.",
+    "play": {
+      "mode": "Solo se reproduce en el modo Parpadeo.",
+      "epochs": "Hacen falta al menos dos épocas con imagen en esta banda."
+    },
+    "transport": "Todavía no hay épocas para recorrer.",
+    "retryWait": "El servidor pidió esperar antes de reintentar.",
+    "completing": "El campo ya se está completando."
   }
 }

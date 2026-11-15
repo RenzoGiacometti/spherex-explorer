@@ -53,8 +53,18 @@
   cursor: pointer;
 }
 
-.input:disabled {
+.input:disabled,
+.input[aria-disabled="true"] {
   cursor: not-allowed;
+}
+
+/*
+ * La celda atenuada (opacidad) se pinta encima del radio y le saca el puntero:
+ * deshabilitado con motivo, el radio va arriba para recibir el cursor y el
+ * toque y poder decir por que (DisabledReason.tsx).
+ */
+.input[aria-disabled="true"] {
+  z-index: 1;
 }
 
 /* option: borde hairline-strong, sin relleno propio, texto en label-cap. */
@@ -132,10 +142,11 @@
   outline-offset: 2px;
 }
 
-.input:disabled + .cell {
+.input:disabled + .cell,
+.input[aria-disabled="true"] + .cell {
   opacity: 0.4;
 }
 
-.option:hover .input:not(:disabled):not(:checked) + .cell {
+.option:hover .input:not(:disabled):not([aria-disabled="true"]):not(:checked) + .cell {
   border-color: var(--color-text);
 }

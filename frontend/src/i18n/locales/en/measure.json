@@ -13,7 +13,8 @@
     "measuring": "Saturated source: measuring with the coverage layer…",
     "needTwo": "Mark the object in another epoch to measure how far it moved.",
     "sameDate": "The marks share the same date: another epoch is needed.",
-    "off": "With the object marked in two or more epochs, its motion per year is worked out. Turning it on switches the viewer to blink mode."
+    "off": "With the object marked in two or more epochs, its motion per year is worked out. Turning it on switches the viewer to blink mode.",
+    "markCenterDisabled": "The current epoch has no image in this band: there is nothing to mark."
   },
   "marks": {
     "title": "Marks",

@@ -5,6 +5,7 @@ import { VIEW_MODES, type ViewMode } from "@/state/urlState";
 import { epochMonth } from "./epochText";
 import { HoldButton } from "./HoldButton";
 import styles from "./panels.module.css";
+import type { FieldContextStatus } from "./useFieldContext";
 import type { ViewerController } from "./useViewerController";
 
 export interface ModePanelProps {
@@ -22,10 +23,23 @@ export interface ModePanelProps {
 const PAIR_MODES: readonly ViewMode[] = ["difference", "redcyan", "hold"];
 
 /**
+ * Que le falta al contexto del campo para ofrecer el viaje entre misiones. Con
+ * el contexto listo solo queda la vista incrustada, que no tiene su control.
+ */
+export function contextIssue(
+  status: FieldContextStatus,
+): "loading" | "unavailable" | "error" | "embed" {
+  if (status === "loading" || status === "idle") return "loading";
+  if (status === "unavailable" || status === "error") return status;
+  return "embed";
+}
+
+/**
  * Panel Modo: los modos de la URL y, para los que comparan, la epoca de
  * referencia (B). La epoca actual (A) se elige en la linea de tiempo. El viaje
  * entre misiones queda deshabilitado en un campo sin contexto, y la cortina
- * visible/infrarrojo en uno sin placa optica: sin parrafos que lo expliquen.
+ * visible/infrarrojo en uno sin placa optica: sin parrafos que lo expliquen,
+ * pero cada opcion deshabilitada dice su motivo (`disabledReason`).
  */
 export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
   const { t } = useTranslation("viewer");
@@ -33,13 +47,25 @@ export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
   const usesPair = PAIR_MODES.includes(mode);
   const compact = variant === "compact";
 
-  const modeOptions: SegmentedOption<ViewMode>[] = VIEW_MODES.map((item) => ({
-    value: item,
-    label: t(`mode.${item}`),
+  // Por que no se puede elegir cada uno: se dice al pasar el cursor, al tocar y al lector de pantalla.
+  const journeyReason = t(`disabled.context.${contextIssue(journey.status)}`);
+  const curtainReason = journey.available
+    ? t(curtain.pending ? "disabled.curtain.loading" : "disabled.curtain.noPlate")
+    : journey.status === "unavailable"
+      ? t("disabled.curtain.unavailable")
+      : journeyReason;
+
+  const modeOptions: SegmentedOption<ViewMode>[] = VIEW_MODES.map((item) => {
     // El viaje entre misiones necesita el contexto del campo, y la cortina, una placa optica.
-    disabled:
-      (item === "journey" && !journey.available) || (item === "curtain" && !curtain.available),
-  }));
+    const disabled =
+      (item === "journey" && !journey.available) || (item === "curtain" && !curtain.available);
+    return {
+      value: item,
+      label: t(`mode.${item}`),
+      disabled,
+      disabledReason: !disabled ? undefined : item === "journey" ? journeyReason : curtainReason,
+    };
+  });
 
   const referenceOptions: SegmentedOption<number>[] = entries.map((entry) => {
     const number = formatInteger(entry.epoch.epoch);
@@ -52,6 +78,7 @@ export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
       ariaLabel: t("comparison.referenceOption", { n: number, date: month }),
       // B no puede ser la misma epoca que A.
       disabled: entry.epoch.epoch === view.current,
+      disabledReason: t("disabled.reference"),
       noData: entry.plane?.status === "empty",
     };
   });

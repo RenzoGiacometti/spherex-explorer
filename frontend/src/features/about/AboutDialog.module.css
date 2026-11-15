@@ -1,0 +1,123 @@
+/*
+ * "Acerca de": un panel de vidrio (nivel 2 de DESIGN.md) centrado sobre el
+ * cielo, con borde fino y sin sombra. En celular queda a 12 px de los bordes.
+ */
+.dialog {
+  width: min(640px, calc(100vw - 2 * var(--space-lg)));
+  max-width: none;
+  max-height: calc(100dvh - 2 * var(--space-lg));
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  color: var(--color-text);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dialog {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+/* El cielo sigue a la vista, apagado, detras del panel. */
+.dialog::backdrop {
+  background-color: color-mix(in srgb, var(--color-void) 60%, transparent);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.content p {
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* Titular dentro de un panel: display-sm. */
+.title {
+  margin: 0;
+  font: var(--type-display-sm-font);
+  letter-spacing: var(--type-display-sm-tracking);
+  text-transform: var(--type-display-sm-transform);
+}
+
+.section,
+.disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.section {
+  color: var(--color-text-mute);
+}
+
+/* Como los avisos destacados del espectro: recuadro con borde fuerte y texto en blanco. */
+.disclosure {
+  padding: var(--space-md);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-xs);
+  color: var(--color-text);
+}
+
+.heading {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.credits {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.credit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  padding: var(--space-xs) 0;
+  border-top: 1px solid var(--color-divider);
+}
+
+.creditName {
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  font-weight: 600;
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.creditBody {
+  margin: 0;
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+@media (max-width: 599px) {
+  .dialog {
+    width: calc(100vw - 2 * var(--space-sm));
+    max-height: calc(100dvh - 2 * var(--space-sm));
+  }
+
+  .content {
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+}

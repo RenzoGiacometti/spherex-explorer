@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import styles from "./Button.module.css";
 import { classNames } from "./classNames";
+import { describedBy, useDisabledReason, withoutHandlers } from "./DisabledReason";
 import { Icon, type IconName } from "./Icon";
 
 /**
@@ -37,7 +38,14 @@ function ButtonContent({ icon, children }: Pick<ButtonOwnProps, "icon" | "childr
 }
 
 export type ButtonProps = ButtonOwnProps &
-  Omit<ComponentPropsWithoutRef<"button">, keyof ButtonOwnProps>;
+  Omit<ComponentPropsWithoutRef<"button">, keyof ButtonOwnProps> & {
+    /**
+     * Por que esta deshabilitado, ya traducido. Con esto el boton deshabilitado
+     * muestra el motivo al pasarle el cursor, tocarlo o enfocarlo, y lo da como
+     * descripcion accesible (DisabledReason.tsx).
+     */
+    readonly disabledReason?: string | undefined;
+  };
 
 /** Boton con texto (`button-primary` y `button-ghost` de DESIGN.md): pildora de 44 px. */
 export function Button({
@@ -46,17 +54,26 @@ export function Button({
   className,
   children,
   type = "button",
+  disabled = false,
+  disabledReason,
   ...rest
 }: ButtonProps) {
+  const reason = useDisabledReason(disabled, disabledReason);
   return (
-    <button
-      type={type}
-      className={buttonClass(variant, className)}
-      data-variant={variant}
-      {...rest}
-    >
-      <ButtonContent icon={icon}>{children}</ButtonContent>
-    </button>
+    <>
+      <button
+        type={type}
+        className={buttonClass(variant, className)}
+        data-variant={variant}
+        {...(reason.active ? withoutHandlers(rest) : rest)}
+        disabled={reason.active ? undefined : disabled}
+        {...reason.props}
+        aria-describedby={describedBy(rest["aria-describedby"], reason)}
+      >
+        <ButtonContent icon={icon}>{children}</ButtonContent>
+      </button>
+      {reason.bubble}
+    </>
   );
 }
 

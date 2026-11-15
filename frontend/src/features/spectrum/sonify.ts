@@ -30,8 +30,8 @@ export interface SoundPlan {
 export const SOUND_DURATION_S = 8;
 const STEPS = 96;
 /** La nota mas grave (flujo minimo) y cuantas octavas sube hasta el flujo maximo. */
-const BASE_FREQUENCY_HZ = 196;
-const OCTAVES = 2;
+export const BASE_FREQUENCY_HZ = 196;
+export const OCTAVES = 2;
 /** Entre dos canales separados por mas de esto no se interpola: es un hueco. */
 const MAX_GAP_UM = 0.2;
 const MASTER_GAIN = 0.18;

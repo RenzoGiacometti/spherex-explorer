@@ -57,10 +57,11 @@
     "barLabel": "{{molecule}}: {{level}}"
   },
   "listen": {
-    "play": "Escuchar",
+    "play": "Escuchar el espectro",
     "stop": "Detener",
-    "description": "Recorre el espectro de izquierda a derecha en {{seconds}} segundos: más flujo suena más agudo y los tramos sin datos quedan en silencio.",
-    "unsupported": "Este navegador no puede reproducir sonido."
+    "description": "Es el gráfico convertido en sonido, no el sonido del objeto: recorre el espectro de la longitud de onda más corta a la más larga en {{seconds}} segundos y, en cada instante, más flujo suena más agudo (hasta {{octaves}} octavas por encima de {{hz}} Hz) y un poco más fuerte; donde no hay datos hay silencio.",
+    "unsupported": "Este navegador no puede reproducir sonido.",
+    "noData": "No hay puntos con los que armar el sonido."
   },
   "notice": {
     "snapped": "Este espectro es el de la fuente guardada más cercana, a {{offset}} del punto elegido.",

@@ -112,6 +112,8 @@ export interface JourneyControl {
 export interface CurtainControl {
   /** El campo tiene placa optica y la pantalla la muestra: el modo se puede elegir. */
   readonly available: boolean;
+  /** El pedido de las placas opticas sigue en camino: todavia no se sabe si el campo tiene. */
+  readonly pending: boolean;
   /** Placa del lado visible; null si el campo no tiene. Su credito va siempre con la imagen. */
   readonly plate: OpticalLayer | null;
   /** Lado visible: el cuadro de la placa (sin imagen mientras no llega). */
@@ -670,6 +672,7 @@ export function useViewerController(): ViewerController {
   };
   const curtain: CurtainControl = {
     available: curtainAvailable,
+    pending: journeyAvailable && context.opticalPending,
     plate: curtainPlate,
     visible: curtainVisible,
     infrared: curtainInfrared,

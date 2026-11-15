@@ -58,6 +58,7 @@ function ErrorPanel({ error }: ErrorPanelProps) {
             variant="primary"
             className={styles.retry}
             disabled={waitS > 0}
+            disabledReason={t("disabled.retryWait")}
             onClick={() => void retry()}
           >
             {tErrors("retry")}

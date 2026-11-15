@@ -135,6 +135,14 @@ function input(): HTMLInputElement {
   return screen.getByRole("searchbox", { name: esEntry.search.label }) as HTMLInputElement;
 }
 
+/**
+ * Un boton deshabilitado con motivo va con `aria-disabled` en lugar de
+ * `disabled`, para que pueda decir por que (components/DisabledReason.tsx).
+ */
+function isDisabled(button: HTMLButtonElement): boolean {
+  return button.disabled || button.getAttribute("aria-disabled") === "true";
+}
+
 function submitButton(): HTMLButtonElement {
   return screen.getByRole("button", { name: esEntry.search.submit }) as HTMLButtonElement;
 }
@@ -196,7 +204,7 @@ describe("SpherePage sin WebGL", () => {
 
     // Barra superior: la marca, escrita como es, y el idioma.
     const topbar = screen.getByRole("banner");
-    expect(within(topbar).getByText("SPHEREx Explorer")).toBeTruthy();
+    expect(within(topbar).getByText("SkyBlink")).toBeTruthy();
     const language = within(topbar).getByRole("group", { name: "Idioma" });
     const radios = within(language).getAllByRole("radio") as HTMLInputElement[];
     expect(radios.map((radio) => radio.getAttribute("aria-label"))).toEqual(["Español", "English"]);
@@ -207,7 +215,7 @@ describe("SpherePage sin WebGL", () => {
     expect(within(main).getByText(esSphere.status.noWebgl)).toBeTruthy();
     expect(within(main).getByRole("search")).toBeTruthy();
     expect(within(main).getByRole("navigation", { name: esSphere.markers.nav })).toBeTruthy();
-    expect(randomButton().disabled).toBe(false);
+    expect(isDisabled(randomButton())).toBe(false);
     // La unica lista de destacados es la de links: la de marcadores no tiene donde ubicarse.
     expect(screen.getAllByRole("navigation")).toHaveLength(1);
   });
@@ -220,7 +228,7 @@ describe("SpherePage sin WebGL", () => {
     expect(input().placeholder).toBe(EXAMPLE);
     expect(input().value).toBe("");
     expect(submitButton().type).toBe("submit");
-    expect(submitButton().disabled).toBe(false);
+    expect(isDisabled(submitButton())).toBe(false);
     expect(screen.queryByRole("alert")).toBeNull();
     expect(announced()).toBe("");
   });
@@ -333,8 +341,8 @@ describe("SpherePage sin WebGL", () => {
       // Resolviendo: se dice, y no se puede volver a enviar ni pedir otro lugar.
       expect(fake.names).toEqual(["Barnard's Star"]);
       expect(announced()).toBe("Buscando Barnard's Star…");
-      expect(submitButton().disabled).toBe(true);
-      expect(randomButton().disabled).toBe(true);
+      expect(isDisabled(submitButton())).toBe(true);
+      expect(isDisabled(randomButton())).toBe(true);
       expect(screen.getByRole("search").getAttribute("aria-busy")).toBe("true");
       expect(urlState()).toEqual(DEFAULT_URL_STATE);
 
@@ -497,7 +505,7 @@ describe("SpherePage sin WebGL", () => {
         expect(input().getAttribute("aria-describedby")).toBe(alert.id);
         // El texto queda para corregirlo, y se puede volver a enviar.
         expect(input().value).toBe("Barnad Star");
-        expect(submitButton().disabled).toBe(false);
+        expect(isDisabled(submitButton())).toBe(false);
         expect(screen.getByRole("search").getAttribute("aria-busy")).toBe("false");
         expect(announced()).toBe("");
         // No se abrio ningun campo.
@@ -563,7 +571,7 @@ describe("SpherePage sin WebGL", () => {
       fireEvent.change(input(), { target: { value: "Barnard's Sta" } });
 
       expect(fake.signals[0]?.aborted).toBe(true);
-      expect(submitButton().disabled).toBe(false);
+      expect(isDisabled(submitButton())).toBe(false);
       expect(announced()).toBe("");
 
       // La respuesta llega igual, tarde: no se navega ni se muestra un error.

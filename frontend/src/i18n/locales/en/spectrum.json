@@ -57,10 +57,11 @@
     "barLabel": "{{molecule}}: {{level}}"
   },
   "listen": {
-    "play": "Listen",
+    "play": "Listen to the spectrum",
     "stop": "Stop",
-    "description": "Sweeps the spectrum from left to right in {{seconds}} seconds: more flux sounds higher, and stretches without data are silent.",
-    "unsupported": "This browser cannot play sound."
+    "description": "This is the chart turned into sound, not the sound of the object: it sweeps the spectrum from the shortest wavelength to the longest in {{seconds}} seconds and, at each moment, more flux sounds higher (up to {{octaves}} octaves above {{hz}} Hz) and slightly louder; where there is no data there is silence.",
+    "unsupported": "This browser cannot play sound.",
+    "noData": "There are no points to turn into sound."
   },
   "notice": {
     "snapped": "This spectrum belongs to the nearest saved source, {{offset}} from the chosen point.",

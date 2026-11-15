@@ -1,4 +1,5 @@
 import { classNames } from "./classNames";
+import { useDisabledReason } from "./DisabledReason";
 import styles from "./Toggle.module.css";
 
 export interface ToggleProps {
@@ -7,6 +8,8 @@ export interface ToggleProps {
   readonly checked: boolean;
   readonly onChange: (checked: boolean) => void;
   readonly disabled?: boolean;
+  /** Por que esta deshabilitado, ya traducido (DisabledReason.tsx). */
+  readonly disabledReason?: string | undefined;
   readonly className?: string | undefined;
 }
 
@@ -16,7 +19,15 @@ export interface ToggleProps {
  * funcionan sin codigo propio. Prendido se invierte a blanco solido, como toda
  * seleccion; no usa el acento.
  */
-export function Toggle({ label, checked, onChange, disabled = false, className }: ToggleProps) {
+export function Toggle({
+  label,
+  checked,
+  onChange,
+  disabled = false,
+  disabledReason,
+  className,
+}: ToggleProps) {
+  const reason = useDisabledReason(disabled, disabledReason);
   return (
     <label className={classNames(styles.toggle, disabled && styles.disabled, className)}>
       <span className={styles.label}>{label}</span>
@@ -26,15 +37,17 @@ export function Toggle({ label, checked, onChange, disabled = false, className }
         className={styles.input}
         checked={checked}
         aria-checked={checked}
-        disabled={disabled}
+        disabled={reason.active ? undefined : disabled}
         onChange={(event) => {
           // Deshabilitado no avisa cambios, tampoco ante un evento sintetico.
           if (!disabled) onChange(event.currentTarget.checked);
         }}
+        {...reason.props}
       />
       <span className={styles.track} aria-hidden="true">
         <span className={styles.thumb} />
       </span>
+      {reason.bubble}
     </label>
   );
 }

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Button, classNames } from "@/components";
+import a11y from "@/components/a11y.module.css";
 import { useUrlState } from "@/state/urlState";
 import styles from "./guide.module.css";
 import { startTour } from "./guideStore";
@@ -21,8 +22,18 @@ export function GuideLauncher({ className }: GuideLauncherProps) {
   const embed = useUrlState((state) => state.embed);
   if (embed || TOUR_START === null) return null;
   return (
-    <Button icon="target" className={classNames(styles.launcher, className)} onClick={startTour}>
-      {t("launcher.start")}
+    // A la vista va el rotulo corto, para que los accesos de la entrada entren
+    // en una linea; el nombre completo sigue siendo el nombre accesible, la
+    // ayuda al pasar el cursor y el texto del boton en el documento.
+    <Button
+      icon="target"
+      className={classNames(styles.launcher, className)}
+      aria-label={t("launcher.start")}
+      title={t("launcher.start")}
+      onClick={startTour}
+    >
+      {t("launcher.short")}
+      <span className={a11y.visuallyHidden}>{t("launcher.detail")}</span>
     </Button>
   );
 }

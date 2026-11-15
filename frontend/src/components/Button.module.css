@@ -40,11 +40,13 @@
   color: var(--button-ghost-text);
 }
 
-.ghost:hover:not(:disabled) {
+.ghost:hover:not(:disabled):not([aria-disabled="true"]) {
   background-color: color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 
-.button:disabled {
+/* Con motivo, el deshabilitado va con aria-disabled (DisabledReason.tsx). */
+.button:disabled,
+.button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }

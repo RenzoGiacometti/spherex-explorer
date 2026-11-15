@@ -45,10 +45,17 @@
   pointer-events: auto;
 }
 
+/* A la derecha de la barra: "Acerca de" y el idioma. */
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 /*
  * Marca: condensada de 15 px con tracking de 2,4 px, como en la maqueta
- * (DESIGN.md no tiene un token para ella), escrita como es, con la x en
- * minuscula.
+ * (DESIGN.md no tiene un token para ella), escrita como es ("SkyBlink"), sin
+ * mayusculas forzadas.
  */
 .brand {
   font: 600 15px / 1.2 var(--font-condensed);

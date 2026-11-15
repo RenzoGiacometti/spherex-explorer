@@ -34,6 +34,15 @@
   "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC",
   "shortcuts": {
     "journey": "Viaje en el tiempo",
-    "curtain": "Visible contra infrarrojo"
+    "curtain": "Visible e infrarrojo"
+  },
+  "shortcutDetail": {
+    "journey": "Abre {{name}} en el viaje entre misiones: de las placas fotográficas a SPHEREx.",
+    "curtain": "Abre {{name}} con la cortina: luz visible de un lado e infrarrojo del otro."
+  },
+  "busy": {
+    "opening": "Se está abriendo un lugar: disponible cuando termine.",
+    "searching": "Hay una búsqueda en curso: disponible cuando termine.",
+    "sensors": "Se están esperando los sensores del teléfono."
   }
 }

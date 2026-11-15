@@ -5,7 +5,7 @@
     "example": "{{name}} · {{coordinates}}",
     "resolving": "Searching for {{query}}…",
     "advice": {
-      "not_resolved": "Try another name or the coordinates."
+      "not_resolved": "Try another name, or search by coordinates."
     },
     "nameServiceDown": "The name lookup service is not responding. Try coordinates in degrees instead, for example {{coordinates}}."
   }

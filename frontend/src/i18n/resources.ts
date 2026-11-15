@@ -7,6 +7,7 @@
 // Los textos de una pagina de desarrollo no van aca: lo que se importa en este
 // archivo viaja en el sitio compilado. Ver src/dev/devTexts.ts.
 
+import enAbout from "./locales/en/about.json";
 import enCommon from "./locales/en/common.json";
 import enComponents from "./locales/en/components.json";
 import enContext from "./locales/en/context.json";
@@ -19,6 +20,7 @@ import enMeasure from "./locales/en/measure.json";
 import enObjectCard from "./locales/en/objectCard.json";
 import enSpectrum from "./locales/en/spectrum.json";
 import enViewer from "./locales/en/viewer.json";
+import esAbout from "./locales/es/about.json";
 import esCommon from "./locales/es/common.json";
 import esComponents from "./locales/es/components.json";
 import esContext from "./locales/es/context.json";
@@ -36,6 +38,7 @@ export const DEFAULT_NAMESPACE = "common";
 
 export const resources = {
   es: {
+    about: esAbout,
     common: esCommon,
     components: esComponents,
     context: esContext,
@@ -50,6 +53,7 @@ export const resources = {
     viewer: esViewer,
   },
   en: {
+    about: enAbout,
     common: enCommon,
     components: enComponents,
     context: enContext,

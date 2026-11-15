@@ -34,6 +34,15 @@
   "credit": "Sky: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC",
   "shortcuts": {
     "journey": "Time travel",
-    "curtain": "Visible versus infrared"
+    "curtain": "Visible and infrared"
+  },
+  "shortcutDetail": {
+    "journey": "Opens {{name}} in the mission journey: from photographic plates to SPHEREx.",
+    "curtain": "Opens {{name}} with the curtain: visible light on one side and infrared on the other."
+  },
+  "busy": {
+    "opening": "A place is opening: available once it finishes.",
+    "searching": "A search is in progress: available once it finishes.",
+    "sensors": "Still waiting for the phone sensors."
   }
 }

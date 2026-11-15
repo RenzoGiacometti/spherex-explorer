@@ -22,11 +22,12 @@
   outline-offset: 2px;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not(:disabled):not([aria-disabled="true"]) {
   border-color: var(--color-text);
 }
 
-.button:disabled {
+.button:disabled,
+.button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }

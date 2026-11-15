@@ -209,5 +209,31 @@
   },
   "error": {
     "title": "The field could not be loaded"
+  },
+  "disabled": {
+    "context": {
+      "loading": "The field context is still loading.",
+      "unavailable": "Only available in saved fields: this field has no images from other missions.",
+      "error": "The field context could not be loaded.",
+      "embed": "Not available in the embedded view."
+    },
+    "curtain": {
+      "loading": "The visible-light plate is still loading.",
+      "unavailable": "Only available in saved fields: this field has no visible-light plate.",
+      "noPlate": "This field has no visible-light plate that can be shown."
+    },
+    "gaia": {
+      "loading": "The Gaia catalog is still loading.",
+      "unavailable": "Only available in saved fields: this field has no Gaia catalog.",
+      "none": "The Gaia catalog for this field has not arrived yet, or the field has none."
+    },
+    "reference": "This is the epoch on screen (A): an epoch cannot be compared with itself.",
+    "play": {
+      "mode": "Playback only works in Blink mode.",
+      "epochs": "At least two epochs with an image in this band are needed."
+    },
+    "transport": "There are no epochs to step through yet.",
+    "retryWait": "The server asked to wait before retrying.",
+    "completing": "The field is already being completed."
   }
 }

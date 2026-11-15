@@ -24,6 +24,8 @@ export interface SearchFieldProps {
   readonly error?: string | undefined;
   /** Hay una busqueda en curso: el boton queda deshabilitado. */
   readonly busy?: boolean;
+  /** Por que el boton esta deshabilitado mientras `busy`, ya traducido. */
+  readonly busyReason?: string | undefined;
   /** Referencia al campo de texto, por ejemplo para darle el foco. */
   readonly inputRef?: Ref<HTMLInputElement> | undefined;
   readonly className?: string | undefined;
@@ -44,6 +46,7 @@ export function SearchField({
   hint,
   error,
   busy = false,
+  busyReason,
   inputRef,
   className,
 }: SearchFieldProps) {
@@ -88,7 +91,7 @@ export function SearchField({
           aria-invalid={error === undefined ? undefined : true}
           onChange={(event) => onChange(event.currentTarget.value)}
         />
-        <Button type="submit" variant="primary" disabled={busy}>
+        <Button type="submit" variant="primary" disabled={busy} disabledReason={busyReason}>
           {submitLabel}
         </Button>
       </div>

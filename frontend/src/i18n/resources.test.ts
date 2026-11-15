@@ -90,7 +90,7 @@ describe("initI18n", () => {
     expect(i18n.isInitialized).toBe(true);
     expect(currentLanguage()).toBe("es");
     expect(i18n.t("field.ra", { ns: "viewer" })).toBe("Ascensión recta");
-    expect(i18n.t("app.name")).toBe("SPHEREx Explorer");
+    expect(i18n.t("app.name")).toBe("SkyBlink");
   });
 
   it("cambia de idioma", async () => {

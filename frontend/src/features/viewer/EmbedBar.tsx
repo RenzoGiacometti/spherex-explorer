@@ -45,6 +45,8 @@ export function EmbedBar({ controller }: EmbedBarProps) {
           onNext={() => controller.step(1)}
           disabled={timeline.length === 0}
           playDisabled={!canPlay}
+          disabledReason={t("disabled.transport")}
+          playDisabledReason={t(mode === "blink" ? "disabled.play.epochs" : "disabled.play.mode")}
         />
         <p className={styles.position}>
           <span className={styles.positionLabel}>

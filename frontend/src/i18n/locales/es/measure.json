@@ -13,7 +13,8 @@
     "measuring": "Fuente saturada: midiendo con la capa de cobertura…",
     "needTwo": "Hace falta marcar el objeto en otra época para medir cuánto se movió.",
     "sameDate": "Las marcas son de la misma fecha: hace falta otra época.",
-    "off": "Con el objeto marcado en dos épocas o más se calcula cuánto se mueve por año. Al prenderlo, el visor pasa al modo parpadeo."
+    "off": "Con el objeto marcado en dos épocas o más se calcula cuánto se mueve por año. Al prenderlo, el visor pasa al modo parpadeo.",
+    "markCenterDisabled": "La época actual no tiene imagen en esta banda: no hay dónde marcar."
   },
   "marks": {
     "title": "Marcas",

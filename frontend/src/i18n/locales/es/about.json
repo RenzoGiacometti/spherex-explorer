@@ -1,0 +1,49 @@
+{
+  "open": "Acerca de",
+  "title": "Acerca de SkyBlink",
+  "close": "Cerrar",
+  "what": {
+    "title": "Qué es",
+    "body": "SkyBlink muestra imágenes de la misión SPHEREx de una misma zona del cielo a lo largo del tiempo, para encontrar objetos que se mueven o cambian de brillo, y muestra su espectro.",
+    "origin": "Hecho para NASA Space Apps 2026. Es un proyecto independiente: no es un producto de NASA ni implica su aval."
+  },
+  "ai": {
+    "title": "Uso de inteligencia artificial",
+    "body": "El código de SkyBlink fue escrito con asistencia de IA (Claude, de Anthropic), bajo la dirección y la revisión del equipo."
+  },
+  "data": {
+    "title": "Datos y licencias",
+    "spherex": {
+      "name": "SPHEREx",
+      "body": "Imágenes de la misión SPHEREx (NASA/JPL-Caltech), del NASA/IPAC Infrared Science Archive (IRSA). Datos públicos de NASA."
+    },
+    "surveys": {
+      "name": "2MASS y WISE (AllWISE)",
+      "body": "Relevamientos financiados por NASA (2MASS también por la NSF), del archivo IRSA. Datos públicos."
+    },
+    "gaia": {
+      "name": "Gaia DR3",
+      "body": "ESA/Gaia/DPAC. Licencia CC BY-NC 3.0 IGO (no comercial)."
+    },
+    "dss": {
+      "name": "Digitized Sky Survey (DSS)",
+      "body": "Placas fotográficas del archivo MAST de STScI. No son de dominio público: licencia CC BY-NC-SA 4.0, para uso científico, educativo y sin fines de lucro; el uso comercial está prohibido. El titular depende de la placa (Caltech/Palomar, AURA/STScI, UK SERC/PPARC y Anglo-Australian Observatory) y se muestra debajo de cada una."
+    },
+    "sky": {
+      "name": "Mapa estelar de la esfera",
+      "body": "NASA/Goddard Space Flight Center Scientific Visualization Studio, «Deep Star Maps 2020». Gaia DR2: ESA/Gaia/DPAC. Es luz visible, no una imagen de SPHEREx."
+    },
+    "names": {
+      "name": "Nombres de objetos",
+      "body": "SIMBAD y Sesame, del CDS (Estrasburgo)."
+    },
+    "code": {
+      "name": "Código",
+      "body": "El código es de licencia MIT; los datos conservan las licencias de arriba."
+    }
+  },
+  "sound": {
+    "title": "Sobre el sonido",
+    "body": "«Escuchar el espectro» no reproduce el sonido del objeto: el espacio no transmite sonido y estos datos son luz. Es una forma de oír el gráfico: recorre el espectro de la longitud de onda más corta a la más larga en {{seconds}} segundos; en cada instante, más flujo suena más agudo (hasta {{octaves}} octavas por encima de {{hz}} Hz) y un poco más fuerte, y donde no hay datos hay silencio."
+  }
+}

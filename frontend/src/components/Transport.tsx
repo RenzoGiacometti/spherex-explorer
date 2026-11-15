@@ -22,6 +22,10 @@ export interface TransportProps {
    * siguen andando.
    */
   readonly playDisabled?: boolean;
+  /** Por que esta deshabilitado todo el transporte, ya traducido. */
+  readonly disabledReason?: string | undefined;
+  /** Por que no se puede reproducir, ya traducido. */
+  readonly playDisabledReason?: string | undefined;
   /** Nombre accesible del grupo. Por defecto sale de i18n. */
   readonly label?: string | undefined;
   readonly className?: string | undefined;
@@ -39,6 +43,8 @@ export function Transport({
   playSize,
   disabled = false,
   playDisabled = false,
+  disabledReason,
+  playDisabledReason,
   label,
   className,
 }: TransportProps) {
@@ -54,6 +60,7 @@ export function Transport({
         icon="prev"
         label={t("transport.previous")}
         disabled={disabled}
+        disabledReason={disabledReason}
         onClick={onPrevious}
       />
       <IconButton
@@ -64,9 +71,16 @@ export function Transport({
         // Sin tamano pedido, la hoja de estilos lo agranda en celular.
         className={playSize === undefined ? styles.playAuto : undefined}
         disabled={disabled || playDisabled}
+        disabledReason={disabled ? disabledReason : playDisabledReason}
         onClick={() => onPlayingChange(!playing)}
       />
-      <IconButton icon="next" label={t("transport.next")} disabled={disabled} onClick={onNext} />
+      <IconButton
+        icon="next"
+        label={t("transport.next")}
+        disabled={disabled}
+        disabledReason={disabledReason}
+        onClick={onNext}
+      />
     </div>
   );
 }

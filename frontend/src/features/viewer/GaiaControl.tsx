@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   arrowYearsForStep,
   DEFAULT_GAIA_LIMIT,
@@ -16,10 +17,20 @@ export interface GaiaControlProps {
  * prendida, el largo de las flechas y la magnitud limite (`GaiaControls`).
  *
  * En un campo sin contexto, o si el catalogo no se pudo cargar, el conmutador
- * queda deshabilitado, sin parrafos que lo expliquen.
+ * queda deshabilitado, sin parrafos que lo expliquen: el motivo lo dice el
+ * propio conmutador al pasarle el cursor, tocarlo o enfocarlo.
  */
 export function GaiaControl({ gaia }: GaiaControlProps) {
-  const { catalog, grid, on, year, arrowStep, maxGMag } = gaia;
+  const { t } = useTranslation("viewer");
+  const { catalog, grid, on, year, arrowStep, maxGMag, status } = gaia;
+  const reason =
+    status === "loading" || status === "idle"
+      ? t("disabled.gaia.loading")
+      : status === "unavailable"
+        ? t("disabled.gaia.unavailable")
+        : status === "error"
+          ? t("disabled.context.error")
+          : t("disabled.gaia.none");
 
   // Cuantas fuentes se dibujan con estos controles: la misma cuenta que hace la capa.
   const shown = useMemo(() => {
@@ -46,6 +57,7 @@ export function GaiaControl({ gaia }: GaiaControlProps) {
       total={catalog?.count ?? 0}
       year={year}
       disabled={catalog === null || grid === null}
+      disabledReason={reason}
     />
   );
 }

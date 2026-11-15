@@ -11,6 +11,7 @@ import {
   SearchField,
 } from "@/components";
 import type { NameResolver } from "@/data/nameResolver";
+import { AboutDialog } from "@/features/about";
 import {
   type FeaturedObject,
   type FoundPlace,
@@ -143,6 +144,7 @@ export function SpherePage({
   const { t: tEntry } = useTranslation("entry");
   const { t: tCommon } = useTranslation("common");
   const { t: tErrors } = useTranslation("errors");
+  const { t: tAbout } = useTranslation("about");
   const language = useLanguage();
 
   const urlLanguage = useUrlState((state) => state.lang);
@@ -161,6 +163,7 @@ export function SpherePage({
   const [opening, setOpening] = useState<string | null>(null);
   const [sphereStatus, setSphereStatus] = useState<SkySphereStatus>("loading");
   const [nearest, setNearest] = useState<Nearest | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [coarsePointer] = useState(
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
@@ -406,6 +409,8 @@ export function SpherePage({
   }
 
   const busy = opening !== null || status.kind === "resolving";
+  // Por que los botones no responden mientras tanto: se dice al pasar el cursor, al tocar y al lector.
+  const busyReason = opening !== null ? t("busy.opening") : t("busy.searching");
 
   // Avisos sobre el buscador: la esfera no se pudo dibujar, o la ventana al cielo no esta disponible.
   const notices: string[] = [];
@@ -451,10 +456,23 @@ export function SpherePage({
           // En la ventana al cielo, arriba solo queda la salida.
           <IconButton icon="close" label={t("window.exit")} onClick={skyWindow.stop} />
         ) : (
-          // El idioma va en la URL (`lang`); App lo aplica a i18next.
-          <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+          <div className={styles.topActions}>
+            {/* "Acerca de": que es, uso de IA y creditos de los datos. Se ve con y sin esfera. */}
+            <Button
+              className={styles.action}
+              variant="ghost"
+              icon="info"
+              aria-haspopup="dialog"
+              onClick={() => setAboutOpen(true)}
+            >
+              {tAbout("open")}
+            </Button>
+            {/* El idioma va en la URL (`lang`); App lo aplica a i18next. */}
+            <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+          </div>
         )}
       </header>
+      {aboutOpen ? <AboutDialog onClose={() => setAboutOpen(false)} /> : null}
 
       <p className={styles.readout} data-hidden={sphereStatus === "no-webgl"}>
         <span className={styles.readoutLabel}>{t("center")}</span>{" "}
@@ -465,7 +483,13 @@ export function SpherePage({
         {windowOn ? (
           <main className={styles.windowDock}>
             {/* El unico boton relleno de la vista: abre lo que esta en la mira. */}
-            <Button variant="primary" icon="target" disabled={busy} onClick={handleWindowOpen}>
+            <Button
+              variant="primary"
+              icon="target"
+              disabled={busy}
+              disabledReason={busyReason}
+              onClick={handleWindowOpen}
+            >
               {lockedTarget === undefined
                 ? t("window.openHere")
                 : t("window.open", { name: lockedTarget.label })}
@@ -502,6 +526,11 @@ export function SpherePage({
                   variant="ghost"
                   icon={shortcut.icon}
                   disabled={busy}
+                  disabledReason={busyReason}
+                  // El rotulo es corto para que los tres entren en una linea: el detalle va en la ayuda.
+                  title={
+                    busy ? undefined : t(`shortcutDetail.${shortcut.id}`, { name: shortcut.label })
+                  }
                   data-shortcut={shortcut.id}
                   onClick={() => handleShortcut(shortcut)}
                 >
@@ -521,6 +550,7 @@ export function SpherePage({
                 hint={hintText}
                 error={errorText}
                 busy={busy}
+                busyReason={busyReason}
                 inputRef={inputRef}
               />
               <div className={styles.actions}>
@@ -529,6 +559,7 @@ export function SpherePage({
                   variant="ghost"
                   icon="shuffle"
                   disabled={busy}
+                  disabledReason={busyReason}
                   onClick={handleRandom}
                 >
                   {t("random")}
@@ -539,6 +570,7 @@ export function SpherePage({
                     variant="ghost"
                     icon="compass"
                     disabled={busy || windowState.kind === "starting"}
+                    disabledReason={busy ? busyReason : t("busy.sensors")}
                     onClick={() => void skyWindow.start()}
                   >
                     {t("window.enter")}

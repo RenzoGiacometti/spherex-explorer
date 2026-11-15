@@ -249,7 +249,7 @@ describe("ViewerPage: celular", () => {
     // Ningun otro control: el idioma esta en el cajon.
     expect(within(banner).getAllByRole("button")).toHaveLength(1);
     expect(within(banner).queryAllByRole("radio")).toEqual([]);
-    expect(within(banner).queryByText("SPHEREx Explorer")).toBeNull();
+    expect(within(banner).queryByText("SkyBlink")).toBeNull();
   });
 
   it("los controles frecuentes estan a la vista: modo, banda, epocas y transporte", async () => {

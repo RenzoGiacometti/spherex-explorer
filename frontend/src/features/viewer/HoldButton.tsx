@@ -26,6 +26,7 @@ export function HoldButton({ controller, className }: HoldButtonProps) {
       className={classNames(styles.holdButton, className)}
       aria-pressed={holding}
       disabled={view.issue !== null}
+      disabledReason={view.issue === null ? undefined : t(`comparison.issue.${view.issue}`)}
       onPointerDown={() => setHolding(true)}
       onPointerUp={() => setHolding(false)}
       onPointerLeave={() => setHolding(false)}

@@ -15,6 +15,12 @@ export {
 export { ControlHeader, type ControlHeaderProps } from "./ControlHeader";
 export { classNames } from "./classNames";
 export { DataGroup, type DataGroupProps, DataRow, type DataRowProps } from "./DataRow";
+export {
+  type DisabledReasonProps,
+  type DisabledReasonState,
+  useDisabledReason,
+  withoutHandlers,
+} from "./DisabledReason";
 export { GlassPanel, type GlassPanelProps } from "./GlassPanel";
 export { ICON_NAMES, Icon, type IconName, type IconProps } from "./Icon";
 export {

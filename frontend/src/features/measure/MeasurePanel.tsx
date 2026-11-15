@@ -168,6 +168,7 @@ export function MeasurePanel({
           icon="target"
           className={styles.action}
           disabled={!measure.canMark}
+          disabledReason={t("panel.markCenterDisabled")}
           onClick={measure.pickAtViewCenter}
         >
           {t("panel.markCenter")}

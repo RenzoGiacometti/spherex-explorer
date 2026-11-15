@@ -279,6 +279,7 @@ export function MissionJourney({
         onPrevious={() => step(-1)}
         onNext={() => step(1)}
         disabled={ordered.length < 2}
+        disabledReason={t("journey.transportDisabled")}
       />
     </GlassPanel>
   );

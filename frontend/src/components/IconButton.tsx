@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { classNames } from "./classNames";
+import { describedBy, useDisabledReason, withoutHandlers } from "./DisabledReason";
 import { Icon, type IconName } from "./Icon";
 import styles from "./IconButton.module.css";
 
@@ -50,6 +51,8 @@ export type IconButtonProps = IconButtonOwnProps &
      * informa `aria-pressed` y, prendido, se dibuja relleno.
      */
     readonly pressed?: boolean | undefined;
+    /** Por que esta deshabilitado, ya traducido (DisabledReason.tsx). */
+    readonly disabledReason?: string | undefined;
   };
 
 /** Boton de icono (`button-icon` de DESIGN.md): circulo de 44 px con borde fino. */
@@ -62,22 +65,31 @@ export function IconButton({
   pressed,
   className,
   type = "button",
+  disabled = false,
+  disabledReason,
   ...rest
 }: IconButtonProps) {
   const shown = pressed === true ? "solid" : variant;
+  const reason = useDisabledReason(disabled, disabledReason);
   return (
-    <button
-      type={type}
-      className={iconButtonClass(shown, size, shape, className)}
-      data-variant={shown}
-      data-size={size}
-      data-shape={shape}
-      aria-label={label}
-      aria-pressed={pressed}
-      {...rest}
-    >
-      <Icon name={icon} size={ICON_SIZE[size]} />
-    </button>
+    <>
+      <button
+        type={type}
+        className={iconButtonClass(shown, size, shape, className)}
+        data-variant={shown}
+        data-size={size}
+        data-shape={shape}
+        aria-label={label}
+        aria-pressed={pressed}
+        {...(reason.active ? withoutHandlers(rest) : rest)}
+        disabled={reason.active ? undefined : disabled}
+        {...reason.props}
+        aria-describedby={describedBy(rest["aria-describedby"], reason)}
+      >
+        <Icon name={icon} size={ICON_SIZE[size]} />
+      </button>
+      {reason.bubble}
+    </>
   );
 }
 

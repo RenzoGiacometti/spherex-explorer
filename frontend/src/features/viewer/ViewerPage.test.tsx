@@ -117,7 +117,7 @@ describe("ViewerPage: un link con coordenadas", () => {
     expect(drawnWidth(contexts, container)).toBeCloseTo(VIEWPORT.width, 6);
 
     // Barra superior: marca, coordenadas con el formato de DESIGN.md y salida.
-    expect(screen.getByText("SPHEREx Explorer")).toBeTruthy();
+    expect(screen.getByText("SkyBlink")).toBeTruthy();
     expect(screen.getByRole("heading", { level: 1, name: "Campo" })).toBeTruthy();
     expect(screen.getAllByText("08h 55m 02s")).toHaveLength(2);
     expect(screen.getAllByText("−07° 14′ 32″")).toHaveLength(2);
@@ -305,10 +305,12 @@ describe("ViewerPage: modos", () => {
     expect(
       within(reference).getByRole<HTMLInputElement>("radio", { name: "Época 2, 2025-10" }).checked,
     ).toBe(true);
-    // B no puede ser la misma epoca que A.
+    // B no puede ser la misma epoca que A: queda deshabilitada (con `aria-disabled`, para decir por que).
     expect(
-      within(reference).getByRole<HTMLInputElement>("radio", { name: "Época 3, 2026-04" }).disabled,
-    ).toBe(true);
+      within(reference)
+        .getByRole("radio", { name: "Época 3, 2026-04" })
+        .getAttribute("aria-disabled"),
+    ).toBe("true");
     fireEvent.click(within(reference).getByRole("radio", { name: "Época 1, 2025-05" }));
     expect(page().dataset.epochs).toBe("1,3");
     expect(new URLSearchParams(window.location.search).get("ref")).toBe("1");
@@ -475,8 +477,8 @@ describe("ViewerPage: modos", () => {
     expect(page().dataset).toMatchObject({ scene: "single", epochs: "3" });
     choose("Mantener apretado");
     expect(
-      screen.getByRole<HTMLButtonElement>("button", { name: "Mantener para ver B" }).disabled,
-    ).toBe(true);
+      screen.getByRole("button", { name: "Mantener para ver B" }).getAttribute("aria-disabled"),
+    ).toBe("true");
   });
 });
 
@@ -582,8 +584,8 @@ describe("ViewerPage: reproductor", () => {
     choose("Diferencia");
     expect(page().dataset.playing).toBeUndefined();
     // Fuera del parpadeo no hay nada que reproducir; anterior y siguiente siguen andando.
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Reproducir" }).disabled).toBe(
-      true,
+    expect(screen.getByRole("button", { name: "Reproducir" }).getAttribute("aria-disabled")).toBe(
+      "true",
     );
     expect(
       screen.getByRole<HTMLButtonElement>("button", { name: "Época siguiente" }).disabled,
@@ -780,7 +782,7 @@ describe("ViewerPage: errores", () => {
     expect(within(alert).getByText("Hay muchos pedidos en espera.")).toBeTruthy();
     expect(within(alert).getByText("Se puede reintentar en 5 s.")).toBeTruthy();
     const retry = within(alert).getByRole<HTMLButtonElement>("button", { name: "Reintentar" });
-    expect(retry.disabled).toBe(true);
+    expect(retry.getAttribute("aria-disabled")).toBe("true");
     expect(screen.getByText("Campo sin cargar")).toBeTruthy();
 
     act(() => {
@@ -792,6 +794,7 @@ describe("ViewerPage: errores", () => {
     });
     expect(within(alert).queryByText(/Se puede reintentar/)).toBeNull();
     expect(retry.disabled).toBe(false);
+    expect(retry.getAttribute("aria-disabled")).toBeNull();
 
     backend.handlers.field = original;
     fireEvent.click(retry);

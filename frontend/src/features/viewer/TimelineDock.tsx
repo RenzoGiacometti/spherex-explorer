@@ -68,7 +68,7 @@ export function TimelineDock({
   const language = useLanguage();
   const timeline = useFieldStore(selectTimeline);
   const hasEmpty = useHasEmptyEpoch();
-  const { view, playing, canPlay, speed } = controller;
+  const { view, playing, canPlay, speed, mode } = controller;
 
   const epochs: TimelineEpoch[] = timeline.map((item) => ({
     epoch: item.epoch.epoch,
@@ -103,6 +103,8 @@ export function TimelineDock({
       onNext={() => controller.step(1)}
       disabled={epochs.length === 0}
       playDisabled={!canPlay}
+      disabledReason={t("disabled.transport")}
+      playDisabledReason={t(mode === "blink" ? "disabled.play.epochs" : "disabled.play.mode")}
     />
   );
   const track = (

@@ -1,0 +1,49 @@
+{
+  "open": "About",
+  "title": "About SkyBlink",
+  "close": "Close",
+  "what": {
+    "title": "What it is",
+    "body": "SkyBlink shows images from the SPHEREx mission of the same patch of sky over time, to find objects that move or change in brightness, and shows their spectrum.",
+    "origin": "Made for NASA Space Apps 2026. It is an independent project: it is not a NASA product and does not imply NASA's endorsement."
+  },
+  "ai": {
+    "title": "Use of artificial intelligence",
+    "body": "SkyBlink's code was written with AI assistance (Claude, by Anthropic), under the team's direction and review."
+  },
+  "data": {
+    "title": "Data and licenses",
+    "spherex": {
+      "name": "SPHEREx",
+      "body": "Images from the SPHEREx mission (NASA/JPL-Caltech), from the NASA/IPAC Infrared Science Archive (IRSA). NASA public data."
+    },
+    "surveys": {
+      "name": "2MASS and WISE (AllWISE)",
+      "body": "Surveys funded by NASA (2MASS also by the NSF), from the IRSA archive. Public data."
+    },
+    "gaia": {
+      "name": "Gaia DR3",
+      "body": "ESA/Gaia/DPAC. License: CC BY-NC 3.0 IGO (non-commercial)."
+    },
+    "dss": {
+      "name": "Digitized Sky Survey (DSS)",
+      "body": "Photographic plates from the MAST archive at STScI. They are not in the public domain: license CC BY-NC-SA 4.0, for scientific, educational and non-profit use; commercial use is prohibited. The copyright holder depends on the plate (Caltech/Palomar, AURA/STScI, UK SERC/PPARC and the Anglo-Australian Observatory) and is shown below each one."
+    },
+    "sky": {
+      "name": "Star map on the sphere",
+      "body": "NASA/Goddard Space Flight Center Scientific Visualization Studio, “Deep Star Maps 2020”. Gaia DR2: ESA/Gaia/DPAC. It is visible light, not a SPHEREx image."
+    },
+    "names": {
+      "name": "Object names",
+      "body": "SIMBAD and Sesame, from the CDS (Strasbourg)."
+    },
+    "code": {
+      "name": "Code",
+      "body": "The code is MIT licensed; the data keep the licenses above."
+    }
+  },
+  "sound": {
+    "title": "About the sound",
+    "body": "“Listen to the spectrum” does not play the sound of the object: space does not carry sound and these data are light. It is a way of hearing the chart: it sweeps the spectrum from the shortest wavelength to the longest in {{seconds}} seconds; at each moment, more flux sounds higher (up to {{octaves}} octaves above {{hz}} Hz) and slightly louder, and where there is no data there is silence."
+  }
+}
