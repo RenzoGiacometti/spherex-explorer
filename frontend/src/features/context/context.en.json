@@ -1,0 +1,34 @@
+{
+  "journey": {
+    "title": "Journey across missions",
+    "span": "{{years}} years",
+    "spanOne": "1 year",
+    "year": "Year",
+    "mission": "Mission",
+    "band": "Band",
+    "observed": "Observed",
+    "track": "Missions and epochs, in date order",
+    "stop": "{{mission}} {{band}}, {{date}}, {{state}}",
+    "state": {
+      "loaded": "image loaded",
+      "unloaded": "no image"
+    },
+    "transport": "Step through the missions",
+    "empty": "This field has no saved images from other missions.",
+    "notSpherex": "Not a SPHEREx image",
+    "frame": "{{mission}} {{band}}, {{date}}",
+    "noImage": "No image for this date",
+    "target": "Expected position of the object"
+  },
+  "gaia": {
+    "title": "Gaia DR3",
+    "count": "{{shown}} / {{total}}",
+    "show": "Sources and proper motion",
+    "arrowScale": "Arrows: motion over",
+    "arrowYear": "1 year",
+    "arrowYears": "{{years}} years",
+    "magnitude": "Limiting G magnitude",
+    "epochNote": "Positions moved to {{year}}. Each arrow shows where the source is heading.",
+    "layer": "Gaia DR3 sources with their proper motion: {{count}}"
+  }
+}

@@ -1,0 +1,38 @@
+/* Capa de anotacion sobre la imagen: nivel 1 de DESIGN.md, sin fondo. */
+.layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.under,
+.over {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Trazo negro de abajo: hace que el blanco se lea tambien sobre una estrella brillante. */
+.under {
+  stroke: var(--color-void);
+  stroke-width: 3px;
+  opacity: 0.7;
+}
+
+.over {
+  stroke: var(--color-text);
+  stroke-width: 1px;
+}
+
+/* La fuente destacada es un marcador: uso 1 del acento. */
+.highlight {
+  stroke: var(--color-accent);
+  stroke-width: 1.5px;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-mute);
+}

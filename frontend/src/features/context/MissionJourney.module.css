@@ -1,0 +1,176 @@
+/* ---- Lectura: anio en grande y datos del cuadro --------------------------- */
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-xs) var(--space-lg);
+}
+
+.yearBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  margin: 0;
+}
+
+.yearLabel {
+  color: var(--color-text-mute);
+}
+
+/* El anio no cambia de ancho al pasar de cuadro: cifras tabulares y ancho minimo. */
+.year {
+  min-width: 6ch;
+  color: var(--color-text);
+}
+
+.facts {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-mute);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+/* ---- Pista ---------------------------------------------------------------- */
+
+/* fieldset sin el aspecto del navegador. `--journey-stop-width` llega desde el componente. */
+.track {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Renglon de misiones: el nombre sobre su tramo de la pista. */
+.missions {
+  position: relative;
+  height: 24px;
+}
+
+.inner {
+  position: absolute;
+  top: 0;
+  right: calc(var(--journey-stop-width) / 2);
+  bottom: 0;
+  left: calc(var(--journey-stop-width) / 2);
+}
+
+.mission {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  color: var(--color-text-dim);
+  white-space: nowrap;
+}
+
+.currentMission {
+  color: var(--color-text);
+}
+
+/* Corchete fino que junta las epocas de una misma mision. */
+.bracket {
+  position: absolute;
+  bottom: 2px;
+  height: 4px;
+  border: 1px solid var(--color-hairline-strong);
+  border-bottom: 0;
+}
+
+/*
+ * Caja de la pista, con alto propio: las capas de adentro son absolutas. No
+ * cuelgan directo del fieldset, donde Chrome y Edge resuelven con alto 0 una
+ * capa con top y bottom en 0 (mismo caso que la linea de tiempo del visor).
+ */
+.rail {
+  position: relative;
+  height: 52px;
+}
+
+.baseline {
+  position: absolute;
+  top: 18px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background-color: var(--color-hairline-strong);
+}
+
+.stops {
+  position: absolute;
+  top: 0;
+  right: calc(var(--journey-stop-width) / 2);
+  left: calc(var(--journey-stop-width) / 2);
+  height: 100%;
+}
+
+/* Parada de un cuadro: 56 x 52, por encima de los 44 px de un objetivo tactil. */
+.stop {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--journey-stop-width);
+  height: 100%;
+  margin-left: calc(var(--journey-stop-width) / -2);
+  color: var(--timeline-epoch-text);
+  cursor: pointer;
+}
+
+/* El radio nativo cubre la marca y su anio: recibe el clic, el foco y las flechas. */
+.input {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.markerBox {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+}
+
+/* Foco de teclado: contorno blanco de 2 px; el acento no se usa para el foco. */
+.input:focus-visible + .markerBox {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+}
+
+.date {
+  margin-top: -2px;
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+  white-space: nowrap;
+}
+
+.currentStop {
+  color: var(--timeline-epoch-current-text);
+}
+
+.transport {
+  align-self: center;
+}

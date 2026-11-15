@@ -1,0 +1,34 @@
+{
+  "journey": {
+    "title": "Viaje entre misiones",
+    "span": "{{years}} años",
+    "spanOne": "1 año",
+    "year": "Año",
+    "mission": "Misión",
+    "band": "Banda",
+    "observed": "Observado",
+    "track": "Misiones y épocas, en orden de fecha",
+    "stop": "{{mission}} {{band}}, {{date}}, {{state}}",
+    "state": {
+      "loaded": "imagen cargada",
+      "unloaded": "sin imagen"
+    },
+    "transport": "Recorrer las misiones",
+    "empty": "Este campo no tiene imágenes de otras misiones guardadas.",
+    "notSpherex": "No es una imagen de SPHEREx",
+    "frame": "{{mission}} {{band}}, {{date}}",
+    "noImage": "Sin imagen para esta fecha",
+    "target": "Posición esperada del objeto"
+  },
+  "gaia": {
+    "title": "Gaia DR3",
+    "count": "{{shown}} / {{total}}",
+    "show": "Fuentes y movimiento propio",
+    "arrowScale": "Flechas: movimiento en",
+    "arrowYear": "1 año",
+    "arrowYears": "{{years}} años",
+    "magnitude": "Magnitud G límite",
+    "epochNote": "Posiciones llevadas a {{year}}. La flecha muestra hacia dónde va cada fuente.",
+    "layer": "Fuentes de Gaia DR3 con su movimiento propio: {{count}}"
+  }
+}
