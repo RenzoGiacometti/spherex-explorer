@@ -119,6 +119,7 @@
   },
   "stage": {
     "waiting": "Waiting for the first image.",
+    "building": "New field: it is being built from IRSA images. The first image arrives in about a minute and the full field takes a few minutes.",
     "empty": "This epoch has no data in {{band}}.",
     "emptyBand": "No epoch has data in {{band}}.",
     "pending": "The image of this epoch has not arrived yet.",

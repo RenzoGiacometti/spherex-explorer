@@ -27,12 +27,14 @@ export function StageStatus({ controller }: StageStatusProps) {
   const { t } = useTranslation("viewer");
   const band = useUrlState((state) => state.band);
   const hasError = useFieldStore((state) => state.error !== null);
+  // `loading`: el backend esta armando el campo (en cola, listando o bajando recortes).
+  const building = useFieldStore((state) => state.phase === "loading");
   const { view, source, mode } = controller;
 
   let message: string | null = null;
   if (source === "none" && !hasError && view.missing !== null) {
     const bandName = formatBand(band);
-    if (view.missing === "waiting") message = t("stage.waiting");
+    if (view.missing === "waiting") message = t(building ? "stage.building" : "stage.waiting");
     else if (view.missing === "pending") message = t("stage.pending");
     else message = t(mode === "sum" ? "stage.emptyBand" : "stage.empty", { band: bandName });
   }

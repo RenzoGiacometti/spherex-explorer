@@ -119,6 +119,7 @@
   },
   "stage": {
     "waiting": "Esperando la primera imagen.",
+    "building": "Campo nuevo: se está armando con imágenes de IRSA. La primera imagen llega en cerca de un minuto y el campo completo tarda unos minutos.",
     "empty": "Esta época no tiene datos en {{band}}.",
     "emptyBand": "Ninguna época tiene datos en {{band}}.",
     "pending": "La imagen de esta época todavía no llegó.",

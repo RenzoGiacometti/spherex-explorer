@@ -1,5 +1,6 @@
 # Imagen del despliegue publico: un solo proceso que sirve la API y el frontend
-# compilado, solo con los campos precalculados (backend/data/fields). No toca IRSA.
+# compilado. Los campos precalculados (backend/data/fields) salen sin tocar IRSA; un
+# campo nuevo se arma contra IRSA, con 2 trabajos activos y hasta 10 en cola.
 #
 #   docker build -t spherex-explorer .
 #   docker run --rm -p 7860:7860 spherex-explorer
@@ -14,8 +15,8 @@ COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml 
 COPY frontend/scripts ./scripts
 RUN pnpm install --frozen-lockfile
 COPY frontend/ ./
-# El despliegue solo tiene el escalon base: la interfaz no ofrece el campo de 30'.
-ENV VITE_PRECOMPUTED_ONLY=1
+# El campo de 30' no se probo con datos reales: el despliegue no lo ofrece.
+ENV VITE_WIDE_FIELD=0
 RUN pnpm build
 
 # ---- Backend ----
@@ -33,9 +34,14 @@ COPY --from=frontend /src/frontend/dist /app/static
 COPY backend/data/sesame /app/cache/sesame
 RUN chmod -R a+rwX /app/cache
 
-ENV SPHEREX_PRECOMPUTED_ONLY=1 \
-    SPHEREX_STATIC_DIR=/app/static \
+# SPHEREX_PRECOMPUTED_ONLY=1 (por ejemplo desde el panel de Render) vuelve al modo que solo
+# sirve lo precalculado y nunca toca IRSA.
+ENV SPHEREX_STATIC_DIR=/app/static \
     SPHEREX_CACHE_DIR=/app/cache \
+    SPHEREX_MAX_ACTIVE_JOBS=2 \
+    SPHEREX_MAX_QUEUED_JOBS=10 \
+    SPHEREX_NEARBY_FIELD_ARCSEC=60 \
+    SPHEREX_CUTOUT_CACHE_MAX_GB=2 \
     PYTHONUNBUFFERED=1 \
     PORT=7860
 EXPOSE 7860

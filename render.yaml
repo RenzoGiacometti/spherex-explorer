@@ -1,9 +1,21 @@
 # Despliegue publico en Render (https://render.com) a partir del Dockerfile de la raiz.
-# Un solo servicio web: API, frontend compilado y campos precalculados. No toca IRSA.
+# Un solo servicio web: API, frontend compilado y campos precalculados. Los campos nuevos
+# se arman contra IRSA dentro de este mismo proceso, asi que tiene que ser una sola instancia.
 services:
   - type: web
     name: spherex-explorer
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free
+    # 2 GB de memoria. Oregon es la region mas cercana a IRSA (Caltech, California).
+    plan: standard
+    region: oregon
+    numInstances: 1
     healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "7860"
+      # Trabajos que arman campos a la vez y campos en espera (los valores del Dockerfile).
+      - key: SPHEREX_MAX_ACTIVE_JOBS
+        value: "2"
+      - key: SPHEREX_MAX_QUEUED_JOBS
+        value: "10"

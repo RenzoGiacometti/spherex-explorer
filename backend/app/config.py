@@ -83,6 +83,11 @@ class Settings:
     # `data/fields`): pedir cualquier otro responde 404 `not_found` y nunca se toca IRSA.
     # Es el modo del despliegue publico.
     precomputed_only: bool = False
+    # Un pedido cuyo centro esta a menos de estos segundos de arco del de un campo ya armado
+    # del mismo escalon abre ese campo en vez de armar otro casi igual (coordenadas tipeadas
+    # a mano, con menos decimales): ahorra unas 350 descargas a IRSA. 0 lo desactiva. En modo
+    # `precomputed_only` vale al menos 60.
+    nearby_field_arcsec: float = 0.0
     # Carpeta con el frontend compilado (`frontend/dist`). Si se indica, el backend lo sirve
     # en `/` desde el mismo origen que la API; vacio, solo responde `/api`.
     static_dir: str = ""

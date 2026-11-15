@@ -81,7 +81,7 @@ from app.jobs.job import CutoutArrived, CutoutLost, FieldJob
 from app.jobs.plan import CutoutTask, GiveUp, after_failure
 from app.jobs.store import META_FILENAME, FieldStore, StoreError
 
-# Modo `precomputed_only`: un pedido a menos de esta distancia del centro de un campo armado lo abre.
+# Modo `precomputed_only`: minimo de `Settings.nearby_field_arcsec`.
 NEARBY_FIELD_ARCSEC = 60.0
 
 logger = logging.getLogger(__name__)
@@ -269,13 +269,17 @@ class JobManager:
                 if request.refresh and not self._settings.precomputed_only:
                     self._start_refresh(request, stored)
                 return stored
+            # Un centro casi igual al de un campo armado (coordenadas tipeadas a mano, con menos
+            # decimales) abre ese campo en vez de armar otro o de responder que no existe.
+            tolerance = self._settings.nearby_field_arcsec
             if self._settings.precomputed_only:
-                # Despliegue publico: solo lo que ya esta armado, sin trabajos ni pedidos a IRSA.
-                # Un centro casi igual al de un campo armado (coordenadas tipeadas a mano, con
-                # menos decimales) abre ese campo en vez de responder que no existe.
-                nearby = self._nearby_stored(request)
+                tolerance = max(tolerance, NEARBY_FIELD_ARCSEC)
+            if tolerance > 0 and not request.refresh:
+                nearby = self._nearby_stored(request, tolerance)
                 if nearby is not None:
                     return nearby
+            if self._settings.precomputed_only:
+                # Solo lo que ya esta armado, sin trabajos ni pedidos a IRSA.
                 raise not_found("este servidor solo sirve los campos precalculados")
             if not request.refresh:
                 self._check_no_coverage(request)
@@ -716,8 +720,8 @@ class JobManager:
 
     # ------------------------------------------------------------------ almacen
 
-    def _nearby_stored(self, request: NormalizedRequest) -> FieldMeta | None:
-        """Campo terminado del mismo escalon con el centro a menos de `NEARBY_FIELD_ARCSEC` del pedido."""
+    def _nearby_stored(self, request: NormalizedRequest, tolerance_arcsec: float) -> FieldMeta | None:
+        """Campo terminado del mismo escalon con el centro a menos de `tolerance_arcsec` del pedido."""
         best: tuple[float, FieldMeta] | None = None
         for field_id in self._store.list_ids():
             meta = self._stored(field_id)
@@ -725,7 +729,7 @@ class JobManager:
                 continue
             d_ra = ((request.ra - meta.request.ra + 180.0) % 360.0 - 180.0) * math.cos(math.radians(request.dec))
             separation = math.hypot(d_ra, request.dec - meta.request.dec) * 3600.0
-            if separation <= NEARBY_FIELD_ARCSEC and (best is None or separation < best[0]):
+            if separation <= tolerance_arcsec and (best is None or separation < best[0]):
                 best = (separation, meta)
         return best[1] if best is not None else None
 
