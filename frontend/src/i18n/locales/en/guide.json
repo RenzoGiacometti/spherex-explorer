@@ -1,0 +1,21 @@
+{
+  "launcher": {
+    "start": "Guided tour: find WISE 0855"
+  },
+  "tour": {
+    "title": "Find WISE 0855",
+    "progress": "{{n}} / {{total}}",
+    "progressLabel": "Step {{n}} of {{total}}",
+    "step": {
+      "band": "Pick band B6, the reddest one SPHEREx has; the tour switches the stretch to linear for you, which quiets the background noise.",
+      "play": "Play the blink and watch the center of the image: one dot shifts while the stars stay put.",
+      "redcyan": "Switch to Red/cyan mode; the tour picks the two sharpest epochs to compare for you.",
+      "locate": "Find the object that moves, which has a cyan side and a red side while the stars stay white, and click or tap it.",
+      "closing": "WISE 0855 is a brown dwarf: a body that never gathered enough mass to ignite like a star and is as cold as the North Pole, so nearly all of its light comes out at the longest infrared wavelengths and it only shows up in the reddest bands, B5 and B6."
+    },
+    "miss": "Not there: look for the dot that is half cyan and half red.",
+    "reveal": "Show me where it is",
+    "skip": "Skip",
+    "finish": "Finish"
+  }
+}

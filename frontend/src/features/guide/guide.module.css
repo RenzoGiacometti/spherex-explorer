@@ -1,0 +1,132 @@
+/*
+ * Recorrido guiado sobre el visor: la tarjeta con la consigna y el anillo que
+ * resalta un control. Los dos son fijos y van encima de la pantalla del visor,
+ * que no sabe que existen.
+ */
+
+/*
+ * Boton de la entrada. En celular el texto ocupa dos renglones: parejos, en
+ * vez de dejar una palabra sola en el segundo.
+ */
+.launcher {
+  text-wrap: balance;
+}
+
+/*
+ * Mientras dura el recorrido, la mira y el rastro que el visor dibuja sobre el
+ * objeto no se ven: hay que encontrarlo. Siguen en el documento, y de ahi sale
+ * la posicion contra la que se compara el clic (viewerDom.ts). GuideTour.tsx
+ * pone y saca el atributo.
+ */
+:global(html[data-guide-hides-target]) :global([data-annotation="reticle"]),
+:global(html[data-guide-hides-target]) :global([data-annotation="trail"]) {
+  visibility: hidden;
+}
+
+/*
+ * Tarjeta. En escritorio ocupa el primer lugar de la columna derecha, sobre el
+ * panel de metadatos: la imagen queda entera a la vista y los controles que
+ * piden los pasos (columna izquierda y muelle) quedan libres. Encima de la
+ * imagen no entra: en una notebook la imagen mide menos de 400 px de alto y la
+ * tarjeta llegaba al centro, que es donde esta el objeto.
+ *
+ * Las medidas siguen a ViewerPage.module.css: barra de 64 px, y columna de
+ * 320 px a 24 px del borde desde 1180 px de ancho, o de 264 px a 12 px desde
+ * 900. Por debajo no hay columnas (mas abajo en este archivo).
+ */
+.card {
+  position: fixed;
+  top: calc(64px + var(--space-md));
+  right: var(--space-lg);
+  z-index: 21;
+  width: 320px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.text {
+  color: var(--color-text);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+  text-wrap: pretty;
+}
+
+.hint {
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+}
+
+/*
+ * Anillo: blanco de 2 px con una linea de vacio por fuera, como el foco del
+ * visor, para que se lea sobre el vidrio y sobre una zona clara de la imagen.
+ * No recibe el puntero: lo que rodea se usa como siempre.
+ */
+.ring {
+  position: fixed;
+  z-index: 20;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
+  outline: 1px solid var(--color-void);
+  pointer-events: none;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.ring[data-shape="round"] {
+  border-radius: var(--radius-full);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation: none;
+  }
+}
+
+@media (max-width: 1179px) {
+  .card {
+    top: calc(64px + var(--space-sm));
+    right: var(--space-sm);
+    width: 264px;
+  }
+}
+
+/*
+ * Ventana angosta y celular: no hay columna derecha y los controles van debajo
+ * de la imagen. La tarjeta va arriba de todo, sobre la barra superior, que solo
+ * tiene informacion y la salida: asi tapa lo menos posible de la imagen, y el
+ * centro queda libre.
+ *
+ * En el cierre baja al borde inferior, sobre los controles, que ya no hacen
+ * falta: la consigna es mas larga y arriba taparia la mira recien mostrada.
+ */
+@media (max-width: 899px) {
+  .card {
+    top: var(--space-sm);
+    right: auto;
+    left: 50%;
+    width: min(420px, calc(100% - 2 * var(--space-sm)));
+    transform: translateX(-50%);
+  }
+
+  .card[data-guide-step="closing"] {
+    top: auto;
+    bottom: var(--space-sm);
+  }
+}
