@@ -70,8 +70,20 @@ def _field(
     return geometry.normalize_request(ra, dec, fov, pipeline=settings.pipeline_version)
 
 
+def _guarded_field(
+    settings: Annotated[Settings, Depends(_settings)],
+    service: Annotated[LiveContextService, Depends(_service)],
+    field: Annotated[NormalizedRequest, Depends(_field)],
+) -> NormalizedRequest:
+    # Con `SPHEREX_PRECOMPUTED_ONLY` nunca se le pide nada a IRSA: como `POST /api/field` en ese modo,
+    # lo que no esta guardado responde `not_found`.
+    if settings.precomputed_only and not service.is_precomputed(field):
+        raise not_found("este servidor solo sirve el contexto guardado y ese campo no lo tiene")
+    return field
+
+
 Service = Annotated[LiveContextService, Depends(_service)]
-Field = Annotated[NormalizedRequest, Depends(_field)]
+Field = Annotated[NormalizedRequest, Depends(_guarded_field)]
 
 
 def _unavailable(exc: PartUnavailable) -> Exception:

@@ -16,6 +16,76 @@
       "gaia_sources": 242
     },
     {
+      "key": "148.9685_+69.6797_0.1667",
+      "field_id": "616f2ebaf5239068",
+      "alias": "m-82",
+      "name": "M 82",
+      "ra": 148.9685,
+      "dec": 69.6797,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 401
+    },
+    {
+      "key": "162.2955_-53.3170_0.1667",
+      "field_id": "61ed7e9a9a710d80",
+      "alias": "luhman-16",
+      "name": "NAME Luhman 16",
+      "ra": 162.2955,
+      "dec": -53.317,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 3588
+    },
+    {
+      "key": "164.0925_+6.9952_0.1667",
+      "field_id": "71a5e25f75f18168",
+      "alias": "wolf-359",
+      "name": "Wolf 359",
+      "ra": 164.0925,
+      "dec": 6.9952,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 103
+    },
+    {
+      "key": "202.4696_+47.1953_0.1667",
+      "field_id": "d1182d95a5142a4d",
+      "alias": "m-51",
+      "name": "M 51",
+      "ra": 202.4696,
+      "dec": 47.1953,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 779
+    },
+    {
+      "key": "217.3698_-62.6739_0.1667",
+      "field_id": "730d0dd6b3d7fe2a",
+      "alias": "proxima-centauri",
+      "name": "NAME Proxima Centauri",
+      "ra": 217.3698,
+      "dec": -62.6739,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 11729
+    },
+    {
       "key": "248.1672_+66.7550_0.1667",
       "field_id": "721817858ae5e0d2",
       "alias": "rdra",
@@ -58,6 +128,20 @@
       "gaia_sources": 212
     },
     {
+      "key": "43.2795_+16.8538_0.1667",
+      "field_id": "cf57e1e6aa516371",
+      "alias": "teegarden-s-star",
+      "name": "NAME Teegarden's Star",
+      "ra": 43.2795,
+      "dec": 16.8538,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 103
+    },
+    {
       "key": "76.9566_+30.4013_0.1667",
       "field_id": "09413d9ee9d96187",
       "alias": "rwaur",
@@ -70,6 +154,48 @@
         "wise_w2"
       ],
       "gaia_sources": 998
+    },
+    {
+      "key": "77.9853_-45.0596_0.1667",
+      "field_id": "2748d945632b7032",
+      "alias": "hd-33793",
+      "name": "HD 33793",
+      "ra": 77.9853,
+      "dec": -45.0596,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 170
+    },
+    {
+      "key": "83.6324_+22.0174_0.1667",
+      "field_id": "12856d74fb2832ab",
+      "alias": "m-1",
+      "name": "M 1",
+      "ra": 83.6324,
+      "dec": 22.0174,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 1001
+    },
+    {
+      "key": "83.8201_-5.3876_0.1667",
+      "field_id": "f7b2e086cecaccae",
+      "alias": "m-42",
+      "name": "M 42",
+      "ra": 83.8201,
+      "dec": -5.3876,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 913
     }
   ]
 }

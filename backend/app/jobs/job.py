@@ -100,6 +100,8 @@ _SETTLED_PLANE_STATUSES: frozenset[str] = CUBE_PLANE_STATUSES | {"empty"}
 # que haya llegado ninguno, IRSA no esta entregando recortes: el trabajo falla ahi en vez de insistir con
 # los cientos que faltan, que con el servicio caido serian decenas de minutos ocupando un lugar de la cola.
 GIVE_UP_AFTER_LOST = 10
+# Detector con el que se describe la vista provisoria mientras esta pendiente: W2, la banda que se pide siempre.
+PREVIEW_DETECTOR = 6
 
 # Motivo del aviso `full_download` cuando el recorte completo ya estaba en la cache
 # (`CutoutFile.reason` solo viene en uno recien bajado).
@@ -228,7 +230,8 @@ class FieldJob:
         preview = (
             base.preview.model_copy(deep=True)
             if base is not None
-            else preview_info(request.band, settings, "pending" if settings.preview_enabled else "unavailable")
+            # La vista provisoria es siempre WISE W2 (`app.context.live.fetch_preview`), sea cual sea la banda pedida.
+            else preview_info(PREVIEW_DETECTOR, settings, "pending" if settings.preview_enabled else "unavailable")
         )
         self.meta = FieldMeta(
             id=request.field_id,

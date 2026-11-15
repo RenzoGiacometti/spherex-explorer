@@ -13,12 +13,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.config import Settings
+from app.context.live import fetch_preview
 from app.contract import utc_timestamp
 from app.domain import CutoutFile, Exposure, ExposureList, Grid, PreviewImage, ReprojectedExposure
 from app.irsa.cutouts import discard_cutout, fetch_cutout, prune_cutout_cache
 from app.irsa.sia import list_exposures_parallel
 from app.pipeline.exposure import load_exposure
-from app.preview.hips2fits import fetch_preview
 
 
 def wait_on(condition: threading.Condition, timeout: float | None) -> None:
@@ -37,7 +37,8 @@ class JobDeps:
       global de descargas (`get_limiter(settings).cutout_slot()`) mientras baja.
     - `discard_cutout(path, settings)` y `prune_cutout_cache(settings)`: la
       cache de recortes.
-    - `fetch_preview(grid, band, settings)`: `app.preview.hips2fits.fetch_preview`.
+    - `fetch_preview(grid, band, settings)`: `app.context.live.fetch_preview`, WISE W2 desde IRSA
+      (la de `app.preview.hips2fits` quedo sin uso: el servicio de CDS estuvo caido).
     - `load_exposure(path, grid)`: `app.pipeline.exposure.load_exposure`.
     - `clock()`: segundos de un reloj que solo avanza. Con el se miden
       `elapsed_s`, el tope de eventos `progress` y las esperas de los reintentos.

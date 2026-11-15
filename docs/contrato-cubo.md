@@ -230,17 +230,19 @@ Va aparte del cubo para que el `id` del campo no dependa del objeto. Devuelve `p
 
 ### 4.10 `GET /api/field/{id}/preview`
 
-Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantalla mientras carga un campo nuevo. El backend lo pide a hips2fits de CDS al crear el trabajo, en paralelo con la lista de exposiciones, y lo guarda con el campo.
+Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantalla mientras carga un campo nuevo. El backend lo pide a IRSA al crear el trabajo, en paralelo con la lista de exposiciones, y lo guarda con el campo (`app.context.live.fetch_preview`).
 
 - Mismo formato que un plano (sección 6): Float32, la misma grilla y la misma forma que el cubo. `NaN` es sin datos y no hay `+Infinity`: la vista no marca saturación.
 - La vista puede quedar lista antes de `listed`, cuando el documento todavía no trae `grid`. Su forma no depende de las exposiciones: es la del escalón de `request.fov` (tabla de la sección 3).
-- Los valores están en las unidades del relevamiento de origen, no en MJy/sr. Sirven solo para mirar; no se comparan con los planos de SPHEREx ni entran en los modos de comparación.
-- Banda: W1 (3,4 µm), o W2 (4,6 µm) si el `band` pedido es 5 o 6. La vista queda con la banda del pedido que creó el trabajo y no cambia con `priority`. El frontend la rotula según `preview.band`, no según la banda que la persona está mirando.
+- **Banda: siempre W2 (4,6 µm)**, sea cual sea el `band` pedido: es la banda de WISE donde se ven los objetos más fríos. No cambia con `priority`. El frontend la rotula según `preview.band`, no según la banda que la persona está mirando.
+- **Unidades: MJy/sr, con el fondo restado.** Sirve solo para mirar; no entra en los modos de comparación ni se compara con los planos de SPHEREx.
+- `preview.hips` trae el identificador del mosaico de AllWISE del que salió (`IRSA/allwise_p3am_cdd/<mosaico>/w2`), no un HiPS.
 - Devuelve `409 not_ready` mientras `preview.status` es `pending` y `404 not_found` si es `unavailable`.
-- Si hips2fits no responde en 20 s, `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria. No es un error del campo. Los 20 s son el tope de todo el intercambio: un solo pedido, sin reintentos ni redirecciones.
-- El backend pide la imagen con el WCS exacto de la grilla (parámetro `wcs` de hips2fits), y `preview.hips` es `CDS/P/allWISE/W1` o `CDS/P/allWISE/W2`.
-- **[VERIFICAR]** Nada de esto se pudo comprobar contra el servicio: el 15 de noviembre de 2026 hips2fits respondió 404 con la página "Page unavailable" de CDS en los siete sondeos hechos entre las 10:11 y las 13:44 UTC, y su espejo no conectó. Los parámetros salen del código de astroquery y los identificadores de la lista del nodo HiPS de IRSA. Falta confirmar que acepta el pedido, que devuelve el WCS pedido y las unidades. Cuando vuelva: `uv run python scripts/probe_hips2fits.py --save tests/fixtures/preview` desde `backend/`.
-- Por eso la vista está **apagada por defecto**. A las 16:16 UTC del mismo día hips2fits seguía respondiendo 404. Sin `SPHEREX_PREVIEW_ENABLED=1` el backend no la pide: el campo nace con `preview.status = "unavailable"`, no se emite el evento `preview` y `/preview` responde `404`.
+- Si IRSA no responde en el plazo (un solo intento, 12 s por parte), `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria: el campo carga igual. No es un error del campo.
+- Corre solo para campos nuevos: un campo precalculado no la pide, y con `SPHEREX_PRECOMPUTED_ONLY=1` no hay trabajos, así que nunca se pide.
+- Medido el 15 de noviembre de 2026 contra IRSA: 5,8 s para un campo sin nada en caché (de 2 a 7 s según el mosaico, `docs/contexto-2.md`).
+- `SPHEREX_PREVIEW_ENABLED=0` la apaga: el campo nace con `preview.status = "unavailable"`, no se emite el evento `preview` y `/preview` responde `404`.
+- Historia: la primera versión pedía la vista a hips2fits de CDS (`app/preview/hips2fits.py`, W1 o W2 según la banda, en las unidades del relevamiento). Ese servicio respondió 404 todo el 15 de noviembre de 2026 y nunca se pudo verificar; el módulo quedó en el repositorio, sin uso.
 
 ## 5. Documento de metadatos
 

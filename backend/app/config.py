@@ -112,11 +112,11 @@ class Settings:
     resolve_cache_days: float = 30.0
     exposure_list_cache_hours: float = 24.0
 
-    # Vista provisoria de WISE. Desactivada por defecto: hips2fits de CDS estuvo caido todo el
-    # 2026-11-15 y el pedido nunca se pudo verificar contra el servicio. Con
-    # `SPHEREX_PREVIEW_ENABLED=1` el trabajo la vuelve a pedir; sin eso, el campo sale con
-    # `preview.status = "unavailable"` desde el principio y no se toca la red.
-    preview_enabled: bool = False
+    # Vista provisoria de un campo nuevo: WISE W2 pedida a IRSA mientras carga SPHEREx
+    # (`app.context.live.fetch_preview`; la de hips2fits de CDS quedo sin uso, el servicio estuvo
+    # caido todo el 2026-11-15). Con `SPHEREX_PREVIEW_ENABLED=0` el campo sale con
+    # `preview.status = "unavailable"` desde el principio y no se pide nada.
+    preview_enabled: bool = True
     # Si hips2fits no responde en este tiempo, se descarta.
     preview_timeout_s: float = 20.0
     # Servicio hips2fits de CDS y HiPS de WISE de cada banda (app/preview/hips2fits.py).

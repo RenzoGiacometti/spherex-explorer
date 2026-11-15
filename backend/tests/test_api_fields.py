@@ -94,7 +94,7 @@ def test_every_resource_at_each_stage_of_a_new_field(build: HarnessFactory) -> N
     }  # fmt: skip
     assert created.meta.request.model_dump() == {"ra": 269.4463, "dec": 4.7683, "fov": 0.1667}
     assert (created.meta.rev, created.meta.progress.phase, created.meta.progress.queue_position) == (0, "queued", 1)
-    assert (created.meta.preview.status, created.meta.preview.band) == ("pending", "W1")
+    assert (created.meta.preview.status, created.meta.preview.band) == ("pending", "W2")
     base = f"/api/field/{created.id}"
 
     # 2. Listando: todavia no hay grilla, epocas ni planos. Nada esta construido, pero va a estarlo.

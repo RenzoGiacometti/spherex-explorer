@@ -91,13 +91,16 @@ Rehacer el cubo desde recortes en caché tardaba de 10 a 16 s en la Etapa 0. El 
 | `GET /api/field/{id}/plane/{época}/{detector}` | Un plano en Float32, apenas está listo (provisorio o definitivo) |
 | `GET /api/field/{id}/cube` | Todos los planos en Float32, sin compresión, cuando el campo terminó |
 | `GET /api/field/{id}/aux/{época}/{detector}` | Flags por mayoría (Uint32) y cobertura (Uint16) de un plano |
-| `GET /api/field/{id}/preview` | Recorte de WISE de la misma zona (hips2fits de CDS), como vista provisoria mientras carga un campo nuevo |
+| `GET /api/field/{id}/preview` | Recorte de WISE W2 de la misma zona, pedido a IRSA, como vista provisoria mientras carga un campo nuevo |
 | `GET /api/field/{id}/track?name=` | Posición esperada del objeto en cada época, con movimiento propio y paralaje |
 | `POST /api/field/{id}/priority {band}` | Adelanta los planos de una banda |
 | `GET /api/spectrum?ra=&dec=&field=` | Documento del espectro: puntos {longitud de onda, flujo, error, fecha, detector, flags}, promedios por tramo, épocas, detectores y avisos (`saturated_source`, con la forma del contrato del cubo, y `offset_source`). `pm_ra`, `pm_dec` y `epoch` opcionales para que la apertura siga a un objeto que se mueve. Con `field` de un campo precalculado el clic se ajusta a la fuente guardada más cercana dentro de 12″ (aviso `snapped_source`); si no hay ninguna responde 200 con `status: "no_source"`, `nearest` y `saved_sources`, sin puntos |
 | `GET /api/context?ra=&dec=&fov=` | Documento de contexto del campo: capas de otras misiones con su fecha y resumen de Gaia. Solo lo precalculado; un campo sin contexto responde `404 not_found` |
 | `GET /api/context/gaia?ra=&dec=&fov=` | Fuentes de Gaia DR3 del campo (posición en 2016,0, movimiento propio, paralaje, magnitud G) |
 | `GET /api/context/index` | Campos que tienen contexto guardado |
+| `GET /api/context/optical?ra=&dec=&fov=` | Capas ópticas del campo: placas del Digitized Sky Survey con su fecha, relevamiento, número de placa y titular |
+| `GET /api/survey/optical?ra=&dec=&fov=&layer=` | Una placa (`dss1` o `dss2_red`) en Float32, en la grilla del campo. Son densidades de placa, no flujos |
+| `GET /api/live/context`, `/api/live/context/gaia`, `/api/live/survey` | Lo mismo que las rutas de contexto, para cualquier campo: lo precalculado si existe y, si no, WISE W2 y Gaia pedidos a IRSA con un plazo corto. Con `SPHEREX_PRECOMPUTED_ONLY`, solo lo guardado |
 | `GET /api/survey?ra=&dec=&fov=&layer=` | Una capa de otra misión (`twomass_ks`, `wise_w2`) en Float32, ya reproyectada a la grilla del campo. No usa hips2fits de CDS ni recibe `hips`: sirve capas precalculadas desde IRSA (`docs/contexto.md`, sección 5) |
 
 Espectro: fotometría de apertura sobre cada exposición individual (no sobre el coadd), fondo en anillo, longitud de onda tomada de WCS-WAVE en el píxel del objeto, error desde VARIANCE. WCS-WAVE va después de EPSF y la descarga cortada no la trae: bajar un recorte completo por detector y reutilizar su tabla con el encabezado de IMAGE de cada recorte.
@@ -131,7 +134,7 @@ Cada etapa termina en algo que se puede mostrar.
 - Modos de comparación como shaders: diferencia, suma, rojo/cian, mantener apretado. En diferencia y rojo/cian los píxeles saturados se enmascaran.
 - Capa de flags, panel de metadatos y aviso visible cuando una fuente está saturada.
 - Un plano provisorio se distingue a la vista de uno definitivo, y los modos de comparación avisan si alguna de las épocas comparadas es provisoria.
-- Vista provisoria mientras carga un campo nuevo: recorte de WISE de la misma zona, pedido a hips2fits de CDS desde el backend y rotulado como tal.
+- Vista provisoria mientras carga un campo nuevo: recorte de WISE W2 de la misma zona, pedido a IRSA desde el backend y rotulado como tal.
 - Tests del backend sin red, con recortes guardados como fixtures.
 - **Hecho cuando:** un link con coordenadas abre el visor; los cinco objetos de prueba abren en menos de 2 s; en un campo nuevo la primera imagen aparece apenas llega y el resto se completa con barra de progreso.
 
@@ -153,7 +156,7 @@ Cada etapa termina en algo que se puede mostrar.
 - Overlay de Gaia con flechas de movimiento propio; objetos del sistema solar con SkyBoT.
 - Ficha del objeto (SIMBAD + Gaia) en lenguaje llano.
 - Cortina visible/infrarrojo y viaje en el tiempo entre misiones con `/survey`.
-- Estado: el contexto (2MASS Ks, WISE W2 y Gaia DR3) se precalcula desde IRSA con `backend/scripts/precompute_context.py` y queda en `backend/data/context/`; las rutas solo leen lo guardado, así que valen igual con `SPHEREX_PRECOMPUTED_ONLY`. SIMBAD y SkyBoT no están (son de CDS e IMCCE y no se probaron). "Viaje entre misiones" es un modo más del visor y la capa de Gaia se prende junto a la de flags; en un campo sin contexto guardado las dos cosas se muestran deshabilitadas con una explicación. El detalle está en `docs/contexto.md`.
+- Estado: el contexto (2MASS Ks, WISE W2, Gaia DR3 y placas del Digitized Sky Survey) se precalcula con `backend/scripts/precompute_context.py`, `precompute_context_fields.py` y `precompute_optical.py`, y queda en `backend/data/context/` para los 14 campos precalculados (`docs/contexto-2.md`); las rutas solo leen lo guardado, así que valen igual con `SPHEREX_PRECOMPUTED_ONLY`. SIMBAD y SkyBoT no están (son de CDS e IMCCE y no se probaron). "Viaje entre misiones" es un modo más del visor y la capa de Gaia se prende junto a la de flags; en un campo sin contexto guardado las dos cosas se muestran deshabilitadas con una explicación. El detalle está en `docs/contexto.md`.
 - **Hecho cuando:** el slider de misiones muestra a Barnard moviéndose a lo largo de décadas.
 
 ### Etapa 4 — Esfera (28, 23, 37)
@@ -182,7 +185,7 @@ Cada etapa termina en algo que se puede mostrar.
 | Estrellas brillantes saturadas (Barnard: hueco en el centro) | El núcleo se dibuja en blanco máximo con contorno y aviso, y se enmascara en diferencia y rojo/cian; las posiciones se miden ajustando las alas |
 | R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1, que tampoco está libre de saturación: 37 de 56 exposiciones, y el criterio se cumple con los 18 puntos válidos. La fotometría sobre las alas queda como investigación |
 | El campo de 1° de la maqueta no es viable con recortes (4 GB por campo) | Campos de 5′, 10′ y 30′; para contexto amplio, el mapa de la Etapa 3 |
-| hips2fits de CDS sin responder (pasó el 15 de noviembre de 2026: 404 con la página "Page unavailable" en siete sondeos entre las 10:11 y las 13:44 UTC) | La vista provisoria de WISE es opcional: si falla, el campo carga igual. **[VERIFICAR]** La vista está implementada contra la documentación y no se pudo probar contra el servicio. Queda apagada detrás de `SPHEREX_PREVIEW_ENABLED` (a las 16:16 UTC seguía caído) |
+| hips2fits de CDS sin responder (pasó todo el 15 de noviembre de 2026: 404 con la página "Page unavailable") | La vista provisoria ya no depende de CDS: sale de WISE W2 en IRSA (`app.context.live`), probada contra el servicio (5,8 s). Es opcional: si IRSA no responde en el plazo, el campo carga igual sin vista. `/api/survey` tampoco usa hips2fits |
 | Pocas épocas, movimiento subpíxel | Rojo/cian, diferencia y viaje entre misiones. La diferencia entre épocas ya muestra un dipolo claro en Barnard y en WISE 0855 |
 | CDS (Sesame, SIMBAD, VizieR) sin responder | Espejo de Sesame en CfA y caché de nombres resueltos |
 | CORS de servicios externos | Todo pasa por el backend |

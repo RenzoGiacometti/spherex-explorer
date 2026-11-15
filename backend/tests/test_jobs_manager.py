@@ -51,7 +51,7 @@ def test_new_field_publishes_the_whole_sequence(build: HarnessFactory) -> None:
     first = harness.manager.submit(request)
     assert (first.id, first.status, first.rev) == (request.field_id, "queued", 0)
     assert first.progress.phase == "queued" and first.progress.queue_position == 1
-    assert first.preview.status == "pending" and first.preview.band == "W1"
+    assert first.preview.status == "pending" and first.preview.band == "W2"  # pendiente: siempre W2
     # Lo que todavia no existe falta: no va en null (contrato, seccion 5).
     assert set(first.model_dump(mode="json")) == {
         "id", "pipeline", "status", "rev", "request", "progress", "warnings", "preview",

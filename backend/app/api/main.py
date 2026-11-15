@@ -72,6 +72,8 @@ from app.api.headers import (
 from app.api.static import FrontendFiles
 from app.config import Settings, get_settings
 from app.context.api import router as context_router
+from app.context.api_live import router as live_router
+from app.context.api_optical import router as optical_router
 from app.contract import FieldRequest, PriorityRequest
 from app.jobs.deps import JobDeps
 from app.jobs.events import PING, FieldEvent, encode_sse
@@ -223,6 +225,13 @@ def create_app(
     # `/api/context/index` y `/api/survey`. Solo leen lo precalculado en data/context; nunca salen a la red,
     # asi que valen igual con `SPHEREX_PRECOMPUTED_ONLY`.
     app.include_router(context_router)
+    # Capas opticas del DSS (app/context/api_optical.py): `GET /api/context/optical` y `/api/survey/optical`.
+    # Tambien leen solo lo precalculado.
+    app.include_router(optical_router)
+    # Contexto para cualquier campo (app/context/api_live.py): `/api/live/context`, `/api/live/context/gaia`
+    # y `/api/live/survey`. El precalculado si existe; si no, WISE y Gaia pedidos a IRSA con un plazo corto.
+    # Con `SPHEREX_PRECOMPUTED_ONLY` sirven solo lo guardado.
+    app.include_router(live_router)
     # Curva de luz (app/lightcurve/router.py): `GET /api/lightcurve`, con las mismas reglas que el espectro.
     app.include_router(lightcurve_router)
 
