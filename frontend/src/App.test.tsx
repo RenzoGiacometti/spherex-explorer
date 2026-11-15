@@ -208,7 +208,7 @@ describe("App", () => {
     // El enlace lleva la misma vista, sin `embed`.
     expect(
       screen.getByRole("link", { name: "Abrir en el visor completo" }).getAttribute("href"),
-    ).toBe("/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink");
+    ).toBe("/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5");
     expect(backend.requests("field")).toHaveLength(1);
   });
 

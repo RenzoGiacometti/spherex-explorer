@@ -245,7 +245,9 @@ describe("ViewerPage: mira y rastro del objeto buscado", () => {
   });
 
   it("sin nombre en la URL no hay mira ni rastro, y no se pide la trayectoria", async () => {
-    const { backend } = openViewer(BARNARD_FIELD);
+    // Un punto a 10 minutos de arco de Barnard, fuera de la huella de todo campo
+    // guardado: un link sin nombre dentro de una huella gana el nombre del campo.
+    const { backend } = openViewer(BARNARD_FIELD.replace("dec=4.7683", "dec=4.935"));
     await shown("3");
     await waitFor(() => expect(annotations("scale")).toHaveLength(1));
 

@@ -89,14 +89,20 @@ describe("savedFieldPatch", () => {
       name: WISE_NAME,
       band: 2,
     });
+    // El link al centro exacto, armado sin nombre: gana el nombre y conserva su banda.
+    const center = "?ra=133.7598&dec=-7.2422&fov=0.1667&band=3&mode=blink";
+    expect(savedFieldPatch(parseUrlState(center), center)).toEqual({
+      ra: 133.7598,
+      dec: -7.2422,
+      name: WISE_NAME,
+      band: 3,
+    });
   });
 
-  it("no toca una URL con nombre, sin campo, fuera de toda huella o que ya es el campo guardado", () => {
+  it("no toca una URL con nombre, sin campo o fuera de toda huella", () => {
     for (const search of [
       "",
       "?lang=en",
-      // El link completo al campo guardado, armado sin nombre: se ve como se dejo.
-      WISE_URL.slice(1),
       // Ya trae un nombre: alguien eligio ese objeto.
       "?ra=133.7951&dec=-7.2451&name=Otro+objeto",
       `?ra=133.7598&dec=-7.2422&band=6&name=${encodeURIComponent(WISE_NAME)}`,

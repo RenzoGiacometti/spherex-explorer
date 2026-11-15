@@ -118,7 +118,10 @@ describe("ViewerPage: un link con coordenadas", () => {
 
     // Barra superior: marca, coordenadas con el formato de DESIGN.md y salida.
     expect(screen.getByText("SkyBlink")).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 1, name: "Campo" })).toBeTruthy();
+    // El link no trae nombre, pero cae en un campo guardado: lleva el de su objeto.
+    expect(
+      screen.getByRole("heading", { level: 1, name: "WISE J085510.83-071442.5" }),
+    ).toBeTruthy();
     expect(screen.getAllByText("08h 55m 02s")).toHaveLength(2);
     expect(screen.getAllByText("−07° 14′ 32″")).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Volver a la entrada" }).getAttribute("href")).toBe(

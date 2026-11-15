@@ -35,9 +35,8 @@ function currentSearch(): string {
  * que `search` (la consulta tal como esta escrita) ya traiga `band`: una banda
  * pedida a mano se respeta.
  *
- * Tampoco se toca un link completo al campo guardado: su centro exacto con la
- * banda escrita. Ya abre ese campo, y quien lo armo sin nombre lo ve como lo
- * dejo, sin mira.
+ * Tambien se corrige el link al centro exacto de un campo guardado que no trae
+ * nombre: le falta el nombre, y con el la mira y el rastro del objeto.
  */
 export function savedFieldPatch(
   url: UrlState,
@@ -48,7 +47,6 @@ export function savedFieldPatch(
   if (saved === null) return null;
   const { ra, dec, name, band } = featuredUrlPatch(saved);
   const bandWritten = new URLSearchParams(search).has("band");
-  if (bandWritten && url.ra === ra && url.dec === dec) return null;
   return { ra, dec, name, band: bandWritten ? url.band : band };
 }
 
