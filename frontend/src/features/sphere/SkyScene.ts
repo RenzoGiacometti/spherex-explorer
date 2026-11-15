@@ -9,18 +9,35 @@
 // La clase no sabe de React ni de punteros: guarda la vista, la anima
 // (inercia, deriva, vuelo a un punto, orientacion del telefono) y dibuja solo
 // cuando algo cambio. Los gestos estan en skyControls.ts.
+//
+// Niveles de detalle, de lejos a cerca:
+//
+// 1. El mapa de 4k, con el que arranca.
+// 2. El mismo mapa en 8k (`detailTextureUrl`): se pide cuando el campo de
+//    vision baja de DETAIL_FOV y reemplaza al de 4k con un fundido.
+// 3. Los parches (`patches`): la imagen real de SPHEREx de cada campo
+//    precalculado, sobre el plano tangente en el centro del campo. Aparecen
+//    cuando ocupan suficientes pixeles, y `flyToPatch` termina el
+//    acercamiento sobre uno de ellos.
 
 import {
+  Box2,
   BufferAttribute,
   BufferGeometry,
+  DataTexture,
   DoubleSide,
+  ImageBitmapLoader,
+  LinearFilter,
+  LinearMipmapLinearFilter,
   Mesh,
   MeshBasicMaterial,
+  NearestFilter,
   PerspectiveCamera,
   Scene,
   SRGBColorSpace,
-  type Texture,
+  Texture,
   TextureLoader,
+  Vector2,
   Vector3,
   WebGLRenderer,
 } from "three";
@@ -48,14 +65,70 @@ export interface SkyView {
   readonly fov: number;
 }
 
-export const MIN_FOV = 10;
+/**
+ * Limite del acercamiento a mano (rueda, pellizco, teclado). Con 1,5 grados un
+ * parche de 10 minutos de arco ocupa cerca de un decimo del lado largo de la
+ * ventana. Mas cerca solo llegan los vuelos a un parche.
+ */
+export const MIN_FOV = 1.5;
 export const MAX_FOV = 120;
 export const DEFAULT_FOV = 100;
+
+/** Limite del acercamiento de un vuelo a un parche. */
+const FLIGHT_MIN_FOV = 0.05;
+
+/**
+ * Por debajo de este campo de vision se pide el mapa de 8k. El de 4k tiene
+ * 11,4 pixeles por grado: con 70 grados en una ventana de 1920 px la pantalla
+ * ya muestra 27 pixeles por grado y la imagen se ve blanda.
+ */
+export const DETAIL_FOV = 70;
+/** Lado mayor del mapa de 8k: la tarjeta tiene que admitir texturas de este tamano. */
+const DETAIL_TEXTURE_SIZE = 8192;
+/** Duracion del fundido del mapa de 4k al de 8k, en milisegundos. */
+const DETAIL_FADE_MS = 900;
+/**
+ * Subir el mapa de 8k entero a la tarjeta congela la pagina unos 0,3 segundos
+ * (medido en una GeForce GTX 1070). Por eso sube de a franjas de estas filas,
+ * repartidas en varios cuadros.
+ */
+const DETAIL_STRIP_ROWS = 128;
+/** Milisegundos por cuadro que se le dan a la subida de franjas. */
+const DETAIL_UPLOAD_BUDGET_MS = 4;
+/**
+ * Tiempo sin gestos, en milisegundos, que se espera para pedir el mapa de 8k
+ * despues de un vuelo, y para subirlo de una vez donde no se puede por franjas.
+ */
+const QUIET_MS = 250;
 
 /** La vista con el norte arriba no llega al polo: ahi el "arriba" no esta definido. */
 const MAX_DEC = 88;
 
 const SPHERE_RADIUS = 100;
+
+/**
+ * Muy cerca, el mapa ya no tiene mas detalle y queda como una mancha borrosa.
+ * Por debajo de este campo de vision se lo va apagando, hasta DEEP_SKY_DIM en
+ * el limite del acercamiento, para que lo que se destaque sean los parches.
+ */
+const DEEP_SKY_FOV = 6;
+const DEEP_SKY_DIM = 0.55;
+
+/** Los parches van apenas por delante de la esfera. */
+const PATCH_RADIUS = SPHERE_RADIUS * 0.98;
+/** Un parche empieza a verse cuando su lado ocupa estos pixeles, y se ve entero con estos otros. */
+const PATCH_FADE_START_PX = 32;
+const PATCH_FADE_END_PX = 96;
+/** Tiempo minimo del fundido de un parche, en segundos: no aparece de golpe en un vuelo rapido. */
+const PATCH_FADE_TIME = 0.25;
+/** Por debajo de este campo de vision se piden las imagenes de los parches que estan a la vista. */
+const PATCH_PRELOAD_FOV = 30;
+/** Al final de un vuelo a un parche, la imagen ocupa esta fraccion del lado corto de la ventana. */
+const PATCH_FIT = 0.86;
+/** Tiempo que se le suma a un vuelo a un parche: el acercamiento es mucho mas largo. */
+const PATCH_FLIGHT_EXTRA_MS = 900;
+/** Espera maxima al llegar, si la imagen del parche todavia no termino de aparecer. */
+const PATCH_HOLD_MS = 800;
 const SEGMENTS_U = 96;
 const SEGMENTS_V = 48;
 
@@ -63,6 +136,8 @@ const SEGMENTS_V = 48;
 const INERTIA_TIME = 0.4;
 /** Por debajo de esta velocidad (grados por segundo) la inercia se corta. */
 const INERTIA_MIN_SPEED = 0.4;
+/** Con la vista muy cerca el corte se mide en pixeles por segundo, o la inercia no llegaria a verse. */
+const INERTIA_MIN_SPEED_PX = 8;
 const INERTIA_MAX_SPEED = 400;
 /** Con que rapidez la camara sigue al sensor de orientacion (1/s). */
 const ORIENTATION_FOLLOW = 14;
@@ -76,10 +151,27 @@ export interface FlyOptions {
   readonly onProgress?: (progress: number) => void;
 }
 
+/** Imagen de un campo que se dibuja sobre el cielo (patches.ts). */
+export interface SkyPatchSpec extends SkyPosition {
+  readonly id: string;
+  readonly url: string;
+  /** Lados sobre el plano tangente, en grados de la proyeccion TAN: este-oeste y norte-sur. */
+  readonly widthDeg: number;
+  readonly heightDeg: number;
+}
+
 export interface SkySceneOptions {
   /** Elemento que contiene al canvas; la escena lo crea y lo agrega al principio. */
   readonly container: HTMLElement;
   readonly textureUrl: string;
+  /**
+   * El mismo mapa con el doble de resolucion (8192 px de ancho). Se pide recien
+   * cuando la vista se acerca, y solo si la tarjeta admite texturas de ese
+   * tamano. Sin el, la esfera se queda con `textureUrl`.
+   */
+  readonly detailTextureUrl?: string | undefined;
+  /** Imagenes de campos que aparecen al acercarse. */
+  readonly patches?: readonly SkyPatchSpec[] | undefined;
   readonly canvasClassName?: string;
   readonly initialView?: SkyView;
   /** Grados por segundo de la deriva inicial; 0 la apaga. */
@@ -98,9 +190,94 @@ interface Flight {
   readonly fromFov: number;
   readonly toFov: number;
   readonly duration: number;
+  /** Fraccion del vuelo en la que termina el giro. */
+  readonly turnEnd: number;
+  /** Fraccion del vuelo en la que empieza el acercamiento. */
+  readonly zoomStart: number;
+  /** Parche al que va el vuelo: al llegar se espera a que su imagen se vea entera. */
+  readonly patch: PatchLayer | null;
   readonly onProgress: ((progress: number) => void) | undefined;
   readonly resolve: (arrived: boolean) => void;
   start: number | null;
+  arrivedAt: number | null;
+}
+
+/** Un parche en la escena. La imagen se pide recien cuando hace falta. */
+interface PatchLayer {
+  readonly spec: SkyPatchSpec;
+  readonly direction: Vec3;
+  /** Lado menor en grados: con el se mide cuanto ocupa en pantalla. */
+  readonly sizeDeg: number;
+  readonly geometry: BufferGeometry;
+  readonly material: MeshBasicMaterial;
+  readonly mesh: Mesh;
+  texture: Texture | null;
+  state: "idle" | "loading" | "ready" | "failed";
+  opacity: number;
+}
+
+/**
+ * Mapa de 8k. `decoded`: la imagen ya esta en memoria. `uploading`: sube a la
+ * tarjeta de a franjas. `fading`: se dibuja encima del de 4k con opacidad
+ * creciente. `done`: reemplazo al de 4k.
+ */
+export type SkyDetailState =
+  | "idle"
+  | "loading"
+  | "decoded"
+  | "uploading"
+  | "fading"
+  | "done"
+  | "failed";
+
+/**
+ * Rectangulo plano, tangente a la esfera en el centro del campo. La camara esta
+ * en el centro de la esfera, asi que lo ve en proyeccion gnomonica, que es la
+ * TAN del campo: cada pixel de la imagen cae en su lugar del cielo.
+ *
+ * La imagen tiene el norte arriba y el este a la izquierda: su esquina superior
+ * izquierda va al noreste. Los ejes este y norte salen de derivar
+ * `raDecToVector`, la misma funcion que ubica la malla y los marcadores.
+ */
+function buildPatchGeometry(patch: SkyPatchSpec): BufferGeometry {
+  const ra = patch.ra * DEG;
+  const dec = patch.dec * DEG;
+  const center = raDecToVector(patch.ra, patch.dec);
+  const east: Vec3 = [-Math.sin(ra), 0, -Math.cos(ra)];
+  const north: Vec3 = [-Math.sin(dec) * Math.cos(ra), Math.cos(dec), Math.sin(dec) * Math.sin(ra)];
+  // En TAN, un grado de la proyeccion es pi/180 del radio sobre el plano tangente.
+  const halfEast = (PATCH_RADIUS * patch.widthDeg * DEG) / 2;
+  const halfNorth = (PATCH_RADIUS * patch.heightDeg * DEG) / 2;
+  // [este, norte, u, v], con v = 1 en el borde superior de la imagen.
+  const corners: readonly (readonly [number, number, number, number])[] = [
+    [1, 1, 0, 1],
+    [-1, 1, 1, 1],
+    [1, -1, 0, 0],
+    [-1, -1, 1, 0],
+  ];
+  const positions = new Float32Array(12);
+  const uvs = new Float32Array(8);
+  corners.forEach(([e, n, u, v], index) => {
+    for (let axis = 0; axis < 3; axis += 1) {
+      positions[index * 3 + axis] =
+        (center[axis] as number) * PATCH_RADIUS +
+        (east[axis] as number) * e * halfEast +
+        (north[axis] as number) * n * halfNorth;
+    }
+    uvs[index * 2] = u;
+    uvs[index * 2 + 1] = v;
+  });
+  const geometry = new BufferGeometry();
+  geometry.setIndex([0, 2, 1, 1, 2, 3]);
+  geometry.setAttribute("position", new BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new BufferAttribute(uvs, 2));
+  return geometry;
+}
+
+/** Curva suave de 0 a 1 entre dos bordes. */
+function smoothstep(from: number, to: number, value: number): number {
+  const t = clamp((value - from) / (to - from), 0, 1);
+  return t * t * (3 - 2 * t);
 }
 
 function buildSkyGeometry(): BufferGeometry {
@@ -161,6 +338,29 @@ export class SkyScene {
   private readonly material: MeshBasicMaterial;
   private readonly mesh: Mesh;
   private texture: Texture | null = null;
+
+  // Mapa de 8k: se pide al acercarse y reemplaza al de 4k con un fundido.
+  private readonly detailUrl: string | undefined;
+  private detailState: SkyDetailState = "idle";
+  private detailTexture: Texture | null = null;
+  private detailBitmap: ImageBitmap | null = null;
+  /** Envuelve a `detailBitmap` para copiarlo de a franjas; nunca sube entero a la tarjeta. */
+  private detailSource: Texture | null = null;
+  /** Primera fila del mapa de 8k que todavia no subio. */
+  private detailRow = 0;
+  private readonly stripRegion = new Box2();
+  private readonly stripTarget = new Vector2();
+  private detailMaterial: MeshBasicMaterial | null = null;
+  private detailMesh: Mesh | null = null;
+  private detailFadeStart = 0;
+  /** Momento del ultimo gesto, en el reloj de `performance.now()`. */
+  private lastInput = 0;
+  /** Momento en que llego el ultimo vuelo: justo despues no se pide el mapa de 8k. */
+  private flightEndedAt = -QUIET_MS;
+  /** Cuanto se oscurece el cielo, de 0 a 1. Los parches no se oscurecen. */
+  private skyDim = 0;
+
+  private readonly patches: PatchLayer[] = [];
 
   private readonly onFrame: ((scene: SkyScene) => void) | undefined;
   private readonly reducedMotion: boolean;
@@ -223,6 +423,38 @@ export class SkyScene {
     // Hasta que llega la textura no se dibuja nada: queda el negro del lienzo.
     this.mesh.visible = false;
     this.scene.add(this.mesh);
+
+    this.detailUrl =
+      this.renderer.capabilities.maxTextureSize >= DETAIL_TEXTURE_SIZE
+        ? options.detailTextureUrl
+        : undefined;
+
+    for (const spec of options.patches ?? []) {
+      const geometry = buildPatchGeometry(spec);
+      const material = new MeshBasicMaterial({
+        side: DoubleSide,
+        depthTest: false,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0,
+      });
+      const mesh = new Mesh(geometry, material);
+      mesh.visible = false;
+      // Despues del cielo y del mapa de 8k que se esta fundiendo.
+      mesh.renderOrder = 2;
+      this.scene.add(mesh);
+      this.patches.push({
+        spec,
+        direction: raDecToVector(spec.ra, spec.dec),
+        sizeDeg: Math.min(spec.widthDeg, spec.heightDeg),
+        geometry,
+        material,
+        mesh,
+        texture: null,
+        state: "idle",
+        opacity: 0,
+      });
+    }
 
     new TextureLoader().load(
       options.textureUrl,
@@ -317,6 +549,7 @@ export class SkyScene {
    */
   rotateByPixels(dx: number, dy: number): void {
     if (this.free) return;
+    this.lastInput = performance.now();
     const scale = this.degreesPerPixel();
     this.ra = wrapDegrees(this.ra + (dx * scale) / this.cosDecLimit());
     this.dec = clamp(this.dec + dy * scale, -MAX_DEC, MAX_DEC);
@@ -326,6 +559,7 @@ export class SkyScene {
   /** Gira en grados de cielo: positivo en `east` lleva la vista hacia el este. */
   rotateByDegrees(east: number, north: number): void {
     if (this.free) return;
+    this.lastInput = performance.now();
     this.ra = wrapDegrees(this.ra + east / this.cosDecLimit());
     this.dec = clamp(this.dec + north, -MAX_DEC, MAX_DEC);
     this.dirty = true;
@@ -333,8 +567,30 @@ export class SkyScene {
 
   /** Multiplica el campo de vision: menos de 1 acerca. */
   zoomBy(factor: number): void {
-    this.fov = clamp(this.fov * factor, MIN_FOV, MAX_FOV);
+    this.lastInput = performance.now();
+    // Despues de un vuelo a un parche la vista esta mas cerca que el limite: se puede alejar sin salto.
+    this.fov = clamp(this.fov * factor, Math.min(MIN_FOV, this.fov), MAX_FOV);
     this.dirty = true;
+  }
+
+  /**
+   * Oscurece el cielo, de 0 (normal) a 1 (negro), sin tocar los parches. Es el
+   * final del acercamiento a un campo: queda la imagen sola sobre el negro, que
+   * es como abre el visor.
+   */
+  setSkyDim(amount: number): void {
+    const dim = clamp(amount, 0, 1);
+    if (dim === this.skyDim) return;
+    this.skyDim = dim;
+    this.dirty = true;
+  }
+
+  /** Brillo del mapa en este cuadro: lo apagan el pedido de `setSkyDim` y la cercania. */
+  private applySkyBrightness(): void {
+    const depth = 1 - smoothstep(MIN_FOV, DEEP_SKY_FOV, this.fov);
+    const brightness = 1 - Math.max(this.skyDim, DEEP_SKY_DIM * depth);
+    this.material.color.setScalar(brightness);
+    this.detailMaterial?.color.setScalar(brightness);
   }
 
   /** Suelta el arrastre con una velocidad en pixeles por segundo: la inercia la va frenando. */
@@ -370,6 +626,37 @@ export class SkyScene {
    * interrumpio (otro vuelo, un arrastre o el cierre de la escena).
    */
   flyTo(position: SkyPosition, options: FlyOptions = {}): Promise<boolean> {
+    const fov = clamp(options.fov ?? this.fov, MIN_FOV, MAX_FOV);
+    return this.startFlight(position, fov, options, null);
+  }
+
+  /**
+   * Vuela al campo de un parche y sigue acercando hasta que su imagen ocupa
+   * casi todo el lado corto de la ventana. La promesa da true cuando la imagen
+   * ya se ve entera (o no se pudo cargar), y false si el vuelo se interrumpio o
+   * el parche no existe.
+   */
+  flyToPatch(id: string, options: Omit<FlyOptions, "fov"> = {}): Promise<boolean> {
+    const layer = this.patches.find((candidate) => candidate.spec.id === id);
+    if (layer === undefined) return Promise.resolve(false);
+    this.loadPatch(layer);
+    return this.startFlight(layer.spec, this.fovToFit(layer.sizeDeg / PATCH_FIT), options, layer);
+  }
+
+  /** Campo de vision (sobre el lado largo) con el que `degrees` ocupa justo el lado corto. */
+  private fovToFit(degrees: number): number {
+    const long = Math.max(this.width, this.height);
+    const short = Math.min(this.width, this.height);
+    const fov = (2 * Math.atan(Math.tan((degrees * DEG) / 2) * (long / short))) / DEG;
+    return clamp(fov, FLIGHT_MIN_FOV, MAX_FOV);
+  }
+
+  private startFlight(
+    position: SkyPosition,
+    fov: number,
+    options: FlyOptions,
+    patch: PatchLayer | null,
+  ): Promise<boolean> {
     this.cancelFlight();
     this.setFreeOrientation(null);
     this.velocityRa = 0;
@@ -379,19 +666,25 @@ export class SkyScene {
     const target = {
       ra: wrapDegrees(position.ra),
       dec: clamp(position.dec, -MAX_DEC, MAX_DEC),
-      fov: clamp(options.fov ?? this.fov, MIN_FOV, MAX_FOV),
+      fov,
     };
     const fromDirection = raDecToVector(this.ra, this.dec);
     const toDirection = raDecToVector(target.ra, target.dec);
-    const duration = this.reducedMotion
+    let duration = this.reducedMotion
       ? 0
-      : (options.duration ?? flightDuration(fromDirection, toDirection));
+      : (options.duration ??
+        flightDuration(fromDirection, toDirection) + (patch === null ? 0 : PATCH_FLIGHT_EXTRA_MS));
 
-    if (duration <= 0) {
-      this.setView(target);
+    if (duration <= 0 && patch === null) {
+      this.ra = target.ra;
+      this.dec = target.dec;
+      this.fov = target.fov;
+      this.dirty = true;
       options.onProgress?.(1);
       return Promise.resolve(true);
     }
+    // Sin animaciones el vuelo a un parche es un salto, pero igual espera a la imagen.
+    if (duration <= 0) duration = 1;
     return new Promise((resolve) => {
       this.flight = {
         fromDirection,
@@ -399,9 +692,16 @@ export class SkyScene {
         fromFov: this.fov,
         toFov: target.fov,
         duration,
+        // Hacia un parche el campo de vision termina cientos de veces mas chico:
+        // el giro tiene que terminar antes, o el campo queda fuera de la vista
+        // hasta el ultimo cuadro.
+        turnEnd: patch === null ? 1 : 0.55,
+        zoomStart: patch === null ? 0.2 : 0.15,
+        patch,
         onProgress: options.onProgress,
         resolve,
         start: null,
+        arrivedAt: null,
       };
     });
   }
@@ -465,10 +765,13 @@ export class SkyScene {
     if (this.advanceInertia(dt)) changed = true;
     if (this.advanceDrift(dt)) changed = true;
     if (this.advanceOrientation(dt)) changed = true;
+    if (this.advanceDetail(time)) changed = true;
+    if (this.advancePatches(dt)) changed = true;
     if (!changed) return;
 
     this.dirty = false;
     this.applyCamera();
+    this.applySkyBrightness();
     this.renderer.render(this.scene, this.camera);
     this.onFrame?.(this);
   };
@@ -478,16 +781,25 @@ export class SkyScene {
     if (flight === null) return false;
     if (flight.start === null) flight.start = time;
     const progress = clamp((time - flight.start) / flight.duration, 0, 1);
-    const eased = easeInOutCubic(progress);
+    const eased = easeInOutCubic(clamp(progress / flight.turnEnd, 0, 1));
     const center = vectorToRaDec(slerpDirection(flight.fromDirection, flight.toDirection, eased));
     this.ra = center.ra;
     this.dec = clamp(center.dec, -MAX_DEC, MAX_DEC);
     // El acercamiento arranca despues que el giro: primero se ve adonde se va.
-    const zoom = easeInOutCubic(clamp((progress - 0.2) / 0.8, 0, 1));
+    const zoom = easeInOutCubic(
+      clamp((progress - flight.zoomStart) / (1 - flight.zoomStart), 0, 1),
+    );
     this.fov = flight.fromFov * (flight.toFov / flight.fromFov) ** zoom;
     flight.onProgress?.(progress);
     if (progress >= 1) {
+      const patch = flight.patch;
+      if (patch !== null && patch.state !== "failed" && patch.opacity < 0.99) {
+        // Llego antes que la imagen: se queda en el lugar hasta que se vea entera.
+        if (flight.arrivedAt === null) flight.arrivedAt = time;
+        if (time - flight.arrivedAt < PATCH_HOLD_MS) return true;
+      }
       this.flight = null;
+      this.flightEndedAt = time;
       flight.resolve(true);
     }
     return true;
@@ -500,7 +812,8 @@ export class SkyScene {
     const decay = Math.exp(-dt / INERTIA_TIME);
     this.velocityRa *= decay;
     this.velocityDec *= decay;
-    if (Math.hypot(this.velocityRa, this.velocityDec) < INERTIA_MIN_SPEED) {
+    const slowest = Math.min(INERTIA_MIN_SPEED, INERTIA_MIN_SPEED_PX * this.degreesPerPixel());
+    if (Math.hypot(this.velocityRa, this.velocityDec) < slowest) {
       this.velocityRa = 0;
       this.velocityDec = 0;
     }
@@ -523,6 +836,263 @@ export class SkyScene {
     this.freeForward.lerp(this.targetForward, blend).normalize();
     this.freeUp.lerp(this.targetUp, blend).normalize();
     return true;
+  }
+
+  // ---- Mapa de 8k ---------------------------------------------------------
+
+  /** En que paso esta el reemplazo del mapa de 4k por el de 8k. */
+  getDetailState(): SkyDetailState {
+    return this.detailState;
+  }
+
+  private advanceDetail(time: number): boolean {
+    switch (this.detailState) {
+      case "idle":
+        // Durante un vuelo, o con el cielo ya apagado al llegar a un campo, no se
+        // pide: lo que sigue es el visor, que tiene su propia descarga.
+        if (
+          this.detailUrl !== undefined &&
+          this.texture !== null &&
+          this.skyDim === 0 &&
+          this.fov < DETAIL_FOV &&
+          this.flight === null &&
+          time - this.flightEndedAt > QUIET_MS
+        ) {
+          this.loadDetail(this.detailUrl);
+        }
+        return false;
+      case "decoded": {
+        const texture = this.detailTexture;
+        if (texture === null) return false;
+        if (this.detailSource === null) {
+          // Sin ImageBitmap no hay subida por franjas: sube de una vez, en un momento sin gestos.
+          if (!this.isQuiet(time)) return false;
+          this.renderer.initTexture(texture);
+          this.showDetail(time);
+          return true;
+        }
+        // Reserva la memoria de la textura, con todos sus niveles y sin datos.
+        this.renderer.initTexture(texture);
+        // Los niveles reducidos se calculan una sola vez, con la ultima franja.
+        texture.generateMipmaps = false;
+        this.detailState = "uploading";
+        return false;
+      }
+      case "uploading":
+        return this.uploadDetailStrips(time);
+      case "fading": {
+        const material = this.detailMaterial;
+        if (material === null) return false;
+        const opacity = this.reducedMotion
+          ? 1
+          : clamp((time - this.detailFadeStart) / DETAIL_FADE_MS, 0, 1);
+        material.opacity = opacity;
+        if (opacity >= 1) this.finishDetail();
+        return true;
+      }
+      default:
+        return false;
+    }
+  }
+
+  /** Sin gestos recientes, sin vuelo y sin inercia: un cuadro lento no se nota. */
+  private isQuiet(time: number): boolean {
+    return (
+      time - this.lastInput > QUIET_MS &&
+      this.flight === null &&
+      this.velocityRa === 0 &&
+      this.velocityDec === 0
+    );
+  }
+
+  private loadDetail(url: string): void {
+    this.detailState = "loading";
+    const fail = (): void => {
+      // La esfera sigue con el mapa de 4k: no es un error que haya que mostrar.
+      this.detailState = "failed";
+    };
+    const ready = (texture: Texture): void => {
+      texture.colorSpace = SRGBColorSpace;
+      texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      texture.needsUpdate = true;
+      this.detailTexture = texture;
+      this.detailState = "decoded";
+    };
+    if (typeof createImageBitmap === "function") {
+      // La imagen se decodifica fuera del hilo principal, asi el arrastre no se frena.
+      // Queda como viene, con la fila 0 en el borde norte: pedirle al navegador que
+      // la invierta congela la pagina 0,15 segundos. La vuelta la da la textura.
+      const loader = new ImageBitmapLoader();
+      loader.setOptions({ premultiplyAlpha: "none" });
+      loader.load(
+        url,
+        (bitmap) => {
+          if (this.disposed) {
+            bitmap.close();
+            return;
+          }
+          // Textura de destino del mismo tamano y sin datos: las franjas se copian
+          // del ImageBitmap con `copyTextureToTexture`.
+          const texture = new DataTexture(null, bitmap.width, bitmap.height);
+          texture.source.dataReady = false;
+          texture.generateMipmaps = true;
+          texture.minFilter = LinearMipmapLinearFilter;
+          texture.magFilter = LinearFilter;
+          // La fila 0 de la textura es el norte y la malla espera v = 1 ahi: v' = 1 - v.
+          texture.repeat.set(1, -1);
+          texture.offset.set(0, 1);
+          this.detailBitmap = bitmap;
+          this.detailSource = new Texture(bitmap);
+          this.detailRow = 0;
+          ready(texture);
+        },
+        undefined,
+        fail,
+      );
+    } else {
+      new TextureLoader().load(
+        url,
+        (texture) => {
+          if (this.disposed) texture.dispose();
+          else ready(texture);
+        },
+        undefined,
+        fail,
+      );
+    }
+  }
+
+  /**
+   * Sube las franjas del mapa de 8k que entran en el tiempo de este cuadro.
+   * Con la ultima se calculan los niveles reducidos y empieza el fundido.
+   */
+  private uploadDetailStrips(time: number): boolean {
+    const texture = this.detailTexture;
+    const source = this.detailSource;
+    const bitmap = this.detailBitmap;
+    if (texture === null || source === null || bitmap === null) return false;
+    const started = performance.now();
+    do {
+      const from = this.detailRow;
+      const to = Math.min(bitmap.height, from + DETAIL_STRIP_ROWS);
+      const last = to >= bitmap.height;
+      if (last) texture.generateMipmaps = true;
+      this.stripRegion.min.set(0, from);
+      this.stripRegion.max.set(bitmap.width, to);
+      this.stripTarget.set(0, from);
+      this.renderer.copyTextureToTexture(source, texture, this.stripRegion, this.stripTarget);
+      this.detailRow = to;
+      if (last) {
+        // La copia en memoria ya no hace falta: la imagen quedo en la tarjeta.
+        source.dispose();
+        bitmap.close();
+        this.detailSource = null;
+        this.detailBitmap = null;
+        this.showDetail(time);
+        return true;
+      }
+    } while (performance.now() - started < DETAIL_UPLOAD_BUDGET_MS);
+    return false;
+  }
+
+  /** Con el mapa de 8k ya en la tarjeta, lo empieza a fundir sobre el de 4k. */
+  private showDetail(time: number): void {
+    const texture = this.detailTexture;
+    if (texture === null) return;
+
+    const material = new MeshBasicMaterial({
+      map: texture,
+      side: DoubleSide,
+      depthTest: false,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0,
+    });
+    const mesh = new Mesh(this.geometry, material);
+    mesh.frustumCulled = false;
+    mesh.renderOrder = 1;
+    this.scene.add(mesh);
+    this.detailMaterial = material;
+    this.detailMesh = mesh;
+    this.detailFadeStart = time;
+    this.detailState = "fading";
+  }
+
+  /** Fin del fundido: el mapa de 8k pasa a ser el de la esfera y el de 4k se libera. */
+  private finishDetail(): void {
+    const texture = this.detailTexture;
+    if (texture === null) return;
+    this.texture?.dispose();
+    this.texture = texture;
+    this.detailTexture = null;
+    this.material.map = texture;
+    this.material.needsUpdate = true;
+    if (this.detailMesh !== null) this.scene.remove(this.detailMesh);
+    this.detailMaterial?.dispose();
+    this.detailMesh = null;
+    this.detailMaterial = null;
+    this.detailState = "done";
+  }
+
+  // ---- Parches ------------------------------------------------------------
+
+  private loadPatch(layer: PatchLayer): void {
+    if (layer.state !== "idle") return;
+    layer.state = "loading";
+    new TextureLoader().load(
+      layer.spec.url,
+      (texture) => {
+        if (this.disposed) {
+          texture.dispose();
+          return;
+        }
+        texture.colorSpace = SRGBColorSpace;
+        // Ampliada, la imagen muestra sus pixeles como cuadrados, igual que el visor.
+        texture.magFilter = NearestFilter;
+        layer.texture = texture;
+        layer.material.map = texture;
+        layer.material.needsUpdate = true;
+        layer.state = "ready";
+        this.dirty = true;
+      },
+      undefined,
+      () => {
+        layer.state = "failed";
+      },
+    );
+  }
+
+  /** Opacidad de cada parche segun cuanto ocupa en pantalla. */
+  private advancePatches(dt: number): boolean {
+    if (this.patches.length === 0) return false;
+    const view: Vec3 = this.free
+      ? [this.freeForward.x, this.freeForward.y, this.freeForward.z]
+      : raDecToVector(this.ra, this.dec);
+    const scale = this.degreesPerPixel();
+    // Mitad de la diagonal de la ventana, con margen: lo que queda mas lejos no se ve.
+    const reach = Math.cos(Math.min(180, this.fov * 0.75 + 1) * DEG);
+    let changed = false;
+    for (const layer of this.patches) {
+      const d = layer.direction;
+      const inView = view[0] * d[0] + view[1] * d[1] + view[2] * d[2] >= reach;
+      const target = inView
+        ? smoothstep(PATCH_FADE_START_PX, PATCH_FADE_END_PX, layer.sizeDeg / scale)
+        : 0;
+      if (inView && layer.state === "idle" && (target > 0 || this.fov < PATCH_PRELOAD_FOV)) {
+        this.loadPatch(layer);
+      }
+      const goal = layer.state === "ready" ? target : 0;
+      if (goal === layer.opacity) continue;
+      const step = this.reducedMotion ? 1 : dt / PATCH_FADE_TIME;
+      layer.opacity =
+        goal > layer.opacity
+          ? Math.min(goal, layer.opacity + step)
+          : Math.max(goal, layer.opacity - step);
+      layer.material.opacity = layer.opacity;
+      layer.mesh.visible = layer.opacity > 0.002;
+      changed = true;
+    }
+    return changed;
   }
 
   private applyCamera(): void {
@@ -549,6 +1119,15 @@ export class SkyScene {
     this.geometry.dispose();
     this.material.dispose();
     this.texture?.dispose();
+    this.detailMaterial?.dispose();
+    this.detailTexture?.dispose();
+    this.detailSource?.dispose();
+    this.detailBitmap?.close();
+    for (const layer of this.patches) {
+      layer.geometry.dispose();
+      layer.material.dispose();
+      layer.texture?.dispose();
+    }
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     this.renderer.domElement.remove();

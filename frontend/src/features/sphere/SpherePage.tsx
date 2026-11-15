@@ -26,6 +26,7 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
 import { DEFAULT_BAND, DEFAULT_MODE, DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
+import { findPatch } from "./patches";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus } from "./SkySphere";
 import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
@@ -59,9 +60,23 @@ const MIN_LOCK_RADIUS = 5;
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
 
-/** Opacidad del fundido a negro segun el avance del vuelo: ocupa el ultimo tramo. */
+/**
+ * Tiempo que el acercamiento se queda sobre la imagen del campo antes de abrir
+ * el visor, en milisegundos: se llega a ver adonde se llego.
+ */
+const PATCH_DWELL_MS = 350;
+
+/**
+ * Opacidad del fundido a negro segun el avance del vuelo: ocupa el ultimo
+ * tramo. Hacia un campo con parche lo que se va a negro es solo el cielo, y
+ * queda la imagen del campo.
+ */
 function fadeAt(progress: number): number {
   return clamp((progress - 0.55) / 0.45, 0, 1) ** 2;
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 /** Destacado mas cercano al centro de la ventana al cielo. */
@@ -205,15 +220,26 @@ export function SpherePage({
 
       const sphere = sphereRef.current;
       const hasScene = sphere !== null && sphere.getView() !== null;
-      const arrived = hasScene
-        ? await sphere.flyTo(
-            { ra: place.patch.ra, dec: place.patch.dec },
-            { fov: ZOOM_FOV, onProgress: (progress) => setFade(fadeAt(progress)) },
-          )
-        : true;
+      const position = { ra: place.patch.ra, dec: place.patch.dec };
+      // Un campo precalculado tiene su imagen sobre la esfera: el acercamiento
+      // termina sobre ella. Para cualquier otro lugar termina en negro.
+      const patch = hasScene ? findPatch(position) : undefined;
+      let arrived = true;
+      if (hasScene && patch !== undefined) {
+        arrived = await sphere.flyToPatch(patch.id, {
+          onProgress: (progress) => sphere.setSkyDim(fadeAt(progress)),
+        });
+        if (arrived) await wait(PATCH_DWELL_MS);
+      } else if (hasScene) {
+        arrived = await sphere.flyTo(position, {
+          fov: ZOOM_FOV,
+          onProgress: (progress) => setFade(fadeAt(progress)),
+        });
+      }
 
       if (!arrived) {
         setFade(0);
+        sphere?.setSkyDim(0);
         openingRef.current = false;
         setOpening(null);
         return;
@@ -227,6 +253,7 @@ export function SpherePage({
       restoreTimerRef.current = window.setTimeout(() => {
         restoreTimerRef.current = null;
         setFade(0);
+        sphereRef.current?.setSkyDim(0);
         openingRef.current = false;
         setOpening(null);
         void sphereRef.current?.flyTo(
@@ -423,7 +450,11 @@ export function SpherePage({
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
       />
-      {/* Fundido a negro del final del acercamiento: el visor abre sobre el mismo negro. */}
+      {/*
+        Fundido a negro del final del acercamiento a un lugar sin imagen propia: el
+        visor abre sobre el mismo negro. Hacia un campo precalculado no se usa: la
+        escena oscurece el cielo y deja la imagen del campo.
+      */}
       <div ref={fadeRef} className={styles.fade} aria-hidden="true" />
 
       {windowOn ? (

@@ -11,7 +11,13 @@
 //   check=1           marcas blancas sobre diez estrellas brillantes: si la
 //                     textura esta bien orientada, cada anillo rodea a su
 //                     estrella. Es la comprobacion de que la imagen y los
-//                     marcadores usan la misma convencion.
+//                     marcadores usan la misma convencion. Suma marcas sobre
+//                     dos parches (PATCH_PROBES): acercando a Barnard's Star y
+//                     a M 51, cada anillo tiene que rodear a su objeto.
+//   random=0.81       valor fijo para "Lugar al azar", de 0 a 1 (0.81 es
+//                     M 51): capturas repetibles de un campo sin marcador
+//   stay=1            al terminar el acercamiento no carga el visor: la
+//                     esfera queda sobre la imagen del campo y despues vuelve
 //   sensor=1          muestra "Ventana al cielo" tambien en una computadora y
 //                     acepta los sensores simulados de las herramientas de
 //                     desarrollo (More tools > Sensors), que no traen brujula
@@ -44,6 +50,25 @@ const BRIGHT_STARS: readonly SkyMarker[] = [
   { id: "probe-altair", label: "Altair", ra: 297.6958, dec: 8.8683 },
 ].map((star) => ({ ...star, kind: "probe" as const }));
 
+/**
+ * Objetos que se reconocen dentro de dos parches, para comprobar que la imagen
+ * del campo esta orientada como el cielo (norte arriba, este a la izquierda).
+ *
+ * - M 51: el nucleo de la companera NGC 5195 (SIMBAD, ICRS), que queda al
+ *   norte y un poco al este del centro del campo.
+ * - Barnard's Star: tres estrellas vecinas de Gaia DR3
+ *   (backend/data/context/269.4463_+4.7683_0.1667/gaia.json), con la posicion
+ *   llevada de 2016,0 a 2026,2, la fecha de la epoca del parche.
+ */
+const PATCH_PROBES: readonly SkyMarker[] = [
+  { id: "probe-ngc-5195", label: "NGC 5195", ra: 202.4983, dec: 47.2661 },
+  { id: "probe-barnard-s", label: "Gaia DR3 4472832165289153024", ra: 269.46646, dec: 4.70555 },
+  { id: "probe-barnard-ne", label: "Gaia DR3 4472837942025804800", ra: 269.48417, dec: 4.83176 },
+  { id: "probe-barnard-w", label: "Gaia DR3 4472835807421415680", ra: 269.39214, dec: 4.77215 },
+].map((probe) => ({ ...probe, kind: "probe" as const }));
+
+const CHECK_MARKERS: readonly SkyMarker[] = [...BRIGHT_STARS, ...PATCH_PROBES];
+
 function parseView(text: string | null): SkyView | undefined {
   if (text === null) return undefined;
   const [ra, dec, fov = DEFAULT_FOV] = text.split(",").map(Number);
@@ -64,17 +89,23 @@ function openInViewer(patch: ViewerUrlPatch): void {
   window.location.assign(viewerHref({ ...DEFAULT_URL_STATE, embed, lang, ...patch }));
 }
 
+/** Con `stay=1`: el acercamiento termina y la esfera sigue en pantalla. */
+function keepSphere(): void {}
+
 function SphereDevPage() {
   const params = new URLSearchParams(window.location.search);
   const sensor = params.get("sensor") === "1";
+  const random = parseNumber(params.get("random"));
+  const stay = params.get("stay") === "1";
   return (
     <SpherePage
       initialView={parseView(params.get("view"))}
       driftRate={parseNumber(params.get("drift"))}
-      extraMarkers={params.get("check") === "1" ? BRIGHT_STARS : undefined}
+      extraMarkers={params.get("check") === "1" ? CHECK_MARKERS : undefined}
+      random={random === undefined ? undefined : () => random}
       offerSkyWindow={sensor ? true : undefined}
       allowRelativeOrientation={sensor}
-      onOpenField={openInViewer}
+      onOpenField={stay ? keepSphere : openInViewer}
     />
   );
 }
