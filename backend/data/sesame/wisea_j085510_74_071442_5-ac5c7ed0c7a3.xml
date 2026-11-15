@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>WISEA J085510.74-071442.5</name>
+  <!-- Q208861 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 88ms [88] -->
+    <oid>8596164</oid>
+    <oname>WISEA J085510.74-071442.5</oname>
+    <otype>BD*</otype>
+    <jpos>08:55:16.53 -07:14:49.3</jpos>
+    <jradeg>133.81890825</jradeg>
+    <jdedeg>-7.247048</jdedeg>
+    <refPos>2021ApJS..253....7K</refPos>
+    <pm>
+      <v>8151.5</v><e>1.8</e><q>C</q><r>2021ApJS..253....7K</r>
+      <pa>274.74</pa>
+      <pmRA>-8123.7</pmRA><epmRA>1.3</epmRA>
+      <pmDE>673.2</pmDE><epmDE>1.3</epmDE>
+    </pm>
+    <plx><v>439.0</v><e>2.4</e><q>C</q><r>2021ApJS..253....7K</r></plx>
+    <spType>Y2</spType><spNum>0.00046000.0000.0000000000000000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,16:22:11z)==== -->

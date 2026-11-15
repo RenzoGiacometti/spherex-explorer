@@ -41,6 +41,7 @@ from typing import Annotated
 from fastapi import FastAPI, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.api.backend import ApiBackend
@@ -188,6 +189,11 @@ def create_app(
     async def get_resolve(name: str) -> JSONResponse:
         resolved = await run_in_threadpool(backend.resolve, name)
         return JSONResponse(content=resolved.model_dump(mode="json"))
+
+    if settings.static_dir:
+        # Despliegue de un solo proceso: el frontend ya compilado (frontend/dist) sale del mismo
+        # origen que la API. Va al final para que las rutas de /api tengan prioridad.
+        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="frontend")
 
     return app
 

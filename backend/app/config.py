@@ -83,6 +83,9 @@ class Settings:
     # `data/fields`): pedir cualquier otro responde 404 `not_found` y nunca se toca IRSA.
     # Es el modo del despliegue publico.
     precomputed_only: bool = False
+    # Carpeta con el frontend compilado (`frontend/dist`). Si se indica, el backend lo sirve
+    # en `/` desde el mismo origen que la API; vacio, solo responde `/api`.
+    static_dir: str = ""
 
     # Identidad del campo.
     field_epoch: float = FIELD_EPOCH
