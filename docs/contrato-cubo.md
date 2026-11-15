@@ -83,7 +83,7 @@ Pide un campo. Es idempotente: el mismo pedido devuelve siempre el mismo `id`, y
 | `ra`, `dec` | número | sí | Centro del campo, grados ICRS |
 | `fov` | número | no | Lado en grados. Por defecto 0,1667. Entre 0,02 y 0,5 |
 | `band` | entero | no | Detector que la persona está mirando. Sus planos se construyen primero. Por defecto 3 |
-| `refresh` | booleano | no | Vuelve a listar exposiciones aunque el campo esté en caché |
+| `refresh` | booleano | no | Vuelve a listar exposiciones aunque el campo esté en caché. Sobre un campo `partial` de la caché lo completa: ver la sección 11 |
 
 Respuesta `200` si el campo está terminado, `202` si no:
 
@@ -499,6 +499,9 @@ El proceso no es el cuello de botella: leer y reproyectar una exposición lleva 
 
 - Un campo en caché se sirve sin tocar IRSA. Abrirlo cuesta un `POST` (que ya trae los metadatos) y los planos de la banda actual: 3 o 4 pedidos de 152 kB. El resto llega con `/cube`. Objetivo: menos de 2 s desde el link hasta la primera imagen.
 - Los cinco objetos de prueba se precalculan con un script y se guardan en el repositorio, en `backend/data/fields/`. El backend busca primero ahí y después en su caché; el borrado por tope de disco no los toca. `/cube` se arma concatenando los planos al servirlo, así no se guarda dos veces. El script es `backend/scripts/precompute.py`; guarda con cada campo la trayectoria de su objeto, y un `refresh` pedido por la API no toca un campo precalculado (se actualiza con `precompute.py --refresh`).
+- **Completar un campo incompleto.** `POST /api/field` con `refresh: true` sobre un campo `partial` que vive en la caché responde `202` y el campo se vuelve a armar como un trabajo visible con el mismo `id`: `queued`, `listing`, `downloading` y eventos como en un campo nuevo. Usa la lista de exposiciones guardada si sigue vigente y los recortes que ya están en la caché, así que a IRSA solo se le piden los que faltaron. Las revisiones de los planos siguen numerando desde las anteriores y el campo termina con su `rev` anterior más 1; mientras se arma, `rev` vale 0 y los planos responden `409` hasta que se republican. El visor ofrece el botón "Completar el campo" y conserva lo que ya se ve mientras tanto. Sobre un campo `ready` sigue valiendo el refresh silencioso (`200`); sobre uno precalculado, o con `SPHEREX_PRECOMPUTED_ONLY=1`, responde `200` sin armar nada. `precompute.py --refresh` no cambia.
+- **Compresión.** Toda respuesta de 1 kB o más sale con gzip si el cliente lo acepta (JSON, planos, cubo y el frontend compilado), con `Vary: Accept-Encoding` y sin cambiar `Cache-Control`; el cubo comprimido no lleva `Content-Length`. El flujo de eventos nunca se comprime y `/aux` sigue negociando por su cuenta. En un plano la ganancia es chica (152 100 bytes pasan a unos 140 500).
+- **Descargas en el despliegue público:** 4 en paralelo (`SPHEREX_MAX_CUTOUT_DOWNLOADS=4`); el tope sigue en 10. El 15 de noviembre de 2026 IRSA respondió `503 Server busy` a buena parte de los pedidos con 10 en paralelo y bien con 4.
 - **Campo cercano** (`SPHEREX_NEARBY_FIELD_ARCSEC`, 60 en el despliegue público y 0 en desarrollo): si el centro pedido está a menos de esa distancia del de un campo ya armado del mismo escalón, `POST /api/field` responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido. No vale con `refresh`.
 - **Modo solo precalculados** (`SPHEREX_PRECOMPUTED_ONLY=1`): el backend no crea trabajos ni toca IRSA. `POST /api/field` de un campo que no está armado responde `404 not_found`, salvo que su centro esté a menos de 1 minuto de arco del de un campo armado del mismo escalón: en ese caso responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido.
 - Tiempos medidos al precalcular contra IRSA el 15 de noviembre de 2026, con 10 descargas en paralelo: Barnard, 358 exposiciones en 148 s; Epsilon Indi B, 458 en 157 s; WISE 0855, 258 en 138 s (4 recortes fallidos, campo `partial`).
@@ -518,7 +521,8 @@ No son parte del contrato, pero evitan errores conocidos:
 ## 13. Fuera de este contrato
 
 - El campo de 1°: son unos 4 GB de recortes por campo. Para contexto amplio está el mapa de la Etapa 3.
-- El espectro y la curva de luz (Etapa 2) y los relevamientos de contexto con `/api/survey` (Etapa 3). La vista provisoria de WISE es una versión mínima y aparte.
+- El espectro tiene su propia ruta, `GET /api/spectrum` (`ra`, `dec`, `field`, `pm_ra`, `pm_dec`, `epoch`; `backend/app/spectrum`), fuera de este contrato salvo en un punto: su aviso `saturated_source` tiene la forma del aviso del campo (`ra`, `dec`, `radius_arcsec`, `epochs`, `detectors`), más `n_exposures` y `n_total`; ahí `radius_arcsec` es el radio de la apertura.
+- La curva de luz (Etapa 2) y los relevamientos de contexto con `/api/survey` (Etapa 3). La vista provisoria de WISE es una versión mínima y aparte.
 - La actualización automática de un campo en caché.
 
 ## 14. Decisiones tomadas al aprobar

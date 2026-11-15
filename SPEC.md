@@ -94,7 +94,7 @@ Rehacer el cubo desde recortes en caché tardaba de 10 a 16 s en la Etapa 0. El 
 | `GET /api/field/{id}/preview` | Recorte de WISE de la misma zona (hips2fits de CDS), como vista provisoria mientras carga un campo nuevo |
 | `GET /api/field/{id}/track?name=` | Posición esperada del objeto en cada época, con movimiento propio y paralaje |
 | `POST /api/field/{id}/priority {band}` | Adelanta los planos de una banda |
-| `GET /api/spectrum?ra=&dec=&field=` | lista de {longitud de onda, flujo, error, fecha, detector, flags} |
+| `GET /api/spectrum?ra=&dec=&field=` | Documento del espectro: puntos {longitud de onda, flujo, error, fecha, detector, flags}, promedios por tramo, épocas, detectores y avisos (`saturated_source`, con la forma del contrato del cubo, y `offset_source`). `pm_ra`, `pm_dec` y `epoch` opcionales para que la apertura siga a un objeto que se mueve |
 | `GET /api/context?ra=&dec=&fov=` | fuentes de Gaia DR3 (posición, movimiento propio, paralaje), SIMBAD, SkyBoT |
 | `GET /api/survey?ra=&dec=&fov=&hips=` | recorte de otra misión vía hips2fits, reproyectado a la grilla del campo |
 
@@ -130,7 +130,7 @@ Cada etapa termina en algo que se puede mostrar.
 - **Hecho cuando:** un link con coordenadas abre el visor; los cinco objetos de prueba abren en menos de 2 s; en un campo nuevo la primera imagen aparece apenas llega y el resto se completa con barra de progreso.
 
 ### Etapa 2 — Espectro (8, 9, 10, 7, 13, 30, 31, 32, 41)
-- `/spectrum` y panel de espectro al hacer clic, con barras de error.
+- `/spectrum` y panel de espectro al hacer clic, con barras de error. Un clic o toque corto sobre la imagen pide el espectro de ese punto; sobre la mira del objeto con nombre se piden su posición y su movimiento propio. Arrastrar, pellizcar, la rueda, el doble clic y mantener apretado no lo piden (el clic espera 350 ms para distinguirse del doble clic). Los avisos de fuente saturada y de fuente corrida van arriba del gráfico.
 - Marcas de H2O, CO2, CO, CH4 y plantillas (enana T, enana Y, estrella M). **[VERIFICAR]** Los límites de las bandas de `frontend/src/features/spectrum/molecules.ts` salen de la bibliografía que cita ese archivo (Cushing, Rayner y Vacca 2005; Yamamura, Tsuji y Tanabe 2010), redondeados a la resolución del instrumento. No se contrastaron con espectros de SPHEREx ni con las tablas de bandas de la misión.
 - El gráfico del espectro es SVG propio (`SpectrumChart`), no uPlot: son a lo sumo unos cientos de puntos y así las barras de error, las bandas moleculares y los tokens de color quedan bajo control del sistema de diseño.
 - RGB eligiendo tres detectores. Curva de luz por detector.
@@ -148,7 +148,8 @@ Cada etapa termina en algo que se puede mostrar.
 
 ### Etapa 4 — Esfera (28, 23, 37)
 - Esfera three.js con textura de todo el cielo: el mapa estelar "Deep Star Maps 2020" de NASA Scientific Visualization Studio (estrellas de Hipparcos-2, Tycho-2 y Gaia DR2 más la Vía Láctea), equirrectangular de 4096 × 2048 px. Es luz visible, no infrarrojo: sirve de mapa para ubicarse y no es una imagen de SPHEREx. Origen, licencia, crédito y orientación, en `frontend/src/features/sphere/assets/FUENTES.md`. Una textura infrarroja (WISE, 2MASS o SPHEREx) queda para después, si el procesamiento offline del HiPS resulta viable.
-- Marcadores de los 5 objetos, clic → zoom → visor. Botón de lugar al azar.
+- La esfera es la pantalla de entrada, con un solo buscador (ejemplo en grados decimales: `Barnard's Star · 269.4463 +4.7683`). Sin WebGL quedan el buscador, "Lugar al azar" y los cinco destacados como links.
+- Marcadores de los 5 objetos, clic → zoom → visor. Botón de lugar al azar, que elige entre todos los campos precalculados (`PRECOMPUTED_FIELDS`), no solo entre los cinco.
 - Modo celular como ventana: DeviceOrientation + geolocalización + hora para pasar de altitud/azimut a RA/Dec. Requiere HTTPS y permiso explícito en iOS.
 
 ### Etapa 5 — Medir y participar (14, 49, 20, 34)

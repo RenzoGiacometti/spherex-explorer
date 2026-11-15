@@ -116,12 +116,12 @@ src/
     format.ts           coordenadas, fechas y números con el formato de DESIGN.md
     wcs.ts              proyección gnomónica: píxel a cielo y cielo a píxel
     fov.ts              vistas de 5′, 10′ y 30′ y el escalón de campo que les corresponde
-  features/             una carpeta por funcionalidad: entry/ (pantalla de entrada) y viewer/ (pantalla del visor)
+  features/             una carpeta por funcionalidad: sphere/ (pantalla de entrada: la esfera), entry/ (lógica del buscador y lista de destacados), viewer/ (pantalla del visor) y spectrum/ (panel de espectro)
   test/                 preparación de Vitest, guardas y ejemplos del contrato
     fixtures/           datos de muestra generados por el backend
 ```
 
-`App.tsx` llama a `useFieldUrlSync()` una vez y muestra `features/entry` o `features/viewer` según la URL. En `features/viewer`, `ViewerPage` arma la pantalla con `useViewerController` (estado de modo, época, contraste y capa de flags) y `viewModel.ts` (qué se compone en cada modo); `viewerPage.testkit.ts` es el apoyo para los tests de una pantalla con campo.
+`App.tsx` llama a `useFieldUrlSync()` una vez y muestra `features/sphere` o `features/viewer` según la URL. En el visor, un clic sobre la imagen pide el espectro (`useSpectrum`, `spectrumClick.ts`) y lo muestra en `SpectrumDock`; sus textos están en el namespace `spectrum` de `src/i18n`. En `features/viewer`, `ViewerPage` arma la pantalla con `useViewerController` (estado de modo, época, contraste y capa de flags) y `viewModel.ts` (qué se compone en cada modo); `viewerPage.testkit.ts` es el apoyo para los tests de una pantalla con campo.
 
 ## Páginas de desarrollo
 

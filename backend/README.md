@@ -155,6 +155,8 @@ El `Dockerfile` de la raíz arma una imagen de un solo proceso: la API, el front
 - `SPHEREX_NEARBY_FIELD_ARCSEC=60`: un pedido a menos de 1 minuto de arco del centro de un campo ya armado abre ese campo en vez de armar otro casi igual.
 - `SPHEREX_PRECOMPUTED_ONLY=1` vuelve al modo que solo sirve lo ya armado: cualquier otro campo responde `404 not_found` y nunca se toca IRSA.
 - El frontend se compila con `VITE_WIDE_FIELD=0`: no ofrece el campo de 30′, que no se probó con datos reales.
+- 4 descargas en paralelo contra IRSA (`SPHEREX_MAX_CUTOUT_DOWNLOADS=4`), `/docs` apagado (`SPHEREX_DOCS_ENABLED=0`) y el proceso corre como el usuario `spherex` (uid 1000), con `/app/cache` como única carpeta escribible.
+- Las respuestas de 1 kB o más salen con gzip (`app/api/compression.py`); `/assets/*` del frontend lleva caché larga e `immutable` y lo demás `no-cache` (`app/api/static.py`).
 - `render.yaml` describe el servicio para Render (plan de 2 GB, una sola instancia).
 
 ```powershell
@@ -243,3 +245,4 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/jobs/manager.py` | Cola y planificación de trabajos | Hecho |
 | `app/jobs/job.py`, `plan.py`, `document.py`, `deps.py` | Un trabajo, orden de descarga y reintentos, documento final, dependencias inyectables | Hecho |
 | `scripts/precompute.py` | Precálculo de los objetos de prueba en `data/fields` | Hecho |
+| `app/spectrum/` | `GET /api/spectrum`: fotometría de apertura por exposición, longitud de onda y espectros guardados | Hecho |
