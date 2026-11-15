@@ -261,7 +261,7 @@ Las tres se cargan desde Google Fonts. Sustitutos: Arial Narrow, Helvetica Neue 
 
 | Token | Tamaño | Peso | Interlínea | Tracking | Uso |
 |---|---|---|---|---|---|
-| `{typography.display}` | 44px | 600 | 1.05 | 1.2px | Titular de la entrada (mayúsculas) |
+| `{typography.display}` | 44px | 600 | 1.05 | 1.2px | Titular de página (hoy sin uso: la entrada es la esfera y no lleva titular) (mayúsculas) |
 | `{typography.display-sm}` | 30px | 600 | 1.08 | 0.9px | Titular dentro de un panel (mayúsculas) |
 | `{typography.title}` | 20px | 600 | 1.2 | 0 | Nombre de objeto; 16 a 26 px según contexto |
 | `{typography.body}` | 14px | 400 | 1.45 | 0 | Texto de apoyo |
@@ -290,6 +290,10 @@ Las tres se cargan desde Google Fonts. Sustitutos: Arial Narrow, Helvetica Neue 
 - La imagen define el espacio. En la entrada, la esfera celeste llena la ventana. En el visor, el recorte cuadrado toma toda la altura disponible y los paneles se anclan a las esquinas y bordes.
 - Cada panel agrupa una sola tarea (banda, modo, imagen, metadatos, avisos, tiempo) y lleva un encabezado con icono y `{typography.label-cap}`.
 - El centro de la imagen queda libre: ningún panel tapa la mira.
+- **Entrada.** La entrada es la esfera celeste a ventana completa, sin titular ni bajada: la marca arriba a la izquierda, el idioma arriba a la derecha y, abajo al centro, el buscador con el botón "Lugar al azar" a su lado y un renglón de ayuda. El centro del cielo que se mira y el crédito de la textura van al pie, en `{typography.data-sm}` y `{typography.body-sm}`. Sin WebGL la esfera se reemplaza por un aviso y los cinco destacados quedan como `quick-link`; el buscador y "Lugar al azar" siguen en su lugar.
+- **Barra superior del visor.** Sus dos extremos van sobre vidrio (a la izquierda: salida, marca, nombre del objeto y coordenadas; a la derecha: idioma). El centro de la barra sigue transparente. Sin el vidrio, las coordenadas en `{colors.text-mute}` no se leían sobre el gris medio del modo diferencia.
+- **Zona libre del visor.** La imagen se encuadra en la zona que dejan libre la barra, las dos columnas y el muelle de abajo, no en la ventana entera; al acercar, la imagen sigue por debajo de los paneles hasta los bordes de la ventana. Con el panel de espectro abierto la columna derecha se ensancha y la imagen se reencuadra en lo que queda.
+- **Marca.** `SPHEREx Explorer` en IBM Plex Sans Condensed 600 de 15px con tracking de 2,4px, igual en la entrada y en el visor.
 
 ## Elevation & Depth
 
@@ -335,11 +339,18 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 - **Aviso de calidad**: icono `alert` en blanco y una frase en `{typography.body-sm}`. El encabezado del panel muestra la cantidad en mono. Son avisos, entre otros: una fuente saturada en el campo, una época armada con pocas exposiciones, y una comparación (diferencia, suma, rojo/cian, mantener apretado) en la que alguna de las épocas es provisoria.
 - **`search-field`**: campo de vidrio de 56px con icono, etiqueta visible encima y ejemplo de nombre y coordenadas como texto de ayuda. Los renglones de ayuda que quedan fuera del vidrio, directamente sobre la imagen, van en `{colors.text-mute}`: `{colors.text-dim}` no llega a 4,5:1 sobre un recorte real.
 - **`quick-link`**: píldora de 36px para los objetos destacados.
+- **Foco del buscador**: el anillo de foco (2px blanco separado 2px) rodea el campo entero cuando el cursor está en el texto, y el borde pasa a blanco.
+- **Ejemplo del buscador**: nombre y coordenadas en grados decimales con punto (`Barnard's Star · 269.4463 +4.7683`), en cualquier idioma: son los mismos decimales del centro del campo, así quien copia el ejemplo abre el campo precalculado.
+- **Mensajes del buscador**: debajo del campo, en un renglón reservado para que el campo no se mueva. Mientras resuelve: `Buscando…`. Si falla: el texto del error y una frase que dice qué probar. Cuando el servicio de nombres no responde va un texto propio que invita a buscar por coordenadas.
+- **Controles del panel Imagen**: contraste (deslizador), capa de flags (conmutador), estirado (`option` de tres celdas: lineal, log, asinh) y campo de visión (`option`). El panel Modo suma, en los modos que comparan, la época de referencia como `option` con el número y el mes de cada época, y en "mantener apretado" un `button-ghost` que muestra la referencia mientras se lo aprieta.
+- **Error del campo**: `glass-panel` con `role=alert`, centrado si no hay imagen y abajo de la zona libre si la hay. Su botón Reintentar es el único `button-primary` del visor y queda deshabilitado mientras dura la espera que pidió el servidor.
 
 ### Tiempo y carga
 - **Línea de tiempo**: línea base `{colors.hairline-strong}` con una marca por época. Cada época es una pasada del relevamiento, y un campo tiene 3 o 4; las marcas se ubican según su fecha. Cinco estados: cargada (`timeline-epoch`, punto blanco de 8px), provisoria (`timeline-epoch-provisional`, anillo punteado de 8px: la imagen se armó con parte de sus exposiciones), sin cargar (punto hueco de 8px), sin datos (cruz de 8px en `{colors.text-dim}`: la época no tiene exposiciones en la banda actual, como la época 4 de Epsilon Indi B en B1 y B4; se puede elegir igual, como una banda sin datos) y actual (`timeline-epoch-current`, punto ámbar de 12px con anillo). Dos marcas nunca quedan a menos del ancho de una parada (56px), aunque sus fechas sean cercanas. Debajo, el mes de inicio de cada época en `{typography.data-sm}`. La época actual conserva el ámbar aunque sea provisoria; lo provisorio se lee en el rótulo de la imagen.
 - **Transporte**: anterior, reproducir (blanco sólido, 44px en escritorio y 56px en celular; hasta 64px) y siguiente.
 - **`progress-bar`**: línea de 2px, avance en `{colors.accent}`, con etiqueta en mayúsculas a la izquierda y conteo en mono a la derecha (`14 / 22 recortes · 64 %`). Mientras el avance no se conoce (en cola, listando exposiciones) un tramo ámbar recorre el riel; con `prefers-reduced-motion` queda quieto.
+- **Estado de la carga**: ocupa siempre un renglón al pie del muelle, para que la imagen no cambie de tamaño al terminar: la `progress-bar` mientras carga y, al final, `CAMPO COMPLETO · 358 recortes` o `CAMPO INCOMPLETO · faltaron 4 de 258 recortes`. Debajo de "Campo incompleto" va un `button-ghost` "Completar el campo", que lo vuelve a pedir sin sacar de la vista lo que ya cargó; si el pedido falla, un aviso de calidad dice el motivo.
+- **Campo nuevo**: mientras no llega la primera imagen, el centro de la zona libre dice en `{typography.body}` `{colors.text-mute}` que el campo se está armando con imágenes de IRSA y que tarda unos minutos. Aparece con 0,4 s de demora para no parpadear al abrir un campo ya calculado.
 
 ### Sobre la imagen
 - **`reticle`**: círculo con cuatro marcas en `{colors.accent}`, de 64px en el visor y 128px en la ventana al cielo. A su derecha, el nombre en `{typography.label-cap}` y el movimiento propio en mono.
@@ -349,11 +360,15 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 - **Rótulo de imagen** (`image-tag`): píldora de vidrio de 28px centrada sobre el borde superior de la imagen, con una palabra en `{typography.label-cap}` y el dato en mono. Tiene dos usos. Plano provisorio: `PROVISORIO · 9 / 18 exposiciones`. Vista de otro relevamiento mientras carga un campo nuevo: `VISTA PROVISORIA · WISE 3,4 µm`, con una segunda línea en `{typography.body-sm}` que aclara que no es una imagen de SPHEREx. La segunda línea va debajo de la píldora, en su propio vidrio.
 - **Fuente saturada**: los píxeles saturados se dibujan en el blanco máximo de la escala, rodeados por un contorno circular de 1px en `{colors.text}` montado sobre un trazo de 3px en `{colors.void}`. El trazo negro de abajo hace que el contorno se lea también sobre el blanco de la propia estrella: una línea sola en `{colors.hairline-strong}` no cambiaba ningún píxel sobre el núcleo de Barnard. En los modos diferencia y rojo/cian esos píxeles se enmascaran (negro, como las zonas sin datos) y el contorno se mantiene. Siempre va acompañada de un aviso de calidad.
 - **Capa de flags**: los píxeles marcados se cubren con una trama diagonal de 1px que alterna `{colors.text}` y `{colors.void}`, así se distingue sobre cielo oscuro y sobre una estrella. No usa el acento ni un color propio. Se prende con un conmutador y va acompañada de la lista de flags presentes, con su nombre y la cantidad de píxeles.
+- **Punto del espectro**: anillo blanco de 1px montado sobre un trazo en `{colors.void}`, como el rastro, con el radio de la apertura y un mínimo de 7px. Marca el punto medido: si el clic se ajustó a una fuente guardada, el anillo va sobre esa fuente y no sobre el clic. No usa el acento; sobre el objeto con nombre no se dibuja, porque ya tiene su mira.
 
 ### Espectro
 - **Gráfico**: puntos blancos con barras de error en blanco al 45 %, grilla `{colors.hairline}`, ejes en `{typography.data-sm}`. Eje X de 0,75 a 5 µm. Las bandas de H₂O, CH₄, CO₂ y CO son franjas blancas al 7 % con un trazo superior y la fórmula encima. El cursor de lectura es una línea ámbar con el valor en mono (`λ 3,31 µm · 0,05 ± 0,05`).
 - **Huella química**: una fila por molécula con nombre, fórmula en mono, barra blanca de 6px y una palabra (fuerte, moderada, débil, no detectada). La palabra es obligatoria: la barra sola no alcanza.
 - **Ficha del objeto**: tipo, distancia y movimiento propio como `data-row` o como celdas con `{typography.data-lg}`.
+- **Panel de espectro en el visor**: se abre con un clic o toque corto sobre la imagen. En escritorio va arriba de la columna derecha, que se ensancha a `clamp(380px, 36vw, 560px)` (`clamp(320px, 40vw, 420px)` por debajo de 1180px); entre 600 y 899px queda debajo de la imagen; en celular es una hoja que sube hasta el 56 % de la pantalla y comparte lugar con el cajón de herramientas. Encabezado con el nombre o "Punto del cielo" / "Fuente guardada del campo", las coordenadas en mono y un `button-icon` de 36px para cerrar; también cierra Escape.
+- **Estados del panel**: cargando (`progress-bar` sin avance conocido y una línea que dice qué se está midiendo), error (texto del error y Reintentar si corresponde) y sin espectro guardado: un título, la explicación de que el campo solo guarda el espectro de sus fuentes más brillantes, la distancia a la más cercana y un `button-ghost` "Ver la fuente más cercana". Ese último estado no lleva icono de alerta ni gráfico vacío.
+- **Avisos del espectro**: los que cambian cómo se lee el gráfico van arriba, en un recuadro con borde `{colors.hairline-strong}`, icono `alert` y texto en blanco pleno, en este orden: el espectro es de la fuente guardada más cercana (con la distancia; no se muestra si es menor que 1″), fuente saturada, fuente corrida respecto del punto pedido. Los demás (exposiciones descartadas, versión de la tabla de longitudes de onda) quedan debajo del gráfico.
 
 ## Responsive Behavior
 
@@ -361,6 +376,8 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 |---|---|---|
 | Escritorio | ≥ 1180px | Paneles anclados a esquinas y bordes; recorte cuadrado a toda la altura |
 | Celular | < 600px | Columna única; controles en la mitad inferior; paneles a 12px del borde |
+| Intermedio | 900 a 1179px | Columnas de 264px y márgenes de 12px |
+| Tableta | 600 a 899px | Columna única que se desplaza: imagen, línea de tiempo y paneles; el espectro, debajo de la imagen |
 
 - **Zona del pulgar.** En celular, todo control frecuente (reproducción, épocas, banda, modo) queda en el 45 % inferior de la pantalla. La parte superior solo muestra información y la salida.
 - **Objetivos táctiles** de 44px como mínimo, de alto y de ancho; el botón de reproducción mide 56 a 64px.
