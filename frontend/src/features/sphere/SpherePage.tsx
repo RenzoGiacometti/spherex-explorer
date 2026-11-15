@@ -26,15 +26,28 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
 import { DEFAULT_BAND, DEFAULT_MODE, DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
-import { constellationAt, constellationLabel } from "./constellations";
+import {
+  CONSTELLATION_NAMES,
+  type ConstellationFigure,
+  constellationAt,
+  constellationLabel,
+  loadConstellationFigures,
+} from "./constellations";
 import { findPatch } from "./patches";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
-import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus } from "./SkySphere";
+import {
+  type SkyLabel,
+  type SkyMarker,
+  SkySphere,
+  type SkySphereHandle,
+  type SkySphereStatus,
+} from "./SkySphere";
 import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
 import { angularSeparation, clamp, type SkyPosition, wrapDegrees } from "./skyMath";
 import { pickRandomField, SKY_TARGETS, savedFieldNear } from "./targets";
 import { useSphereTexts } from "./texts";
+import { useUrlFlag } from "./urlFlag";
 import { useSkyWindow } from "./useSkyWindow";
 
 /**
@@ -57,6 +70,9 @@ const WINDOW_FOV = 75;
  * menos de este radio en grados: la brujula del telefono no es mas precisa.
  */
 const MIN_LOCK_RADIUS = 5;
+
+/** Parametro de la URL que prende la capa de constelaciones: `?const=1`. */
+const CONSTELLATIONS_PARAM = "const";
 
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
@@ -164,6 +180,8 @@ export function SpherePage({
   const updateUrl = useUrlState((state) => state.update);
 
   const sphereRef = useRef<SkySphereHandle>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -175,6 +193,39 @@ export function SpherePage({
   const [opening, setOpening] = useState<string | null>(null);
   const [sphereStatus, setSphereStatus] = useState<SkySphereStatus>("loading");
   const [nearest, setNearest] = useState<Nearest | null>(null);
+  // Capa de constelaciones: el interruptor va en la URL y las figuras se piden al prenderla.
+  const [constellationsOn, setConstellationsOn] = useUrlFlag(CONSTELLATIONS_PARAM);
+  const [figures, setFigures] = useState<readonly ConstellationFigure[] | null>(null);
+  useEffect(() => {
+    if (!constellationsOn || figures !== null) return;
+    let alive = true;
+    loadConstellationFigures()
+      .then((loaded) => {
+        if (alive) setFigures(loaded);
+      })
+      .catch((error: unknown) => {
+        console.warn("esfera: no se pudieron cargar las constelaciones", error);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [constellationsOn, figures]);
+  const shownFigures = constellationsOn ? figures : null;
+  const constellationLines = useMemo(
+    () => (shownFigures === null ? null : shownFigures.flatMap((figure) => figure.lines)),
+    [shownFigures],
+  );
+  const constellationLabels = useMemo<SkyLabel[]>(
+    () =>
+      (shownFigures ?? []).map((figure) => ({
+        id: figure.id,
+        ra: figure.label[0],
+        dec: figure.label[1],
+        text: CONSTELLATION_NAMES[figure.abbr]?.[language] ?? figure.abbr,
+      })),
+    [shownFigures, language],
+  );
+
   /** Punto del cielo elegido con un clic o un toque: lleva la mira y la tarjeta. */
   const [pick, setPick] = useState<SkyPosition | null>(null);
   const [coarsePointer] = useState(
@@ -209,6 +260,22 @@ export function SpherePage({
     },
     [],
   );
+
+  // Alto de la franja de abajo (buscador, botones y credito), que cambia con la
+  // ventana y con lo que se muestra. La esfera lo usa para no escribir nombres
+  // del cielo debajo de esos textos.
+  useEffect(() => {
+    const page = pageRef.current;
+    const bottom = bottomRef.current;
+    if (page === null || bottom === null || typeof ResizeObserver === "undefined") return;
+    const measure = (): void => {
+      page.style.setProperty("--sky-labels-inset", `${bottom.offsetHeight}px`);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(bottom);
+    return () => observer.disconnect();
+  }, []);
 
   const setFade = useCallback((opacity: number) => {
     if (fadeRef.current !== null) fadeRef.current.style.opacity = String(opacity);
@@ -476,7 +543,7 @@ export function SpherePage({
   const showWindowButton = (offerSkyWindow ?? coarsePointer) && sphereStatus !== "no-webgl";
 
   return (
-    <div className={styles.page} data-window={windowOn}>
+    <div ref={pageRef} className={styles.page} data-window={windowOn}>
       <SkySphere
         ref={sphereRef}
         label={t("stage.label")}
@@ -487,6 +554,8 @@ export function SpherePage({
         driftRate={driftRate ?? DRIFT_RATE}
         unlabelledMarkerId={lockedTarget?.id ?? null}
         interactive={!windowOn}
+        lines={constellationLines}
+        labels={constellationLabels}
         pick={windowOn ? null : pick}
         onSkyTap={handleSkyTap}
         onViewChange={handleViewChange}
@@ -515,8 +584,19 @@ export function SpherePage({
           // En la ventana al cielo, arriba solo queda la salida.
           <IconButton icon="close" label={t("window.exit")} onClick={skyWindow.stop} />
         ) : (
-          // El idioma va en la URL (`lang`); App lo aplica a i18next.
-          <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+          <div className={styles.topActions}>
+            {sphereStatus === "no-webgl" ? null : (
+              // Capa de constelaciones: prendida, el boton va relleno en blanco.
+              <IconButton
+                icon="layers"
+                label={t(constellationsOn ? "constellations.hide" : "constellations.show")}
+                pressed={constellationsOn}
+                onClick={() => setConstellationsOn(!constellationsOn)}
+              />
+            )}
+            {/* El idioma va en la URL (`lang`); App lo aplica a i18next. */}
+            <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+          </div>
         )}
       </header>
 
@@ -525,7 +605,7 @@ export function SpherePage({
         <span ref={readoutRef} className={styles.readoutValue} />
       </p>
 
-      <div className={styles.bottom}>
+      <div ref={bottomRef} className={styles.bottom}>
         {windowOn ? (
           <main className={styles.windowDock}>
             {/* El unico boton relleno de la vista: abre lo que esta en la mira. */}

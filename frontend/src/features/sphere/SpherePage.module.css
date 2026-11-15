@@ -45,6 +45,13 @@
   pointer-events: auto;
 }
 
+/* A la derecha de la barra: la capa de constelaciones y el idioma. */
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 /*
  * Marca: condensada de 15 px con tracking de 2,4 px, como en la maqueta
  * (DESIGN.md no tiene un token para ella), escrita como es, con la x en

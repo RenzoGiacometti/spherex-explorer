@@ -17,6 +17,10 @@
     "saved": "Campo guardado de {{name}}: abre al instante.",
     "open": "Abrir este campo"
   },
+  "constellations": {
+    "show": "Mostrar las constelaciones",
+    "hide": "Ocultar las constelaciones"
+  },
   "opening": "Abriendo {{name}}…",
   "status": {
     "noWebgl": "Este navegador no pudo dibujar la esfera. El buscador y los objetos destacados siguen funcionando.",

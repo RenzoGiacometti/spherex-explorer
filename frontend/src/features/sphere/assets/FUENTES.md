@@ -134,6 +134,14 @@ La tabla de Nancy Roman (1987), "Identification of a constellation from a positi
 - **Licencia:** BSD de 3 cláusulas, "Copyright (c) 2015, Olaf Frohn" (archivo `LICENSE` del repositorio, leído el 15 de noviembre de 2026). La licencia pide conservar el aviso de copyright y sus condiciones al redistribuir: van completos en `constelaciones/LICENCIA-d3-celestial.txt`.
 - **Correcciones propias**, todas en `NAME_FIXES` del script: Octans es "Octante" (la fuente dice "Bastón"), Lepus es "Liebre" (decía "Conejo"), Canis Major y Minor son "Can Mayor" y "Can Menor", Coma Berenices es "Cabellera de Berenice"; en inglés, Ursa Major y Minor son "Great Bear" y "Little Bear" (decía "Big Dipper" y "Little Dipper", que son una parte de cada una), Crux es "Southern Cross" y Puppis, "Stern", como en la lista de la IAU. Las dos mitades de Serpens llevan el nombre "Serpens". El resto de los nombres va como está en la fuente: son traducciones del significado ("Carnero", "Ram") y no se revisaron uno por uno.
 
+## `lineas.json`: las figuras
+
+Las líneas de las 88 constelaciones (89 figuras, porque Serpens son dos; 893 puntos) y la posición de cada nombre. Es la capa "Constelaciones" de la esfera: se pide recién al prenderla (`?const=1` en la URL) y se dibuja con líneas de un píxel en el gris `text-dim` de DESIGN.md.
+
+- **Origen y licencia:** d3-celestial, el mismo repositorio y commit que los nombres, archivos `data/constellations.lines.json` (figuras) y `data/constellations.json` (posición de los nombres). BSD de 3 cláusulas; el texto va en `constelaciones/LICENCIA-d3-celestial.txt`.
+- **Coordenadas:** la fuente escribe la ascensión recta como longitud de −180° a 180°; el script la pasa a grados de 0 a 360 (ICRS/J2000) y redondea a 0,001°.
+- **Comprobación:** en la página de prueba (`/?dev=sphere&const=1&view=84,0,60`), la figura de Orión pasa por Betelgeuse, Rigel y las tres estrellas del cinturón del mapa de fondo.
+
 ## Regenerar
 
 Con los tres archivos de origen en una carpeta (`constellation_data_roman87.dat`, `constellations.json` y `constellations.lines.json`), desde la raíz del repositorio:

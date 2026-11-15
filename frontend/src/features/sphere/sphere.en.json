@@ -17,6 +17,10 @@
     "saved": "Saved field of {{name}}: opens instantly.",
     "open": "Open this field"
   },
+  "constellations": {
+    "show": "Show the constellations",
+    "hide": "Hide the constellations"
+  },
   "opening": "Opening {{name}}…",
   "status": {
     "noWebgl": "This browser could not draw the sphere. Search and the featured objects still work.",

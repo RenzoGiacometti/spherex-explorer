@@ -29,6 +29,8 @@ import {
   ImageBitmapLoader,
   LinearFilter,
   LinearMipmapLinearFilter,
+  LineBasicMaterial,
+  LineSegments,
   Mesh,
   MeshBasicMaterial,
   NearestFilter,
@@ -118,6 +120,11 @@ const SPHERE_RADIUS = 100;
  */
 const DEEP_SKY_FOV = 6;
 const DEEP_SKY_DIM = 0.55;
+
+/** Las lineas (constelaciones) van entre el mapa y los parches. */
+const LINE_RADIUS = SPHERE_RADIUS * 0.99;
+/** Opacidad de las lineas: son una referencia, no tienen que competir con el cielo. */
+const LINE_OPACITY = 0.6;
 
 /** Los parches van apenas por delante de la esfera. */
 const PATCH_RADIUS = SPHERE_RADIUS * 0.98;
@@ -373,6 +380,11 @@ export class SkyScene {
 
   private readonly patches: PatchLayer[] = [];
 
+  // Lineas sobre el cielo (figuras de las constelaciones).
+  private lineGeometry: BufferGeometry | null = null;
+  private lineMaterial: LineBasicMaterial | null = null;
+  private lineMesh: LineSegments | null = null;
+
   private readonly onFrame: ((scene: SkyScene) => void) | undefined;
   private readonly reducedMotion: boolean;
 
@@ -550,6 +562,56 @@ export class SkyScene {
   }
 
   /**
+   * Dibuja lineas sobre el cielo, o las saca con null. Cada linea es una lista
+   * plana RA, Dec, RA, Dec... en grados, y sus puntos se unen con tramos
+   * rectos: vistos desde el centro de la esfera son arcos de circulo maximo.
+   * `color` es un color CSS (sin el, blanco); las lineas de WebGL miden siempre un pixel.
+   */
+  setLines(lines: readonly (readonly number[])[] | null, color?: string): void {
+    if (this.lineMesh !== null) this.scene.remove(this.lineMesh);
+    this.lineGeometry?.dispose();
+    this.lineMaterial?.dispose();
+    this.lineGeometry = null;
+    this.lineMaterial = null;
+    this.lineMesh = null;
+    this.dirty = true;
+    if (lines === null || this.disposed) return;
+
+    const positions: number[] = [];
+    for (const line of lines) {
+      for (let index = 0; index + 3 < line.length; index += 2) {
+        const from = raDecToVector(line[index] as number, line[index + 1] as number);
+        const to = raDecToVector(line[index + 2] as number, line[index + 3] as number);
+        positions.push(
+          from[0] * LINE_RADIUS,
+          from[1] * LINE_RADIUS,
+          from[2] * LINE_RADIUS,
+          to[0] * LINE_RADIUS,
+          to[1] * LINE_RADIUS,
+          to[2] * LINE_RADIUS,
+        );
+      }
+    }
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new BufferAttribute(new Float32Array(positions), 3));
+    const material = new LineBasicMaterial({
+      transparent: true,
+      opacity: LINE_OPACITY,
+      depthTest: false,
+      depthWrite: false,
+    });
+    if (color !== undefined) material.color.set(color);
+    const mesh = new LineSegments(geometry, material);
+    mesh.frustumCulled = false;
+    // Sobre el mapa (y el de 8k que se esta fundiendo), debajo de los parches.
+    mesh.renderOrder = 1.5;
+    this.scene.add(mesh);
+    this.lineGeometry = geometry;
+    this.lineMaterial = material;
+    this.lineMesh = mesh;
+  }
+
+  /**
    * Punto del cielo que se ve en una posicion de la pantalla (pixeles CSS desde
    * la esquina superior izquierda). Es la inversa de `project`.
    */
@@ -633,6 +695,8 @@ export class SkyScene {
     const brightness = 1 - Math.max(this.skyDim, DEEP_SKY_DIM * depth);
     this.material.color.setScalar(brightness);
     this.detailMaterial?.color.setScalar(brightness);
+    // Las lineas se van con el cielo al llegar a un campo, pero no con la cercania.
+    if (this.lineMaterial !== null) this.lineMaterial.opacity = LINE_OPACITY * (1 - this.skyDim);
   }
 
   /** Suelta el arrastre con una velocidad en pixeles por segundo: la inercia la va frenando. */
@@ -1197,6 +1261,8 @@ export class SkyScene {
       layer.material.dispose();
       layer.texture?.dispose();
     }
+    this.lineGeometry?.dispose();
+    this.lineMaterial?.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     this.renderer.domElement.remove();

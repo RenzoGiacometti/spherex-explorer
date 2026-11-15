@@ -88,3 +88,26 @@ export function constellationLabel(abbreviation: string, language: "es" | "en"):
   const local = entry[language];
   return local === entry.la ? local : `${local} (${entry.la})`;
 }
+
+// ---- Figuras ---------------------------------------------------------------
+
+/** Figura de una constelacion: donde va el nombre y los tramos que la dibujan. */
+export interface ConstellationFigure {
+  /** Unico por figura: Serpens son dos ("Ser" y "Ser-2"). */
+  readonly id: string;
+  /** Abreviatura de la IAU, clave de `CONSTELLATION_NAMES`. */
+  readonly abbr: string;
+  /** Posicion del nombre: [RA, Dec] en grados. */
+  readonly label: readonly [number, number];
+  /** Tramos: cada uno es una lista plana RA, Dec, RA, Dec... en grados. */
+  readonly lines: readonly (readonly number[])[];
+}
+
+/**
+ * Las figuras de las 88 constelaciones. Se piden recien al prender la capa:
+ * no entran en la carga inicial.
+ */
+export async function loadConstellationFigures(): Promise<readonly ConstellationFigure[]> {
+  const module = await import("./assets/constelaciones/lineas.json");
+  return module.default as unknown as readonly ConstellationFigure[];
+}

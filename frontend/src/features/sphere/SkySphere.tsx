@@ -22,6 +22,12 @@ export interface SkyMarker extends SkyPosition {
   readonly kind?: "target" | "probe";
 }
 
+/** Texto sobre el cielo, sin interaccion: el nombre de una constelacion. */
+export interface SkyLabel extends SkyPosition {
+  readonly id: string;
+  readonly text: string;
+}
+
 /**
  * `loading`: todavia no llego la textura. `ready`: se ve el cielo.
  * `texture-error`: no hay imagen, pero la esfera gira y los marcadores andan.
@@ -65,6 +71,13 @@ export interface SkySphereProps {
   readonly unlabelledMarkerId?: string | null | undefined;
   /** En false los gestos no mueven la vista (ventana al cielo). */
   readonly interactive?: boolean | undefined;
+  /**
+   * Lineas sobre el cielo (figuras de las constelaciones): cada una, una lista
+   * plana RA, Dec, RA, Dec... en grados. Van en el gris `text-dim`.
+   */
+  readonly lines?: readonly (readonly number[])[] | null | undefined;
+  /** Textos sobre el cielo, cada uno centrado en su posicion. */
+  readonly labels?: readonly SkyLabel[] | undefined;
   /** Punto elegido: la esfera le deja una mira encima. */
   readonly pick?: SkyPosition | null | undefined;
   /** Clic o toque corto sobre el cielo, fuera de los marcadores: el punto que se toco. */
@@ -90,6 +103,8 @@ export function SkySphere(props: SkySphereProps) {
     onMarkerClick,
     unlabelledMarkerId,
     interactive = true,
+    lines,
+    labels,
     pick,
     className,
   } = props;
@@ -99,6 +114,7 @@ export function SkySphere(props: SkySphereProps) {
   const controlsRef = useRef<SkyControls | null>(null);
   const elementsRef = useRef(new Map<string, HTMLElement>());
   const pickRef = useRef<HTMLSpanElement>(null);
+  const labelElementsRef = useRef(new Map<string, HTMLElement>());
   // Lo ultimo que llego por props, para leerlo desde la escena sin volver a crearla.
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -120,6 +136,16 @@ export function SkySphere(props: SkySphereProps) {
         if (element === undefined) continue;
         if (scene.project(marker, point)) {
           element.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px)`;
+          if (element.hidden) element.hidden = false;
+        } else if (!element.hidden) {
+          element.hidden = true;
+        }
+      }
+      for (const label of propsRef.current.labels ?? []) {
+        const element = labelElementsRef.current.get(label.id);
+        if (element === undefined) continue;
+        if (scene.project(label, point)) {
+          element.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px) translate(-50%, -50%)`;
           if (element.hidden) element.hidden = false;
         } else if (!element.hidden) {
           element.hidden = true;
@@ -201,11 +227,20 @@ export function SkySphere(props: SkySphereProps) {
     controlsRef.current?.setEnabled(interactive);
   }, [interactive]);
 
-  // Marcadores nuevos u otro punto elegido: hay que ubicarlos aunque la vista no se haya movido.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee `markers` ni `pick`, corre cuando cambian
+  // Lineas de las constelaciones, en el gris del sistema de diseno: el color sale
+  // del token, no esta escrito aca.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (stage === null) return;
+    const color = getComputedStyle(stage).getPropertyValue("--color-text-dim").trim();
+    sceneRef.current?.setLines(lines ?? null, color === "" ? undefined : color);
+  }, [lines]);
+
+  // Marcadores, nombres o punto elegido nuevos: hay que ubicarlos aunque la vista no se haya movido.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee esos valores, corre cuando cambian
   useEffect(() => {
     sceneRef.current?.invalidate();
-  }, [markers, pick]);
+  }, [markers, labels, pick]);
 
   useImperativeHandle(
     ref,
@@ -238,6 +273,22 @@ export function SkySphere(props: SkySphereProps) {
       data-status={status}
       data-interactive={interactive}
     >
+      {/* Nombres sobre el cielo: debajo de los marcadores y sin recibir el puntero. */}
+      <div className={styles.labels} aria-hidden="true">
+        {(labels ?? []).map((item) => (
+          <span
+            key={item.id}
+            ref={(element) => {
+              if (element === null) labelElementsRef.current.delete(item.id);
+              else labelElementsRef.current.set(item.id, element);
+            }}
+            className={styles.label}
+            hidden
+          >
+            {item.text}
+          </span>
+        ))}
+      </div>
       {/* Sin esfera no hay donde ubicar los marcadores: quien la usa ofrece los links de otra forma. */}
       <nav className={styles.markers} aria-label={markersLabel} hidden={status === "no-webgl"}>
         {markers.map((marker) =>
