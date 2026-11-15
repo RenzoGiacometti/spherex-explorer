@@ -8,7 +8,7 @@ SkyBlink is a web tool for looking at the infrared sky of the SPHEREx mission ov
 
 ## What you can do
 
-- **Find a place** by name or coordinates, spin the celestial sphere, pick any point of the sky with a click, turn on the constellations to get your bearings, or land on a "random place" among 13 precomputed fields. On a phone, the sphere works as a window to the sky: it shows what lies where you point it.
+- **Find a place** by name or coordinates, spin the celestial sphere, pick any point of the sky with a click, turn on the constellations to get your bearings, or land on a "random place" among 21 precomputed fields. On a phone, the sphere works as a window to the sky: it shows what lies where you point it.
 - **Compare epochs.** Each field has 3 or 4 SPHEREx passes in six bands. You can blink them, subtract them (difference), add them, overlay them in red and cyan, or switch between two by holding a button.
 - **See the spectrum** of a source with one click: flux against wavelength, with error bars, H₂O, CH₄, CO₂ and CO bands, a "chemical fingerprint" labelled as a hint, and the option to listen to it.
 - **See the light curve** of that source, per band, in the next tab.
@@ -35,7 +35,7 @@ pnpm install
 pnpm dev
 ```
 
-The 14 precomputed fields (`backend/data/fields`) open without a connection to IRSA. Opening any other place downloads about 300 to 500 cutouts from IRSA.
+The 22 precomputed fields (`backend/data/fields`) open without a connection to IRSA. Opening any other place downloads about 300 to 500 cutouts from IRSA.
 
 The public version is a single Docker image with the API, the built frontend and the precomputed fields:
 

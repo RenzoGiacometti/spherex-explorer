@@ -8,7 +8,7 @@ Esta tanda agregó solo archivos nuevos. Lo que hace falta tocar en archivos exi
 
 ## 1. Contexto para todos los campos precalculados
 
-Los 14 campos de `backend/data/fields` tienen contexto en `backend/data/context`: 2MASS Ks, WISE W2 y Gaia DR3, más las placas del DSS de la sección 4.
+Los 22 campos de `backend/data/fields` tienen contexto en `backend/data/context`: 2MASS Ks, WISE W2 y Gaia DR3, más las placas del DSS de la sección 4.
 
 | Objeto | Carpeta | DSS, primera generación | DSS, segunda generación | 2MASS | WISE | Fuentes de Gaia |
 |---|---|---|---|---|---|---|
@@ -26,8 +26,16 @@ Los 14 campos de `backend/data/fields` tienen contexto en `backend/data/context`
 | Kapteyn (HD 33793) | `77.9853_-45.0596_0.1667` | 1975 (SERC-J, Bj) | 1990 (AAO-SES, R) | 1999 | 2010 | 170 |
 | M 1 | `83.6324_+22.0174_0.1667` | 1951 (POSS-I, R) | no hay | 1997 | 2010 | 1001 |
 | M 42 | `83.8201_-5.3876_0.1667` | 1955 (POSS-I, R) | 1990 (SERC-ER, R) | 2000 | 2010 | 913 |
+| M 31 | `10.6847_+41.2687_0.1667` | 1953 (POSS-I, R) | 1986 (POSS-II, R) | 1997 | 2010 | 6474 |
+| M 33 | `23.4621_+30.6602_0.1667` | 1949 (POSS-I, R) | 1991 (POSS-II, R) | 1997 | 2010 | 6974 |
+| M 81 | `148.8882_+69.0653_0.1667` | 1953 (POSS-I, R) | 1998 (POSS-II, R) | 1999 | 2010 | 558 |
+| M 101 | `210.8024_+54.3488_0.1667` | 1955 (POSS-I, R) | 1993 (POSS-II, R) | 1999 | 2010 | 626 |
+| M 104 | `189.9976_-11.6231_0.1667` | 1954 (POSS-I, R) | 1993 (SERC-ER, R) | 1999 | 2010 | 343 |
+| UGPS J0722-0540 | `110.6097_-5.6735_0.1667` | 1955 (POSS-I, R) | 1986 (SERC-ER, R) | 1998 | 2010 | 1533 |
+| 2MASS J0415-0935 | `63.8475_-9.5814_0.1667` | 1953 (POSS-I, R) | 1985 (SERC-ER, R) | 1998 | 2010 | 149 |
+| Ross 248 | `355.4803_+44.1659_0.1667` | 1952 (POSS-I, R) | 1990 (POSS-II, R) | 1998 | 2010 | 506 |
 
-Son 9,9 MB en total. El campo de Proxima pesa 1,2 MB porque cae sobre el plano de la galaxia y su `gaia.json` trae 11 729 fuentes.
+Son 16,1 MB en total. El campo de Proxima pesa 1,2 MB porque cae sobre el plano de la galaxia y su `gaia.json` trae 11 729 fuentes.
 
 ### Sin Sesame
 
