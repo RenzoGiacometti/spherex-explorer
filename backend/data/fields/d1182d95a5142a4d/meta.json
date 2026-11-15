@@ -754,12 +754,16 @@
     "cutouts_total": 413,
     "cutouts_done": 413,
     "cutouts_failed": 0,
-    "cutouts_cached": 81,
+    "cutouts_cached": 98,
     "planes_total": 18,
     "planes_ready": 18,
-    "elapsed_s": 349.5
+    "elapsed_s": 342.1
   },
   "warnings": [
+    {
+      "code": "stale_exposure_list",
+      "listed_at": "2026-11-15T17:20:58Z"
+    },
     {
       "code": "saturated_source",
       "ra": 202.4981,
@@ -792,8 +796,8 @@
       "spherex_qr3"
     ],
     "listed_at": "2026-11-15T17:20:58Z",
-    "list_stale": false,
+    "list_stale": true,
     "download_mode": "truncated",
-    "built_at": "2026-11-15T17:26:25Z"
+    "built_at": "2026-11-15T17:26:26Z"
   }
 }
