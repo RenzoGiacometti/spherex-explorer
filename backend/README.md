@@ -152,7 +152,13 @@ Después de precalcular o rearmar un campo hay que generar sus espectros guardad
 uv run python scripts/precompute_field_spectra.py --workers 4
 ```
 
-Deja `data/spectra/fields/<id>.json.gz` con el espectro del objeto con nombre y de hasta 20 fuentes brillantes del campo. La imagen pública no lleva recortes: ahí un clic se ajusta a la fuente guardada más cercana.
+Deja `data/spectra/fields/<id>.json.gz` con el espectro del objeto con nombre y de hasta 20 fuentes brillantes del campo. Después se generan las curvas de luz de esas mismas fuentes (`data/lightcurves/fields/<id>.json.gz`, unos 10 minutos para los 14 campos):
+
+```powershell
+uv run python scripts/precompute_field_lightcurves.py --workers 4
+```
+
+La imagen pública no lleva recortes: ahí un clic se ajusta a la fuente guardada más cercana.
 
 Medido el 2026-11-15 contra IRSA: Barnard (358 exposiciones) en 148 s, Epsilon Indi B (458) en 157 s, WISE 0855 (258) en 138 s.
 
@@ -206,6 +212,9 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 
 ```
 data/fields/     campos precalculados (se versionan)
+data/spectra/    espectros guardados: los cinco objetos de prueba y, en fields/, las fuentes brillantes de cada campo (se versionan)
+data/lightcurves/ curvas de luz guardadas, con la misma organización (se versionan)
+data/context/    capas de 2MASS y WISE y fuentes de Gaia de los campos con contexto (se versionan)
 data/sesame/     respuestas de Sesame de los objetos precalculados (se versionan; se leen si el nombre no está en la caché)
 cache/           caché de ejecución (ignorada por git): fields/, cutouts/, sia/, sesame/
 ```
@@ -256,3 +265,5 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/jobs/job.py`, `plan.py`, `document.py`, `deps.py` | Un trabajo, orden de descarga y reintentos, documento final, dependencias inyectables | Hecho |
 | `scripts/precompute.py` | Precálculo de los objetos de prueba en `data/fields` | Hecho |
 | `app/spectrum/` | `GET /api/spectrum`: fotometría de apertura por exposición, longitud de onda y espectros guardados | Hecho |
+| `app/lightcurve/` | `GET /api/lightcurve`: variación relativa por banda, fotometría sobre las alas para fuentes saturadas y curvas guardadas | Hecho |
+| `app/context/` | `GET /api/context`, `/api/context/gaia`, `/api/context/index` y `/api/survey`: contexto de 2MASS, WISE y Gaia precalculado desde IRSA (`docs/contexto.md`) | Hecho |

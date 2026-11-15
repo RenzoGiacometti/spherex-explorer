@@ -181,7 +181,7 @@ Los cinco objetos tardaron 57 s en total con la caché vacía. El centro de cada
 
 `ra`, `dec` y `fov` se normalizan igual que en `POST /api/field`. Un campo sin contexto guardado responde `404 not_found` con el cuerpo de error del contrato.
 
-**Todavía no están montadas** en `app/api/main.py`, porque esta etapa agregó solo archivos nuevos. Falta una línea en `create_app`:
+Ya están montadas en `app/api/main.py` (`create_app`), con esta línea:
 
 ```python
 from app.context.api import router as context_router
@@ -194,7 +194,7 @@ app.include_router(context_router)
 
 ## 4. Frontend
 
-En `frontend/src/features/context/`. Son componentes sueltos: no están montados en el visor.
+En `frontend/src/features/context/`. Están montados en el visor (`frontend/src/features/viewer`): "Viaje entre misiones" es el modo `journey`, con `MissionJourney` en el muelle de abajo, y la capa de Gaia se prende en el panel Imagen, junto a la de flags. En un campo sin contexto guardado las dos cosas quedan deshabilitadas con una explicación. Los textos están en `src/i18n/locales/<idioma>/context.json`.
 
 | Pieza | Qué hace |
 |---|---|
