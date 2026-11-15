@@ -1,0 +1,56 @@
+{
+  "panel": {
+    "title": "Curva de luz",
+    "unnamed": "Punto del cielo",
+    "band": "Banda",
+    "method": "Medición",
+    "aperture": "Apertura",
+    "wings": "Alas",
+    "noCurve": "sin curva",
+    "footnote": "Cada exposición ve el objeto en otra longitud de onda, así que cada medida se compara solo con las de su mismo canal espectral ({{channels}} por banda). El valor 1 es el brillo típico del período observado.",
+    "controlNote": "Error mínimo, medido con una estrella que no varía ({{control}}): {{floor}} por pasada."
+  },
+  "summary": {
+    "variable": "Varía en {{bands}}",
+    "marginal": "Variación dudosa en {{bands}}",
+    "constant": "Sin variación detectable",
+    "undetermined": "Sin veredicto"
+  },
+  "relative": {
+    "tag": "Variación relativa",
+    "wings": "Medido en las alas de la fuente saturada, en un anillo de {{inner}} a {{outer}} alrededor del núcleo. No da el brillo absoluto: solo cuánto cambia.",
+    "aperture": "Brillo relativo a la mediana de esta banda, que es de {{reference}} mJy."
+  },
+  "verdict": {
+    "variable": "Varía: entre la pasada más brillante y la más débil hay una diferencia del {{amplitude}}, {{significance}} veces su error.",
+    "marginal": "Variación dudosa: la diferencia entre pasadas es del {{amplitude}}, {{significance}} veces su error.",
+    "constant": "Sin variación detectable: la diferencia entre pasadas ({{amplitude}}) no supera tres veces su error ({{error}})."
+  },
+  "reason": {
+    "unstable": "Las alas no sirven en esta banda: medidas de días vecinos y del mismo canal difieren un {{scatter}}, mucho más que el ruido. No se muestra una curva porque no significaría nada.",
+    "blended": "Hay otra fuente dentro de la apertura: la luz medida está corrida {{offset}} del objeto. Un cambio de brillo sería el de la mezcla, no el del objeto.",
+    "insufficient": "No alcanzan las medidas: {{n}} de {{total}} exposiciones dieron un valor, y hacen falta dos pasadas con al menos tres medidas cada una."
+  },
+  "chart": {
+    "label": "Curva de luz de {{name}} en {{band}}: brillo relativo según la fecha, en {{epochs}} pasadas. {{points}} medidas.",
+    "axisY": "Brillo relativo",
+    "pass": "Pasada {{epoch}}",
+    "hint": "Mover el cursor sobre el gráfico, o usar las flechas, para leer un valor.",
+    "readout": "{{date}} · {{value}} ± {{error}} · medidas: {{n}}",
+    "legendBinned": "Mediana de pocos días, con su error",
+    "legendEpoch": "Nivel de cada pasada",
+    "legendExposure": "Cada exposición",
+    "showExposures": "Mostrar cada exposición"
+  },
+  "epochs": {
+    "title": "Pasadas",
+    "row": "Pasada {{epoch}} · {{date}} · {{n}} medidas",
+    "value": "{{value}} ± {{error}}"
+  },
+  "notice": {
+    "saturated": "Fuente saturada en {{bands}}: ahí el brillo se mide en las alas, fuera del núcleo, y solo da variación relativa.",
+    "unstable": "En {{bands}} las alas no sirven: medidas vecinas del mismo canal difieren hasta un {{scatter}}. No se muestra curva en esas bandas.",
+    "unvalidated": "En {{bands}} la estrella de control no validó las alas (ella misma dispersa demasiado ahí). La curva pasa la prueba interna, pero tiene menos respaldo.",
+    "offset": "En {{bands}} hay otra fuente dentro de la apertura (luz corrida {{offset}}). Ahí no hay curva, y no se afirma variación en las demás bandas porque la mezcla puede cambiar entre pasadas."
+  }
+}

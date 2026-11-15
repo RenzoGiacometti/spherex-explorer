@@ -1,0 +1,56 @@
+{
+  "panel": {
+    "title": "Light curve",
+    "unnamed": "Point on the sky",
+    "band": "Band",
+    "method": "Measurement",
+    "aperture": "Aperture",
+    "wings": "Wings",
+    "noCurve": "no curve",
+    "footnote": "Each exposure sees the object at a different wavelength, so each measurement is compared only with those of its own spectral channel ({{channels}} per band). A value of 1 is the typical brightness over the observed period.",
+    "controlNote": "Minimum error, measured on a star that does not vary ({{control}}): {{floor}} per pass."
+  },
+  "summary": {
+    "variable": "Varies in {{bands}}",
+    "marginal": "Doubtful variation in {{bands}}",
+    "constant": "No detectable variation",
+    "undetermined": "No verdict"
+  },
+  "relative": {
+    "tag": "Relative variation",
+    "wings": "Measured on the wings of the saturated source, in a ring from {{inner}} to {{outer}} around the core. It does not give the absolute brightness: only how much it changes.",
+    "aperture": "Brightness relative to the median of this band, which is {{reference}} mJy."
+  },
+  "verdict": {
+    "variable": "It varies: the brightest and the faintest pass differ by {{amplitude}}, {{significance}} times the error.",
+    "marginal": "Doubtful variation: passes differ by {{amplitude}}, {{significance}} times the error.",
+    "constant": "No detectable variation: the difference between passes ({{amplitude}}) is under three times its error ({{error}})."
+  },
+  "reason": {
+    "unstable": "The wings are not usable in this band: measurements from neighbouring days and the same channel differ by {{scatter}}, far more than the noise. No curve is shown because it would mean nothing.",
+    "blended": "Another source is inside the aperture: the measured light is offset {{offset}} from the object. A change in brightness would be that of the blend, not of the object.",
+    "insufficient": "Not enough measurements: {{n}} of {{total}} exposures gave a value, and two passes with at least three measurements each are needed."
+  },
+  "chart": {
+    "label": "Light curve of {{name}} in {{band}}: relative brightness against date, over {{epochs}} passes. {{points}} measurements.",
+    "axisY": "Relative brightness",
+    "pass": "Pass {{epoch}}",
+    "hint": "Move the pointer over the chart, or use the arrow keys, to read a value.",
+    "readout": "{{date}} · {{value}} ± {{error}} · measurements: {{n}}",
+    "legendBinned": "Median over a few days, with its error",
+    "legendEpoch": "Level of each pass",
+    "legendExposure": "Each exposure",
+    "showExposures": "Show each exposure"
+  },
+  "epochs": {
+    "title": "Passes",
+    "row": "Pass {{epoch}} · {{date}} · {{n}} measurements",
+    "value": "{{value}} ± {{error}}"
+  },
+  "notice": {
+    "saturated": "Saturated source in {{bands}}: brightness is measured there on the wings, outside the core, and only gives relative variation.",
+    "unstable": "In {{bands}} the wings are not usable: neighbouring measurements of the same channel differ by up to {{scatter}}. No curve is shown in those bands.",
+    "unvalidated": "In {{bands}} the control star did not validate the wings (it scatters too much there itself). The curve passes the internal check, but has less support.",
+    "offset": "In {{bands}} another source is inside the aperture (light offset {{offset}}). There is no curve there, and no variation is claimed in the other bands because the blend can change between passes."
+  }
+}
