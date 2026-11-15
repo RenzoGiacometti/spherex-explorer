@@ -1,0 +1,139 @@
+/* Grafico de curva de luz: mismo lenguaje que el del espectro (DESIGN.md, "Espectro"). Solo tokens. */
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* Cursor de lectura: el valor en monoespaciada. */
+.readout,
+.hint {
+  margin: 0;
+  min-height: 2.8em;
+}
+
+.readout {
+  color: var(--color-text);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.hint {
+  color: var(--color-text-dim);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.plot {
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--radius-xs);
+}
+
+.plot:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* El dedo mueve el cursor de lectura en horizontal; el desplazamiento vertical de la pagina sigue andando. */
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+/* ---- Tramos del eje del tiempo: uno por pasada ---- */
+
+.segment {
+  fill: color-mix(in srgb, var(--color-text) 3%, transparent);
+}
+
+.axis {
+  stroke: var(--color-hairline-strong);
+  stroke-width: 1;
+}
+
+.grid {
+  stroke: var(--color-hairline);
+  stroke-width: 1;
+}
+
+/* El 1: el brillo tipico del periodo. */
+.unity {
+  stroke: var(--color-hairline-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.tickStart,
+.tickEnd,
+.tickY,
+.axisTitleY,
+.segmentLabel {
+  fill: var(--color-text-dim);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+.tickStart {
+  text-anchor: start;
+}
+
+.tickEnd {
+  text-anchor: end;
+}
+
+.tickY {
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.segmentLabel {
+  fill: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  text-anchor: middle;
+}
+
+/* ---- Datos ---- */
+
+/* Cada exposicion: punto tenue, detras de las medianas. */
+.exposure {
+  fill: color-mix(in srgb, var(--color-text) 30%, transparent);
+}
+
+/* Nivel de la pasada: trazo fino a lo ancho de su tramo. */
+.level {
+  stroke: color-mix(in srgb, var(--color-text) 45%, transparent);
+  stroke-width: 1;
+}
+
+/* Mediana de pocos dias: punto blanco con barra de error en blanco al 45 %. */
+.point {
+  fill: var(--color-text);
+}
+
+.errorBar {
+  stroke: color-mix(in srgb, var(--color-text) 45%, transparent);
+  stroke-width: 1;
+}
+
+/* ---- Cursor de lectura: cuenta como mira, el primer uso del acento ---- */
+
+.cursor {
+  stroke: var(--color-accent);
+  stroke-width: 1;
+}
+
+.cursorPoint {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}

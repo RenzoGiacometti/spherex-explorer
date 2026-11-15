@@ -1,0 +1,135 @@
+/* Panel de curva de luz: el contenedor es GlassPanel con relleno de 24 px (DESIGN.md). Solo tokens. */
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xxs) var(--space-md);
+}
+
+/* Nombre del objeto: como en el catalogo, sin mayusculas. */
+.name {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-title-font);
+  letter-spacing: var(--type-title-tracking);
+}
+
+.position {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.note,
+.relative,
+.verdict,
+.footnote {
+  margin: 0;
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.note,
+.relative {
+  color: var(--color-text-mute);
+}
+
+/* "Variacion relativa": rotulo de contorno seguido de la aclaracion. Sin acento ni color de estado. */
+.relative {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.tag {
+  flex-shrink: 0;
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+/* El veredicto es la frase que la persona tiene que leer: va en el color del texto. */
+.verdict {
+  color: var(--color-text);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs) var(--space-md);
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.swatchBinned,
+.swatchExposure,
+.swatchLevel {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.swatchBinned {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-text);
+}
+
+.swatchExposure {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-text) 30%, transparent);
+}
+
+.swatchLevel {
+  width: 14px;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+
+.epochs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footnote {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-text-dim);
+}
