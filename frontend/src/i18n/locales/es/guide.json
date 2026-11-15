@@ -1,0 +1,21 @@
+{
+  "launcher": {
+    "start": "Recorrido guiado: encontrá a WISE 0855"
+  },
+  "tour": {
+    "title": "Encontrá a WISE 0855",
+    "progress": "{{n}} / {{total}}",
+    "progressLabel": "Paso {{n}} de {{total}}",
+    "step": {
+      "band": "Elegí la banda B6, la más roja de SPHEREx.",
+      "play": "Reproducí el parpadeo y mirá el centro de la imagen: un punto se corre mientras las estrellas quedan quietas.",
+      "redcyan": "Activá el modo Rojo/cian para ver dos épocas en una sola imagen.",
+      "locate": "Ubicá el objeto que se mueve, que es el punto rojo entre estrellas blancas, y marcalo con un clic o un toque.",
+      "closing": "WISE 0855 es una enana marrón: un cuerpo que no juntó masa suficiente para encenderse como una estrella y que es tan frío como el Polo Norte, así que casi toda su luz sale en el infrarrojo de onda más larga y solo se ve en las bandas más rojas, B5 y B6."
+    },
+    "miss": "Ahí no: es el punto rojo más brillante.",
+    "reveal": "Mostrar dónde está",
+    "skip": "Saltar",
+    "finish": "Terminar"
+  }
+}

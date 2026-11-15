@@ -11,11 +11,13 @@ import enCommon from "./locales/en/common.json";
 import enComponents from "./locales/en/components.json";
 import enEntry from "./locales/en/entry.json";
 import enErrors from "./locales/en/errors.json";
+import enGuide from "./locales/en/guide.json";
 import enViewer from "./locales/en/viewer.json";
 import esCommon from "./locales/es/common.json";
 import esComponents from "./locales/es/components.json";
 import esEntry from "./locales/es/entry.json";
 import esErrors from "./locales/es/errors.json";
+import esGuide from "./locales/es/guide.json";
 import esViewer from "./locales/es/viewer.json";
 
 export const DEFAULT_NAMESPACE = "common";
@@ -26,6 +28,7 @@ export const resources = {
     components: esComponents,
     entry: esEntry,
     errors: esErrors,
+    guide: esGuide,
     viewer: esViewer,
   },
   en: {
@@ -33,6 +36,7 @@ export const resources = {
     components: enComponents,
     entry: enEntry,
     errors: enErrors,
+    guide: enGuide,
     viewer: enViewer,
   },
 } as const;
