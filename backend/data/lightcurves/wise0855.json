@@ -197,7 +197,9 @@
    "bins": [
     {"mjd": 60801.335, "date": "2025-05-06", "epoch": 1, "value": 0.7787, "error": 0.0487, "n": 6},
     {"mjd": 60986.665, "date": "2025-11-07", "epoch": 2, "value": 1.0227, "error": 0.0523, "n": 10},
-    {"mjd": 61162.21, "date": "2026-05-02", "epoch": 3, "value": 1.07, "error": 0.0628, "n": 7}
+    {"mjd": 61022.079, "date": "2025-12-13", "epoch": 2, "value": 0.9892, "error": 0.0735, "n": 4},
+    {"mjd": 61162.21, "date": "2026-05-02", "epoch": 3, "value": 1.07, "error": 0.0628, "n": 7},
+    {"mjd": 61172.955, "date": "2026-05-12", "epoch": 3, "value": 1.07, "error": 0.0722, "n": 5}
    ],
    "points": [
     {"mjd": 60801.10726, "date": "2025-05-06", "epoch": 1, "value": 0.8381, "error": 0.1396, "wavelength_um": 4.2951, "channel": 13},
@@ -277,7 +279,8 @@
    ],
    "bins": [
     {"mjd": 60991.404, "date": "2025-11-12", "epoch": 2, "value": 1.0179, "error": 0.0543, "n": 13},
-    {"mjd": 61153.909, "date": "2026-04-23", "epoch": 3, "value": 1.0162, "error": 0.0559, "n": 12}
+    {"mjd": 61153.909, "date": "2026-04-23", "epoch": 3, "value": 1.0162, "error": 0.0559, "n": 12},
+    {"mjd": 61169.748, "date": "2026-05-09", "epoch": 3, "value": 1.0, "error": 0.0794, "n": 5}
    ],
    "points": [
     {"mjd": 60800.70069, "date": "2025-05-05", "epoch": 1, "value": 0.2641, "error": 0.3031, "wavelength_um": 4.9674, "channel": 15},
@@ -331,7 +334,7 @@
   "processing": ["l2b-v27"],
   "channels_per_detector": 17,
   "error_factor_median": 1.2533,
-  "computed_at": "2026-11-15T17:41:15Z"
+  "computed_at": "2026-11-15T17:48:29Z"
  },
  "source": "precomputed"
 }

@@ -73,7 +73,9 @@
     {"epoch": 1, "mjd": 60920.692, "date": "2025-09-02", "value": 0.6603, "error": 0.0292, "n": 4},
     {"epoch": 2, "mjd": 61107.031, "date": "2026-03-08", "value": 1.0, "error": 0.0442, "n": 4}
    ],
-   "bins": [],
+   "bins": [
+    {"mjd": 60920.692, "date": "2025-09-02", "epoch": 1, "value": 0.6607, "error": 0.0232, "n": 4}
+   ],
    "points": [
     {"mjd": 60920.0308, "date": "2025-09-02", "epoch": 1, "value": 0.6378, "error": 0.0258, "wavelength_um": 0.7469, "channel": 0},
     {"mjd": 60920.0323, "date": "2025-09-02", "epoch": 1, "value": 0.6085, "error": 0.0246, "wavelength_um": 0.7645, "channel": 1},
@@ -547,6 +549,7 @@
    "bins": [
     {"mjd": 60921.134, "date": "2025-09-03", "epoch": 1, "value": 1.0981, "error": 0.0347, "n": 19},
     {"mjd": 61106.791, "date": "2026-03-07", "epoch": 2, "value": 1.0, "error": 0.0318, "n": 18},
+    {"mjd": 61285.128, "date": "2026-09-02", "epoch": 3, "value": 0.556, "error": 0.022, "n": 5},
     {"mjd": 61291.807, "date": "2026-09-08", "epoch": 3, "value": 0.9121, "error": 0.0313, "n": 10}
    ],
    "points": [
@@ -897,7 +900,7 @@
   "processing": ["l2b-v27"],
   "channels_per_detector": 17,
   "error_factor_median": 1.2533,
-  "computed_at": "2026-11-15T17:41:20Z"
+  "computed_at": "2026-11-15T17:48:33Z"
  },
  "source": "precomputed"
 }

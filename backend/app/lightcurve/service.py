@@ -84,7 +84,7 @@ MIN_EPOCH_POINTS = 3
 STABILITY_GAP_DAYS = 4.0
 STABILITY_MAX_DAYS = 12.0
 # Una tanda corta se muestra en la curva si junta al menos estas medidas.
-MIN_BIN_POINTS = 6
+MIN_BIN_POINTS = 4
 # Dispersion de las alas, descontado el ruido formal, a partir de la cual no se confia en ellas.
 MAX_EXCESS_SCATTER = 0.12
 # Veredicto: diferencia entre pasadas sobre su error.
