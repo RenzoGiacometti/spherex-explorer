@@ -94,7 +94,7 @@ Rehacer el cubo desde recortes en caché tardaba de 10 a 16 s en la Etapa 0. El 
 | `GET /api/field/{id}/preview` | Recorte de WISE de la misma zona (hips2fits de CDS), como vista provisoria mientras carga un campo nuevo |
 | `GET /api/field/{id}/track?name=` | Posición esperada del objeto en cada época, con movimiento propio y paralaje |
 | `POST /api/field/{id}/priority {band}` | Adelanta los planos de una banda |
-| `GET /api/spectrum?ra=&dec=&field=` | Documento del espectro: puntos {longitud de onda, flujo, error, fecha, detector, flags}, promedios por tramo, épocas, detectores y avisos (`saturated_source`, con la forma del contrato del cubo, y `offset_source`). `pm_ra`, `pm_dec` y `epoch` opcionales para que la apertura siga a un objeto que se mueve |
+| `GET /api/spectrum?ra=&dec=&field=` | Documento del espectro: puntos {longitud de onda, flujo, error, fecha, detector, flags}, promedios por tramo, épocas, detectores y avisos (`saturated_source`, con la forma del contrato del cubo, y `offset_source`). `pm_ra`, `pm_dec` y `epoch` opcionales para que la apertura siga a un objeto que se mueve. Con `field` de un campo precalculado el clic se ajusta a la fuente guardada más cercana dentro de 12″ (aviso `snapped_source`); si no hay ninguna responde 200 con `status: "no_source"`, `nearest` y `saved_sources`, sin puntos |
 | `GET /api/context?ra=&dec=&fov=` | fuentes de Gaia DR3 (posición, movimiento propio, paralaje), SIMBAD, SkyBoT |
 | `GET /api/survey?ra=&dec=&fov=&hips=` | recorte de otra misión vía hips2fits, reproyectado a la grilla del campo |
 
@@ -136,6 +136,7 @@ Cada etapa termina en algo que se puede mostrar.
 - RGB eligiendo tres detectores. Curva de luz por detector.
 - Huella química (rotulada como "indicio"), lupa espectral, sonificación con WebAudio.
 - Slider de longitud de onda y arrastre en dos ejes (con botón de modo para no chocar con el paneo).
+- Espectros guardados por campo: la imagen pública no lleva los recortes, así que cada campo precalculado guarda el espectro de su objeto con nombre y de sus fuentes más brillantes (hasta 20, detectadas sobre el coadd: 279 en los 14 campos) en `backend/data/spectra/fields/<id>.json.gz` (2,6 MB en total). Se generan con `uv run python scripts/precompute_field_spectra.py --workers 4` desde `backend/`, sin red, a partir de los recortes de `backend/cache/cutouts`; hay que volver a correrlo cuando se agrega o se rearma un campo precalculado. En esos campos el archivo manda aunque los recortes estén en disco; en un campo armado en vivo el espectro se mide sobre los recortes. Con `SPHEREX_PRECOMPUTED_ONLY=1` nunca se mide: lo que no está guardado responde `404 not_found`.
 - Investigación: fotometría sobre las alas para fuentes saturadas, con R Draconis y Barnard como casos de prueba. R Draconis no tiene ningún píxel válido sobre la estrella en ninguna exposición.
 - **Hecho cuando:** clic en RW Aurigae muestra espectro y curva de luz coherentes en D1. RW Aurigae también satura en D1 en exposiciones individuales (37 de 56): el criterio se cumple con sus 18 puntos válidos, todos de D1.
 

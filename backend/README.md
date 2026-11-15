@@ -146,6 +146,14 @@ uv run python scripts/precompute.py wise0855 --refresh
 
 Alias: `barnard`, `epsindb`, `wise0855`, `rwaur`, `rdra`. Usa la red (IRSA y Sesame) y deja cada campo en `data/fields`, con la trayectoria del objeto. Código de salida: 0 todos `ready`, 2 alguno `partial` (`--refresh` lo completa), 1 alguno falló. No correrlo mientras el backend arma campos: cada proceso tendría su propio cupo de 10 descargas.
 
+Después de precalcular o rearmar un campo hay que generar sus espectros guardados (sin red, con los recortes de `cache/cutouts`):
+
+```powershell
+uv run python scripts/precompute_field_spectra.py --workers 4
+```
+
+Deja `data/spectra/fields/<id>.json.gz` con el espectro del objeto con nombre y de hasta 20 fuentes brillantes del campo. La imagen pública no lleva recortes: ahí un clic se ajusta a la fuente guardada más cercana.
+
 Medido el 2026-11-15 contra IRSA: Barnard (358 exposiciones) en 148 s, Epsilon Indi B (458) en 157 s, WISE 0855 (258) en 138 s.
 
 ### Despliegue público
