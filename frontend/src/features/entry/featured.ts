@@ -145,6 +145,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - M 104: banda 5 (senal sobre ruido de 188); el nucleo satura en las bandas 1 a 4.
  * - UGPS J0722-0540: banda 5 (senal sobre ruido de 18); en las bandas 1 a 4 no pasa de 3.
  * - 2MASS J0415-0935: banda 5 (senal sobre ruido de 18,5); en las demas no pasa de 9.
+ * - Ross 248: banda 6, la unica con exposiciones validas (8 de 77); satura en las demas.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -322,6 +323,15 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
       // (backend/data/sesame/2mass_j04151954_0935066-*.xml).
       "2MASSI J0415195-093506",
     ],
+  },
+  {
+    id: "ross-248",
+    label: "Ross 248",
+    name: "Ross 248",
+    ra: 355.4803,
+    dec: 44.1659,
+    band: 6,
+    aliases: [],
   },
 ];
 

@@ -74,6 +74,7 @@ FIELD_NAMES = {
     "6a4900bbafa7fc5e": "M 104",
     "fdd01819dc3a5ded": "UGPS J0722-0540",
     "baaad0979c9e8591": "2MASS J0415-0935",
+    "45a6913d1c9281bf": "Ross 248",
 }
 # Fuentes que se detectan de mas, por las que salen `empty` y no se guardan.
 SPARE_SOURCES = 10

@@ -152,6 +152,7 @@ describe("savedFieldByName", () => {
       "2MASS J04151954-0935066",
       "2MASSI J0415195-093506",
     ],
+    "ross-248": ["Ross 248", "ross-248", "Ross248"],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {

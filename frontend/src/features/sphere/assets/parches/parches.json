@@ -208,5 +208,15 @@
     "height_deg": 0.166563,
     "band": 5,
     "epoch": 1
+  },
+  "ross-248": {
+    "file": "ross-248.png",
+    "field": "45a6913d1c9281bf",
+    "ra": 355.4803,
+    "dec": 44.1659,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 6,
+    "epoch": 1
   }
 }
