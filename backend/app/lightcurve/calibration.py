@@ -22,6 +22,14 @@ y, por detector, si el metodo quedo validado: la estrella de control salio
 plana. Las alas no validaron en los detectores 2 y 3 (Barnard dispersa mas del
 15 % entre exposiciones del mismo canal, aunque las estrellas de campo de esas
 mismas imagenes son estables al 1-2 %).
+
+Esa falla no es un efecto del borde del hueco. En los coadds hay una franja de
+cobertura parcial junto al nucleo saturado que sesga las alas; por exposicion se
+comprobo que no aplica: el anillo ya tiene validos el 98-99 % de sus pixeles, la
+dispersion no baja al correrlo 3 o 6 px hacia afuera (detector 2: 21, 16 y 17 %;
+detector 3: 24, 23 y 24 %) y el valor de una medida no depende de la fraccion
+valida de su anillo (correlacion de 0,25 o menos, en valor absoluto). Lo que
+cambia de una exposicion a otra es el halo entero, junto con el tamano del hueco.
 """
 
 from __future__ import annotations
