@@ -106,6 +106,10 @@ Espectro: fotometría de apertura sobre cada exposición individual (no sobre el
 
 `/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink` — todo el estado en la URL. `fov` es el lado de la vista en grados (5′, 10′ o 30′); `name` es opcional y sirve para la mira y el rastro. `&embed=1` oculta la interfaz alrededor del visor. El ejemplo es WISE 0855 en su posición de 2026.
 
+- `mode`: `blink`, `difference`, `sum`, `redcyan`, `hold` o `journey` (viaje entre misiones). En un campo sin contexto guardado, o con `embed=1`, `journey` cae a `blink` sin reescribir la URL.
+- `ref`: época de referencia (la B de diferencia, rojo/cian y mantener apretado) elegida a mano. Sin `ref` es automática: entre las épocas que tienen, en la banda que se ve, al menos la mitad de las exposiciones de la mejor, la más lejana en fecha a la actual. Con esa regla y estirado lineal, WISE 0855 en B6 pasa de 2,5 a 7,6 sigmas en la diferencia. `ref` es del campo: se borra al cambiar de campo.
+- `stretch`: `linear`, `log` o `asinh`, si se eligió a mano. Sin `stretch`, diferencia y rojo/cian abren en lineal y los demás modos en asinh.
+
 ## 4. Alcance
 
 Entran (numeración del Whiteboard): 1–20, 23–26, 28–34, 37, 39–43, 47, 49.
