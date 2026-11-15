@@ -1,0 +1,142 @@
+{
+  "barnard": {
+    "file": "barnard.png",
+    "field": "95d4d56e51048aa4",
+    "ra": 269.4463,
+    "dec": 4.7683,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 2
+  },
+  "epsilon-indi-b": {
+    "file": "epsilon-indi-b.png",
+    "field": "35e036ee3dee68e9",
+    "ra": 331.0966,
+    "dec": -56.8006,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 4
+  },
+  "wise-0855": {
+    "file": "wise-0855.png",
+    "field": "bfcb329969cde224",
+    "ra": 133.7598,
+    "dec": -7.2422,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 6,
+    "epoch": 2
+  },
+  "rw-aurigae": {
+    "file": "rw-aurigae.png",
+    "field": "09413d9ee9d96187",
+    "ra": 76.9566,
+    "dec": 30.4013,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 1,
+    "epoch": 2
+  },
+  "r-draconis": {
+    "file": "r-draconis.png",
+    "field": "721817858ae5e0d2",
+    "ra": 248.1672,
+    "dec": 66.755,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 3
+  },
+  "proxima-centauri": {
+    "file": "proxima-centauri.png",
+    "field": "730d0dd6b3d7fe2a",
+    "ra": 217.3698,
+    "dec": -62.6739,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 2
+  },
+  "luhman-16": {
+    "file": "luhman-16.png",
+    "field": "61ed7e9a9a710d80",
+    "ra": 162.2955,
+    "dec": -53.317,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 2
+  },
+  "wolf-359": {
+    "file": "wolf-359.png",
+    "field": "71a5e25f75f18168",
+    "ra": 164.0925,
+    "dec": 6.9952,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 6,
+    "epoch": 2
+  },
+  "teegarden": {
+    "file": "teegarden.png",
+    "field": "cf57e1e6aa516371",
+    "ra": 43.2795,
+    "dec": 16.8538,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 2
+  },
+  "m-82": {
+    "file": "m-82.png",
+    "field": "616f2ebaf5239068",
+    "ra": 148.9685,
+    "dec": 69.6797,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 1,
+    "epoch": 1
+  },
+  "m-51": {
+    "file": "m-51.png",
+    "field": "d1182d95a5142a4d",
+    "ra": 202.4696,
+    "dec": 47.1953,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 1
+  },
+  "m-42": {
+    "file": "m-42.png",
+    "field": "f7b2e086cecaccae",
+    "ra": 83.8201,
+    "dec": -5.3876,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 2
+  },
+  "m-1": {
+    "file": "m-1.png",
+    "field": "12856d74fb2832ab",
+    "ra": 83.6324,
+    "dec": 22.0174,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 1
+  },
+  "kapteyn": {
+    "file": "kapteyn.png",
+    "field": "2748d945632b7032",
+    "ra": 77.9853,
+    "dec": -45.0596,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 3
+  }
+}
