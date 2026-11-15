@@ -481,6 +481,7 @@
       "code": "saturated_source",
       "ra": 76.95658,
       "dec": 30.40129,
+      "radius_arcsec": 9.23,
       "epochs": [1, 2, 3],
       "detectors": [1, 2, 3, 4, 5, 6],
       "n_exposures": 312,

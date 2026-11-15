@@ -1,10 +1,10 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatPercent, formatWavelength } from "@/lib/format";
 import styles from "./ChemicalFingerprint.module.css";
 import { chemicalFingerprint, type MoleculeEstimate } from "./fingerprint";
 import { bandCenter, MOLECULE_FORMULA } from "./molecules";
-import { useSpectrumTexts } from "./texts";
 import type { SpectrumBin } from "./types";
 
 export interface ChemicalFingerprintProps {
@@ -27,7 +27,7 @@ export function ChemicalFingerprint({
   excludedDetectors,
   excludedLabel,
 }: ChemicalFingerprintProps) {
-  const t = useSpectrumTexts();
+  const { t } = useTranslation("spectrum");
   const language = useLanguage();
   const rows = useMemo(
     () => chemicalFingerprint(bins, excludedDetectors ?? []),

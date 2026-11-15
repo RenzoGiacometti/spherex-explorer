@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, GlassPanel, QualityNotice, Toggle } from "@/components";
+import { useTranslation } from "react-i18next";
+import { Button, GlassPanel, IconButton, QualityNotice, Toggle } from "@/components";
 import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
 import {
@@ -21,7 +22,7 @@ import {
   SOUND_DURATION_S,
   type SoundPlayback,
 } from "./sonify";
-import { type SpectrumT, useSpectrumTexts } from "./texts";
+import type { SpectrumT } from "./texts";
 import type { SpectrumDocument, SpectrumWarning } from "./types";
 
 export interface SpectrumPanelProps {
@@ -29,8 +30,16 @@ export interface SpectrumPanelProps {
   readonly spectrum: SpectrumDocument;
   /** Nombre a mostrar. Por defecto, el del documento. */
   readonly name?: string | undefined;
+  /** Con esto el panel lleva su boton de cerrar, junto al nombre. */
+  readonly onClose?: (() => void) | undefined;
   readonly className?: string | undefined;
 }
+
+/**
+ * Avisos que cambian como se lee el espectro: van arriba, antes del grafico.
+ * `saturated_source` tiene la forma del aviso del campo (contrato, seccion 5).
+ */
+const PROMINENT_CODES: readonly string[] = ["saturated_source", "offset_source"];
 
 /** "B1" suelto, "B1, B3" salteado y "B1" raya "B4" si son seguidos. */
 export function formatBandList(detectors: readonly number[]): string {
@@ -58,7 +67,10 @@ function noticeText(warning: SpectrumWarning, language: Language, t: SpectrumT):
   };
   switch (warning.code) {
     case "saturated_source":
-      return t("notice.saturated", { bands, ...counts });
+      // Las cantidades son un agregado del espectro: el aviso del contrato no las trae.
+      return warning.n_exposures === undefined || warning.n_total === undefined
+        ? t("notice.saturatedNoCount", { bands })
+        : t("notice.saturated", { bands, ...counts });
     case "offset_source":
       return t("notice.offset", {
         bands,
@@ -80,8 +92,8 @@ function noticeText(warning: SpectrumWarning, language: Language, t: SpectrumT):
  *
  * Una fuente saturada no muestra grafico: muestra el aviso.
  */
-export function SpectrumPanel({ spectrum, name, className }: SpectrumPanelProps) {
-  const t = useSpectrumTexts();
+export function SpectrumPanel({ spectrum, name, onClose, className }: SpectrumPanelProps) {
+  const { t } = useTranslation("spectrum");
   const language = useLanguage();
   const [showExposures, setShowExposures] = useState(true);
   const [playhead, setPlayhead] = useState<number | null>(null);
@@ -128,6 +140,8 @@ export function SpectrumPanel({ spectrum, name, className }: SpectrumPanelProps)
     .filter((warning) => !(spectrum.status === "saturated" && warning.code === "saturated_source"))
     .map((warning) => ({ code: warning.code, text: noticeText(warning, language, t) }))
     .filter((notice): notice is { code: string; text: string } => notice.text !== null);
+  const prominent = notices.filter((notice) => PROMINENT_CODES.includes(notice.code));
+  const minor = notices.filter((notice) => !PROMINENT_CODES.includes(notice.code));
 
   const saturated = spectrum.warnings.find((warning) => warning.code === "saturated_source");
   // Donde la luz es de otra fuente, la huella quimica no se evalua.
@@ -148,12 +162,28 @@ export function SpectrumPanel({ spectrum, name, className }: SpectrumPanelProps)
       padding="roomy"
       className={className}
     >
-      <div className={styles.heading}>
-        <p className={styles.name}>{title}</p>
-        <p className={styles.position}>
-          {`${formatRa(spectrum.target.ra, { language })} ${formatDec(spectrum.target.dec, { language })}`}
-        </p>
+      <div className={styles.top}>
+        <div className={styles.heading}>
+          <p className={styles.name}>{title}</p>
+          <p className={styles.position}>
+            {`${formatRa(spectrum.target.ra, { language })} ${formatDec(spectrum.target.dec, { language })}`}
+          </p>
+        </div>
+        {onClose === undefined ? null : (
+          <IconButton icon="close" size="sm" label={t("panel.close")} onClick={onClose} />
+        )}
       </div>
+
+      {/* Fuente saturada y luz de otra fuente: antes del grafico, para que se lean primero. */}
+      {prominent.length === 0 ? null : (
+        <ul className={styles.prominent} data-spectrum-notices="prominent">
+          {prominent.map((notice) => (
+            <QualityNotice key={notice.code} as="li">
+              {notice.text}
+            </QualityNotice>
+          ))}
+        </ul>
+      )}
 
       {hasPoints ? (
         <>
@@ -201,19 +231,21 @@ export function SpectrumPanel({ spectrum, name, className }: SpectrumPanelProps)
             {spectrum.status === "saturated" ? t("panel.saturatedTitle") : t("panel.emptyTitle")}
           </QualityNotice>
           <p className={styles.note}>
-            {spectrum.status === "saturated"
-              ? t("panel.saturatedBody", {
-                  n: formatInteger(saturated?.n_exposures ?? 0),
-                  total: formatInteger(saturated?.n_total ?? spectrum.provenance.n_exposures),
-                })
-              : t("panel.emptyBody", { n: formatInteger(spectrum.provenance.n_exposures) })}
+            {spectrum.status !== "saturated"
+              ? t("panel.emptyBody", { n: formatInteger(spectrum.provenance.n_exposures) })
+              : saturated?.n_exposures === undefined
+                ? t("panel.saturatedBodyNoCount")
+                : t("panel.saturatedBody", {
+                    n: formatInteger(saturated.n_exposures),
+                    total: formatInteger(saturated.n_total ?? spectrum.provenance.n_exposures),
+                  })}
           </p>
         </div>
       )}
 
-      {notices.length === 0 ? null : (
+      {minor.length === 0 ? null : (
         <ul className={styles.notices}>
-          {notices.map((notice) => (
+          {minor.map((notice) => (
             <QualityNotice key={notice.code} as="li">
               {notice.text}
             </QualityNotice>

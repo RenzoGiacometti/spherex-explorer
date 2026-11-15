@@ -56,6 +56,8 @@ const LABEL_CHAR_WIDTH = 8;
 /** Radio de los anillos del rastro (8 px de diametro) y radio minimo de un contorno de saturacion. */
 const TRAIL_RADIUS = 4;
 const MIN_CONTOUR_RADIUS = 4;
+/** Radio minimo, en pantalla, del anillo que marca el punto del espectro. */
+const MIN_SPECTRUM_MARK_RADIUS = 7;
 
 /** Alto que ocupa el rotulo de la imagen: la pildora sola, o con su segunda linea. */
 const TAG_HEIGHT = 36;
@@ -66,6 +68,19 @@ export interface ImageAnnotationsProps {
   /** Transformacion vigente del visor: llega de `children` de ImageViewer. */
   readonly overlay: ViewerOverlay;
   readonly controller: ViewerController;
+  /**
+   * Punto del que se pidio el espectro, en pixeles de imagen, con el radio de
+   * la apertura si ya se conoce. null si no hay ninguno o si es el objeto
+   * buscado, que ya tiene su mira.
+   */
+  readonly spectrumMark?: SpectrumMark | null | undefined;
+}
+
+export interface SpectrumMark {
+  readonly x: number;
+  readonly y: number;
+  /** Radio de la apertura en pixeles de imagen; null mientras el espectro carga. */
+  readonly radiusPx: number | null;
 }
 
 /**
@@ -79,13 +94,15 @@ export interface ImageAnnotationsProps {
  * - el contorno de cada region saturada de los planos que se ven y, abajo a la
  *   derecha, el aviso de que hay una fuente saturada;
  * - la mira sobre el objeto buscado en la epoca que se ve, con su nombre y su
- *   movimiento por anio, y el rastro de las epocas anteriores.
+ *   movimiento por anio, y el rastro de las epocas anteriores;
+ * - un anillo blanco sobre el punto del que se pidio el espectro, del tamano
+ *   de la apertura.
  *
  * Los dibujos van en un SVG que los lectores de pantalla saltean; lo que dicen
  * esta, en palabras, en una lista que solo se lee. Mientras no hay ninguna
  * imagen en pantalla no se dibuja nada.
  */
-export function ImageAnnotations({ overlay, controller }: ImageAnnotationsProps) {
+export function ImageAnnotations({ overlay, controller, spectrumMark }: ImageAnnotationsProps) {
   const { t } = useTranslation("viewer");
   const language = useLanguage();
   const { view, source, preview, entries, mode } = controller;
@@ -236,6 +253,23 @@ export function ImageAnnotations({ overlay, controller }: ImageAnnotationsProps)
             </g>
           );
         })}
+
+        {/* Punto del espectro: un anillo blanco con la apertura con la que se mide. */}
+        {spectrumMark === null || spectrumMark === undefined
+          ? null
+          : (() => {
+              const center = imageToScreen(transform, spectrumMark.x, spectrumMark.y);
+              const radius = Math.max(
+                MIN_SPECTRUM_MARK_RADIUS,
+                (spectrumMark.radiusPx ?? 0) * transform.scale,
+              );
+              return (
+                <g data-annotation="spectrum-point">
+                  <circle className={styles.halo} cx={center.x} cy={center.y} r={radius} />
+                  <circle className={styles.line} cx={center.x} cy={center.y} r={radius} />
+                </g>
+              );
+            })()}
 
         {/* Mira: uno de los cuatro usos del acento. */}
         {reticle !== null && reticleShown ? (

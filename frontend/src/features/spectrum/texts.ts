@@ -1,20 +1,16 @@
-// Textos del panel de espectro (es, en), por i18next.
+// Textos del espectro.
 //
-// Viven al lado de la funcionalidad y se registran al cargar este modulo, para
-// no tocar src/i18n/resources.ts mientras la Etapa 2 se construye aparte. Al
-// integrarla: mover locales/es.json y locales/en.json a
-// src/i18n/locales/<idioma>/spectrum.json, sumarlos a resources.ts y reemplazar
-// `useSpectrumTexts()` por `useTranslation("spectrum")`.
+// Los del panel viven en src/i18n/locales/<idioma>/spectrum.json y se leen con
+// `useTranslation("spectrum")`, como el resto de la interfaz.
 //
-// Las claves se comprueban al compilar contra el JSON en espanol, igual que las
-// del resto de la interfaz.
+// Lo que queda aca es para la pagina de desarrollo (spectrum.devpage.tsx): sus
+// textos no viajan en el sitio compilado, asi que se registran al cargarla.
 
+import type { TFunction } from "i18next";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { i18n } from "@/i18n";
 import type { Language } from "@/i18n/languages";
-import en from "./locales/en.json";
-import es from "./locales/es.json";
 
 type Leaves<Tree, Prefix extends string = ""> = {
   [Key in keyof Tree & string]: Tree[Key] extends string
@@ -54,12 +50,5 @@ export function useTexts<Tree>(namespace: string): Translate<Tree> {
 
 export const SPECTRUM_NAMESPACE = "spectrum";
 
-registerTexts(SPECTRUM_NAMESPACE, { es, en });
-
-/** Traduce una clave del panel: "chart.axisX", "fingerprint.level.strong". */
-export type SpectrumT = Translate<typeof es>;
-
-/** Textos del panel en el idioma activo. */
-export function useSpectrumTexts(): SpectrumT {
-  return useTexts<typeof es>(SPECTRUM_NAMESPACE);
-}
+/** La `t` de `useTranslation("spectrum")`: "chart.axisX", "fingerprint.level.strong". */
+export type SpectrumT = TFunction<typeof SPECTRUM_NAMESPACE>;

@@ -41,3 +41,8 @@
   justify-content: space-between;
   gap: var(--space-xs) var(--space-md);
 }
+
+/* El boton de completar el campo queda a la derecha, tambien cuando va solo. */
+.complete {
+  margin-left: auto;
+}

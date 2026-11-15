@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { ApiErrorCode } from "@/api/errors";
 import { Button, ProgressBar, QualityNotice } from "@/components";
 import { selectLoadProgress, selectQueuePosition } from "@/data/selectors";
 import { useLanguage } from "@/i18n/useLanguage";
@@ -15,11 +17,16 @@ const SEPARATOR = String.fromCodePoint(0x00b7);
  * y al final campo completo o incompleto. Ocupa siempre su renglon, para que
  * la imagen no cambie de tamano al terminar la carga.
  *
+ * Un campo incompleto ofrece completarlo: el boton lo vuelve a pedir con
+ * `refresh` y el backend retoma solo los recortes que faltaron (el campo vuelve
+ * a mostrarse cargando, sin perder lo que ya se ve).
+ *
  * Debajo avisa si alguna imagen no se pudo bajar del backend, con un boton
  * para reintentar esas descargas.
  */
 export function LoadStatus() {
   const { t } = useTranslation("viewer");
+  const { t: tErrors } = useTranslation("errors");
   const language = useLanguage();
   const phase = useFieldStore((state) => state.phase);
   const status = useFieldStore((state) => state.meta?.status);
@@ -29,8 +36,23 @@ export function LoadStatus() {
     (state) => Object.keys(state.planeErrors).length + (state.cube.status === "error" ? 1 : 0),
   );
   const retryDownloads = useFieldStore((state) => state.retryDownloads);
+  const completeField = useFieldStore((state) => state.completeField);
+  /** El pedido de completar esta en camino. */
+  const [completing, setCompleting] = useState(false);
+  /** Por que fallo el ultimo pedido de completar; null si no fallo. */
+  const [completeError, setCompleteError] = useState<ApiErrorCode | null>(null);
 
   if (phase === "idle") return null;
+
+  const canComplete = phase === "ready" && status === "partial";
+  function handleComplete(): void {
+    setCompleting(true);
+    setCompleteError(null);
+    void completeField().then((failure) => {
+      setCompleting(false);
+      setCompleteError(failure);
+    });
+  }
 
   const cutouts =
     progress !== null && progress.total > 0
@@ -108,6 +130,16 @@ export function LoadStatus() {
   return (
     <div className={styles.status}>
       {content}
+      {canComplete ? (
+        <div className={styles.downloads}>
+          {completeError === null ? null : (
+            <QualityNotice>{tErrors(`code.${completeError}`)}</QualityNotice>
+          )}
+          <Button className={styles.complete} disabled={completing} onClick={handleComplete}>
+            {t("load.complete")}
+          </Button>
+        </div>
+      ) : null}
       {failedDownloads > 0 ? (
         <div className={styles.downloads}>
           <QualityNotice>

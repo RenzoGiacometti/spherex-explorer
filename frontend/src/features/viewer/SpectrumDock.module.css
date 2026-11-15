@@ -1,0 +1,58 @@
+/*
+ * Lugar del espectro en el visor. El vidrio lo pone el panel de adentro; aca
+ * solo va lo de los estados de carga y de error. Solo tokens.
+ */
+.dock {
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.heading {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xxs) var(--space-md);
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-title-font);
+  letter-spacing: var(--type-title-tracking);
+}
+
+.position {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  color: var(--color-text);
+}
+
+.retry {
+  align-self: flex-start;
+}

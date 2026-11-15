@@ -28,6 +28,7 @@ import {
   panByScreen,
   pinchView,
   type ScreenRect,
+  screenToImage,
   type ViewportSize,
   type ViewState,
   type ViewTransform,
@@ -65,6 +66,20 @@ export interface ViewerOverlay {
   readonly image: ImageSize;
   /** Centro y acercamiento vigentes. */
   readonly view: ViewState;
+}
+
+/** Un clic o un toque sobre la imagen (`onImageClick`). */
+export interface ImageClick {
+  /**
+   * Pixel de imagen donde cayo, con fracciones: las coordenadas del contrato,
+   * las mismas de view.ts y lib/wcs.ts (`x` hacia el oeste, `y` hacia el norte).
+   */
+  readonly x: number;
+  readonly y: number;
+  /** El mismo punto en pixeles CSS del visor. */
+  readonly screen: Point;
+  /** Transformacion vigente en ese momento, para medir distancias en pantalla. */
+  readonly transform: ViewTransform;
 }
 
 /** Lo que el visor deja manejar desde afuera, por `ref`. */
@@ -112,6 +127,14 @@ export interface ImageViewerProps {
   /** Se llama cuando se sabe con que se esta dibujando. */
   readonly onRendererChange?: ((info: RendererInfo | null) => void) | undefined;
   /**
+   * Un clic o un toque sobre la imagen: una pulsacion corta, de un solo
+   * puntero y sin desplazamiento. Arrastrar, pellizcar, la rueda y el doble
+   * clic no lo disparan. Llega con una demora corta (`CLICK_DELAY_MS`), la que
+   * hace falta para saber que no era el primero de un doble clic. Un clic fuera
+   * de la imagen o sobre un hijo interactivo de la capa de encima no avisa.
+   */
+  readonly onImageClick?: ((click: ImageClick) => void) | undefined;
+  /**
    * Lo que se dibuja encima de la imagen, por ejemplo un SVG con la mira. Recibe
    * la transformacion vigente y se actualiza en el mismo paso que la imagen.
    *
@@ -131,6 +154,10 @@ const TAP_MAX_MOVE = 10;
 const TAP_MAX_MS = 300;
 const DOUBLE_TAP_MAX_MS = 350;
 const DOUBLE_TAP_MAX_DISTANCE = 30;
+/** Una pulsacion mas larga que esto ya no es un clic: es mantener apretado. */
+const CLICK_MAX_MS = 400;
+/** Lo que espera un clic antes de avisar: si llega el segundo, era un doble clic. */
+export const CLICK_DELAY_MS = DOUBLE_TAP_MAX_MS;
 
 interface Tap {
   readonly at: number;
@@ -163,6 +190,7 @@ function currentPixelRatio(): number {
  *
  * - Rueda: acerca alrededor del cursor. Arrastre: desplaza. Dos dedos:
  *   pellizco. Doble clic o doble toque: vuelve a la vista de partida.
+ * - Un clic o un toque corto, sin desplazamiento, avisa por `onImageClick`.
  * - Teclado, con el foco en el visor: flechas, `+`, `-` y `0` o Inicio.
  * - No llama a la API ni lee estado global: recibe planos ya decodificados.
  */
@@ -178,6 +206,7 @@ export function ImageViewer({
   renderer: preferred = "webgl2",
   onOverlayChange,
   onRendererChange,
+  onImageClick,
   children,
   ref,
 }: ImageViewerProps) {
@@ -188,6 +217,14 @@ export function ImageViewer({
   const pointersRef = useRef(new Map<number, Point>());
   const startsRef = useRef(new Map<number, PointerStart>());
   const lastTapRef = useRef<Tap | null>(null);
+  /** Ultima pulsacion corta del mouse, para reconocer la segunda de un doble clic. */
+  const lastClickRef = useRef<Tap | null>(null);
+  /** Clic que espera su demora antes de avisar. */
+  const clickTimerRef = useRef<number | null>(null);
+  const onImageClickRef = useRef(onImageClick);
+  useEffect(() => {
+    onImageClickRef.current = onImageClick;
+  }, [onImageClick]);
 
   const [viewport, setViewport] = useState<ViewportSize | null>(null);
   const [pixelRatio, setPixelRatio] = useState(currentPixelRatio);
@@ -428,6 +465,42 @@ export function ImageViewer({
     return () => root.removeEventListener("wheel", onWheel);
   }, [homeZoom]);
 
+  // ---- Clic sobre la imagen ------------------------------------------------
+
+  function cancelPendingClick(): void {
+    if (clickTimerRef.current === null) return;
+    window.clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = null;
+  }
+
+  /** Avisa el clic despues de la demora, salvo que antes llegue otra pulsacion. */
+  function scheduleClick(point: Point): void {
+    cancelPendingClick();
+    if (onImageClickRef.current === undefined) return;
+    clickTimerRef.current = window.setTimeout(() => {
+      clickTimerRef.current = null;
+      const live = overlayRef.current;
+      const notify = onImageClickRef.current;
+      if (live === null || notify === undefined) return;
+      const pixel = screenToImage(live.transform, point.x, point.y);
+      // Fuera de la imagen (el fondo, a los costados) no hay nada que medir.
+      const inside =
+        pixel.x >= -0.5 &&
+        pixel.x <= live.image.width - 0.5 &&
+        pixel.y >= -0.5 &&
+        pixel.y <= live.image.height - 0.5;
+      if (inside) notify({ x: pixel.x, y: pixel.y, screen: point, transform: live.transform });
+    }, CLICK_DELAY_MS);
+  }
+
+  // Al desmontar, el clic que esperaba ya no avisa.
+  useEffect(
+    () => () => {
+      if (clickTimerRef.current !== null) window.clearTimeout(clickTimerRef.current);
+    },
+    [],
+  );
+
   /**
    * Dice si un evento empezo en algo de la capa de encima. La capa no recibe el
    * puntero, asi que solo pasa con un hijo que lo volvio a activar: ese gesto es
@@ -446,6 +519,11 @@ export function ImageViewer({
     const point = localPoint(event);
     pointersRef.current.set(event.pointerId, point);
     startsRef.current.set(event.pointerId, { at: event.timeStamp, point, moved: false });
+    // Un segundo dedo es un pellizco: ninguno de los dos toques es un clic.
+    if (pointersRef.current.size > 1) {
+      cancelPendingClick();
+      for (const start of startsRef.current.values()) start.moved = true;
+    }
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
     } catch {
@@ -464,6 +542,8 @@ export function ImageViewer({
     const start = startsRef.current.get(event.pointerId);
     if (start && Math.hypot(after.x - start.point.x, after.y - start.point.y) > TAP_MAX_MOVE) {
       start.moved = true;
+      // Empezo un arrastre: el toque de recien no era un clic sobre la imagen.
+      cancelPendingClick();
     }
 
     if (pointers.size === 1) {
@@ -503,11 +583,39 @@ export function ImageViewer({
     }
     if (pointers.size === 0) setDragging(false);
 
+    if (event.type !== "pointerup" || start === undefined) return;
+    const pressedMs = event.timeStamp - start.at;
+    const still = !start.moved && pointers.size === 0;
+
+    if (event.pointerType === "mouse") {
+      // El doble clic del mouse lo avisa el navegador (`dblclick`); aca solo se
+      // decide si esta pulsacion fue un clic y si es la segunda de un doble.
+      if (!still || pressedMs > CLICK_MAX_MS) {
+        lastClickRef.current = null;
+        cancelPendingClick();
+        return;
+      }
+      const before = lastClickRef.current;
+      const second =
+        before !== null &&
+        event.timeStamp - before.at <= DOUBLE_TAP_MAX_MS &&
+        Math.hypot(start.point.x - before.point.x, start.point.y - before.point.y) <=
+          DOUBLE_TAP_MAX_DISTANCE;
+      if (second) {
+        lastClickRef.current = null;
+        cancelPendingClick();
+      } else {
+        lastClickRef.current = { at: event.timeStamp, point: start.point };
+        scheduleClick(start.point);
+      }
+      return;
+    }
+
     // Doble toque: los navegadores no siempre mandan `dblclick` con el dedo.
-    if (event.type !== "pointerup" || event.pointerType === "mouse" || start === undefined) return;
-    const isTap = !start.moved && event.timeStamp - start.at <= TAP_MAX_MS && pointers.size === 0;
+    const isTap = still && pressedMs <= TAP_MAX_MS;
     if (!isTap) {
       lastTapRef.current = null;
+      cancelPendingClick();
       return;
     }
     const previous = lastTapRef.current;
@@ -518,9 +626,11 @@ export function ImageViewer({
         DOUBLE_TAP_MAX_DISTANCE;
     if (isDouble) {
       lastTapRef.current = null;
+      cancelPendingClick();
       setView(null);
     } else {
       lastTapRef.current = { at: event.timeStamp, point: start.point };
+      scheduleClick(start.point);
     }
   }
 
@@ -559,7 +669,11 @@ export function ImageViewer({
       onPointerCancel={handlePointerEnd}
       onDoubleClick={(event) => {
         // Dos clics seguidos sobre un hijo interactivo son del hijo.
-        if (!startedOnOverlay(event)) setView(null);
+        if (startedOnOverlay(event)) return;
+        // El primero de los dos no era un clic sobre la imagen.
+        cancelPendingClick();
+        lastClickRef.current = null;
+        setView(null);
       }}
       onKeyDown={handleKeyDown}
     >

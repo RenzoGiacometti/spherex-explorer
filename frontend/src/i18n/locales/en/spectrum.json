@@ -3,12 +3,14 @@
     "title": "Spectrum",
     "summary": "{{points}} points · {{epochs}} epochs",
     "unnamed": "Point on the sky",
+    "close": "Close the spectrum",
     "source": {
       "precomputed": "Precomputed",
       "computed": "Measured now"
     },
     "saturatedTitle": "Saturated source: no reliable spectrum",
     "saturatedBody": "The source is too bright for SPHEREx: its centre was saturated in {{n}} of {{total}} exposures and none gave a valid measurement. No spectrum is shown, to avoid giving false numbers.",
+    "saturatedBodyNoCount": "The source is too bright for SPHEREx: its centre was saturated and no exposure gave a valid measurement. No spectrum is shown, to avoid giving false numbers.",
     "emptyTitle": "No valid measurements at this point",
     "emptyBody": "None of the {{n}} exposures gave a clean measurement: there were discarded pixels inside the aperture.",
     "footnote": "Aperture photometry on each exposure: {{radius}} radius, background from an annulus, no aperture correction. Each exposure sees the object at a different wavelength and on a different date."
@@ -56,8 +58,14 @@
   },
   "notice": {
     "saturated": "Saturated source in {{bands}}: {{n}} of {{total}} exposures could not be measured.",
+    "saturatedNoCount": "Saturated source in {{bands}}: its centre has no valid measurement.",
     "offset": "In {{bands}} the measured light is offset {{offset}} from the object: another source is inside the aperture and those points mostly belong to it.",
     "masked": "{{n}} of {{total}} exposures were discarded because of bad pixels inside the aperture.",
     "waveTable": "These exposures come from a different processing version than the wavelength table: wavelengths could be shifted."
+  },
+  "request": {
+    "loading": "Measuring the spectrum",
+    "loadingNote": "That point is measured on every exposure of the field, one by one: it can take a few seconds.",
+    "errorTitle": "The spectrum could not be obtained"
   }
 }

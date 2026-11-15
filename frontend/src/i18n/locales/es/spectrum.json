@@ -3,12 +3,14 @@
     "title": "Espectro",
     "summary": "{{points}} puntos · {{epochs}} épocas",
     "unnamed": "Punto del cielo",
+    "close": "Cerrar el espectro",
     "source": {
       "precomputed": "Precalculado",
       "computed": "Medido ahora"
     },
     "saturatedTitle": "Fuente saturada: no hay un espectro confiable",
     "saturatedBody": "La fuente es demasiado brillante para SPHEREx: su centro quedó saturado en {{n}} de {{total}} exposiciones y ninguna dejó una medición válida. No se muestra un espectro para no dar números falsos.",
+    "saturatedBodyNoCount": "La fuente es demasiado brillante para SPHEREx: su centro quedó saturado y ninguna exposición dejó una medición válida. No se muestra un espectro para no dar números falsos.",
     "emptyTitle": "No hay mediciones válidas en este punto",
     "emptyBody": "Ninguna de las {{n}} exposiciones dejó una medición limpia: había píxeles descartados dentro de la apertura.",
     "footnote": "Fotometría de apertura sobre cada exposición: radio de {{radius}}, fondo en un anillo, sin corrección de apertura. Cada exposición ve el objeto en otra longitud de onda y en otra fecha."
@@ -56,8 +58,14 @@
   },
   "notice": {
     "saturated": "Fuente saturada en {{bands}}: {{n}} de {{total}} exposiciones no se pudieron medir.",
+    "saturatedNoCount": "Fuente saturada en {{bands}}: su centro no tiene medición válida.",
     "offset": "En {{bands}} la luz medida está corrida {{offset}} del objeto: hay otra fuente dentro de la apertura y esos puntos son sobre todo de ella.",
     "masked": "{{n}} de {{total}} exposiciones se descartaron por píxeles defectuosos dentro de la apertura.",
     "waveTable": "Estas exposiciones son de otra versión de procesamiento que la tabla de longitudes de onda: las longitudes de onda podrían estar corridas."
+  },
+  "request": {
+    "loading": "Midiendo el espectro",
+    "loadingNote": "Se mide ese punto en cada exposición del campo, una por una: puede tardar unos segundos.",
+    "errorTitle": "No se pudo obtener el espectro"
   }
 }

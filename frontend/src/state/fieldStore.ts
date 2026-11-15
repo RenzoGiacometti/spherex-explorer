@@ -21,6 +21,9 @@
 //   las de la banda actual se renuevan solas cuando el plano cambia de
 //   revision. `selectAuxLayers` entrega solo las de la imagen que se ve.
 // - Al cambiar de campo se cancela todo lo del anterior: pedidos, cola y flujo.
+// - `completeField` vuelve a pedir, con `refresh: true`, un campo que termino
+//   incompleto. El backend lo arma de nuevo con el mismo id y el store sigue
+//   sus eventos como los de un campo nuevo, sin soltar lo que ya se ve.
 //
 // Las imagenes se guardan como `PlaneImage` (src/viewer/planeImage.ts), que es
 // lo que recibe el visor.
@@ -28,7 +31,7 @@
 import { create } from "zustand";
 import { cubePlaneView, type GridShape, isInCube, planeView, splitAux } from "@/api/binary";
 import { type ApiClient, api as defaultApi } from "@/api/client";
-import { isAbortError, isApiError } from "@/api/errors";
+import { type ApiErrorCode, isAbortError, isApiError } from "@/api/errors";
 import {
   type FieldEventsOptions,
   type FieldEventsSubscription,
@@ -131,6 +134,18 @@ export interface FieldActions {
   retry(): Promise<void>;
   /** Vuelve a intentar las descargas que fallaron: planos, vista provisoria y cubo. */
   retryDownloads(): void;
+  /**
+   * Completa un campo que termino `partial`: lo vuelve a pedir con
+   * `refresh: true`. Si el backend lo vuelve a armar (202), el campo pasa a
+   * `loading` y sigue los eventos como uno nuevo; lo que ya estaba bajado se
+   * sigue viendo hasta que llega su reemplazo. Si responde el campo terminado
+   * (200: un precalculado ignora `refresh`), queda como estaba.
+   *
+   * La promesa nunca se rechaza: da null si el pedido salio bien o no habia
+   * nada que completar, y el codigo del error si fallo. Un fallo no toca el
+   * campo, que sigue a la vista.
+   */
+  completeField(): Promise<ApiErrorCode | null>;
   /** Cierra el campo y cancela todo lo que estaba en curso. */
   close(): void;
 }
@@ -174,6 +189,13 @@ interface Session {
   /** Nombre para el que ya se pidio /track en este campo. */
   trackName: string | null;
   trackController: AbortController | null;
+  /** El POST de `completeField` esta en camino. */
+  completing: boolean;
+  /**
+   * El campo se esta volviendo a armar (`completeField`): las imagenes ya
+   * bajadas se conservan hasta que llega su reemplazo.
+   */
+  rebuilding: boolean;
 }
 
 function newSession(): Session {
@@ -187,6 +209,8 @@ function newSession(): Session {
     finalMetaRequested: false,
     trackName: null,
     trackController: null,
+    completing: false,
+    rebuilding: false,
   };
 }
 
@@ -233,10 +257,15 @@ function needsFinalMeta(meta: FieldMeta | null): boolean {
 /**
  * Saca lo bajado que ya no corresponde al documento: planos que dejaron de
  * tener binario o cuya revision retrocedio (el trabajo se rehizo).
+ *
+ * Con `keepUnbuilt` se conserva lo de los planos que todavia no tienen
+ * binario: mientras un campo se vuelve a armar, la imagen anterior se sigue
+ * viendo hasta que llega la nueva.
  */
 function pruneByPlane<Entry extends { rev: number }>(
   entries: Readonly<Record<string, Entry>>,
   meta: FieldMeta,
+  keepUnbuilt = false,
 ): Readonly<Record<string, Entry>> {
   const kept: Record<string, Entry> = {};
   let changed = false;
@@ -244,10 +273,28 @@ function pruneByPlane<Entry extends { rev: number }>(
     const parsed = parsePlaneKey(key);
     const plane =
       parsed === null ? undefined : findPlane(meta.planes, parsed.epoch, parsed.detector);
-    if (plane && hasBinary(plane) && plane.rev >= entry.rev) kept[key] = entry;
+    const keep = plane && hasBinary(plane) ? plane.rev >= entry.rev : keepUnbuilt;
+    if (keep) kept[key] = entry;
     else changed = true;
   }
   return changed ? kept : entries;
+}
+
+/**
+ * Documento de un campo que se vuelve a armar, mientras todavia no paso por
+ * `listed`: conserva la grilla, las epocas y los planos del anterior, asi lo
+ * que se ve no desaparece mientras el trabajo espera turno o lista exposiciones.
+ */
+function keepListedParts(next: FieldMeta, previous: FieldMeta | null): FieldMeta {
+  if (previous === null || isListed(next) || !isListed(previous)) return next;
+  return {
+    ...next,
+    grid: previous.grid,
+    detectors: previous.detectors,
+    epochs: previous.epochs,
+    planes: previous.planes,
+    flags: previous.flags,
+  };
 }
 
 export function createFieldStore(deps: FieldStoreDeps = {}) {
@@ -604,11 +651,13 @@ export function createFieldStore(deps: FieldStoreDeps = {}) {
     // ---- Metadatos --------------------------------------------------------
 
     /** Lleva lo bajado a lo que dice un documento nuevo. */
-    function replaceMeta(meta: FieldMeta): void {
+    function replaceMeta(incoming: FieldMeta): void {
       const state = get();
+      const rebuilding = session?.rebuilding ?? false;
+      const meta = rebuilding ? keepListedParts(incoming, state.meta) : incoming;
       set({
         meta,
-        planes: pruneByPlane(state.planes, meta),
+        planes: pruneByPlane(state.planes, meta, rebuilding),
         planeErrors: pruneByPlane(state.planeErrors, meta),
         aux: pruneByPlane(state.aux, meta),
       });
@@ -798,6 +847,11 @@ export function createFieldStore(deps: FieldStoreDeps = {}) {
           set({ meta, phase: "ready", stream: "closed" });
           // El cliente cierra de su lado para que nada reconecte solo.
           closeStream(current);
+          if (current.rebuilding) {
+            // Termino de rearmarse: lo que no tenga reemplazo ya no corresponde.
+            current.rebuilding = false;
+            if (meta !== null) replaceMeta(meta);
+          }
           finalize(current);
           break;
         case "error":
@@ -892,6 +946,73 @@ export function createFieldStore(deps: FieldStoreDeps = {}) {
       reconcile();
     }
 
+    async function complete(): Promise<ApiErrorCode | null> {
+      const current = session;
+      const state = get();
+      if (
+        !current ||
+        current.completing ||
+        state.request === null ||
+        state.phase !== "ready" ||
+        state.meta?.status !== "partial"
+      ) {
+        return null;
+      }
+      const { request, band } = state;
+      current.completing = true;
+
+      let response: FieldResponse;
+      try {
+        response = await api.requestField(
+          { ra: request.ra, dec: request.dec, fov: request.fov, band, refresh: true },
+          { signal: current.controller.signal },
+        );
+      } catch (error) {
+        current.completing = false;
+        if (isAbortError(error) || !isCurrent(current)) return null;
+        // El campo incompleto sigue a la vista: el fallo se informa al lado del boton.
+        console.warn("POST /field con refresh: sin respuesta", error);
+        return errorCodeOf(error);
+      }
+      current.completing = false;
+      if (!isCurrent(current)) return null;
+
+      const before = get();
+      if (isFinishedStatus(response.meta.status)) {
+        // 200: un campo precalculado ignora `refresh` y vuelve el mismo documento.
+        const same =
+          response.id === before.fieldId &&
+          response.meta.rev === before.meta?.rev &&
+          response.meta.status === before.meta?.status;
+        if (same) return null;
+        // Ya estaba completo del lado del backend: manda su documento.
+        set({ fieldId: response.id, cube: { status: "idle", error: null } });
+        replaceMeta(response.meta);
+        current.finalMetaRequested = false;
+        finalize(current);
+        reconcile();
+        return null;
+      }
+
+      // 202: el campo se vuelve a armar con el mismo id. Se siguen sus eventos
+      // como los de un campo nuevo, sin soltar las imagenes que ya estan.
+      closeStream(current);
+      current.rebuilding = true;
+      current.finalMetaRequested = false;
+      set({
+        fieldId: response.id,
+        phase: "loading",
+        error: null,
+        cube: { status: "idle", error: null },
+      });
+      replaceMeta(response.meta);
+      connect(current, response.id);
+      const currentBand = get().band;
+      if (currentBand !== band) void sendPriority(current, response.id, currentBand);
+      reconcile();
+      return null;
+    }
+
     return {
       ...INITIAL_FIELD_STATE,
 
@@ -978,6 +1099,10 @@ export function createFieldStore(deps: FieldStoreDeps = {}) {
           cube: state.cube.status === "error" ? { status: "idle", error: null } : state.cube,
         });
         reconcile();
+      },
+
+      completeField() {
+        return complete();
       },
 
       close() {

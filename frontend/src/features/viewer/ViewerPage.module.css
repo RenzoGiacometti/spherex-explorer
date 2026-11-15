@@ -36,6 +36,14 @@
   background-color: var(--color-void);
 }
 
+/*
+ * Con el espectro abierto la columna derecha se ensancha para que entre el
+ * grafico; la imagen se vuelve a encuadrar en lo que queda libre.
+ */
+.page[data-spectrum="open"] {
+  --viewer-column-right: clamp(380px, 36vw, 560px);
+}
+
 .viewer {
   position: absolute;
   inset: 0;
@@ -112,6 +120,10 @@
     gap: var(--space-sm);
     padding: 0 var(--space-sm) var(--space-sm);
   }
+
+  .page[data-spectrum="open"] {
+    --viewer-column-right: clamp(320px, 40vw, 420px);
+  }
 }
 
 /*
@@ -145,6 +157,16 @@
   .left,
   .right {
     overflow-y: visible;
+  }
+
+  /* El espectro va justo debajo de la imagen, antes de la linea de tiempo. */
+  .page[data-spectrum="open"] {
+    grid-template-areas:
+      "top"
+      "stage"
+      "right"
+      "dock"
+      "left";
   }
 }
 
@@ -210,11 +232,30 @@
 }
 
 /*
- * Con el cajon de herramientas abierto siguen ocupando su lugar, para que la
- * imagen no cambie de tamano, pero no se ven ni reciben el foco.
+ * Con el cajon de herramientas o el espectro abiertos siguen ocupando su
+ * lugar, para que la imagen no cambie de tamano, pero no se ven ni reciben el
+ * foco.
  */
 .controls[data-covered="true"] {
   visibility: hidden;
+}
+
+/*
+ * Hoja del espectro en el celular: sale del lugar de los controles y sube
+ * sobre la parte de abajo de la imagen, hasta algo mas de media pantalla, para
+ * que el grafico entre. El resto de la imagen sigue a la vista; lo que no entra
+ * se desplaza adentro.
+ */
+.sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: max(100%, 56vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  pointer-events: auto;
 }
 
 /*

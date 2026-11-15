@@ -53,8 +53,15 @@ const epochSchema = z.object({
 
 // Un aviso lleva `code` y los parametros de ese codigo. Los codigos que esta
 // interfaz no conoce pasan igual y se ignoran al mostrarlos.
+//
+// `saturated_source` tiene la forma del aviso del campo (docs/contrato-cubo.md,
+// seccion 5): `ra`, `dec`, `radius_arcsec`, `epochs` y `detectors`. El espectro
+// puede sumarle `n_exposures` y `n_total` (exposiciones saturadas y medidas).
 const warningSchema = z.object({
   code: z.string(),
+  ra: z.number().optional(),
+  dec: z.number().optional(),
+  radius_arcsec: z.number().optional(),
   detectors: z.array(z.number().int()).optional(),
   epochs: z.array(z.number().int()).optional(),
   n_exposures: z.number().optional(),

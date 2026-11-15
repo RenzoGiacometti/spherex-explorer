@@ -4,6 +4,7 @@
     "field": "Campo",
     "viewerLabel": "Imagen del campo",
     "viewerHelp": "Rueda o pellizco para acercar, arrastre para desplazar y doble clic para volver a la vista de partida. Con el teclado: flechas, más, menos y cero.",
+    "viewerHelpSpectrum": "Un clic o un toque sobre la imagen muestra el espectro de ese punto.",
     "annotationsLabel": "Sobre la imagen"
   },
   "field": {
@@ -112,6 +113,7 @@
     "readyDetail": "{{total}} recortes",
     "partial": "Campo incompleto",
     "partialDetail": "faltaron {{failed}} de {{total}} recortes",
+    "complete": "Completar el campo",
     "interrupted": "Carga interrumpida",
     "notLoaded": "Campo sin cargar",
     "downloadFailed": "Imágenes que no se pudieron bajar: {{n}}.",

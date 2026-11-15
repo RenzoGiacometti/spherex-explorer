@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatBand, formatDecimal, formatInteger, formatWavelength, MICRO } from "@/lib/format";
@@ -23,7 +24,7 @@ import {
 } from "./chartScale";
 import { bandCenter, MOLECULE_BANDS, MOLECULE_FORMULA } from "./molecules";
 import styles from "./SpectrumChart.module.css";
-import { type SpectrumT, useSpectrumTexts } from "./texts";
+import type { SpectrumT } from "./texts";
 import type { SpectrumBin, SpectrumDocument } from "./types";
 
 export interface SpectrumChartProps {
@@ -90,7 +91,7 @@ export function SpectrumChart({
   showExposures = true,
   playhead = null,
 }: SpectrumChartProps) {
-  const t = useSpectrumTexts();
+  const { t } = useTranslation("spectrum");
   const language = useLanguage();
   const [wrapperRef, width] = useWidth();
   const clipId = `spectrum-clip-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;

@@ -1,11 +1,9 @@
-// Espectro (Etapa 2): componentes sueltos, listos para sumar al visor.
-//
-// Como integrarlo:
-// 1. Al hacer clic en un punto del visor, pedir el espectro con
-//    `fetchSpectrum({ ra, dec, field })` (y `pmRa`, `pmDec` de /api/resolve si
-//    el objeto se mueve).
-// 2. Dibujar `<SpectrumPanel spectrum={documento} />` en un panel del visor.
-// 3. Mover los textos a src/i18n (ver texts.ts).
+// Espectro (Etapa 2). El visor lo usa asi (features/viewer/useSpectrum.ts y
+// SpectrumDock.tsx):
+// 1. Un clic en la imagen pide el espectro con `fetchSpectrum({ ra, dec, field })`
+//    (y `pmRa`, `pmDec`, `epoch` de /api/resolve si es el objeto buscado).
+// 2. El documento se dibuja con `<SpectrumPanel spectrum={documento} />`.
+// 3. Los textos estan en src/i18n/locales/<idioma>/spectrum.json.
 //
 // Para verlo sin el visor: /?dev=spectrum con `pnpm dev` (spectrum.devpage.tsx),
 // con los espectros precalculados de los cinco objetos de prueba.
@@ -36,7 +34,7 @@ export {
   type SoundPlayback,
   type SoundStep,
 } from "./sonify";
-export { SPECTRUM_NAMESPACE, useSpectrumTexts } from "./texts";
+export { SPECTRUM_NAMESPACE, type SpectrumT } from "./texts";
 export {
   parseSpectrum,
   type SpectrumBin,

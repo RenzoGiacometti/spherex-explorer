@@ -35,12 +35,13 @@ export {
   sceneSize,
 } from "./compose";
 export type {
+  ImageClick,
   ImageViewerHandle,
   ImageViewerProps,
   ViewerInsets,
   ViewerOverlay,
 } from "./ImageViewer";
-export { ImageViewer } from "./ImageViewer";
+export { CLICK_DELAY_MS, ImageViewer } from "./ImageViewer";
 export type { MaskValue, PlaneImage } from "./planeImage";
 export { MASK_NO_DATA, MASK_SATURATED, MASK_VALID, toPlaneImage } from "./planeImage";
 export type {

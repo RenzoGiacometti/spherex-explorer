@@ -4,6 +4,7 @@
     "field": "Field",
     "viewerLabel": "Image of the field",
     "viewerHelp": "Scroll or pinch to zoom, drag to pan and double-click to go back to the starting view. With the keyboard: arrow keys, plus, minus and zero.",
+    "viewerHelpSpectrum": "A click or a tap on the image shows the spectrum of that point.",
     "annotationsLabel": "On the image"
   },
   "field": {
@@ -112,6 +113,7 @@
     "readyDetail": "{{total}} cutouts",
     "partial": "Field incomplete",
     "partialDetail": "{{failed}} of {{total}} cutouts missing",
+    "complete": "Complete the field",
     "interrupted": "Loading interrupted",
     "notLoaded": "Field not loaded",
     "downloadFailed": "Images that could not be downloaded: {{n}}.",
