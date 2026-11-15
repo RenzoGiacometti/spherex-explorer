@@ -1,0 +1,16 @@
+{
+  "code": {
+    "invalid_request": "El pedido no es válido. Hay que revisar las coordenadas y el campo de visión.",
+    "not_resolved": "No se encontró ningún objeto con ese nombre.",
+    "not_found": "Ese campo no existe o ya no está disponible.",
+    "not_ready": "Los datos todavía no están listos.",
+    "no_coverage": "SPHEREx todavía no observó esa zona del cielo.",
+    "queue_full": "Hay muchos pedidos en espera.",
+    "upstream_unavailable": "El archivo de datos no responde.",
+    "network": "No se pudo conectar con el servidor.",
+    "invalid_response": "El servidor respondió algo inesperado.",
+    "unknown": "Ocurrió un error inesperado."
+  },
+  "retry": "Reintentar",
+  "retryIn": "Se puede reintentar en {{seconds}} s."
+}

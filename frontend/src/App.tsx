@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { DevPageHost } from "@/dev/DevPageHost";
-import { EntryPlaceholder } from "@/features/entry/EntryPlaceholder";
-import { ViewerPlaceholder } from "@/features/viewer/ViewerPlaceholder";
+import { EntryPage } from "@/features/entry";
+import { ViewerPage } from "@/features/viewer";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
 import { useUrlState } from "@/state/urlState";
 
@@ -24,5 +24,5 @@ export function App() {
     : null;
   if (devPage) return <DevPageHost id={devPage} />;
 
-  return showViewer ? <ViewerPlaceholder /> : <EntryPlaceholder />;
+  return showViewer ? <ViewerPage /> : <EntryPage />;
 }

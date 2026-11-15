@@ -10,10 +10,12 @@
 import enCommon from "./locales/en/common.json";
 import enComponents from "./locales/en/components.json";
 import enEntry from "./locales/en/entry.json";
+import enErrors from "./locales/en/errors.json";
 import enViewer from "./locales/en/viewer.json";
 import esCommon from "./locales/es/common.json";
 import esComponents from "./locales/es/components.json";
 import esEntry from "./locales/es/entry.json";
+import esErrors from "./locales/es/errors.json";
 import esViewer from "./locales/es/viewer.json";
 
 export const DEFAULT_NAMESPACE = "common";
@@ -23,12 +25,14 @@ export const resources = {
     common: esCommon,
     components: esComponents,
     entry: esEntry,
+    errors: esErrors,
     viewer: esViewer,
   },
   en: {
     common: enCommon,
     components: enComponents,
     entry: enEntry,
+    errors: enErrors,
     viewer: enViewer,
   },
 } as const;
