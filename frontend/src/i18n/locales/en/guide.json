@@ -9,12 +9,14 @@
     "step": {
       "band": "Pick band B6, the reddest one SPHEREx has; the tour switches the stretch to linear for you, which quiets the background noise.",
       "play": "Play the blink and watch the center of the image: one dot shifts while the stars stay put.",
-      "redcyan": "Switch to Red/cyan mode; the tour picks the two sharpest epochs to compare for you.",
+      "redcyan": "Switch to Red/cyan mode, which compares the two sharpest epochs.",
       "locate": "Find the object that moves, which has a cyan side and a red side while the stars stay white, and click or tap it.",
-      "closing": "WISE 0855 is a brown dwarf: a body that never gathered enough mass to ignite like a star and is as cold as the North Pole, so nearly all of its light comes out at the longest infrared wavelengths and it only shows up in the reddest bands, B5 and B6."
+      "closing": "WISE 0855 is a brown dwarf: a body that never gathered enough mass to ignite like a star and is as cold as the North Pole, so nearly all of its light comes out at the longest infrared wavelengths and it only shows up in the reddest bands, B5 and B6. Click or tap the reticle to open its spectrum.",
+      "spectrum": "The light the spectrum shows below 3.8 µm belongs to a background star that falls inside the same aperture, a few arcseconds away; WISE 0855's own light is the rise at the red end, between 4 and 5 µm, because at about 250 K it emits almost nothing at shorter wavelengths."
     },
     "miss": "Not there: look for the dot that is half cyan and half red.",
     "reveal": "Show me where it is",
+    "openSpectrum": "Open its spectrum",
     "skip": "Skip",
     "finish": "Finish"
   }

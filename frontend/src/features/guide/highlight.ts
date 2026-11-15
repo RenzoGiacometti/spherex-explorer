@@ -2,7 +2,7 @@
 // CSS de la ventana. El anillo es un elemento fijo que se dibuja encima de la
 // pantalla del visor (GuideTour.tsx); aca solo se decide su lugar.
 
-import { searchArea } from "./locate";
+import { hitRadius, searchArea } from "./locate";
 import { TOUR_BAND, TOUR_MODE, type TourStep } from "./tour";
 import {
   findButton,
@@ -40,7 +40,7 @@ export const RING_OFFSET_PX = 4;
 /**
  * Control sobre el que actua la persona en un paso: la celda B6, el boton de
  * reproducir, la celda de rojo/cian o la imagen. null si el paso no tiene
- * (el cierre) o si el control no esta en pantalla.
+ * (el ultimo) o si el control no esta en pantalla.
  */
 export function findStepControl(
   step: TourStep,
@@ -55,6 +55,7 @@ export function findStepControl(
     case "redcyan":
       return findOptionCell(page, labels.modeGroup, TOUR_MODE);
     case "locate":
+    case "closing":
       return findImageRoot(page);
     default:
       return null;
@@ -65,6 +66,7 @@ export function findStepControl(
  * Lugar del anillo para un paso. En los pasos con control, lo rodea. En el de
  * ubicar el objeto, marca una zona de la imagen que lo contiene: la imagen
  * entera llega a los bordes de la ventana y un anillo alrededor no diria nada.
+ * En el cierre rodea la mira, con el radio en el que un clic cuenta.
  */
 export function measureHighlight(
   step: TourStep,
@@ -81,6 +83,20 @@ export function measureHighlight(
       top: area.y - area.radius,
       width: 2 * area.radius,
       height: 2 * area.radius,
+      shape: "round",
+    };
+  }
+  if (step === "closing") {
+    // La mira ya se ve: el anillo marca donde va el clic que abre el espectro.
+    const target = readTargetPoint(page);
+    if (target === null) return null;
+    const radius = hitRadius(readPixelsPerArcsec(page));
+    return {
+      step,
+      left: target.x - radius,
+      top: target.y - radius,
+      width: 2 * radius,
+      height: 2 * radius,
       shape: "round",
     };
   }

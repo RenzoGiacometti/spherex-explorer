@@ -59,6 +59,9 @@ export const useGuideStore = create<GuideStore>()((set, get) => ({
  */
 export function startTour(): void {
   if (TOUR_START === null) return;
-  useUrlState.getState().update({ ...TOUR_START, embed: false }, { history: "push" });
+  // Sin epoca de referencia ni estirado elegidos a mano: el recorrido parte de los del visor.
+  useUrlState
+    .getState()
+    .update({ ...TOUR_START, ref: null, stretch: null, embed: false }, { history: "push" });
   useGuideStore.getState().start();
 }

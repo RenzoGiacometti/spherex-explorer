@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { DevPageHost } from "@/dev/DevPageHost";
+import { GuideTour } from "@/features/guide";
 import { ViewerPage } from "@/features/viewer";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
 import { useFieldUrlSync } from "@/state/fieldUrlSync";
@@ -14,7 +15,9 @@ const SpherePage = lazy(() =>
 /**
  * Cascaron de la aplicacion. La URL decide que se ve: sin coordenadas, la
  * entrada, que es la esfera celeste (src/features/sphere); con `ra` y `dec`, el
- * visor (SPEC.md, seccion 3.3).
+ * visor (SPEC.md, seccion 3.3). Junto al visor va el recorrido guiado
+ * (src/features/guide), que no dibuja nada hasta que se lo inicia desde la
+ * entrada.
  */
 export function App() {
   const showViewer = useUrlState((state) => state.ra !== null && state.dec !== null);
@@ -35,7 +38,15 @@ export function App() {
     : null;
   if (devPage) return <DevPageHost id={devPage} />;
 
-  if (showViewer) return <ViewerPage />;
+  if (showViewer) {
+    return (
+      <>
+        {/* Antes que la pantalla: sus botones son lo primero que encuentra el tabulador. */}
+        <GuideTour />
+        <ViewerPage />
+      </>
+    );
+  }
   return (
     <Suspense fallback={null}>
       <SpherePage />

@@ -168,6 +168,14 @@
   white-space: nowrap;
 }
 
+/*
+ * Recorrido guiado: renglon propio sobre el buscador, del ancho de su texto.
+ * En el celular ocupa todo el ancho, como las demas acciones.
+ */
+.guide {
+  align-self: flex-start;
+}
+
 /* Ventana al cielo: abajo, en la zona del pulgar, solo el boton principal. */
 .windowDock {
   display: flex;
@@ -278,6 +286,10 @@
 
   .actions {
     flex-direction: column;
+  }
+
+  .guide {
+    align-self: stretch;
   }
 
   .credit {

@@ -9,12 +9,14 @@
     "step": {
       "band": "Elegí la banda B6, la más roja de SPHEREx; la guía pasa sola el estirado a lineal, que apaga el ruido del fondo.",
       "play": "Reproducí el parpadeo y mirá el centro de la imagen: un punto se corre mientras las estrellas quedan quietas.",
-      "redcyan": "Activá el modo Rojo/cian; la guía elige sola las dos épocas más nítidas para comparar.",
+      "redcyan": "Activá el modo Rojo/cian, que compara las dos épocas más nítidas.",
       "locate": "Ubicá el objeto que se mueve, que tiene un lado cian y otro rojo mientras las estrellas quedan blancas, y marcalo con un clic o un toque.",
-      "closing": "WISE 0855 es una enana marrón: un cuerpo que no juntó masa suficiente para encenderse como una estrella y que es tan frío como el Polo Norte, así que casi toda su luz sale en el infrarrojo de onda más larga y solo se ve en las bandas más rojas, B5 y B6."
+      "closing": "WISE 0855 es una enana marrón: un cuerpo que no juntó masa suficiente para encenderse como una estrella y que es tan frío como el Polo Norte, así que casi toda su luz sale en el infrarrojo de onda más larga y solo se ve en las bandas más rojas, B5 y B6. Marcá la mira con un clic o un toque para abrir su espectro.",
+      "spectrum": "La luz que el espectro muestra por debajo de 3,8 µm es de una estrella de fondo que entra en la misma apertura, a pocos segundos de arco; la de WISE 0855 es la subida del extremo rojo, entre 4 y 5 µm, porque a unos 250 K casi no emite en longitudes de onda más cortas."
     },
     "miss": "Ahí no: buscá el punto mitad cian y mitad rojo.",
     "reveal": "Mostrar dónde está",
+    "openSpectrum": "Abrir su espectro",
     "skip": "Saltar",
     "finish": "Terminar"
   }

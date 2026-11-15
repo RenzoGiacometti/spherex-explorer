@@ -6,20 +6,28 @@
 // pide nada: mira la URL y lo que el visor publica en el documento
 // (viewerDom.ts). Los controles del visor siguen andando como siempre; el
 // recorrido espera a que la persona haga lo que pide cada paso. Lo unico que
-// cambia por su cuenta es el estirado, al elegir B6, y la epoca de referencia,
-// al activar rojo/cian (viewerControls.ts).
+// cambia por su cuenta va por la URL: el estirado, al elegir B6, y las epocas
+// que se comparan, al activar rojo/cian.
 //
-// Mientras dura, la mira y el rastro que el visor dibuja sobre el objeto quedan
-// ocultos: el recorrido consiste en encontrarlo. Aparecen en el cierre, o al
-// saltarlo.
+// El clic sobre la imagen lo toma por la regla del visor
+// (features/viewer/imageClick.ts, con el nombre "guide") mientras pide marcar
+// el objeto, para que ese clic le responda al recorrido y no abra el espectro.
+// Lo suelta al entrar al ultimo paso, y ahi hace un clic sobre la mira: el
+// clic por defecto del visor abre el panel del objeto.
+//
+// Mientras se busca, la mira y el rastro que el visor dibuja sobre el objeto
+// quedan ocultos: el recorrido consiste en encontrarlo. Aparecen en el cierre,
+// o al saltarlo.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, GlassPanel } from "@/components";
 import a11y from "@/components/a11y.module.css";
+// La regla del clic no sale por el indice del visor: se importa de su archivo.
+import { useImageClickTool } from "@/features/viewer/imageClick";
 import { formatInteger } from "@/lib/format";
-import { useFieldStore } from "@/state/fieldStore";
 import { useUrlState } from "@/state/urlState";
+import type { ImageClick } from "@/viewer/ImageViewer";
 import styles from "./guide.module.css";
 import { useGuideStore } from "./guideStore";
 import {
@@ -29,11 +37,11 @@ import {
   measureHighlight,
   sameHighlight,
 } from "./highlight";
-import { isHit, isTap, type ScreenPoint } from "./locate";
+import { isHit } from "./locate";
 import {
   isOnTourField,
   isStepDone,
-  pickReferenceEpoch,
+  isTargetRevealed,
   stepDwell,
   stepNumber,
   TOUR_MODE,
@@ -43,8 +51,8 @@ import {
   type TourSignals,
   type TourStep,
 } from "./tour";
-import { applyReference, applyStretch } from "./viewerControls";
 import {
+  clickImageAt,
   findImageRoot,
   findViewerPage,
   isPlaying,
@@ -57,6 +65,16 @@ import {
  * el recorrido. La regla esta en guide.module.css.
  */
 const HIDE_TARGET_ATTRIBUTE = "data-guide-hides-target";
+
+/** Nombre con el que el recorrido toma el clic sobre la imagen (`data-click` del visor). */
+const CLICK_TOOL_ID = "guide";
+
+/**
+ * Espera antes del clic que abre el espectro, en ms: el visor avisa un clic
+ * recien cuando ya no puede ser un doble (350 ms); con este margen el del
+ * recorrido tampoco se toma por el segundo de un doble clic de la persona.
+ */
+const OPEN_SPECTRUM_DELAY_MS = 150;
 
 /**
  * Recorrido guiado "Encontra a WISE 0855". Se monta una vez, junto a la
@@ -110,10 +128,6 @@ function TourOverlay() {
   const bandGroup = tViewer("band.group");
   const modeGroup = tViewer("comparison.group");
   const playLabel = tComponents("transport.play");
-  const referenceGroup = tViewer("comparison.reference");
-  const stretchGroup = tViewer("image.stretch");
-  const toolsOpenLabel = tViewer("tools.open");
-  const toolsCloseLabel = tViewer("tools.close");
 
   // ---- Lo que se lee de la pantalla ----------------------------------------
 
@@ -179,93 +193,68 @@ function TourOverlay() {
 
   // ---- Lo que el recorrido cambia en el visor -------------------------------
 
-  // Los dos cambios van por los controles del visor (viewerControls.ts): quedan
-  // a la vista en sus paneles y la persona los puede deshacer. Las medidas que
-  // los justifican estan en tour.ts.
+  // Los dos cambios van por la URL, como los haria la persona desde los
+  // paneles: quedan a la vista y se pueden deshacer. Las medidas que los
+  // justifican estan en tour.ts.
 
   // Apenas se elige B6, el estirado pasa a lineal: el fondo queda oscuro y el
-  // objeto se despega, en el parpadeo y en la comparacion que sigue.
+  // objeto se despega en el parpadeo (el visor ya abre en lineal la diferencia
+  // y el rojo/cian, pero el parpadeo, en asinh).
   const bandReached = step === "band" && stepReached;
   useEffect(() => {
-    if (!bandReached) return;
-    void applyStretch({
-      stretchGroup,
-      toolsOpen: toolsOpenLabel,
-      toolsClose: toolsCloseLabel,
-      stretch: TOUR_STRETCH,
-    });
-  }, [bandReached, stretchGroup, toolsOpenLabel, toolsCloseLabel]);
+    if (bandReached) useUrlState.getState().update({ stretch: TOUR_STRETCH });
+  }, [bandReached]);
 
-  // Apenas se activa rojo/cian, la comparacion queda entre la ultima epoca y
-  // la mas lejana de las bien armadas.
+  // Apenas se activa rojo/cian, la comparacion queda como la arma el visor por
+  // su cuenta: la ultima epoca (A) contra la mas lejana de las bien cubiertas
+  // (B). Solo hay que soltar lo que se haya elegido a mano.
   const comparisonReached = step === "redcyan" && stepReached;
   useEffect(() => {
     if (!comparisonReached) return;
     const url = useUrlState.getState();
-    // Sin epoca fija la actual (A) es la ultima.
-    if (url.epoch !== null) url.update({ epoch: null });
-    void applyReference({
-      referenceGroup,
-      pickReference: (current) => {
-        const { meta, band: shown } = useFieldStore.getState();
-        const epochs = (meta?.planes ?? [])
-          .filter((plane) => plane.detector === shown)
-          .map((plane) => ({ epoch: plane.epoch, exposures: plane.n_used }));
-        return pickReferenceEpoch(epochs, current);
-      },
-      cancelled: () => !useGuideStore.getState().active,
-    });
-  }, [comparisonReached, referenceGroup]);
+    if (url.epoch !== null || url.ref !== null) url.update({ epoch: null, ref: null });
+  }, [comparisonReached]);
 
-  // ---- Ubicar el objeto -----------------------------------------------------
+  // ---- El clic sobre la imagen ----------------------------------------------
 
-  // Un clic o un toque sobre la imagen, cerca de donde esta el objeto. Se
-  // escucha en la ventana, en la fase de captura: el visor captura el puntero
-  // para el arrastre, y un arrastre no cuenta.
+  // Mientras se busca el objeto, y en el cierre, el clic es del recorrido: uno
+  // cerca de donde esta el objeto cumple el paso. El visor ya descarto los
+  // arrastres y los dobles clics. `screen` viene en pixeles de la imagen en
+  // pantalla; la mira se lee en pixeles de la ventana.
+  const handleImageClick = (click: ImageClick): void => {
+    const page = findViewerPage();
+    const image = findImageRoot(page)?.getBoundingClientRect();
+    const target = readTargetPoint(page);
+    const hit =
+      image !== undefined &&
+      target !== null &&
+      isHit(
+        { x: image.left + click.screen.x, y: image.top + click.screen.y },
+        target,
+        readPixelsPerArcsec(page),
+      );
+    if (hit) completeStep(step);
+    else if (step === "locate") miss();
+  };
+  const claimsClick = step === "locate" || step === "closing";
+  useImageClickTool(CLICK_TOOL_ID, claimsClick ? handleImageClick : null);
+
+  // Ultimo paso: con el clic ya suelto, uno sobre la mira abre el panel del
+  // objeto (espectro y curva de luz), como si lo hiciera la persona.
   useEffect(() => {
-    if (step !== "locate") return;
-    let down: (ScreenPoint & { readonly id: number }) | null = null;
-
-    const onPointerDown = (event: PointerEvent): void => {
-      const image = findImageRoot(findViewerPage());
-      const onImage =
-        image !== null && event.target instanceof Node && image.contains(event.target);
-      down =
-        onImage && event.isPrimary && event.button === 0
-          ? { id: event.pointerId, x: event.clientX, y: event.clientY }
-          : null;
-    };
-
-    const onPointerUp = (event: PointerEvent): void => {
-      const start = down;
-      down = null;
-      if (start === null || start.id !== event.pointerId) return;
-      const tap = { x: event.clientX, y: event.clientY };
-      if (!isTap(start, tap)) return;
+    if (step !== "spectrum") return;
+    const timer = window.setTimeout(() => {
       const page = findViewerPage();
       const target = readTargetPoint(page);
-      if (target !== null && isHit(tap, target, readPixelsPerArcsec(page))) completeStep("locate");
-      else miss();
-    };
-
-    const onPointerCancel = (): void => {
-      down = null;
-    };
-
-    window.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("pointerup", onPointerUp, true);
-    window.addEventListener("pointercancel", onPointerCancel, true);
-    return () => {
-      window.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("pointerup", onPointerUp, true);
-      window.removeEventListener("pointercancel", onPointerCancel, true);
-    };
-  }, [step, completeStep, miss]);
+      if (target !== null) clickImageAt(page, target);
+    }, OPEN_SPECTRUM_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [step]);
 
   // ---- La mira del visor ----------------------------------------------------
 
   // Oculta hasta el cierre. Antes de pintar, para que no llegue a verse.
-  const hidesTarget = step !== "closing";
+  const hidesTarget = !isTargetRevealed(step);
   useLayoutEffect(() => {
     if (!hidesTarget) return;
     const root = document.documentElement;
@@ -311,7 +300,12 @@ function TourOverlay() {
             {step === "locate" ? (
               <Button onClick={() => completeStep("locate")}>{t("tour.reveal")}</Button>
             ) : null}
-            <Button onClick={end}>{step === "closing" ? t("tour.finish") : t("tour.skip")}</Button>
+            {step === "closing" ? (
+              <Button onClick={() => completeStep("closing")}>{t("tour.openSpectrum")}</Button>
+            ) : null}
+            <Button onClick={end}>
+              {isTargetRevealed(step) ? t("tour.finish") : t("tour.skip")}
+            </Button>
           </div>
         </GlassPanel>
       </div>

@@ -42,6 +42,16 @@
   width: 320px;
 }
 
+/*
+ * Ultimo paso: el panel del espectro abre en el primer lugar de la columna
+ * derecha, que con el se ensancha (`--viewer-column-right` de
+ * ViewerPage.module.css con `data-spectrum="open"`). La tarjeta se corre al
+ * costado de esa columna, sobre la imagen, que ya no es lo que se mira.
+ */
+.card[data-guide-step="spectrum"] {
+  right: calc(var(--space-lg) + clamp(380px, 36vw, 560px) + var(--space-sm));
+}
+
 .message {
   display: flex;
   flex-direction: column;
@@ -105,6 +115,10 @@
     right: var(--space-sm);
     width: 264px;
   }
+
+  .card[data-guide-step="spectrum"] {
+    right: calc(var(--space-sm) + clamp(320px, 40vw, 420px) + var(--space-sm));
+  }
 }
 
 /*
@@ -115,6 +129,7 @@
  *
  * En el cierre baja al borde inferior, sobre los controles, que ya no hacen
  * falta: la consigna es mas larga y arriba taparia la mira recien mostrada.
+ * En el ultimo paso vuelve arriba: el espectro abre debajo de la imagen.
  */
 @media (max-width: 899px) {
   .card {
@@ -123,6 +138,10 @@
     left: 50%;
     width: min(420px, calc(100% - 2 * var(--space-sm)));
     transform: translateX(-50%);
+  }
+
+  .card[data-guide-step="spectrum"] {
+    right: auto;
   }
 
   .card[data-guide-step="closing"] {

@@ -2,6 +2,7 @@ import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } fr
 import { useTranslation } from "react-i18next";
 import {
   Button,
+  classNames,
   Icon,
   IconButton,
   LanguageSelector,
@@ -20,6 +21,7 @@ import {
   type ViewerUrlPatch,
   viewerHref,
 } from "@/features/entry";
+import { GuideLauncher } from "@/features/guide";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
@@ -114,7 +116,8 @@ export interface SpherePageProps {
 /**
  * Pantalla de entrada de la aplicacion: lo que se ve cuando la URL no trae
  * coordenadas (SPEC.md, Etapa 4). El cielo a pantalla completa, los cinco
- * objetos de prueba marcados, el buscador y el boton "Lugar al azar". Elegir un
+ * objetos de prueba marcados, el buscador, el boton "Lugar al azar" y el que
+ * inicia el recorrido guiado (src/features/guide). Elegir un
  * lugar acerca la camara al punto y abre su campo en el visor. En un telefono
  * suma la "ventana al cielo": la esfera sigue la direccion a la que apunta el
  * aparato.
@@ -480,6 +483,8 @@ export function SpherePage({
                 ))}
               </QuickLinkList>
             )}
+            {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
+            <GuideLauncher className={classNames(styles.action, styles.guide)} />
             <div className={styles.searchRow}>
               <SearchField
                 className={styles.search}

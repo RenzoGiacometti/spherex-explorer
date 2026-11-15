@@ -6,9 +6,8 @@
 //
 //   main[data-layout]                 la pantalla (ViewerPage.tsx)
 //   main[data-playing="true"]         el reproductor esta andando
-//   fieldset > legend + radios        los selectores (banda, modo, epoca de
-//                                     referencia, estirado), por su nombre
-//   button[aria-label]                los botones (reproducir, herramientas), por su nombre
+//   fieldset > legend + radios        los selectores (banda y modo), por su nombre
+//   button[aria-label]                el boton de reproducir, por su nombre
 //   [role="application"]              la imagen (ImageViewer.tsx)
 //   [data-annotation="reticle"]       la mira sobre el objeto (ImageAnnotations.tsx)
 //   [data-annotation="scale"]         la barra de escala, con lo que mide
@@ -16,6 +15,10 @@
 // Si alguno de esos cambia, la funcion que lo busca devuelve null y el paso se
 // queda sin resaltado, pero el recorrido sigue: los pasos avanzan por el estado
 // de la URL y siempre se puede saltar.
+//
+// Lo unico que hace sobre la pantalla es un clic en la imagen (`clickImageAt`),
+// para abrir el panel del objeto en el ultimo paso: el visor no publica otra
+// forma de pedirlo desde afuera.
 
 import type { ScreenPoint } from "./locate";
 
@@ -38,7 +41,7 @@ export function findImageRoot(page: HTMLElement | null): HTMLElement | null {
  * Radios de un control segmentado, en el orden en que se ven: los del grupo
  * con ese nombre (su `legend`). Vacio si el grupo no esta en pantalla.
  */
-export function findOptionInputs(page: HTMLElement, groupLabel: string): HTMLInputElement[] {
+function findOptionInputs(page: HTMLElement, groupLabel: string): HTMLInputElement[] {
   for (const group of page.querySelectorAll("fieldset")) {
     if (group.querySelector("legend")?.textContent?.trim() !== groupLabel) continue;
     return [...group.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
@@ -47,7 +50,7 @@ export function findOptionInputs(page: HTMLElement, groupLabel: string): HTMLInp
 }
 
 /** Radio de una opcion de un control segmentado: el que tiene ese valor. */
-export function findOptionInput(
+function findOptionInput(
   page: HTMLElement,
   groupLabel: string,
   value: string | number,
@@ -109,4 +112,28 @@ export function readPixelsPerArcsec(page: HTMLElement | null): number | null {
   const length = Number(scale.dataset.length);
   if (!(arcsec > 0) || !(length > 0)) return null;
   return length / arcsec;
+}
+
+/**
+ * Hace un clic del mouse sobre la imagen, en un punto de la ventana (pixeles
+ * CSS): apoyar y soltar en el mismo lugar, que es lo que el visor toma por un
+ * clic (ImageViewer.tsx lo avisa unos 300 ms despues, por si es un doble clic).
+ * Devuelve false si no hay imagen.
+ */
+export function clickImageAt(page: HTMLElement | null, point: ScreenPoint): boolean {
+  const image = findImageRoot(page);
+  if (image === null) return false;
+  const base: PointerEventInit = {
+    bubbles: true,
+    cancelable: true,
+    clientX: point.x,
+    clientY: point.y,
+    pointerId: 1,
+    pointerType: "mouse",
+    isPrimary: true,
+    button: 0,
+  };
+  image.dispatchEvent(new PointerEvent("pointerdown", { ...base, buttons: 1 }));
+  image.dispatchEvent(new PointerEvent("pointerup", { ...base, buttons: 0 }));
+  return true;
 }

@@ -7,11 +7,18 @@
 //   play      reproduce el parpadeo          `data-playing` de la pantalla del visor
 //   redcyan   activa el modo rojo/cian       `mode` de la URL
 //   locate    marca el objeto en la imagen   un clic o un toque cerca de su posicion
-//   closing   lee que es lo que encontro     el boton Terminar
+//   closing   lee que es y pide su espectro  un clic sobre la mira, o el boton
+//   spectrum  lee que dice el espectro       el boton Terminar
 //
-// Dos cosas las cambia el recorrido por su cuenta (viewerControls.ts): al
-// elegir B6 pasa el estirado a lineal, y al activar rojo/cian elige la epoca
-// de referencia (`pickReferenceEpoch`).
+// Dos cosas las cambia el recorrido por su cuenta, las dos por la URL
+// (GuideTour.tsx): al elegir B6 fija el estirado lineal (`stretch`), que en
+// parpadeo no es el del visor, y al activar rojo/cian suelta la epoca actual y
+// la de referencia (`epoch`, `ref`), para que A sea la ultima y B la que
+// elige el visor: entre las bien cubiertas, la mas lejana
+// (`pickReferenceEpoch` de features/viewer/viewModel.ts; en B6, la 2).
+//
+// Al entrar al ultimo paso el recorrido hace un clic sobre la mira: el clic
+// por defecto del visor abre el panel del objeto (features/viewer/imageClick.ts).
 //
 // Lo que se ve en el campo real (precalculado el 15 de noviembre de 2026), y
 // por eso las consignas dicen lo que dicen:
@@ -21,12 +28,19 @@
 //   mueve: el recorrido abre en B1 y nunca dice que el centro este vacio.
 // - En B6 se corre 1,5 px de grilla entre la epoca 2 y la 3. Con la vista de
 //   10' son 5 px de pantalla; con la de 5', 10. Por eso abre en 5'.
-// - Por defecto el visor compara la ultima epoca (A) con la primera (B), y la
-//   primera de B6 se armo con 3 exposiciones (las otras, con 21): su ruido
-//   tapa al objeto. Entre la 2 y la 3 el objeto queda con un lado cian (donde
-//   estaba) y otro rojo (donde esta), y las estrellas, blancas.
-// - El estirado asinh con el que abre el visor levanta el ruido del fondo y
-//   comprime lo brillante; el lineal deja el fondo oscuro.
+// - La primera epoca de B6 se armo con 3 exposiciones (las otras, con 21): su
+//   ruido tapa al objeto, y el visor no la elige como referencia. Entre la 2 y
+//   la 3 el objeto queda con un lado cian (donde estaba) y otro rojo (donde
+//   esta), y las estrellas, blancas.
+// - El estirado asinh con el que el visor abre el parpadeo levanta el ruido
+//   del fondo y comprime lo brillante; el lineal deja el fondo oscuro.
+// - El espectro guardado del objeto (apertura de 9" de radio) tiene flujo en
+//   todas las bandas: de 0,7 a 3,8 um mide entre 1,0 y 0,1 mJy, en bajada, y
+//   es la estrella de fondo, que queda a unos 5" del centro de la apertura
+//   (aviso `offset_source` en B1 a B4); toca fondo cerca de 3,5 um y vuelve a
+//   subir entre 4 y 5 um (0,5 a 0,9 mJy), que es el objeto. Por eso el ultimo
+//   paso dice de quien es cada parte y no que el lado azul esta vacio. No da
+//   la distancia en numeros: el panel ya avisa la suya (5,7") al lado.
 //
 // Medido sobre la imagen que se muestra (vista de 5', 1440 x 900): senial de
 // la mancha del objeto, promediada en 2 px de grilla, contra la dispersion
@@ -53,7 +67,7 @@ import type { ViewFov } from "@/lib/fov";
 import type { Band, ViewMode } from "@/state/urlState";
 import type { StretchKind } from "@/viewer/stretch";
 
-export const TOUR_STEPS = ["band", "play", "redcyan", "locate", "closing"] as const;
+export const TOUR_STEPS = ["band", "play", "redcyan", "locate", "closing", "spectrum"] as const;
 
 export type TourStep = (typeof TOUR_STEPS)[number];
 
@@ -74,40 +88,6 @@ export const TOUR_MODE: ViewMode = "redcyan";
 
 /** Estirado del recorrido desde que se elige la banda: el que deja el fondo oscuro. */
 export const TOUR_STRETCH: StretchKind = "linear";
-
-/**
- * Una epoca cuenta como bien armada si tiene al menos esta fraccion de las
- * exposiciones de la mejor. En B6 las epocas tienen 3, 21 y 21: la primera
- * queda afuera.
- */
-export const GOOD_EPOCH_FRACTION = 0.5;
-
-/** Exposiciones con las que se armo la imagen de una epoca, en la banda que se mira. */
-export interface EpochExposures {
-  readonly epoch: number;
-  readonly exposures: number;
-}
-
-/**
- * Epoca de referencia (B) para comparar con la actual (A): entre las que
- * estan bien armadas, la mas alejada de la actual, que es donde el objeto mas
- * se movio. null si no hay ninguna otra epoca con exposiciones.
- */
-export function pickReferenceEpoch(
-  epochs: readonly EpochExposures[],
-  current: number,
-): number | null {
-  const others = epochs.filter((item) => item.epoch !== current && item.exposures > 0);
-  const best = Math.max(0, ...others.map((item) => item.exposures));
-  const good = others.filter((item) => item.exposures >= best * GOOD_EPOCH_FRACTION);
-  let chosen: EpochExposures | null = null;
-  for (const item of good) {
-    if (chosen === null || Math.abs(item.epoch - current) > Math.abs(chosen.epoch - current)) {
-      chosen = item;
-    }
-  }
-  return chosen?.epoch ?? null;
-}
 
 /** Clave del objeto del recorrido entre los destacados de la entrada. */
 export const TOUR_OBJECT_ID = "wise-0855";
@@ -142,8 +122,8 @@ export interface TourSignals {
 
 /**
  * Dice si lo que pide un paso ya esta hecho. `locate` y `closing` no dependen
- * del estado del visor: se cumplen con un clic sobre el objeto y con el boton
- * de cierre.
+ * del estado del visor: se cumplen con un clic sobre el objeto (o con su
+ * boton). `spectrum` es el ultimo: lo cierra el boton Terminar.
  *
  * Quien pasa a rojo/cian sin haber reproducido ya comparo dos epocas: el paso
  * del parpadeo se da por hecho, en vez de pedirle que vuelva atras.
@@ -172,7 +152,13 @@ export const STEP_DWELL_MS: Record<TourStep, number> = {
   redcyan: 600,
   locate: 0,
   closing: 0,
+  spectrum: 0,
 };
+
+/** Dice si en ese paso el objeto ya esta encontrado: la mira del visor se muestra. */
+export function isTargetRevealed(step: TourStep): boolean {
+  return step === "closing" || step === "spectrum";
+}
 
 /** El paso que sigue; el ultimo se sigue a si mismo. */
 export function nextStep(step: TourStep): TourStep {
@@ -188,7 +174,7 @@ export function stepDwell(step: TourStep, signals: TourSignals): number {
   return isStepDone(nextStep(step), signals) ? 0 : STEP_DWELL_MS[step];
 }
 
-/** Numero de un paso, desde 1, para "2 / 5". */
+/** Numero de un paso, desde 1, para "2 / 6". */
 export function stepNumber(step: TourStep): number {
   return TOUR_STEPS.indexOf(step) + 1;
 }
