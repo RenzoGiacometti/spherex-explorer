@@ -5,7 +5,9 @@
 // Va montado al lado de la pantalla del visor, no adentro, y no le pasa ni le
 // pide nada: mira la URL y lo que el visor publica en el documento
 // (viewerDom.ts). Los controles del visor siguen andando como siempre; el
-// recorrido solo espera a que la persona haga lo que pide cada paso.
+// recorrido espera a que la persona haga lo que pide cada paso. Lo unico que
+// cambia por su cuenta es la comparacion, al activar rojo/cian: la epoca de
+// referencia y el estirado (viewerControls.ts).
 //
 // Mientras dura, la mira y el rastro que el visor dibuja sobre el objeto quedan
 // ocultos: el recorrido consiste en encontrarlo. Aparecen en el cierre, o al
@@ -16,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { Button, GlassPanel } from "@/components";
 import a11y from "@/components/a11y.module.css";
 import { formatInteger } from "@/lib/format";
+import { useFieldStore } from "@/state/fieldStore";
 import { useUrlState } from "@/state/urlState";
 import styles from "./guide.module.css";
 import { useGuideStore } from "./guideStore";
@@ -30,14 +33,17 @@ import { isHit, isTap, type ScreenPoint } from "./locate";
 import {
   isOnTourField,
   isStepDone,
+  pickReferenceEpoch,
   stepDwell,
   stepNumber,
   TOUR_MODE,
   TOUR_PLAY_MODE,
   TOUR_STEPS,
+  TOUR_STRETCH,
   type TourSignals,
   type TourStep,
 } from "./tour";
+import { prepareComparison } from "./viewerControls";
 import {
   findImageRoot,
   findViewerPage,
@@ -104,6 +110,10 @@ function TourOverlay() {
   const bandGroup = tViewer("band.group");
   const modeGroup = tViewer("comparison.group");
   const playLabel = tComponents("transport.play");
+  const referenceGroup = tViewer("comparison.reference");
+  const stretchGroup = tViewer("image.stretch");
+  const toolsOpenLabel = tViewer("tools.open");
+  const toolsCloseLabel = tViewer("tools.close");
 
   // ---- Lo que se lee de la pantalla ----------------------------------------
 
@@ -165,10 +175,38 @@ function TourOverlay() {
     if (step === "play" && url.mode !== TOUR_PLAY_MODE && url.mode !== TOUR_MODE) {
       url.update({ mode: TOUR_PLAY_MODE });
     }
-    // Sin epoca fija el visor compara la ultima con la primera, que es donde
-    // el objeto mas se movio.
-    if (step === "locate" && url.epoch !== null) url.update({ epoch: null });
   }, [step]);
+
+  // ---- La comparacion -------------------------------------------------------
+
+  // Apenas se activa rojo/cian, el recorrido deja lista la comparacion en la
+  // que el objeto se distingue (tour.ts): la ultima epoca contra la mas lejana
+  // de las bien armadas, con el estirado lineal. Lo hace por los controles del
+  // visor, asi que queda a la vista y la persona lo puede cambiar.
+  const comparisonReached = step === "redcyan" && stepReached;
+  useEffect(() => {
+    if (!comparisonReached) return;
+    const url = useUrlState.getState();
+    // Sin epoca fija la actual (A) es la ultima.
+    if (url.epoch !== null) url.update({ epoch: null });
+    void prepareComparison({
+      labels: {
+        referenceGroup,
+        stretchGroup,
+        toolsOpen: toolsOpenLabel,
+        toolsClose: toolsCloseLabel,
+      },
+      stretch: TOUR_STRETCH,
+      pickReference: (current) => {
+        const { meta, band: shown } = useFieldStore.getState();
+        const epochs = (meta?.planes ?? [])
+          .filter((plane) => plane.detector === shown)
+          .map((plane) => ({ epoch: plane.epoch, exposures: plane.n_used }));
+        return pickReferenceEpoch(epochs, current);
+      },
+      cancelled: () => !useGuideStore.getState().active,
+    });
+  }, [comparisonReached, referenceGroup, stretchGroup, toolsOpenLabel, toolsCloseLabel]);
 
   // ---- Ubicar el objeto -----------------------------------------------------
 

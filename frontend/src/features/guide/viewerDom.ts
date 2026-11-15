@@ -6,8 +6,9 @@
 //
 //   main[data-layout]                 la pantalla (ViewerPage.tsx)
 //   main[data-playing="true"]         el reproductor esta andando
-//   fieldset > legend + radios        los selectores de banda y de modo, por su nombre
-//   button[aria-label]                el boton de reproducir, por su nombre
+//   fieldset > legend + radios        los selectores (banda, modo, epoca de
+//                                     referencia, estirado), por su nombre
+//   button[aria-label]                los botones (reproducir, herramientas), por su nombre
 //   [role="application"]              la imagen (ImageViewer.tsx)
 //   [data-annotation="reticle"]       la mira sobre el objeto (ImageAnnotations.tsx)
 //   [data-annotation="scale"]         la barra de escala, con lo que mide
@@ -34,21 +35,34 @@ export function findImageRoot(page: HTMLElement | null): HTMLElement | null {
 }
 
 /**
- * Celda de una opcion de un control segmentado: la del radio con ese valor,
- * dentro del grupo con ese nombre (su `legend`).
+ * Radios de un control segmentado, en el orden en que se ven: los del grupo
+ * con ese nombre (su `legend`). Vacio si el grupo no esta en pantalla.
  */
+export function findOptionInputs(page: HTMLElement, groupLabel: string): HTMLInputElement[] {
+  for (const group of page.querySelectorAll("fieldset")) {
+    if (group.querySelector("legend")?.textContent?.trim() !== groupLabel) continue;
+    return [...group.querySelectorAll<HTMLInputElement>('input[type="radio"]')];
+  }
+  return [];
+}
+
+/** Radio de una opcion de un control segmentado: el que tiene ese valor. */
+export function findOptionInput(
+  page: HTMLElement,
+  groupLabel: string,
+  value: string | number,
+): HTMLInputElement | null {
+  return findOptionInputs(page, groupLabel).find((input) => input.value === String(value)) ?? null;
+}
+
+/** Celda de una opcion de un control segmentado: lo que se ve del radio con ese valor. */
 export function findOptionCell(
   page: HTMLElement,
   groupLabel: string,
   value: string | number,
 ): HTMLElement | null {
-  for (const group of page.querySelectorAll("fieldset")) {
-    if (group.querySelector("legend")?.textContent?.trim() !== groupLabel) continue;
-    for (const input of group.querySelectorAll<HTMLInputElement>('input[type="radio"]')) {
-      if (input.value === String(value)) return input.closest<HTMLElement>("label") ?? input;
-    }
-  }
-  return null;
+  const input = findOptionInput(page, groupLabel, value);
+  return input === null ? null : (input.closest<HTMLElement>("label") ?? input);
 }
 
 /** Boton con ese nombre accesible. */

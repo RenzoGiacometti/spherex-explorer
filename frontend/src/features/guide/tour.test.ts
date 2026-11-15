@@ -4,6 +4,7 @@ import {
   isOnTourField,
   isStepDone,
   nextStep,
+  pickReferenceEpoch,
   STEP_DWELL_MS,
   stepDwell,
   stepNumber,
@@ -70,6 +71,39 @@ describe("recorrido guiado", () => {
     // Tres epocas a 800 ms cada una.
     expect(STEP_DWELL_MS.play).toBeGreaterThanOrEqual(3 * 800);
     expect(stepDwell("play", { ...START, band: 6, playing: true })).toBe(STEP_DWELL_MS.play);
+  });
+
+  it("compara con la epoca bien armada mas lejana, no con la que tiene pocas exposiciones", () => {
+    // B6 de WISE 0855: la primera epoca se armo con 3 exposiciones.
+    const b6 = [
+      { epoch: 1, exposures: 3 },
+      { epoch: 2, exposures: 21 },
+      { epoch: 3, exposures: 21 },
+    ];
+    expect(pickReferenceEpoch(b6, 3)).toBe(2);
+    expect(pickReferenceEpoch(b6, 2)).toBe(3);
+    expect(pickReferenceEpoch(b6, 1)).toBe(3);
+  });
+
+  it("entre epocas igual de buenas elige la mas lejana, y sin otra epoca no elige", () => {
+    const even = [
+      { epoch: 1, exposures: 18 },
+      { epoch: 2, exposures: 25 },
+      { epoch: 3, exposures: 21 },
+      { epoch: 4, exposures: 20 },
+    ];
+    expect(pickReferenceEpoch(even, 4)).toBe(1);
+    expect(pickReferenceEpoch(even, 1)).toBe(4);
+    expect(pickReferenceEpoch([{ epoch: 3, exposures: 21 }], 3)).toBeNull();
+    expect(
+      pickReferenceEpoch(
+        [
+          { epoch: 1, exposures: 0 },
+          { epoch: 2, exposures: 21 },
+        ],
+        2,
+      ),
+    ).toBeNull();
   });
 
   it("si el paso siguiente tambien esta cumplido, no espera", () => {

@@ -9,6 +9,9 @@
 //   locate    marca el objeto en la imagen   un clic o un toque cerca de su posicion
 //   closing   lee que es lo que encontro     el boton Terminar
 //
+// Al activar rojo/cian el recorrido deja lista la comparacion: elige la epoca
+// de referencia (`pickReferenceEpoch`) y el estirado lineal (viewerControls.ts).
+//
 // Lo que se ve en el campo real (precalculado el 15 de noviembre de 2026), y
 // por eso las consignas dicen lo que dicen:
 //
@@ -17,14 +20,32 @@
 //   mueve: el recorrido abre en B1 y nunca dice que el centro este vacio.
 // - En B6 se corre 1,5 px de grilla entre la epoca 2 y la 3. Con la vista de
 //   10' son 5 px de pantalla; con la de 5', 10. Por eso abre en 5'.
-// - En rojo/cian el visor compara la ultima epoca (A, rojo) con la primera (B,
-//   cian). La primera epoca de B6 tiene pocas exposiciones y casi no muestra el
-//   objeto, asi que no queda "un lado rojo y otro cian": queda un punto rojo
-//   entre estrellas blancas, sobre un fondo moteado de los dos colores.
+// - Por defecto el visor compara la ultima epoca (A) con la primera (B), y la
+//   primera de B6 se armo con 3 exposiciones (las otras, con 21): su ruido
+//   tapa al objeto. Entre la 2 y la 3 el objeto queda con un lado cian (donde
+//   estaba) y otro rojo (donde esta), y las estrellas, blancas.
+// - El estirado asinh con el que abre el visor levanta el ruido del fondo y
+//   comprime lo brillante; el lineal deja el fondo oscuro.
+//
+// Medido sobre la imagen que se muestra (vista de 5', 1440 x 900): senial de
+// la mancha del objeto, promediada en 2 px de grilla, contra la dispersion
+// robusta del fondo; y en cuantas otras zonas de la imagen hay una mancha
+// igual de fuerte. Lado rojo (o claro) y lado cian (u oscuro):
+//
+//   rojo/cian 1 y 3, asinh (lo de antes)   2,5 y 1,7 sigma    6 y 81 zonas
+//   diferencia 1 y 3, asinh                3,1 y 1,9          3 y 50
+//   diferencia 2 y 3, asinh                4,6 y 4,2          0 y 3
+//   rojo/cian 2 y 3, asinh                 2,3 y 2,7          62 y 33
+//   diferencia 2 y 3, lineal               8,3 y 7,0          0 y 4
+//   rojo/cian 2 y 3, lineal                7,6 y 7,1          0 y 0
+//
+// Un suavizado (probado como filtro de 3 y 5 px sobre la imagen) no suma: baja
+// la senial un poco mas que el ruido.
 
 import { FEATURED_OBJECTS, featuredUrlPatch, type ViewerUrlPatch } from "@/features/entry/featured";
 import type { ViewFov } from "@/lib/fov";
 import type { Band, ViewMode } from "@/state/urlState";
+import type { StretchKind } from "@/viewer/stretch";
 
 export const TOUR_STEPS = ["band", "play", "redcyan", "locate", "closing"] as const;
 
@@ -44,6 +65,43 @@ export const TOUR_PLAY_MODE: ViewMode = "blink";
 
 /** Modo que pide el tercer paso. */
 export const TOUR_MODE: ViewMode = "redcyan";
+
+/** Estirado con el que se compara: el que deja el fondo oscuro. */
+export const TOUR_STRETCH: StretchKind = "linear";
+
+/**
+ * Una epoca cuenta como bien armada si tiene al menos esta fraccion de las
+ * exposiciones de la mejor. En B6 las epocas tienen 3, 21 y 21: la primera
+ * queda afuera.
+ */
+export const GOOD_EPOCH_FRACTION = 0.5;
+
+/** Exposiciones con las que se armo la imagen de una epoca, en la banda que se mira. */
+export interface EpochExposures {
+  readonly epoch: number;
+  readonly exposures: number;
+}
+
+/**
+ * Epoca de referencia (B) para comparar con la actual (A): entre las que
+ * estan bien armadas, la mas alejada de la actual, que es donde el objeto mas
+ * se movio. null si no hay ninguna otra epoca con exposiciones.
+ */
+export function pickReferenceEpoch(
+  epochs: readonly EpochExposures[],
+  current: number,
+): number | null {
+  const others = epochs.filter((item) => item.epoch !== current && item.exposures > 0);
+  const best = Math.max(0, ...others.map((item) => item.exposures));
+  const good = others.filter((item) => item.exposures >= best * GOOD_EPOCH_FRACTION);
+  let chosen: EpochExposures | null = null;
+  for (const item of good) {
+    if (chosen === null || Math.abs(item.epoch - current) > Math.abs(chosen.epoch - current)) {
+      chosen = item;
+    }
+  }
+  return chosen?.epoch ?? null;
+}
 
 /** Clave del objeto del recorrido entre los destacados de la entrada. */
 export const TOUR_OBJECT_ID = "wise-0855";
