@@ -161,3 +161,22 @@
     transition: none;
   }
 }
+
+/*
+ * Uso 1 del acento: la mira sobre el punto elegido. Circulo con cuatro marcas,
+ * de 40 px sobre el cielo; la escena la reubica en cada cuadro.
+ */
+.pick {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  display: block;
+  width: 40px;
+  height: 40px;
+  color: var(--color-accent);
+  pointer-events: none;
+}
+
+.pick[hidden] {
+  display: none;
+}

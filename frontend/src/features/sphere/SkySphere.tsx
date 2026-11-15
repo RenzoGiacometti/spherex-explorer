@@ -65,6 +65,10 @@ export interface SkySphereProps {
   readonly unlabelledMarkerId?: string | null | undefined;
   /** En false los gestos no mueven la vista (ventana al cielo). */
   readonly interactive?: boolean | undefined;
+  /** Punto elegido: la esfera le deja una mira encima. */
+  readonly pick?: SkyPosition | null | undefined;
+  /** Clic o toque corto sobre el cielo, fuera de los marcadores: el punto que se toco. */
+  readonly onSkyTap?: ((position: SkyPosition) => void) | undefined;
   /** Despues de cada cuadro: centro y campo de vision. No conviene guardarlo en estado de React. */
   readonly onViewChange?: ((view: SkyView) => void) | undefined;
   readonly onStatusChange?: ((status: SkySphereStatus) => void) | undefined;
@@ -86,6 +90,7 @@ export function SkySphere(props: SkySphereProps) {
     onMarkerClick,
     unlabelledMarkerId,
     interactive = true,
+    pick,
     className,
   } = props;
 
@@ -93,6 +98,7 @@ export function SkySphere(props: SkySphereProps) {
   const sceneRef = useRef<SkyScene | null>(null);
   const controlsRef = useRef<SkyControls | null>(null);
   const elementsRef = useRef(new Map<string, HTMLElement>());
+  const pickRef = useRef<HTMLSpanElement>(null);
   // Lo ultimo que llego por props, para leerlo desde la escena sin volver a crearla.
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -117,6 +123,16 @@ export function SkySphere(props: SkySphereProps) {
           if (element.hidden) element.hidden = false;
         } else if (!element.hidden) {
           element.hidden = true;
+        }
+      }
+      const pickElement = pickRef.current;
+      const picked = propsRef.current.pick ?? null;
+      if (pickElement !== null) {
+        if (picked !== null && scene.project(picked, point)) {
+          pickElement.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px)`;
+          if (pickElement.hidden) pickElement.hidden = false;
+        } else if (!pickElement.hidden) {
+          pickElement.hidden = true;
         }
       }
       // Que mapa se esta viendo (4k, fundido u 8k), a la vista en el inspector.
@@ -160,6 +176,7 @@ export function SkySphere(props: SkySphereProps) {
       onDragChange: (dragging) => {
         stage.dataset.dragging = String(dragging);
       },
+      onTap: (x, y) => propsRef.current.onSkyTap?.(scene.unproject(x, y)),
     });
     controls.setEnabled(propsRef.current.interactive ?? true);
     controlsRef.current = controls;
@@ -184,11 +201,11 @@ export function SkySphere(props: SkySphereProps) {
     controlsRef.current?.setEnabled(interactive);
   }, [interactive]);
 
-  // Marcadores nuevos: hay que ubicarlos aunque la vista no se haya movido.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee `markers`, corre cuando cambian
+  // Marcadores nuevos u otro punto elegido: hay que ubicarlos aunque la vista no se haya movido.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee `markers` ni `pick`, corre cuando cambian
   useEffect(() => {
     sceneRef.current?.invalidate();
-  }, [markers]);
+  }, [markers, pick]);
 
   useImperativeHandle(
     ref,
@@ -257,6 +274,26 @@ export function SkySphere(props: SkySphereProps) {
           ),
         )}
       </nav>
+      {/* Mira del punto elegido (DESIGN.md, `reticle`): no recibe el puntero. */}
+      <span ref={pickRef} className={styles.pick} aria-hidden="true" hidden>
+        <svg
+          width={40}
+          height={40}
+          viewBox="0 0 40 40"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="20" cy="20" r="10" />
+          <path d="M20 3v9" />
+          <path d="M20 28v9" />
+          <path d="M3 20h9" />
+          <path d="M28 20h9" />
+        </svg>
+      </span>
     </div>
   );
 }

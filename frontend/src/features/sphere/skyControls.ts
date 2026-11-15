@@ -1,4 +1,5 @@
-// Gestos de la esfera: arrastre con inercia, pellizco, rueda y teclado.
+// Gestos de la esfera: arrastre con inercia, pellizco, rueda, teclado y el
+// toque corto que elige un punto del cielo.
 //
 // Los eventos se escuchan en el escenario, que contiene al canvas y a los
 // marcadores: un arrastre puede empezar sobre un marcador. Para que eso no
@@ -9,6 +10,8 @@ import { clamp } from "./skyMath";
 
 /** Pixeles que hay que mover el puntero para que un toque pase a ser un arrastre. */
 const DRAG_THRESHOLD = 4;
+/** Un toque que dura mas que esto (milisegundos) no elige un punto: es sostener el cielo. */
+const TAP_MAX_MS = 500;
 /** Ventana, en milisegundos, de las muestras con las que se mide la velocidad al soltar. */
 const VELOCITY_WINDOW = 90;
 /** Paso de las flechas del teclado, como fraccion del campo de vision. */
@@ -31,6 +34,11 @@ export interface SkyControlsOptions {
   readonly onInteract?: () => void;
   /** Empieza o termina un arrastre, para cambiar el cursor. */
   readonly onDragChange?: (dragging: boolean) => void;
+  /**
+   * Clic o toque corto sobre el cielo, sin arrastre ni pellizco y fuera de los
+   * marcadores. Recibe la posicion en pixeles desde la esquina del elemento.
+   */
+  readonly onTap?: (x: number, y: number) => void;
 }
 
 export interface SkyControls {
@@ -52,6 +60,9 @@ export function attachSkyControls(
   let suppressClick = false;
   let samples: Sample[] = [];
   let interacted = false;
+  let downTime = 0;
+  /** Hubo mas de un dedo desde que empezo el gesto: ya no es un toque. */
+  let multiTouch = false;
 
   function interact(): void {
     scene.stopMotion();
@@ -79,12 +90,15 @@ export function attachSkyControls(
     suppressClick = false;
     if (pointers.size === 1) {
       travelled = 0;
+      downTime = event.timeStamp;
+      multiTouch = false;
       samples = [{ t: event.timeStamp, x: event.clientX, y: event.clientY }];
       // Tocar frena la inercia y la deriva, aunque despues no se arrastre.
       interact();
     } else {
       pinchDistance = distanceBetweenPointers();
       samples = [];
+      multiTouch = true;
     }
   }
 
@@ -139,8 +153,24 @@ export function attachSkyControls(
         scene.fling((last.x - first.x) / seconds, (last.y - first.y) / seconds);
       }
     }
+    const tapped =
+      enabled &&
+      event.type === "pointerup" &&
+      !dragging &&
+      !multiTouch &&
+      travelled < DRAG_THRESHOLD &&
+      event.timeStamp - downTime <= TAP_MAX_MS;
     setDragging(false);
     samples = [];
+    // Un toque sobre un marcador abre su objeto: no elige un punto.
+    if (
+      tapped &&
+      options.onTap &&
+      !(event.target instanceof Element && event.target.closest("a"))
+    ) {
+      const box = element.getBoundingClientRect();
+      options.onTap(event.clientX - box.left, event.clientY - box.top);
+    }
   }
 
   function onClickCapture(event: MouseEvent): void {

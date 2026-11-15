@@ -26,13 +26,14 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
 import { DEFAULT_BAND, DEFAULT_MODE, DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
+import { constellationAt, constellationLabel } from "./constellations";
 import { findPatch } from "./patches";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus } from "./SkySphere";
 import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
-import { angularSeparation, clamp } from "./skyMath";
-import { pickRandomField, SKY_TARGETS } from "./targets";
+import { angularSeparation, clamp, type SkyPosition, wrapDegrees } from "./skyMath";
+import { pickRandomField, SKY_TARGETS, savedFieldNear } from "./targets";
 import { useSphereTexts } from "./texts";
 import { useSkyWindow } from "./useSkyWindow";
 
@@ -174,6 +175,8 @@ export function SpherePage({
   const [opening, setOpening] = useState<string | null>(null);
   const [sphereStatus, setSphereStatus] = useState<SkySphereStatus>("loading");
   const [nearest, setNearest] = useState<Nearest | null>(null);
+  /** Punto del cielo elegido con un clic o un toque: lleva la mira y la tarjeta. */
+  const [pick, setPick] = useState<SkyPosition | null>(null);
   const [coarsePointer] = useState(
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
@@ -291,7 +294,44 @@ export function SpherePage({
     openTarget(target);
   }
 
+  /** Clic o toque corto sobre el cielo: deja la mira ahi y abre la tarjeta del punto. */
+  function handleSkyTap(position: SkyPosition): void {
+    if (openingRef.current) return;
+    // Con los cuatro decimales de un centro de campo (docs/contrato-cubo.md, seccion 4.8).
+    setPick({
+      ra: wrapDegrees(Math.round(position.ra * 1e4) / 1e4),
+      dec: Math.round(position.dec * 1e4) / 1e4,
+    });
+  }
+
+  /** Campo guardado a menos de un minuto de arco del punto elegido, si lo hay. */
+  const pickSaved = pick === null ? undefined : savedFieldNear(pick);
+
+  /** Abre el punto elegido: el campo guardado si cae sobre uno, o un campo nuevo centrado ahi. */
+  function handlePickOpen(): void {
+    if (pick === null) return;
+    setPick(null);
+    if (pickSaved !== undefined) {
+      openTarget(pickSaved);
+      return;
+    }
+    search.reset();
+    void openPlace({
+      label: formatPosition(pick.ra, pick.dec),
+      patch: {
+        ra: pick.ra,
+        dec: pick.dec,
+        fov: DEFAULT_VIEW_FOV,
+        band: DEFAULT_BAND,
+        mode: DEFAULT_MODE,
+        epoch: null,
+        name: null,
+      },
+    });
+  }
+
   function handleRandom(): void {
+    setPick(null);
     const field = pickRandomField(lastRandomRef.current, random);
     lastRandomRef.current = field.id;
     openTarget(field);
@@ -447,6 +487,8 @@ export function SpherePage({
         driftRate={driftRate ?? DRIFT_RATE}
         unlabelledMarkerId={lockedTarget?.id ?? null}
         interactive={!windowOn}
+        pick={windowOn ? null : pick}
+        onSkyTap={handleSkyTap}
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
       />
@@ -513,6 +555,34 @@ export function SpherePage({
                   </QuickLink>
                 ))}
               </QuickLinkList>
+            )}
+            {pick === null ? null : (
+              <section className={styles.pick} aria-label={t("pick.title")}>
+                <div className={styles.pickHead}>
+                  <h2 className={styles.pickTitle}>{t("pick.title")}</h2>
+                  <IconButton icon="close" label={t("pick.close")} onClick={() => setPick(null)} />
+                </div>
+                <p className={styles.pickCoordinates}>{formatPosition(pick.ra, pick.dec)}</p>
+                <p className={styles.pickLine}>
+                  {t("pick.constellation", {
+                    name: constellationLabel(constellationAt(pick), language),
+                  })}
+                </p>
+                <p className={styles.pickNote} role="status">
+                  {pickSaved === undefined
+                    ? t("pick.new")
+                    : t("pick.saved", { name: pickSaved.label })}
+                </p>
+                <Button
+                  className={classNames(styles.action, styles.pickOpen)}
+                  variant="ghost"
+                  icon="target"
+                  disabled={busy}
+                  onClick={handlePickOpen}
+                >
+                  {t("pick.open")}
+                </Button>
+              </section>
             )}
             {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
             <GuideLauncher className={classNames(styles.action, styles.guide)} />

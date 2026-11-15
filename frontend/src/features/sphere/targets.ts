@@ -15,6 +15,7 @@
 // MORE_PRECOMPUTED_OBJECTS, en src/features/entry/featured.ts.
 
 import { FEATURED_OBJECTS, type FeaturedObject, PRECOMPUTED_OBJECTS } from "@/features/entry";
+import { angularSeparation, type SkyPosition } from "./skyMath";
 
 /** Un lugar con campo propio: nombre visible, texto que lo resuelve, centro y banda inicial. */
 export type SkyTarget = FeaturedObject;
@@ -24,6 +25,29 @@ export const SKY_TARGETS: readonly SkyTarget[] = FEATURED_OBJECTS;
 
 /** Todos los campos precalculados (los cinco objetos de prueba y los demas). */
 export const PRECOMPUTED_FIELDS: readonly SkyTarget[] = PRECOMPUTED_OBJECTS;
+
+/**
+ * Un punto elegido en el cielo cuenta como un campo guardado si esta a menos de
+ * esta distancia de su centro, en grados: un minuto de arco.
+ */
+export const SAVED_FIELD_RADIUS = 1 / 60;
+
+/** Campo precalculado cuyo centro esta a menos de un minuto de arco del punto: el mas cercano. */
+export function savedFieldNear(
+  position: SkyPosition,
+  fields: readonly SkyTarget[] = PRECOMPUTED_FIELDS,
+): SkyTarget | undefined {
+  let best: SkyTarget | undefined;
+  let bestDistance = SAVED_FIELD_RADIUS;
+  for (const field of fields) {
+    const distance = angularSeparation(position, field);
+    if (distance <= bestDistance) {
+      best = field;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
 
 /**
  * Campos que no salen en "Lugar al azar". M 42 (Orion) satura en casi todo el

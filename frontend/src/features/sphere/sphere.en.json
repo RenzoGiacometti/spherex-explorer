@@ -2,12 +2,20 @@
   "stage": {
     "label": "Celestial sphere. Drag or use the arrow keys to rotate it, and the plus and minus keys to zoom."
   },
-  "hint": "Drag to rotate the sky",
+  "hint": "Drag to turn the sky; click to pick a point",
   "center": "Center",
   "random": "Random place",
   "markers": {
     "nav": "Featured objects",
     "open": "Open {{name}} in the viewer"
+  },
+  "pick": {
+    "title": "Chosen point",
+    "close": "Remove the reticle",
+    "constellation": "Constellation: {{name}}",
+    "new": "New field: building it takes a few minutes.",
+    "saved": "Saved field of {{name}}: opens instantly.",
+    "open": "Open this field"
   },
   "opening": "Opening {{name}}…",
   "status": {

@@ -549,6 +549,18 @@ export class SkyScene {
     return Math.abs(this.scratch.x) <= 1.15 && Math.abs(this.scratch.y) <= 1.15;
   }
 
+  /**
+   * Punto del cielo que se ve en una posicion de la pantalla (pixeles CSS desde
+   * la esquina superior izquierda). Es la inversa de `project`.
+   */
+  unproject(x: number, y: number): SkyPosition {
+    this.scratch
+      .set((x / this.width) * 2 - 1, 1 - (y / this.height) * 2, 0.5)
+      .unproject(this.camera);
+    // La camara esta en el centro de la esfera: el punto es una direccion.
+    return vectorToRaDec([this.scratch.x, this.scratch.y, this.scratch.z]);
+  }
+
   // ---- Movimiento con el norte arriba -------------------------------------
   //
   // El arrastre, la rueda y el teclado mueven una vista que siempre tiene el

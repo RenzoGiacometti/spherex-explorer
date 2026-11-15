@@ -215,6 +215,60 @@
   margin-top: 1px;
 }
 
+/*
+ * Tarjeta del punto elegido: vidrio, como el aviso. Coordenadas en mono, la
+ * constelacion, si el campo ya esta guardado o hay que armarlo, y el boton.
+ */
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--glass-panel-padding);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  color: var(--glass-panel-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pick {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+.pickHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.pickTitle {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.pickCoordinates {
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.pickNote {
+  color: var(--color-text-mute);
+}
+
+.pickOpen {
+  align-self: flex-start;
+  margin-top: var(--space-xs);
+}
+
 /* Credito de la imagen del cielo: NASA pide que se la nombre como fuente. */
 .credit {
   align-self: flex-end;

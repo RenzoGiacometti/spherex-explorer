@@ -2,12 +2,20 @@
   "stage": {
     "label": "Esfera celeste. Se gira arrastrando o con las flechas del teclado, y se acerca con las teclas más y menos."
   },
-  "hint": "Arrastrar para girar el cielo",
+  "hint": "Arrastrar para girar el cielo; un clic elige un punto",
   "center": "Centro",
   "random": "Lugar al azar",
   "markers": {
     "nav": "Objetos destacados",
     "open": "Abrir {{name}} en el visor"
+  },
+  "pick": {
+    "title": "Punto elegido",
+    "close": "Quitar la mira",
+    "constellation": "Constelación: {{name}}",
+    "new": "Campo nuevo: armarlo tarda unos minutos.",
+    "saved": "Campo guardado de {{name}}: abre al instante.",
+    "open": "Abrir este campo"
   },
   "opening": "Abriendo {{name}}…",
   "status": {
