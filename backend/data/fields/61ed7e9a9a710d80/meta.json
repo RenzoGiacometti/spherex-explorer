@@ -1,0 +1,1063 @@
+{
+  "id": "61ed7e9a9a710d80",
+  "pipeline": "1",
+  "status": "ready",
+  "rev": 2,
+  "request": {
+    "ra": 162.2955,
+    "dec": -53.317,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      162.2955,
+      -53.317
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "detectors": [
+    {
+      "detector": 1,
+      "wave_min_um": 0.7455,
+      "wave_max_um": 1.1167,
+      "display": {
+        "vmin": -0.10846,
+        "vmax": 14.59,
+        "median": 0.0827537,
+        "sigma": 0.0956066
+      }
+    },
+    {
+      "detector": 2,
+      "wave_min_um": 1.1033,
+      "wave_max_um": 1.6499,
+      "display": {
+        "vmin": -0.142069,
+        "vmax": 14.7589,
+        "median": 0.120074,
+        "sigma": 0.131072
+      }
+    },
+    {
+      "detector": 3,
+      "wave_min_um": 1.6301,
+      "wave_max_um": 2.4346,
+      "display": {
+        "vmin": -0.124784,
+        "vmax": 16.7998,
+        "median": 0.110931,
+        "sigma": 0.117857
+      }
+    },
+    {
+      "detector": 4,
+      "wave_min_um": 2.4027,
+      "wave_max_um": 3.8473,
+      "display": {
+        "vmin": -0.103555,
+        "vmax": 11.2334,
+        "median": 0.0346694,
+        "sigma": 0.0691121
+      }
+    },
+    {
+      "detector": 5,
+      "wave_min_um": 3.8113,
+      "wave_max_um": 4.43,
+      "display": {
+        "vmin": -0.0531419,
+        "vmax": 17.711,
+        "median": 0.0366094,
+        "sigma": 0.0448757
+      }
+    },
+    {
+      "detector": 6,
+      "wave_min_um": 4.4115,
+      "wave_max_um": 5.0096,
+      "display": {
+        "vmin": -0.0433071,
+        "vmax": 13.4253,
+        "median": 0.0261088,
+        "sigma": 0.0347079
+      }
+    }
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "start": "2025-05-30",
+      "end": "2025-07-19",
+      "mjd_start": 60825.23426,
+      "mjd_end": 60875.91484,
+      "mjd_mean": 60848.55178,
+      "n_exposures": 132
+    },
+    {
+      "epoch": 2,
+      "start": "2025-12-21",
+      "end": "2026-02-03",
+      "mjd_start": 61030.85005,
+      "mjd_end": 61074.02847,
+      "mjd_mean": 61045.41526,
+      "n_exposures": 143
+    },
+    {
+      "epoch": 3,
+      "start": "2026-05-24",
+      "end": "2026-07-21",
+      "mjd_start": 61184.40281,
+      "mjd_end": 61242.44302,
+      "mjd_mean": 61208.21924,
+      "n_exposures": 183
+    }
+  ],
+  "planes": [
+    {
+      "epoch": 1,
+      "detector": 1,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 60857.5644,
+      "stats": {
+        "min": -0.110827,
+        "max": 70.2935,
+        "median": 0.0840085,
+        "sigma": 0.0950855,
+        "p01": -0.0107494,
+        "p99": 4.42264,
+        "p997": 14.8674,
+        "valid_fraction": 0.9968,
+        "saturated_fraction": 0.0018
+      },
+      "saturated": [
+        {
+          "x": 173.56,
+          "y": 84.11,
+          "radius_px": 4.26,
+          "n_pixels": 57
+        },
+        {
+          "x": 177.55,
+          "y": 48.64,
+          "radius_px": 1.87,
+          "n_pixels": 11
+        }
+      ],
+      "cube_offset": 0
+    },
+    {
+      "epoch": 1,
+      "detector": 2,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 26,
+      "n_used": 26,
+      "n_failed": 0,
+      "mjd_mean": 60846.6769,
+      "stats": {
+        "min": -0.0403328,
+        "max": 73.0347,
+        "median": 0.114533,
+        "sigma": 0.129024,
+        "p01": -0.0174774,
+        "p99": 4.3385,
+        "p997": 10.0462,
+        "valid_fraction": 0.9981,
+        "saturated_fraction": 0.0018
+      },
+      "saturated": [
+        {
+          "x": 175.55,
+          "y": 50.36,
+          "radius_px": 3.66,
+          "n_pixels": 42
+        },
+        {
+          "x": 171.67,
+          "y": 86.07,
+          "radius_px": 2.19,
+          "n_pixels": 15
+        },
+        {
+          "x": 57.45,
+          "y": 93.82,
+          "radius_px": 1.87,
+          "n_pixels": 11
+        }
+      ],
+      "cube_offset": 152100
+    },
+    {
+      "epoch": 1,
+      "detector": 3,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 21,
+      "n_used": 21,
+      "n_failed": 0,
+      "mjd_mean": 60841.0707,
+      "stats": {
+        "min": -0.0296371,
+        "max": 57.1968,
+        "median": 0.111973,
+        "sigma": 0.117805,
+        "p01": -0.00675825,
+        "p99": 5.31537,
+        "p997": 15.8944,
+        "valid_fraction": 0.9948,
+        "saturated_fraction": 0.0051
+      },
+      "saturated": [
+        {
+          "x": 177.12,
+          "y": 49.5,
+          "radius_px": 5.94,
+          "n_pixels": 111
+        },
+        {
+          "x": 173.5,
+          "y": 84.0,
+          "radius_px": 4.37,
+          "n_pixels": 60
+        },
+        {
+          "x": 57.27,
+          "y": 94.05,
+          "radius_px": 2.65,
+          "n_pixels": 22
+        }
+      ],
+      "cube_offset": 304200
+    },
+    {
+      "epoch": 1,
+      "detector": 4,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 22,
+      "n_used": 22,
+      "n_failed": 0,
+      "mjd_mean": 60855.995,
+      "stats": {
+        "min": -0.491447,
+        "max": 38.0269,
+        "median": 0.0380287,
+        "sigma": 0.0693186,
+        "p01": -0.0332569,
+        "p99": 3.61413,
+        "p997": 10.1579,
+        "valid_fraction": 0.9922,
+        "saturated_fraction": 0.0073
+      },
+      "saturated": [
+        {
+          "x": 177.44,
+          "y": 49.14,
+          "radius_px": 8.25,
+          "n_pixels": 214
+        },
+        {
+          "x": 173.56,
+          "y": 84.17,
+          "radius_px": 3.91,
+          "n_pixels": 48
+        },
+        {
+          "x": 57.5,
+          "y": 94.0,
+          "radius_px": 2.26,
+          "n_pixels": 16
+        }
+      ],
+      "cube_offset": 456300
+    },
+    {
+      "epoch": 1,
+      "detector": 5,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 20,
+      "n_used": 20,
+      "n_failed": 0,
+      "mjd_mean": 60847.3826,
+      "stats": {
+        "min": -2.31625,
+        "max": 155.575,
+        "median": 0.0365296,
+        "sigma": 0.0448578,
+        "p01": -0.0133482,
+        "p99": 3.79231,
+        "p997": 16.75,
+        "valid_fraction": 0.9988,
+        "saturated_fraction": 0.0012
+      },
+      "saturated": [
+        {
+          "x": 177.68,
+          "y": 49.23,
+          "radius_px": 3.74,
+          "n_pixels": 44
+        }
+      ],
+      "cube_offset": 608400
+    },
+    {
+      "epoch": 1,
+      "detector": 6,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 19,
+      "n_used": 19,
+      "n_failed": 0,
+      "mjd_mean": 60840.6139,
+      "stats": {
+        "min": -4.61427,
+        "max": 227.332,
+        "median": 0.0259142,
+        "sigma": 0.0356544,
+        "p01": -0.0201968,
+        "p99": 2.76072,
+        "p997": 13.0248,
+        "valid_fraction": 0.9995,
+        "saturated_fraction": 0.0005
+      },
+      "saturated": [
+        {
+          "x": 177.72,
+          "y": 49.17,
+          "radius_px": 2.39,
+          "n_pixels": 18
+        }
+      ],
+      "cube_offset": 760500
+    },
+    {
+      "epoch": 2,
+      "detector": 1,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 25,
+      "n_used": 25,
+      "n_failed": 0,
+      "mjd_mean": 61040.195,
+      "stats": {
+        "min": -0.0294415,
+        "max": 70.8698,
+        "median": 0.0866863,
+        "sigma": 0.100189,
+        "p01": -0.0120674,
+        "p99": 4.42492,
+        "p997": 15.267,
+        "valid_fraction": 0.9979,
+        "saturated_fraction": 0.0019
+      },
+      "saturated": [
+        {
+          "x": 173.52,
+          "y": 84.12,
+          "radius_px": 4.51,
+          "n_pixels": 64
+        },
+        {
+          "x": 177.56,
+          "y": 48.67,
+          "radius_px": 1.69,
+          "n_pixels": 9
+        }
+      ],
+      "cube_offset": 912600
+    },
+    {
+      "epoch": 2,
+      "detector": 2,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 61045.4279,
+      "stats": {
+        "min": -0.0219511,
+        "max": 71.8679,
+        "median": 0.125595,
+        "sigma": 0.134182,
+        "p01": -0.00634785,
+        "p99": 5.36117,
+        "p997": 16.1736,
+        "valid_fraction": 0.9951,
+        "saturated_fraction": 0.0048
+      },
+      "saturated": [
+        {
+          "x": 177.19,
+          "y": 48.95,
+          "radius_px": 5.73,
+          "n_pixels": 103
+        },
+        {
+          "x": 173.48,
+          "y": 84.06,
+          "radius_px": 4.44,
+          "n_pixels": 62
+        },
+        {
+          "x": 57.64,
+          "y": 94.45,
+          "radius_px": 1.87,
+          "n_pixels": 11
+        },
+        {
+          "x": 40.2,
+          "y": 179.6,
+          "radius_px": 1.26,
+          "n_pixels": 5
+        }
+      ],
+      "cube_offset": 1064700
+    },
+    {
+      "epoch": 2,
+      "detector": 3,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61051.3154,
+      "stats": {
+        "min": -0.0301591,
+        "max": 89.8559,
+        "median": 0.112485,
+        "sigma": 0.119219,
+        "p01": -0.00712115,
+        "p99": 5.46975,
+        "p997": 16.5918,
+        "valid_fraction": 0.995,
+        "saturated_fraction": 0.0049
+      },
+      "saturated": [
+        {
+          "x": 177.23,
+          "y": 48.46,
+          "radius_px": 6.33,
+          "n_pixels": 126
+        },
+        {
+          "x": 173.33,
+          "y": 84.44,
+          "radius_px": 3.78,
+          "n_pixels": 45
+        },
+        {
+          "x": 56.31,
+          "y": 94.08,
+          "radius_px": 2.03,
+          "n_pixels": 13
+        },
+        {
+          "x": 40.5,
+          "y": 179.5,
+          "radius_px": 1.13,
+          "n_pixels": 4
+        }
+      ],
+      "cube_offset": 1216800
+    },
+    {
+      "epoch": 2,
+      "detector": 4,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 25,
+      "n_used": 25,
+      "n_failed": 0,
+      "mjd_mean": 61040.195,
+      "stats": {
+        "min": -0.053069,
+        "max": 68.9505,
+        "median": 0.0271732,
+        "sigma": 0.0672824,
+        "p01": -0.0414768,
+        "p99": 4.15404,
+        "p997": 12.3592,
+        "valid_fraction": 0.9943,
+        "saturated_fraction": 0.0056
+      },
+      "saturated": [
+        {
+          "x": 177.04,
+          "y": 48.47,
+          "radius_px": 7.2,
+          "n_pixels": 163
+        },
+        {
+          "x": 173.64,
+          "y": 83.93,
+          "radius_px": 3.66,
+          "n_pixels": 42
+        },
+        {
+          "x": 57.33,
+          "y": 93.89,
+          "radius_px": 1.69,
+          "n_pixels": 9
+        }
+      ],
+      "cube_offset": 1368900
+    },
+    {
+      "epoch": 2,
+      "detector": 5,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 22,
+      "n_used": 22,
+      "n_failed": 0,
+      "mjd_mean": 61044.3933,
+      "stats": {
+        "min": -0.0370422,
+        "max": 130.945,
+        "median": 0.0366383,
+        "sigma": 0.0449871,
+        "p01": -0.0122416,
+        "p99": 3.79503,
+        "p997": 18.4838,
+        "valid_fraction": 0.9991,
+        "saturated_fraction": 0.0009
+      },
+      "saturated": [
+        {
+          "x": 177.18,
+          "y": 48.82,
+          "radius_px": 3.29,
+          "n_pixels": 34
+        }
+      ],
+      "cube_offset": 1521000
+    },
+    {
+      "epoch": 2,
+      "detector": 6,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61051.3154,
+      "stats": {
+        "min": -0.281996,
+        "max": 155.72,
+        "median": 0.0267184,
+        "sigma": 0.0349546,
+        "p01": -0.0164272,
+        "p99": 2.78163,
+        "p997": 12.8021,
+        "valid_fraction": 0.9995,
+        "saturated_fraction": 0.0004
+      },
+      "saturated": [
+        {
+          "x": 177.29,
+          "y": 48.71,
+          "radius_px": 2.33,
+          "n_pixels": 17
+        }
+      ],
+      "cube_offset": 1673100
+    },
+    {
+      "epoch": 3,
+      "detector": 1,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 61217.2852,
+      "stats": {
+        "min": -0.157789,
+        "max": 63.7996,
+        "median": 0.0774441,
+        "sigma": 0.0913223,
+        "p01": -0.0171376,
+        "p99": 4.31909,
+        "p997": 13.9991,
+        "valid_fraction": 0.9969,
+        "saturated_fraction": 0.0018
+      },
+      "saturated": [
+        {
+          "x": 173.25,
+          "y": 83.84,
+          "radius_px": 4.22,
+          "n_pixels": 56
+        },
+        {
+          "x": 178.0,
+          "y": 49.5,
+          "radius_px": 1.95,
+          "n_pixels": 12
+        }
+      ],
+      "cube_offset": 1825200
+    },
+    {
+      "epoch": 3,
+      "detector": 2,
+      "status": "ready",
+      "rev": 3,
+      "n_exposures": 29,
+      "n_used": 29,
+      "n_failed": 0,
+      "mjd_mean": 61212.7869,
+      "stats": {
+        "min": -0.0317414,
+        "max": 74.1116,
+        "median": 0.119886,
+        "sigma": 0.129897,
+        "p01": -0.0101863,
+        "p99": 5.54739,
+        "p997": 17.5369,
+        "valid_fraction": 0.9957,
+        "saturated_fraction": 0.0043
+      },
+      "saturated": [
+        {
+          "x": 177.33,
+          "y": 48.85,
+          "radius_px": 5.59,
+          "n_pixels": 98
+        },
+        {
+          "x": 173.41,
+          "y": 84.21,
+          "radius_px": 4.3,
+          "n_pixels": 58
+        },
+        {
+          "x": 57.29,
+          "y": 94.0,
+          "radius_px": 1.49,
+          "n_pixels": 7
+        }
+      ],
+      "cube_offset": 1977300
+    },
+    {
+      "epoch": 3,
+      "detector": 3,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 40,
+      "n_used": 40,
+      "n_failed": 0,
+      "mjd_mean": 61199.952,
+      "stats": {
+        "min": -0.0243947,
+        "max": 81.689,
+        "median": 0.108306,
+        "sigma": 0.116277,
+        "p01": -0.00800704,
+        "p99": 5.81837,
+        "p997": 17.5237,
+        "valid_fraction": 0.9958,
+        "saturated_fraction": 0.0041
+      },
+      "saturated": [
+        {
+          "x": 177.32,
+          "y": 49.34,
+          "radius_px": 5.59,
+          "n_pixels": 98
+        },
+        {
+          "x": 173.48,
+          "y": 84.21,
+          "radius_px": 3.91,
+          "n_pixels": 48
+        },
+        {
+          "x": 57.36,
+          "y": 93.45,
+          "radius_px": 1.87,
+          "n_pixels": 11
+        }
+      ],
+      "cube_offset": 2129400
+    },
+    {
+      "epoch": 3,
+      "detector": 4,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 61217.2852,
+      "stats": {
+        "min": -0.0441688,
+        "max": 38.2208,
+        "median": 0.0383699,
+        "sigma": 0.0698648,
+        "p01": -0.0330234,
+        "p99": 3.73394,
+        "p997": 11.1093,
+        "valid_fraction": 0.993,
+        "saturated_fraction": 0.0068
+      },
+      "saturated": [
+        {
+          "x": 177.44,
+          "y": 48.95,
+          "radius_px": 7.94,
+          "n_pixels": 198
+        },
+        {
+          "x": 173.3,
+          "y": 83.83,
+          "radius_px": 3.87,
+          "n_pixels": 47
+        },
+        {
+          "x": 57.23,
+          "y": 94.31,
+          "radius_px": 2.03,
+          "n_pixels": 13
+        }
+      ],
+      "cube_offset": 2281500
+    },
+    {
+      "epoch": 3,
+      "detector": 5,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 29,
+      "n_used": 29,
+      "n_failed": 0,
+      "mjd_mean": 61212.7869,
+      "stats": {
+        "min": -0.0854095,
+        "max": 127.798,
+        "median": 0.0366351,
+        "sigma": 0.0447349,
+        "p01": -0.0115652,
+        "p99": 3.84863,
+        "p997": 17.374,
+        "valid_fraction": 0.9989,
+        "saturated_fraction": 0.001
+      },
+      "saturated": [
+        {
+          "x": 177.33,
+          "y": 48.92,
+          "radius_px": 3.52,
+          "n_pixels": 39
+        }
+      ],
+      "cube_offset": 2433600
+    },
+    {
+      "epoch": 3,
+      "detector": 6,
+      "status": "ready",
+      "rev": 4,
+      "n_exposures": 39,
+      "n_used": 39,
+      "n_failed": 0,
+      "mjd_mean": 61199.2123,
+      "stats": {
+        "min": -0.183283,
+        "max": 231.801,
+        "median": 0.0256497,
+        "sigma": 0.0335067,
+        "p01": -0.0162148,
+        "p99": 2.80481,
+        "p997": 14.3171,
+        "valid_fraction": 0.9996,
+        "saturated_fraction": 0.0004
+      },
+      "saturated": [
+        {
+          "x": 177.36,
+          "y": 48.79,
+          "radius_px": 2.11,
+          "n_pixels": 14
+        }
+      ],
+      "cube_offset": 2585700
+    }
+  ],
+  "flags": [
+    {
+      "bit": 0,
+      "name": "TRANSIENT",
+      "description": "Transient detected during SUR",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 1,
+      "name": "OVERFLOW",
+      "description": "Overflow detected during SUR",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 2,
+      "name": "SUR_ERROR",
+      "description": "Error in onboard processing",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 6,
+      "name": "NONFUNC",
+      "description": "Permanently unusable",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 7,
+      "name": "DICHROIC",
+      "description": "Low efficiency due to dichroic",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 9,
+      "name": "MISSING_DATA",
+      "description": "Onboard data lost",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 10,
+      "name": "HOT",
+      "description": "Hot pixel",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 11,
+      "name": "COLD",
+      "description": "Anomalously low signal",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 12,
+      "name": "FULLSAMPLE",
+      "description": "Pixel full sample history is available",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 14,
+      "name": "PHANMISS",
+      "description": "Phantom correction was not applied",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 15,
+      "name": "NONLINEAR",
+      "description": "Nonlinearity correction cannot be applied reliably",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 17,
+      "name": "PERSIST",
+      "description": "Persistent charge above threshold",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 19,
+      "name": "OUTLIER",
+      "description": "Pixel flagged by Detect Outliers",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 20,
+      "name": "CROSSTALK",
+      "description": "Pixel affected by crosstalk.",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 21,
+      "name": "SOURCE",
+      "description": "Pixel mapped to a known source",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 22,
+      "name": "GHOST",
+      "description": "Affected by a bright source inside the exposure",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 23,
+      "name": "GHOST_FPA",
+      "description": "Affected by a bright source on another detector",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 24,
+      "name": "GHOST_EXT",
+      "description": "Pixel affected by a bright source outside FOV",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 25,
+      "name": "STREAK",
+      "description": "Pixel affected by a streak",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 26,
+      "name": "BLOOM",
+      "description": "Pixel part of a bloom artifact",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 27,
+      "name": "SNOWBALL",
+      "description": "Pixel part of a snowball artifact",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 28,
+      "name": "HALO",
+      "description": "Pixel part of a transient halo",
+      "masked": true,
+      "saturation": false
+    }
+  ],
+  "progress": {
+    "phase": "done",
+    "queue_position": 0,
+    "cutouts_total": 458,
+    "cutouts_done": 458,
+    "cutouts_failed": 0,
+    "cutouts_cached": 283,
+    "planes_total": 18,
+    "planes_ready": 18,
+    "elapsed_s": 153.0
+  },
+  "warnings": [
+    {
+      "code": "saturated_source",
+      "ra": 162.18636,
+      "dec": -53.32784,
+      "radius_arcsec": 13.9,
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "detectors": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "code": "saturated_source",
+      "ra": 162.18058,
+      "dec": -53.35792,
+      "radius_arcsec": 25.4,
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "detectors": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "code": "saturated_source",
+      "ra": 162.35232,
+      "dec": -53.31954,
+      "radius_arcsec": 8.1,
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "detectors": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "code": "saturated_source",
+      "ra": 162.37637,
+      "dec": -53.24646,
+      "radius_arcsec": 3.9,
+      "epochs": [
+        2
+      ],
+      "detectors": [
+        2,
+        3
+      ]
+    }
+  ],
+  "preview": {
+    "status": "unavailable",
+    "survey": "WISE",
+    "band": "W1",
+    "wave_um": 3.4,
+    "hips": "CDS/P/allWISE/W1",
+    "display": null
+  },
+  "provenance": {
+    "source": "SPHEREx / IRSA",
+    "collections": [
+      "spherex_dr1",
+      "spherex_qr3"
+    ],
+    "listed_at": "2026-11-15T17:01:27Z",
+    "list_stale": false,
+    "download_mode": "truncated",
+    "built_at": "2026-11-15T17:03:37Z"
+  }
+}
