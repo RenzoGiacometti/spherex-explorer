@@ -86,6 +86,15 @@ class Settings:
     # Maximo de `IrsaBusy.retry_after`, pida lo que pida IRSA: un `Retry-After` de horas no
     # puede dejar parado un recorte. Lo que pidio de verdad queda en `IrsaBusy.requested`.
     irsa_retry_after_max_s: float = 60.0
+    # De donde salen los pixeles de un recorte (app/irsa/cutouts.py, `_download_from_source`).
+    # `auto`: del servicio de recortes de IRSA y, si responde ocupado o se corta, del archivo
+    # completo en el bucket publico de AWS, leido por rangos (app/irsa/s3.py). `s3`: primero el
+    # bucket y despues IRSA. `irsa`: solo el servicio de recortes.
+    cutout_source: str = "auto"
+    # El bucket `nasa-irsa-spherex` (columna `cloud_access` de SIA2) tiene los mismos archivos,
+    # con la ruta que en `access_url` sigue a `irsa_data_prefix`.
+    s3_base_url: str = "https://nasa-irsa-spherex.s3.us-east-1.amazonaws.com"
+    irsa_data_prefix: str = "https://irsa.ipac.caltech.edu/ibe/data/spherex/"
     # Tope de disco de la cache de recortes (contrato, seccion 11); 0 o menos lo desactiva.
     cutout_cache_max_gb: float = 10.0
 
