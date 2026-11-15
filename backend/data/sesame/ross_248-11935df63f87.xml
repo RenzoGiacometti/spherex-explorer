@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>Ross 248</name>
+  <!-- Q215224 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 15ms [15] -->
+    <oid>1587975</oid>
+    <oname>Ross 248</oname>
+    <otype>BY*</otype>
+    <jpos>23:41:55.03 +44:10:38.8</jpos>
+    <jradeg>355.47931791771504</jradeg>
+    <jdedeg>44.17744969753222</jdedeg>
+    <refPos>2020yCat.1350....0G</refPos>
+    <errRAmas>0.0322</errRAmas><errDEmas>0.0213</errDEmas>
+    <pm>
+      <v>1595.623</v><e>0.045</e><q>A</q><r>2020yCat.1350....0G</r>
+      <pa>175.956</pa>
+      <pmRA>112.527</pmRA><epmRA>0.036</epmRA>
+      <pmDE>-1591.650</pmDE><epmDE>0.027</epmDE>
+    </pm>
+    <plx><v>316.4812</v><e>0.0444</e><q>A</q><r>2020yCat.1350....0G</r></plx>
+    <Vel><v>-77.51</v><e>0.0006</e><q>A</q><r>2018MNRAS.475.1960F</r></Vel>
+    <spType>M5.0V</spType><spNum>0.00028A00.0030.0000000000000000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,23:00:41z)==== -->

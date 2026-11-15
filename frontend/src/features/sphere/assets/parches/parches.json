@@ -138,5 +138,85 @@
     "height_deg": 0.166563,
     "band": 3,
     "epoch": 3
+  },
+  "m-31": {
+    "file": "m-31.png",
+    "field": "377ccf5770a2ee85",
+    "ra": 10.6847,
+    "dec": 41.2687,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 3
+  },
+  "m-33": {
+    "file": "m-33.png",
+    "field": "a0e785c244718cc0",
+    "ra": 23.4621,
+    "dec": 30.6602,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 2,
+    "epoch": 2
+  },
+  "m-81": {
+    "file": "m-81.png",
+    "field": "a688e8984c041695",
+    "ra": 148.8882,
+    "dec": 69.0653,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 2
+  },
+  "m-101": {
+    "file": "m-101.png",
+    "field": "9872a491078b5ce0",
+    "ra": 210.8024,
+    "dec": 54.3488,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 3,
+    "epoch": 1
+  },
+  "m-104": {
+    "file": "m-104.png",
+    "field": "6a4900bbafa7fc5e",
+    "ra": 189.9976,
+    "dec": -11.6231,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 3
+  },
+  "ugps-0722": {
+    "file": "ugps-0722.png",
+    "field": "fdd01819dc3a5ded",
+    "ra": 110.6097,
+    "dec": -5.6735,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 1
+  },
+  "2mass-0415": {
+    "file": "2mass-0415.png",
+    "field": "baaad0979c9e8591",
+    "ra": 63.8475,
+    "dec": -9.5814,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 1
+  },
+  "ross-248": {
+    "file": "ross-248.png",
+    "field": "45a6913d1c9281bf",
+    "ra": 355.4803,
+    "dec": 44.1659,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 6,
+    "epoch": 1
   }
 }

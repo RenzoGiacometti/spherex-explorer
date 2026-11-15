@@ -133,6 +133,26 @@ describe("savedFieldByName", () => {
     "m-82": ["M82", "M 82"],
     "m-42": ["M42", "M 42", "Orion Nebula", "Nebulosa de Orion", "Nebulosa de Orión"],
     "m-1": ["M1", "M 1", "Crab Nebula", "Nebulosa del Cangrejo"],
+    "m-31": ["M31", "M 31", "Messier 31", "Andromeda Galaxy", "Galaxia de Andrómeda"],
+    "m-33": ["M33", "M 33", "Messier 33", "Triangulum Galaxy", "Galaxia del Triángulo"],
+    "m-81": ["M81", "M 81", "Messier 81", "Bode's Galaxy", "Galaxia de Bode"],
+    "m-101": ["M101", "M 101", "Messier 101", "Pinwheel Galaxy", "Galaxia del Molinete"],
+    "m-104": ["M104", "M 104", "Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
+    "ugps-0722": [
+      "UGPS J0722-0540",
+      "UGPS 0722-05",
+      "ugps j0722-05",
+      "UGPS J072227.51-054031.2",
+      "WISE J072227.27-054029.9",
+    ],
+    "2mass-0415": [
+      "2MASS J0415-0935",
+      "2MASS 0415-0935",
+      "2m 0415-0935",
+      "2MASS J04151954-0935066",
+      "2MASSI J0415195-093506",
+    ],
+    "ross-248": ["Ross 248", "ross-248", "Ross248"],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {
@@ -164,7 +184,7 @@ describe("savedFieldByName", () => {
   it("otro nombre, un nombre parecido o unas coordenadas no son un alias", () => {
     for (const text of [
       "",
-      "M 31",
+      "M 87",
       "M 13",
       "M 511",
       "Barnad Star",
@@ -259,8 +279,8 @@ describe("savedFieldAt", () => {
   });
 
   it("un punto lejos de todo campo guardado no cae en ninguno", () => {
-    // M 31, y un punto a 10 minutos de arco de Barnard.
-    expect(savedFieldAt({ ra: 10.6847, dec: 41.269 })).toBeNull();
+    // M 87, y un punto a 10 minutos de arco de Barnard.
+    expect(savedFieldAt({ ra: 187.7059, dec: 12.3911 })).toBeNull();
     expect(savedFieldAt({ ra: 269.4463, dec: 4.7683 + 10 / 60 })).toBeNull();
   });
 });

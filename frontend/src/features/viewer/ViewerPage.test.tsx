@@ -817,8 +817,10 @@ describe("ViewerPage: errores", () => {
     expect(within(alert).queryByRole("button", { name: "Reintentar" })).toBeNull();
     // Lo que si ofrece son las salidas: el campo guardado mas cercano, con su
     // distancia, y el recorrido guiado (que aca no, porque es el de este campo).
-    expect(within(alert).getByText(/campo guardado más cercano es Wolf 359, a 33,4°/)).toBeTruthy();
-    expect(within(alert).getByRole("button", { name: "Abrir Wolf 359" })).toBeTruthy();
+    expect(
+      within(alert).getByText(/campo guardado más cercano es UGPS J0722-0540, a 23,1°/),
+    ).toBeTruthy();
+    expect(within(alert).getByRole("button", { name: "Abrir UGPS J0722-0540" })).toBeTruthy();
     expect(within(alert).queryByRole("button", { name: "Abrir el recorrido guiado" })).toBeNull();
     // Los controles siguen a mano para elegir otro campo de vision o volver.
     expect(radio("10 minutos de arco").checked).toBe(true);

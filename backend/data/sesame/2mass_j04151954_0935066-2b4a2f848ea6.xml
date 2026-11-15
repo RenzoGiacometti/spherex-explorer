@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>2MASS J04151954-0935066</name>
+  <!-- Q215223 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 20ms [20] -->
+    <oid>702025</oid>
+    <oname>2MASSI J0415195-093506</oname>
+    <otype>BD*</otype>
+    <jpos>04:15:19.54 -09:35:06.6</jpos>
+    <jradeg>63.831432</jradeg>
+    <jdedeg>-9.585187</jdedeg>
+    <refPos>2003yCat.2246....0C</refPos>
+    <errRAmas>110</errRAmas><errDEmas>110</errDEmas>
+    <pm>
+      <v>2255</v><e>4</e><q>D</q><r>2009AJ....137....1F</r>
+      <pa>76.5</pa>
+      <pmRA>2193</pmRA><epmRA>3</epmRA>
+      <pmDE>527</pmDE><epmDE>2</epmDE>
+    </pm>
+    <plx><v>174.34</v><e>2.76</e><q>C</q><r>2012ApJ...752...56F</r></plx>
+    <Vel><v>49.6</v><e>1.2</e><q>B</q><r>2021ApJS..257...45H</r></Vel>
+    <spType>T8.0</spType><spNum>0.0003D400.0000.0000000000000000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,23:00:39z)==== -->

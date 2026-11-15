@@ -386,15 +386,15 @@ describe("SpherePage sin WebGL", () => {
     });
 
     it("por coordenadas: pasa por /api/resolve y abre el campo sin nombre", async () => {
-      // M 31: lejos de todo campo guardado.
-      const fake = backend((name) => json(coordinates(name, 10.6847, 41.269)));
+      // M 87: lejos de todo campo guardado.
+      const fake = backend((name) => json(coordinates(name, 187.7059, 12.3911)));
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("10.6847 +41.2690");
+      searchFor("187.7059 +12.3911");
 
-      await waitFor(() => expect(useUrlState.getState().ra).toBe(10.6847));
-      expect(fake.names).toEqual(["10.6847 +41.2690"]);
-      expect(window.location.search).toBe("?ra=10.6847&dec=41.269&fov=0.1667&band=3&mode=blink");
+      await waitFor(() => expect(useUrlState.getState().ra).toBe(187.7059));
+      expect(fake.names).toEqual(["187.7059 +12.3911"]);
+      expect(window.location.search).toBe("?ra=187.7059&dec=12.3911&fov=0.1667&band=3&mode=blink");
       expect(urlState().name).toBeNull();
     });
 
@@ -410,13 +410,13 @@ describe("SpherePage sin WebGL", () => {
     });
 
     it("unas coordenadas con coma decimal llegan al backend como se escribieron", async () => {
-      const fake = backend((name) => json(coordinates(name, 10.6847, 41.269)));
+      const fake = backend((name) => json(coordinates(name, 187.7059, 12.3911)));
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("10,6847 +41,2690");
+      searchFor("187,7059 +12,3911");
 
-      await waitFor(() => expect(useUrlState.getState().ra).toBe(10.6847));
-      expect(fake.names).toEqual(["10,6847 +41,2690"]);
+      await waitFor(() => expect(useUrlState.getState().ra).toBe(187.7059));
+      expect(fake.names).toEqual(["187,7059 +12,3911"]);
     });
 
     // ---- Campos guardados --------------------------------------------------
@@ -610,7 +610,7 @@ describe("SpherePage sin WebGL", () => {
       const fake = backend(() => errorResponse("upstream_unavailable", 503, true));
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("M 31");
+      searchFor("M 87");
 
       const text = (await screen.findByRole("alert")).textContent ?? "";
       expect(text).toContain("coordenadas");
@@ -739,7 +739,7 @@ describe("SpherePage sin WebGL", () => {
     it("en ingles todos los textos salen del ingles", async () => {
       await setLanguage("en");
       const fake = backend((name) =>
-        name === "M 31"
+        name === "M 87"
           ? errorResponse("upstream_unavailable", 503, true)
           : errorResponse("not_resolved", 404),
       );
@@ -764,7 +764,7 @@ describe("SpherePage sin WebGL", () => {
       );
       expect(document.activeElement).toBe(field);
 
-      fireEvent.change(field, { target: { value: "M 31" } });
+      fireEvent.change(field, { target: { value: "M 87" } });
       fireEvent.submit(screen.getByRole("search"));
       await waitFor(() =>
         expect(screen.getByRole("alert").textContent).toBe(

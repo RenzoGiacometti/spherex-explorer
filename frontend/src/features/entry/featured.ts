@@ -138,6 +138,14 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - Luhman 16 y Teegarden: banda 5 (senal sobre ruido de 314 y 313).
  * - Wolf 359: banda 6, la unica con exposiciones validas ademas de una de la 1.
  * - M 82: banda 1, la unica donde el nucleo no satura.
+ * - M 31: banda 5 (senal sobre ruido de 98); el nucleo satura en las bandas 1 a 4.
+ * - M 33: banda 2 (senal sobre ruido de 93, un 13 % mas que la 3).
+ * - M 81: banda 5 (senal sobre ruido de 239); el nucleo satura en las bandas 1 a 4.
+ * - M 101: banda 3, la de mejor senal (136); no satura en ninguna.
+ * - M 104: banda 5 (senal sobre ruido de 188); el nucleo satura en las bandas 1 a 4.
+ * - UGPS J0722-0540: banda 5 (senal sobre ruido de 18); en las bandas 1 a 4 no pasa de 3.
+ * - 2MASS J0415-0935: banda 5 (senal sobre ruido de 18,5); en las demas no pasa de 9.
+ * - Ross 248: banda 6, la unica con exposiciones validas (8 de 77); satura en las demas.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -232,6 +240,98 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     dec: -45.0596,
     band: 3,
     aliases: ["Kapteyn", "Kapteyn Star", "Estrella de Kapteyn"],
+  },
+  {
+    id: "m-31",
+    label: "M 31",
+    name: "M 31",
+    ra: 10.6847,
+    dec: 41.2687,
+    band: 5,
+    aliases: ["Messier 31", "Andromeda Galaxy", "Galaxia de Andromeda"],
+  },
+  {
+    id: "m-33",
+    label: "M 33",
+    name: "M 33",
+    ra: 23.4621,
+    dec: 30.6602,
+    band: 2,
+    aliases: ["Messier 33", "Triangulum Galaxy", "Galaxia del Triangulo"],
+  },
+  {
+    id: "m-81",
+    label: "M 81",
+    name: "M 81",
+    ra: 148.8882,
+    dec: 69.0653,
+    band: 5,
+    aliases: ["Messier 81", "Bode's Galaxy", "Galaxia de Bode"],
+  },
+  {
+    id: "m-101",
+    label: "M 101",
+    name: "M 101",
+    ra: 210.8024,
+    dec: 54.3488,
+    band: 3,
+    aliases: ["Messier 101", "Pinwheel Galaxy", "Galaxia del Molinete"],
+  },
+  {
+    id: "m-104",
+    label: "M 104",
+    name: "M 104",
+    ra: 189.9976,
+    dec: -11.6231,
+    band: 5,
+    aliases: ["Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
+  },
+  {
+    id: "ugps-0722",
+    label: "UGPS J0722-0540",
+    // Nombre completo del catalogo, con el que lo resolvio el servicio de nombres
+    // (backend/data/sesame/ugps_j072227_51_054031_2-*.xml).
+    name: "UGPS J072227.51-054031.2",
+    ra: 110.6097,
+    dec: -5.6735,
+    band: 5,
+    aliases: [
+      // Formas cortas del nombre de catalogo de arriba: las mismas cifras, recortadas.
+      "UGPS 0722-05",
+      "UGPS 0722-0540",
+      "UGPS J0722-05",
+      // Nombre principal con el que responde el servicio de nombres
+      // (backend/data/sesame/ugps_j072227_51_054031_2-*.xml).
+      "WISE J072227.27-054029.9",
+    ],
+  },
+  {
+    id: "2mass-0415",
+    label: "2MASS J0415-0935",
+    // Nombre completo del catalogo, con el que lo resolvio el servicio de nombres
+    // (backend/data/sesame/2mass_j04151954_0935066-*.xml).
+    name: "2MASS J04151954-0935066",
+    ra: 63.8475,
+    dec: -9.5814,
+    band: 5,
+    aliases: [
+      // Formas cortas del nombre de catalogo de arriba: las mismas cifras, recortadas.
+      "2MASS 0415-0935",
+      "2MASS J0415-09",
+      "2M 0415-0935",
+      // Nombre principal con el que responde el servicio de nombres
+      // (backend/data/sesame/2mass_j04151954_0935066-*.xml).
+      "2MASSI J0415195-093506",
+    ],
+  },
+  {
+    id: "ross-248",
+    label: "Ross 248",
+    name: "Ross 248",
+    ra: 355.4803,
+    dec: 44.1659,
+    band: 6,
+    aliases: [],
   },
 ];
 

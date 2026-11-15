@@ -106,8 +106,8 @@ describe("savedFieldPatch", () => {
       // Ya trae un nombre: alguien eligio ese objeto.
       "?ra=133.7951&dec=-7.2451&name=Otro+objeto",
       `?ra=133.7598&dec=-7.2422&band=6&name=${encodeURIComponent(WISE_NAME)}`,
-      // M 31, y un punto a 10 minutos de arco de Barnard.
-      "?ra=10.6847&dec=41.269",
+      // M 87, y un punto a 10 minutos de arco de Barnard.
+      "?ra=187.7059&dec=12.3911",
       "?ra=269.4463&dec=4.935",
     ]) {
       expect(savedFieldPatch(parseUrlState(search), search), search).toBeNull();
@@ -148,8 +148,8 @@ describe("bindFieldToUrl con un campo guardado", () => {
     expect(window.history.length).toBe(before + 1);
 
     // Un punto lejos de todo campo guardado pasa como esta.
-    useUrlState.getState().update({ ra: 10.6847, dec: 41.269, name: null }, { history: "push" });
-    expect(seen[2]).toMatchObject({ ra: 10.6847, dec: 41.269, name: null });
+    useUrlState.getState().update({ ra: 187.7059, dec: 12.3911, name: null }, { history: "push" });
+    expect(seen[2]).toMatchObject({ ra: 187.7059, dec: 12.3911, name: null });
 
     unbind();
   });

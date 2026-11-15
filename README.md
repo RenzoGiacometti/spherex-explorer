@@ -8,7 +8,7 @@ SkyBlink es una herramienta web para mirar el cielo infrarrojo de la misión SPH
 
 ## Qué se puede hacer
 
-- **Buscar un lugar** por nombre o por coordenadas, girar la esfera celeste, elegir cualquier punto del cielo con un clic, prender las constelaciones para ubicarse o caer en un "lugar al azar" entre 13 campos ya calculados. En el teléfono, la esfera funciona como una ventana al cielo: muestra lo que hay hacia donde se apunta.
+- **Buscar un lugar** por nombre o por coordenadas, girar la esfera celeste, elegir cualquier punto del cielo con un clic, prender las constelaciones para ubicarse o caer en un "lugar al azar" entre 21 campos ya calculados. En el teléfono, la esfera funciona como una ventana al cielo: muestra lo que hay hacia donde se apunta.
 - **Comparar épocas.** Cada campo tiene 3 o 4 pasadas de SPHEREx en seis bandas. Se pueden parpadear, restar (diferencia), sumar, superponer en rojo y cian o alternar manteniendo apretado.
 - **Ver el espectro** de una fuente con un clic: flujo contra longitud de onda, con barras de error, bandas de H₂O, CH₄, CO₂ y CO, una "huella química" rotulada como indicio y la opción de escucharlo.
 - **Ver la curva de luz** de esa fuente, por banda, en la pestaña de al lado.
@@ -35,7 +35,7 @@ pnpm install
 pnpm dev
 ```
 
-Los 14 campos precalculados (`backend/data/fields`) abren sin conexión a IRSA. Abrir cualquier otro lugar descarga unos 300 a 500 recortes de IRSA.
+Los 22 campos precalculados (`backend/data/fields`) abren sin conexión a IRSA. Abrir cualquier otro lugar descarga unos 300 a 500 recortes de IRSA.
 
 La versión pública es una sola imagen de Docker con la API, el frontend compilado y los campos precalculados:
 

@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "key": "210.8024_+54.3488_0.1667",
+  "field_id": "9872a491078b5ce0",
+  "pipeline": "1",
+  "object": {
+    "alias": "m-101",
+    "query": "M 101",
+    "name": "M 101"
+  },
+  "request": {
+    "ra": 210.8024,
+    "dec": 54.3488,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      210.8024,
+      54.3488
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "surveys": [
+    {
+      "key": "twomass_ks",
+      "survey": "2MASS",
+      "band": "Ks",
+      "wave_um": 2.159,
+      "file": "twomass_ks.f32",
+      "mjd": 51223.47248,
+      "date": "1999-02-14",
+      "year": 1999.121,
+      "mjd_start": 51223.45666,
+      "mjd_end": 51223.47367,
+      "date_start": "1999-02-14",
+      "date_end": "1999-02-14",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.0,
+      "display": {
+        "vmin": -0.621765,
+        "vmax": 3.42739,
+        "median": -0.027817,
+        "sigma": 0.296974
+      },
+      "valid_fraction": 1.0,
+      "collection": "twomass_allsky",
+      "images": [
+        {
+          "obs_id": "allsky_990214n_s118_0244",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s118/image/ki1180244.fits.gz",
+          "mjd": 51223.47248,
+          "date": "1999-02-14",
+          "coverage": 0.4831
+        },
+        {
+          "obs_id": "allsky_990214n_s118_0256",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s118/image/ki1180256.fits.gz",
+          "mjd": 51223.47269,
+          "date": "1999-02-14",
+          "coverage": 0.3922
+        },
+        {
+          "obs_id": "allsky_990214n_s111_0021",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s111/image/ki1110021.fits.gz",
+          "mjd": 51223.45666,
+          "date": "1999-02-14",
+          "coverage": 0.254
+        },
+        {
+          "obs_id": "allsky_990214n_s111_0032",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s111/image/ki1110032.fits.gz",
+          "mjd": 51223.45685,
+          "date": "1999-02-14",
+          "coverage": 0.0821
+        },
+        {
+          "obs_id": "allsky_990214n_s119_0021",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s119/image/ki1190021.fits.gz",
+          "mjd": 51223.47348,
+          "date": "1999-02-14",
+          "coverage": 0.0676
+        },
+        {
+          "obs_id": "allsky_990214n_s119_0032",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/990214n/s119/image/ki1190032.fits.gz",
+          "mjd": 51223.47367,
+          "date": "1999-02-14",
+          "coverage": 0.0219
+        }
+      ],
+      "target": null
+    },
+    {
+      "key": "wise_w2",
+      "survey": "WISE",
+      "band": "W2",
+      "wave_um": 4.618,
+      "file": "wise_w2.f32",
+      "mjd": 55359.66624,
+      "date": "2010-06-12",
+      "year": 2010.445,
+      "mjd_start": 55352.72022,
+      "mjd_end": 55549.82903,
+      "date_start": "2010-06-05",
+      "date_end": "2010-12-19",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.375,
+      "display": {
+        "vmin": -0.186972,
+        "vmax": 0.974542,
+        "median": 0.0,
+        "sigma": 0.0934861
+      },
+      "valid_fraction": 1.0,
+      "collection": "wise_allwise",
+      "images": [
+        {
+          "obs_id": "2119p545_ac51",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/21/2119/2119p545_ac51/2119p545_ac51-w2-int-3.fits",
+          "mjd": 55359.66624,
+          "date": "2010-06-12",
+          "coverage": 1.0
+        },
+        {
+          "obs_id": "2093p545_ac51",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/20/2093/2093p545_ac51/2093p545_ac51-w2-int-3.fits",
+          "mjd": 55357.28464,
+          "date": "2010-06-10",
+          "coverage": 0.1642
+        }
+      ],
+      "target": null
+    }
+  ],
+  "gaia": {
+    "file": "gaia.json",
+    "catalog": "gaia_dr3_source",
+    "ref_epoch": 2016.0,
+    "n_sources": 626,
+    "radius_arcsec": 430.0,
+    "g_mag_min": 12.8,
+    "g_mag_max": 21.78
+  },
+  "generated_at": "2026-11-15T23:22:42Z"
+}
