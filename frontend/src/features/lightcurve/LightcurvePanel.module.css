@@ -1,11 +1,39 @@
 /* Panel de curva de luz: el contenedor es GlassPanel con relleno de 24 px (DESIGN.md). Solo tokens. */
 
+/* El nombre con su posicion y, si el panel se puede cerrar, el boton a la derecha. */
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
 .heading {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-xxs) var(--space-md);
+  min-width: 0;
+}
+
+/*
+ * Lo que cambia como se lee la curva (variacion relativa medida en las alas, o
+ * que no hay curva): arriba de todo, en un recuadro como el de los avisos
+ * destacados del espectro, con el texto en blanco pleno.
+ */
+.prominent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  list-style: none;
 }
 
 /* Nombre del objeto: como en el catalogo, sin mayusculas. */
@@ -25,7 +53,6 @@
 }
 
 .note,
-.relative,
 .verdict,
 .footnote {
   margin: 0;
@@ -33,21 +60,14 @@
   letter-spacing: var(--type-body-sm-tracking);
 }
 
-.note,
-.relative {
+.note {
   color: var(--color-text-mute);
 }
 
-/* "Variacion relativa": rotulo de contorno seguido de la aclaracion. Sin acento ni color de estado. */
-.relative {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-xs);
-}
-
+/* "Variacion relativa", "Sin curva": rotulo de contorno seguido de la aclaracion. Sin acento ni color de estado. */
 .tag {
-  flex-shrink: 0;
+  display: inline-block;
+  margin-right: var(--space-xxs);
   padding: 2px var(--space-xs);
   border: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius-pill);

@@ -7,7 +7,8 @@
 //            columna izquierda Banda, Modo, Imagen (con la capa de flags)
 //            zona libre        la imagen se encuadra aca
 //            columna derecha   Metadatos y Avisos de calidad; arriba de ellos,
-//                              el espectro cuando esta abierto (la columna se ensancha)
+//                              el espectro y la curva de luz cuando el panel de la
+//                              fuente esta abierto (la columna se ensancha)
 //            muelle inferior   transporte, linea de tiempo y estado de la carga;
 //                              en el modo `journey`, el control del viaje entre misiones
 //
@@ -24,8 +25,14 @@
 // Sobre la imagen, en los tres, van las anotaciones (ImageAnnotations.tsx) y,
 // si esta prendida, la capa de Gaia (GaiaOverlay.tsx).
 //
-// Un clic sobre la imagen pide el espectro de ese punto (useSpectrum.ts) y abre
-// SpectrumDock. En `embed` no: ahi solo va la imagen.
+// Que hace un clic sobre la imagen lo decide imageClick.ts, en un solo lugar:
+// por defecto pide el espectro de ese punto (useSpectrum.ts) y abre
+// SpectrumDock, con sus pestanas de espectro y curva de luz; si una herramienta
+// tomo el clic, va a ella. En `embed` no hay clic: ahi solo va la imagen.
+//
+// En el campo de una estrella variable del desafio (challengeVariables.ts) se
+// ofrece su curva de luz de entrada (LightcurveOffer.tsx): en la columna
+// derecha y, en el celular, sobre la imagen.
 //
 // El estado sale de tres lugares: la URL (campo, banda, modo, epoca), el store
 // del campo (metadatos e imagenes) y useViewerController (reproductor, epoca
@@ -43,14 +50,17 @@ import type { ImageSize } from "@/viewer/compose";
 import { type ImageClick, ImageViewer, type ViewerOverlay } from "@/viewer/ImageViewer";
 import { homeZoomForViewFov } from "@/viewer/view";
 import { BandPanel } from "./BandPanel";
+import { challengeVariableFor } from "./challengeVariables";
 import { EmbedBar } from "./EmbedBar";
 import { GaiaOverlay } from "./GaiaOverlay";
 import { ImageAnnotations } from "./ImageAnnotations";
 import { ImagePanel } from "./ImagePanel";
+import { DEFAULT_IMAGE_CLICK_MODE, routeImageClick, useImageClickMode } from "./imageClick";
+import { LightcurveOffer } from "./LightcurveOffer";
 import { MetadataPanel } from "./MetadataPanel";
 import { ModePanel } from "./ModePanel";
 import { QualityPanel } from "./QualityPanel";
-import { SpectrumDock } from "./SpectrumDock";
+import { type SourceTab, SpectrumDock } from "./SpectrumDock";
 import { StageStatus } from "./StageStatus";
 import { TimelineDock } from "./TimelineDock";
 import { ToolsDrawer, type ToolsSection } from "./ToolsDrawer";
@@ -69,6 +79,10 @@ export function ViewerPage() {
   const { t } = useTranslation("viewer");
   const fov = useUrlState((state) => state.fov);
   const embed = useUrlState((state) => state.embed);
+  const band = useUrlState((state) => state.band);
+  const urlRa = useUrlState((state) => state.ra);
+  const urlDec = useUrlState((state) => state.dec);
+  const urlName = useUrlState((state) => state.name);
   const phone = useMediaQuery(PHONE_QUERY);
   const layout: ViewerLayout = embed ? "embed" : phone ? "phone" : "desktop";
 
@@ -113,12 +127,42 @@ export function ViewerPage() {
       ? (composition.epochs[0] ?? null)
       : view.current;
   const spectrum = useSpectrum(shownEpoch);
-  const { requestAt: requestSpectrum, close: closeSpectrum } = spectrum;
+  const {
+    requestAt: requestSpectrum,
+    requestObject: requestSpectrumOfObject,
+    close: closeSpectrum,
+  } = spectrum;
   const spectrumState = spectrum.state;
   const spectrumOpen = layout !== "embed" && spectrumState.status !== "idle";
   // Solo hay algo que medir sobre una imagen de SPHEREx. Mientras se mantiene
   // apretado para ver B, soltar no es un clic.
   const canPick = layout !== "embed" && source === "spherex" && !controller.holding;
+  /** Quien tiene el clic: "source" (espectro y curva de luz) o la herramienta que lo tomo. */
+  const clickMode = useImageClickMode();
+
+  // Pestana del panel de la fuente. Un clic con el panel abierto la conserva;
+  // cerrado, el proximo clic vuelve a abrir en el espectro.
+  const [sourceTab, setSourceTab] = useState<SourceTab>("spectrum");
+  const spectrumIdle = spectrumState.status === "idle";
+  useEffect(() => {
+    if (spectrumIdle) setSourceTab("spectrum");
+  }, [spectrumIdle]);
+
+  // ---- Curva de luz de las variables del desafio ----------------------------
+
+  const fieldReady = useFieldStore(
+    (state) => state.fieldId !== null && state.meta?.grid !== undefined,
+  );
+  const variable = useMemo(
+    () =>
+      challengeVariableFor({
+        name: urlName,
+        center: urlRa === null || urlDec === null ? null : { ra: urlRa, dec: urlDec },
+      }),
+    [urlName, urlRa, urlDec],
+  );
+  // Se ofrece con el campo ya abierto y mientras el panel de la fuente esta cerrado.
+  const offered = layout !== "embed" && fieldReady && !spectrumOpen ? variable : null;
 
   const openTools = useCallback(
     (section: ToolsSection) => {
@@ -132,13 +176,23 @@ export function ViewerPage() {
   );
   const closeTools = useCallback(() => setTools(null), []);
 
+  // Unico lugar que recibe el clic sobre la imagen: imageClick.ts decide a quien va.
   const handleImageClick = useCallback(
     (click: ImageClick) => {
-      setTools(null);
-      requestSpectrum(click);
+      routeImageClick(click, (sourceClick) => {
+        setTools(null);
+        requestSpectrum(sourceClick);
+      });
     },
     [requestSpectrum],
   );
+  /** Abre el panel del objeto del campo directo en la pestana de la curva de luz. */
+  const openLightcurve = useCallback(() => {
+    if (variable === null) return;
+    setTools(null);
+    setSourceTab("lightcurve");
+    requestSpectrumOfObject(variable);
+  }, [variable, requestSpectrumOfObject]);
   /** Punto que se pidio, para marcarlo sobre la imagen; el objeto buscado ya tiene su mira. */
   const spectrumMark = useMemo(() => {
     if (spectrumState.status === "idle" || spectrumState.point.pixel === null) return null;
@@ -178,6 +232,7 @@ export function ViewerPage() {
       data-journey-frame={journeyOn ? (journey.currentId ?? undefined) : undefined}
       data-flags={controller.flags.status}
       data-spectrum={spectrumOpen ? "open" : undefined}
+      data-click={canPick ? clickMode : undefined}
     >
       {layout === "embed" ? null : (
         <div className={styles.top}>
@@ -226,16 +281,27 @@ export function ViewerPage() {
       </div>
       <p id={helpId} hidden>
         {t("page.viewerHelp")}
-        {canPick ? ` ${t("page.viewerHelpSpectrum")}` : null}
+        {canPick && clickMode === DEFAULT_IMAGE_CLICK_MODE
+          ? ` ${t("page.viewerHelpSpectrum")}`
+          : null}
       </p>
 
       <div ref={stageRef} className={styles.stage}>
+        {layout === "phone" && offered !== null && openSection === null ? (
+          <LightcurveOffer variable={offered} onOpen={openLightcurve} variant="compact" />
+        ) : null}
         <StageStatus controller={controller} />
       </div>
 
       {layout === "desktop" ? (
         <div className={styles.right}>
-          <SpectrumDock spectrum={spectrum} />
+          {offered === null ? null : <LightcurveOffer variable={offered} onOpen={openLightcurve} />}
+          <SpectrumDock
+            spectrum={spectrum}
+            tab={sourceTab}
+            onTabChange={setSourceTab}
+            band={band}
+          />
           <MetadataPanel currentEpoch={view.current} />
           <QualityPanel notices={notices} />
         </div>
@@ -281,7 +347,12 @@ export function ViewerPage() {
           </div>
           {spectrumOpen ? (
             <div className={styles.sheet}>
-              <SpectrumDock spectrum={spectrum} />
+              <SpectrumDock
+                spectrum={spectrum}
+                tab={sourceTab}
+                onTabChange={setSourceTab}
+                band={band}
+              />
             </div>
           ) : null}
           {openSection === null || spectrumOpen ? null : (

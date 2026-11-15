@@ -1,11 +1,10 @@
-// Curva de luz: componentes sueltos, listos para sumar al visor.
-//
-// Como integrarlo:
-// 1. Al hacer clic en un punto del visor, pedir la curva con
-//    `fetchLightcurve({ ra, dec, field })` (y `pmRa`, `pmDec` de /api/resolve si
-//    el objeto se mueve). Son los mismos parametros que el espectro.
-// 2. Dibujar `<LightcurvePanel lightcurve={documento} initialBand={banda} />`.
-// 3. Mover los textos a src/i18n (ver texts.ts).
+// Curva de luz. El visor la usa asi (features/viewer/useLightcurve.ts y
+// SpectrumDock.tsx):
+// 1. La pestana "Curva de luz" del panel que abre un clic en la imagen la pide
+//    con `fetchLightcurve({ ra, dec, field })` (y `pmRa`, `pmDec`, `epoch` de
+//    /api/resolve si es el objeto buscado): los mismos parametros que el espectro.
+// 2. El documento se dibuja con `<LightcurvePanel lightcurve={documento} initialBand={banda} />`.
+// 3. Los textos estan en src/i18n/locales/<idioma>/lightcurve.json.
 //
 // Para verlo sin el visor: /?dev=lightcurve con `pnpm dev`
 // (lightcurve.devpage.tsx), con las curvas precalculadas de los cinco objetos
@@ -18,8 +17,13 @@ export {
   lightcurveUrl,
 } from "./api";
 export { LightcurveChart, type LightcurveChartProps } from "./LightcurveChart";
-export { formatBandList, LightcurvePanel, type LightcurvePanelProps } from "./LightcurvePanel";
-export { LIGHTCURVE_NAMESPACE, useLightcurveTexts } from "./texts";
+export {
+  bandHasCurve,
+  formatBandList,
+  LightcurvePanel,
+  type LightcurvePanelProps,
+} from "./LightcurvePanel";
+export { LIGHTCURVE_NAMESPACE, type LightcurveT } from "./texts";
 export {
   detectorsOf,
   type LightcurveBin,

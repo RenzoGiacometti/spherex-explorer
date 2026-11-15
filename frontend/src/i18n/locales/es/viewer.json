@@ -4,7 +4,7 @@
     "field": "Campo",
     "viewerLabel": "Imagen del campo",
     "viewerHelp": "Rueda o pellizco para acercar, arrastre para desplazar y doble clic para volver a la vista de partida. Con el teclado: flechas, más, menos y cero.",
-    "viewerHelpSpectrum": "Un clic o un toque sobre la imagen muestra el espectro de ese punto.",
+    "viewerHelpSpectrum": "Un clic o un toque sobre la imagen muestra el espectro y la curva de luz de ese punto.",
     "annotationsLabel": "Sobre la imagen"
   },
   "field": {
@@ -186,6 +186,17 @@
       "one": "época {{epochs}} ({{bands}})",
       "other": "épocas {{epochs}} ({{bands}})"
     }
+  },
+  "source": {
+    "tabs": "Qué ver de la fuente elegida",
+    "spectrum": "Espectro",
+    "lightcurve": "Curva de luz"
+  },
+  "offer": {
+    "title": "Estrella variable",
+    "body": "{{name}} es una de las estrellas variables del desafío: su brillo cambia con el tiempo.",
+    "action": "Ver su curva de luz",
+    "actionNamed": "Curva de luz de {{name}}"
   },
   "tools": {
     "open": "Herramientas",

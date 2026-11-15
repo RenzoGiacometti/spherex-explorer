@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatBand, formatDecimal, formatInteger } from "@/lib/format";
@@ -22,7 +23,7 @@ import {
   valueDomain,
 } from "./chartLayout";
 import styles from "./LightcurveChart.module.css";
-import { type LightcurveT, useLightcurveTexts } from "./texts";
+import type { LightcurveT } from "./texts";
 import type { LightcurveBin, LightcurveEpoch, LightcurveSeries } from "./types";
 
 export interface LightcurveChartProps {
@@ -84,7 +85,7 @@ export function LightcurveChart({
   name,
   showExposures = true,
 }: LightcurveChartProps) {
-  const t = useLightcurveTexts();
+  const { t } = useTranslation("lightcurve");
   const language = useLanguage();
   const [wrapperRef, width] = useWidth();
   const clipId = `lightcurve-clip-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;

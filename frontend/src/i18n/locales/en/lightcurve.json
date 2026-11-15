@@ -7,6 +7,7 @@
     "aperture": "Aperture",
     "wings": "Wings",
     "noCurve": "no curve",
+    "close": "Close the light curve",
     "footnote": "Each exposure sees the object at a different wavelength, so each measurement is compared only with those of its own spectral channel ({{channels}} per band). A value of 1 is the typical brightness over the observed period.",
     "controlNote": "Minimum error, measured on a star that does not vary ({{control}}): {{floor}} per pass."
   },
@@ -19,7 +20,18 @@
   "relative": {
     "tag": "Relative variation",
     "wings": "Measured on the wings of the saturated source, in a ring from {{inner}} to {{outer}} around the core. It does not give the absolute brightness: only how much it changes.",
+    "wingsNoRing": "The source saturates: the curve is measured on its wings, outside the core. It does not give the absolute brightness: only how much it changes.",
     "aperture": "Brightness relative to the median of this band, which is {{reference}} mJy."
+  },
+  "noCurve": {
+    "band": "No curve in {{band}}",
+    "all": "No light curve",
+    "empty": "No curve could be built at this point: no band has enough measurements in at least two passes.",
+    "notSaved": "There is no saved light curve for this point. Only the object of the field and its brightest sources have a saved curve, and the chosen point is not near any of them."
+  },
+  "request": {
+    "loading": "Looking for the light curve",
+    "errorTitle": "The light curve could not be fetched"
   },
   "verdict": {
     "variable": "It varies: the brightest and the faintest pass differ by {{amplitude}}, {{significance}} times the error.",

@@ -113,6 +113,46 @@ export function spectrumPointForSky(input: {
 }
 
 /**
+ * Pedido del objeto del campo sin que medie un clic (la oferta de la curva de
+ * luz de una variable del desafio, LightcurveOffer.tsx). Si el objeto buscado
+ * ya esta resuelto, es el mismo pedido que un clic sobre su mira: su posicion
+ * con el movimiento propio. Si no, la posicion de catalogo que se pasa.
+ */
+export function spectrumPointForObject(input: {
+  readonly name: string;
+  readonly ra: number;
+  readonly dec: number;
+  readonly grid: GridWcs;
+  readonly fieldId: string;
+  /** Nombre del objeto buscado (`name` de la URL), si hay. */
+  readonly targetName: string | null;
+  /** Respuesta de /api/resolve para ese nombre, si ya llego. */
+  readonly resolved: Pick<ResolveResponse, "field_center" | "motion"> | null;
+}): SpectrumPoint {
+  const { resolved } = input;
+  if (resolved !== null && input.targetName !== null) {
+    const { field_center: center, motion } = resolved;
+    return {
+      query: {
+        ra: center.ra,
+        dec: center.dec,
+        field: input.fieldId,
+        ...(motion === null
+          ? {}
+          : { pmRa: motion.pm_ra, pmDec: motion.pm_dec, epoch: center.epoch }),
+      },
+      name: input.targetName,
+      pixel: null,
+    };
+  }
+  return {
+    query: { ra: input.ra, dec: input.dec, field: input.fieldId },
+    name: input.name,
+    pixel: skyToPixel(input.grid, input.ra, input.dec),
+  };
+}
+
+/**
  * El punto a marcar una vez que llego el espectro. Si el backend ajusto el
  * clic a una fuente guardada (aviso `snapped_source`), el anillo va sobre la
  * fuente y no sobre el clic. En cualquier otro caso el punto queda como estaba.

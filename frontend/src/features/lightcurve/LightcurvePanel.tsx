@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DataGroup,
   DataRow,
   GlassPanel,
+  IconButton,
   QualityNotice,
   SegmentedControl,
   Toggle,
@@ -22,7 +24,7 @@ import {
 } from "@/lib/format";
 import { LightcurveChart } from "./LightcurveChart";
 import styles from "./LightcurvePanel.module.css";
-import { type LightcurveT, useLightcurveTexts } from "./texts";
+import type { LightcurveT } from "./texts";
 import {
   detectorsOf,
   type LightcurveDocument,
@@ -39,6 +41,8 @@ export interface LightcurvePanelProps {
   readonly name?: string | undefined;
   /** Banda (detector, 1 a 6) con la que abre el panel. Por defecto, la primera que tenga curva. */
   readonly initialBand?: number | undefined;
+  /** Con esto el panel lleva su boton de cerrar, junto al nombre. */
+  readonly onClose?: (() => void) | undefined;
   readonly className?: string | undefined;
 }
 
@@ -82,11 +86,16 @@ export function formatBandList(detectors: readonly number[]): string {
   return parts.join(", ");
 }
 
+/** Dice si la serie que se muestra de esa banda tiene curva. */
+export function bandHasCurve(lightcurve: LightcurveDocument, detector: number): boolean {
+  return seriesOf(lightcurve, detector).some(
+    (series) => series.preferred && series.status === "ok",
+  );
+}
+
 function firstBandWithCurve(lightcurve: LightcurveDocument): number | null {
   const detectors = detectorsOf(lightcurve);
-  const withCurve = detectors.find((detector) =>
-    seriesOf(lightcurve, detector).some((series) => series.preferred && series.status === "ok"),
-  );
+  const withCurve = detectors.find((detector) => bandHasCurve(lightcurve, detector));
   return withCurve ?? detectors[0] ?? null;
 }
 
@@ -153,14 +162,19 @@ function verdictText(series: LightcurveSeries, language: Language, t: Lightcurve
  * pedirlo queda para quien lo integra (`fetchLightcurve`).
  *
  * Una banda sin curva no muestra grafico: muestra por que no la hay.
+ *
+ * Arriba, en un recuadro como el de los avisos destacados del espectro, va lo
+ * que cambia como se lee el panel: que la curva es variacion relativa medida en
+ * las alas, o que no hay curva y por que.
  */
 export function LightcurvePanel({
   lightcurve,
   name,
   initialBand,
+  onClose,
   className,
 }: LightcurvePanelProps) {
-  const t = useLightcurveTexts();
+  const { t } = useTranslation("lightcurve");
   const language = useLanguage();
   const detectors = useMemo(() => detectorsOf(lightcurve), [lightcurve]);
   const [band, setBand] = useState<number | null>(
@@ -187,23 +201,37 @@ export function LightcurvePanel({
     .map((warning) => ({ code: warning.code, text: noticeText(warning, language, t) }))
     .filter((notice): notice is { code: string; text: string } => notice.text !== null);
 
-  const relativeNote =
-    series === null || series.status !== "ok"
+  const curve = series !== null && series.status === "ok" ? series : null;
+  // Medida en las alas de una fuente saturada: variacion relativa, no flujo absoluto.
+  const wingsNote =
+    curve === null || (curve.method !== "wings" && !curve.relative_only)
       ? null
-      : series.relative_only && series.annulus !== null
-        ? t("relative.wings", {
-            inner: formatArcseconds(series.annulus.inner_px * NATIVE_PIXEL_ARCSEC, language, 0),
-            outer: formatArcseconds(series.annulus.outer_px * NATIVE_PIXEL_ARCSEC, language, 0),
-          })
-        : series.reference_mjy === null
-          ? null
-          : t("relative.aperture", {
-              reference: formatDecimal(
-                series.reference_mjy,
-                language,
-                series.reference_mjy < 10 ? 2 : 0,
-              ),
-            });
+      : curve.annulus === null
+        ? t("relative.wingsNoRing")
+        : t("relative.wings", {
+            inner: formatArcseconds(curve.annulus.inner_px * NATIVE_PIXEL_ARCSEC, language, 0),
+            outer: formatArcseconds(curve.annulus.outer_px * NATIVE_PIXEL_ARCSEC, language, 0),
+          });
+  const apertureNote =
+    curve === null || wingsNote !== null || curve.reference_mjy === null
+      ? null
+      : t("relative.aperture", {
+          reference: formatDecimal(curve.reference_mjy, language, curve.reference_mjy < 10 ? 2 : 0),
+        });
+  // Sin curva: en la banda elegida, o en ninguna (documento `empty` o sin series).
+  const anyCurve =
+    lightcurve.status !== "empty" &&
+    detectors.some((detector) => bandHasCurve(lightcurve, detector));
+  const noCurve =
+    curve !== null
+      ? null
+      : {
+          lead:
+            anyCurve && band !== null
+              ? t("noCurve.band", { band: formatBand(band) })
+              : t("noCurve.all"),
+          reason: series === null ? t("noCurve.empty") : reasonText(series, language, t),
+        };
 
   return (
     <GlassPanel
@@ -213,12 +241,37 @@ export function LightcurvePanel({
       padding="roomy"
       className={className}
     >
-      <div className={styles.heading}>
-        <p className={styles.name}>{title}</p>
-        <p className={styles.position}>
-          {`${formatRa(lightcurve.target.ra, { language })} ${formatDec(lightcurve.target.dec, { language })}`}
-        </p>
+      <div className={styles.top}>
+        <div className={styles.heading}>
+          <p className={styles.name}>{title}</p>
+          <p className={styles.position}>
+            {`${formatRa(lightcurve.target.ra, { language })} ${formatDec(lightcurve.target.dec, { language })}`}
+          </p>
+        </div>
+        {onClose === undefined ? null : (
+          <IconButton icon="close" size="sm" label={t("panel.close")} onClick={onClose} />
+        )}
       </div>
+
+      {/* Variacion relativa y "sin curva": antes de todo lo demas, para que se lean primero. */}
+      {wingsNote === null && noCurve === null ? null : (
+        <ul
+          className={styles.prominent}
+          data-lightcurve-notices="prominent"
+          data-lightcurve-curve={noCurve === null ? "wings" : "none"}
+        >
+          {wingsNote === null ? null : (
+            <QualityNotice as="li">
+              <span className={styles.tag}>{t("relative.tag")}</span> {wingsNote}
+            </QualityNotice>
+          )}
+          {noCurve === null ? null : (
+            <QualityNotice as="li">
+              <span className={styles.tag}>{noCurve.lead}</span> {noCurve.reason}
+            </QualityNotice>
+          )}
+        </ul>
+      )}
 
       {detectors.length === 0 ? null : (
         <SegmentedControl
@@ -260,18 +313,11 @@ export function LightcurvePanel({
         />
       ) : null}
 
-      {series === null ? null : series.status === "ok" ? (
+      {curve === null ? null : (
         <>
-          {series.relative_only ? (
-            <p className={styles.relative}>
-              <span className={styles.tag}>{t("relative.tag")}</span>
-              <span>{relativeNote}</span>
-            </p>
-          ) : relativeNote === null ? null : (
-            <p className={styles.note}>{relativeNote}</p>
-          )}
+          {apertureNote === null ? null : <p className={styles.note}>{apertureNote}</p>}
           <LightcurveChart
-            series={series}
+            series={curve}
             epochs={lightcurve.epochs}
             name={title}
             showExposures={showExposures}
@@ -295,11 +341,11 @@ export function LightcurvePanel({
             checked={showExposures}
             onChange={setShowExposures}
           />
-          <p className={styles.verdict}>{verdictText(series, language, t)}</p>
+          <p className={styles.verdict}>{verdictText(curve, language, t)}</p>
           <section className={styles.epochs}>
             <h3 className={styles.subtitle}>{t("epochs.title")}</h3>
             <DataGroup>
-              {series.epochs.map((epoch) => (
+              {curve.epochs.map((epoch) => (
                 <DataRow
                   key={epoch.epoch}
                   label={t("epochs.row", {
@@ -316,8 +362,6 @@ export function LightcurvePanel({
             </DataGroup>
           </section>
         </>
-      ) : (
-        <QualityNotice as="div">{reasonText(series, language, t)}</QualityNotice>
       )}
 
       {notices.length === 0 ? null : (

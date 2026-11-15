@@ -1,9 +1,100 @@
 /*
- * Lugar del espectro en el visor. El vidrio lo pone el panel de adentro; aca
- * solo va lo de los estados de carga y de error. Solo tokens.
+ * Panel de la fuente elegida en el visor: las pestanas (espectro y curva de
+ * luz) y, debajo, el panel de la que se ve. El vidrio del contenido lo pone el
+ * panel de adentro; aca van las pestanas y los estados de carga, de error y de
+ * "sin curva". Solo tokens.
  */
 .dock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
   min-width: 0;
+}
+
+.panel {
+  min-width: 0;
+}
+
+/* Las dos pestanas: una franja de vidrio con dos celdas iguales, como un control segmentado. */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tabs {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+/* Objetivo tactil de 44 px. La elegida va en blanco solido con texto negro, nunca acento. */
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-xxs) var(--space-xs);
+  border: 1px solid transparent;
+  border-radius: var(--option-radius);
+  background-color: transparent;
+  color: var(--option-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  cursor: pointer;
+}
+
+.tab:hover {
+  border-color: var(--color-hairline-strong);
+}
+
+.tab[aria-selected="true"] {
+  border-color: var(--option-selected-bg);
+  border-radius: var(--option-selected-radius);
+  background-color: var(--option-selected-bg);
+  color: var(--option-selected-text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/*
+ * "Sin curva" con su motivo: el mismo recuadro que los avisos destacados del
+ * espectro, con el texto en blanco pleno.
+ */
+.prominent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.tag {
+  display: inline-block;
+  margin-right: var(--space-xxs);
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
 }
 
 .top {

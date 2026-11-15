@@ -1,21 +1,18 @@
-// Textos del panel de curva de luz (es, en), por i18next.
+// Textos de la curva de luz.
 //
-// Viven al lado de la funcionalidad y se registran al cargar este modulo, para
-// no tocar src/i18n/resources.ts mientras esto se construye aparte. Al
-// integrarla: mover locales/es.json y locales/en.json a
-// src/i18n/locales/<idioma>/lightcurve.json, sumarlos a resources.ts y
-// reemplazar `useLightcurveTexts()` por `useTranslation("lightcurve")`.
+// Los del panel viven en src/i18n/locales/<idioma>/lightcurve.json y se leen
+// con `useTranslation("lightcurve")`, como el resto de la interfaz.
 //
-// Las claves se comprueban al compilar contra el JSON en espanol. Este archivo
-// repite a proposito el ayudante de features/spectrum/texts.ts: las dos
-// funcionalidades se integran por separado y ninguna depende de la otra.
+// Lo que queda aca es para la pagina de desarrollo (lightcurve.devpage.tsx):
+// sus textos no viajan en el sitio compilado, asi que se registran al cargarla.
+// Repite a proposito el ayudante de features/spectrum/texts.ts: ninguna de las
+// dos funcionalidades depende de la otra.
 
+import type { TFunction } from "i18next";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { i18n } from "@/i18n";
 import type { Language } from "@/i18n/languages";
-import en from "./locales/en.json";
-import es from "./locales/es.json";
 
 type Leaves<Tree, Prefix extends string = ""> = {
   [Key in keyof Tree & string]: Tree[Key] extends string
@@ -55,12 +52,5 @@ export function useTexts<Tree>(namespace: string): Translate<Tree> {
 
 export const LIGHTCURVE_NAMESPACE = "lightcurve";
 
-registerTexts(LIGHTCURVE_NAMESPACE, { es, en });
-
-/** Traduce una clave del panel: "chart.axisY", "verdict.variable". */
-export type LightcurveT = Translate<typeof es>;
-
-/** Textos del panel en el idioma activo. */
-export function useLightcurveTexts(): LightcurveT {
-  return useTexts<typeof es>(LIGHTCURVE_NAMESPACE);
-}
+/** La `t` de `useTranslation("lightcurve")`: "chart.axisY", "verdict.variable". */
+export type LightcurveT = TFunction<typeof LIGHTCURVE_NAMESPACE>;

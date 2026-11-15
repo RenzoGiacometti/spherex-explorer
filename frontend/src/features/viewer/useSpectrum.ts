@@ -18,6 +18,7 @@ import {
   type SpectrumPoint,
   snapPointToSource,
   spectrumPointForClick,
+  spectrumPointForObject,
   spectrumPointForSky,
 } from "./spectrumClick";
 
@@ -43,6 +44,11 @@ export interface SpectrumController {
   requestAt(click: ImageClick): void;
   /** Pide el espectro de una posicion del cielo (grados ICRS) del campo abierto. */
   requestPosition(position: { readonly ra: number; readonly dec: number }): void;
+  /**
+   * Pide el objeto del campo sin un clic: el objeto buscado con su movimiento
+   * propio si ya esta resuelto; si no, la posicion de catalogo que se pasa.
+   */
+  requestObject(object: { readonly name: string; readonly ra: number; readonly dec: number }): void;
   /** Vuelve a pedir el mismo punto, despues de un error. */
   retry(): void;
   /** Cierra el panel y cancela el pedido en camino. */
@@ -130,6 +136,24 @@ export function useSpectrum(shownEpoch: number | null): SpectrumController {
     [run],
   );
 
+  const requestObject = useCallback(
+    (object: { readonly name: string; readonly ra: number; readonly dec: number }): void => {
+      const store = useFieldStore.getState();
+      const grid = store.meta?.grid;
+      if (store.fieldId === null || grid === undefined) return;
+      run(
+        spectrumPointForObject({
+          ...object,
+          grid,
+          fieldId: store.fieldId,
+          targetName: store.target.name,
+          resolved: store.target.resolved,
+        }),
+      );
+    },
+    [run],
+  );
+
   const retry = useCallback((): void => {
     if (state.status === "error") run(state.point);
   }, [run, state]);
@@ -140,5 +164,5 @@ export function useSpectrum(shownEpoch: number | null): SpectrumController {
     setState(IDLE);
   }, []);
 
-  return { state, requestAt, requestPosition, retry, close };
+  return { state, requestAt, requestPosition, requestObject, retry, close };
 }

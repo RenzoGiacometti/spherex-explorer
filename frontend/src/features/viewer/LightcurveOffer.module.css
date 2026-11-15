@@ -1,0 +1,32 @@
+/* Oferta de la curva de luz en el campo de una variable del desafio. Solo tokens. */
+
+.body {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.action {
+  align-self: flex-start;
+}
+
+/*
+ * En el celular va sobre la imagen, arriba a la izquierda de la zona libre y
+ * por debajo del rotulo del modo y la banda, que ocupa esa esquina (dos
+ * renglones). La celda no recibe el puntero (deja pasar el arrastre a la
+ * imagen): el boton si.
+ */
+.compact {
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+  margin-top: 68px;
+}
+
+.compact > * {
+  pointer-events: auto;
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+}

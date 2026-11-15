@@ -7,6 +7,7 @@
     "aperture": "Apertura",
     "wings": "Alas",
     "noCurve": "sin curva",
+    "close": "Cerrar la curva de luz",
     "footnote": "Cada exposición ve el objeto en otra longitud de onda, así que cada medida se compara solo con las de su mismo canal espectral ({{channels}} por banda). El valor 1 es el brillo típico del período observado.",
     "controlNote": "Error mínimo, medido con una estrella que no varía ({{control}}): {{floor}} por pasada."
   },
@@ -19,7 +20,18 @@
   "relative": {
     "tag": "Variación relativa",
     "wings": "Medido en las alas de la fuente saturada, en un anillo de {{inner}} a {{outer}} alrededor del núcleo. No da el brillo absoluto: solo cuánto cambia.",
+    "wingsNoRing": "La fuente satura: la curva se mide en sus alas, fuera del núcleo. No da el brillo absoluto: solo cuánto cambia.",
     "aperture": "Brillo relativo a la mediana de esta banda, que es de {{reference}} mJy."
+  },
+  "noCurve": {
+    "band": "Sin curva en {{band}}",
+    "all": "Sin curva de luz",
+    "empty": "No se pudo armar una curva en este punto: ninguna banda tiene medidas suficientes en al menos dos pasadas.",
+    "notSaved": "No hay una curva de luz guardada para este punto. Solo hay curvas guardadas del objeto del campo y de sus fuentes más brillantes, y el punto elegido no está cerca de ninguna."
+  },
+  "request": {
+    "loading": "Buscando la curva de luz",
+    "errorTitle": "No se pudo traer la curva de luz"
   },
   "verdict": {
     "variable": "Varía: entre la pasada más brillante y la más débil hay una diferencia del {{amplitude}}, {{significance}} veces su error.",

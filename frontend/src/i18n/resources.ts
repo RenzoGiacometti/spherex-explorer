@@ -12,6 +12,7 @@ import enComponents from "./locales/en/components.json";
 import enContext from "./locales/en/context.json";
 import enEntry from "./locales/en/entry.json";
 import enErrors from "./locales/en/errors.json";
+import enLightcurve from "./locales/en/lightcurve.json";
 import enSpectrum from "./locales/en/spectrum.json";
 import enViewer from "./locales/en/viewer.json";
 import esCommon from "./locales/es/common.json";
@@ -19,6 +20,7 @@ import esComponents from "./locales/es/components.json";
 import esContext from "./locales/es/context.json";
 import esEntry from "./locales/es/entry.json";
 import esErrors from "./locales/es/errors.json";
+import esLightcurve from "./locales/es/lightcurve.json";
 import esSpectrum from "./locales/es/spectrum.json";
 import esViewer from "./locales/es/viewer.json";
 
@@ -31,6 +33,7 @@ export const resources = {
     context: esContext,
     entry: esEntry,
     errors: esErrors,
+    lightcurve: esLightcurve,
     spectrum: esSpectrum,
     viewer: esViewer,
   },
@@ -40,6 +43,7 @@ export const resources = {
     context: enContext,
     entry: enEntry,
     errors: enErrors,
+    lightcurve: enLightcurve,
     spectrum: enSpectrum,
     viewer: enViewer,
   },
