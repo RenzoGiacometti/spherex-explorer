@@ -1,6 +1,6 @@
 # Contrato del cubo del campo
 
-Versión 1.1. La versión 1 se aprobó el 15 de noviembre de 2026; la 1.1 suma las precisiones de la sección 15, que salieron de construir los cimientos y no cambian ninguna decisión. Define lo que el backend entrega y lo que el frontend puede asumir sobre `/api/field` y `/api/resolve` en la Etapa 1. Backend y frontend se construyen en paralelo contra este documento; cualquier cambio posterior se hace acá primero.
+Versión 1.2. La versión 1 se aprobó el 15 de noviembre de 2026. La 1.1 sumó las precisiones de la sección 15, que salieron de construir los cimientos, y la 1.2 las de la sección 16, que salieron de construir y verificar el núcleo (cliente de IRSA, pipeline, resolución de nombres, capa de datos y visor). Ninguna cambia una decisión de la sección 14. Define lo que el backend entrega y lo que el frontend puede asumir sobre `/api/field` y `/api/resolve` en la Etapa 1. Backend y frontend se construyen en paralelo contra este documento; cualquier cambio posterior se hace acá primero.
 
 Las cifras salen de `spike/RESULTADOS.md` (Etapa 0 y fase A de la Etapa 1). Las decisiones tomadas al aprobarlo están en la sección 14.
 
@@ -40,7 +40,7 @@ Un campo ya calculado no necesita SSE: la respuesta de `POST` trae los metadatos
 | `not_ready` | 409 | Se pidió `/cube` o un plano que todavía no está construido |
 | `no_coverage` | 404 | Ninguna exposición de DR1 o QR3 cubre el punto |
 | `queue_full` | 429 | Cola de trabajos llena; trae `Retry-After` |
-| `upstream_unavailable` | 503 | IRSA o Sesame no responden y no hay copia en caché |
+| `upstream_unavailable` | 503 | IRSA o Sesame no responden y no hay copia en caché. Una página de error en HTML de CDS (con 404, o con 200 tras una redirección) cuenta como "no responde", no como nombre desconocido |
 
 Los errores que genera el framework (método no admitido, cuerpo que no es JSON) salen con el mismo cuerpo, como `invalid_request` y código 422. Una ruta que no existe sale como `not_found`.
 
@@ -108,7 +108,7 @@ Flujo `text/event-stream`. Cada evento lleva `event`, `id` (entero creciente) y 
 | `queued` | `{"position": 2}` | Mientras espera turno, cada vez que cambia la posición |
 | `preview` | Objeto `preview` (sección 5) | Cuando la vista provisoria de WISE queda lista o se descarta |
 | `listed` | Documento de metadatos completo. Los planos van en `pending`, salvo los que no tienen exposiciones, que ya van en `empty` | Al terminar la consulta de exposiciones. Desde acá el frontend conoce épocas, detectores y grilla |
-| `progress` | Objeto `progress` (sección 5) | Como máximo 4 por segundo durante la descarga, y una vez en cada cambio de `phase` |
+| `progress` | Objeto `progress` (sección 5) | Como máximo 4 por segundo durante la descarga, y una vez en cada cambio de `phase`. `status` del documento acompaña a `phase` (ver reglas) |
 | `plane` | `{"plane": {...}, "detector_display": {...}}` | Cada vez que hay una revisión nueva de un plano, provisional o definitiva. `detector_display` es `null` si el detector todavía no tiene ningún plano con datos |
 | `warning` | Un aviso (sección 5) | Al detectarlo |
 | `done` | `{"status": "ready", "rev": 1, "elapsed_s": 155.4}` | Fin del trabajo. `status` es `ready` o `partial` |
@@ -123,6 +123,7 @@ Reglas:
 - El `state` que sale justo antes de `done` es el único evento que trae `planes[].cube_offset`, la lista `flags` completa y `provenance.built_at`. `GET .../meta` devuelve lo mismo una vez terminado el trabajo.
 - `flags` llega como lista vacía en `listed`: los bits se leen del encabezado de los archivos, y la lista crece a medida que se bajan porque no todos declaran los mismos (sección 9). Mientras el campo carga, la lista al día está en `GET .../meta`.
 - Un plano que ya va `empty` en `listed` no tiene evento `plane`.
+- `status` del documento acompaña a `progress.phase` aunque no llegue un `state`: con `phase` en `queued` o `listing`, `status` vale lo mismo; con `downloading` o `finishing`, `downloading`. El `status` final (`ready`, `partial` o `failed`) llega con el `state` final, con `done` o con `error`.
 - El evento `queued` se puede perder si el cliente conecta tarde. La posición está también en `progress.queue_position` del primer `state`.
 - El trabajo no depende de la conexión: si el navegador se va, sigue y queda en caché.
 - Quien no pueda usar SSE puede consultar `GET /api/field/{id}/meta` cada 2 s; trae lo mismo que `state`.
@@ -165,7 +166,7 @@ Documento de metadatos (sección 5) en su estado actual. `Cache-Control: no-cach
 
 ### 4.4 `GET /api/field/{id}/plane/{epoch}/{detector}`
 
-Un plano en binario (sección 6), en su revisión más reciente. Con `?rev=N`, si N es la revisión vigente la respuesta lleva `Cache-Control: public, max-age=31536000, immutable`, porque una revisión no cambia nunca. Si N no es la vigente (ya fue reemplazada o todavía no existe), devuelve la vigente con `Cache-Control: no-cache`, igual que sin `rev`. Devuelve `409 not_ready` si el plano está en `pending` y `404 not_found` si está en `empty`.
+Un plano en binario (sección 6), en su revisión más reciente. Con `?rev=N`, si N es la revisión vigente la respuesta lleva `Cache-Control: public, max-age=31536000, immutable`, porque una revisión no cambia nunca. Si N no es la vigente (ya fue reemplazada o todavía no existe), devuelve la vigente con `Cache-Control: no-cache`, igual que sin `rev`. Devuelve `409 not_ready` si el plano está en `pending` y `404 not_found` si está en `empty`. La respuesta lleva la cabecera `X-Plane-Rev` con la revisión que trae, para que quien pidió una revisión que ya fue reemplazada sepa cuál recibió.
 
 ### 4.5 `GET /api/field/{id}/cube`
 
@@ -173,7 +174,7 @@ Todos los planos con datos, concatenados en el orden de `planes` (sección 6). S
 
 ### 4.6 `GET /api/field/{id}/aux/{epoch}/{detector}`
 
-Capas auxiliares de un plano: flags y cobertura (sección 6). Se piden recién al activar la capa de flags.
+Capas auxiliares de un plano: flags y cobertura (sección 6). Se piden recién al activar la capa de flags. Son las de la revisión vigente del plano y cambian con cada revisión: la respuesta lleva `X-Plane-Rev`, igual que el plano, y `Cache-Control: no-cache`. El frontend las vuelve a pedir cuando sube la `rev` del plano que está mirando. Mismos errores que el plano.
 
 ### 4.7 `POST /api/field/{id}/priority`
 
@@ -202,6 +203,8 @@ Resuelve un nombre con Sesame, o interpreta el texto como coordenadas si lo son.
 - `field_center` es donde hay que centrar el campo: la posición propagada a una época fija, 2026,0. Es fija a propósito: si dependiera de la fecha del día, el `id` del campo cambiaría con el tiempo y la caché no serviría. Sin movimiento propio coincide con `j2000`.
 - `moved_arcsec` es cuánto se apartó de la posición de catálogo. Para Barnard son 4,5′, más que medio campo.
 - Para coordenadas, `source` es `"coordinates"`, `name` es `null` y `motion` es `null`.
+- Redondeos: `j2000` a 6 decimales, `field_center` a 4, `moved_arcsec` a 1, `per_year_arcsec` a 2, y movimiento propio, paralaje y velocidad radial a 3. `name` va con los espacios normalizados.
+- Con los servidores de nombres colgados, responde `upstream_unavailable` como mucho en 20 s. El backend consulta Sesame en CDS y, si no responde, su espejo en CfA.
 
 ### 4.9 `GET /api/field/{id}/track?name=`
 
@@ -211,23 +214,32 @@ Posición esperada de un objeto en cada época de un campo, para la mira y el ra
 {
   "name": "NAME Barnard's star",
   "positions": [
-    { "epoch": 1, "mjd": 60913.7, "ra": 269.44604, "dec": 4.76740, "x": 97.3, "y": 96.0, "in_field": true },
-    { "epoch": 2, "mjd": 61116.2, "ra": 269.44661, "dec": 4.76896, "x": 96.6, "y": 97.8, "in_field": true }
+    { "epoch": 1, "mjd": 60913.7, "ra": 269.44620, "dec": 4.76735, "x": 97.1, "y": 95.9, "in_field": true },
+    { "epoch": 2, "mjd": 61116.2, "ra": 269.44636, "dec": 4.76891, "x": 96.9, "y": 97.7, "in_field": true }
   ]
 }
 ```
 
 Va aparte del cubo para que el `id` del campo no dependa del objeto. Devuelve `positions` vacío si el objeto no tiene movimiento propio; en ese caso la mira va en `field_center`.
 
+- `name` es el nombre principal del catálogo, o el texto buscado si eran coordenadas.
+- `mjd` es `epochs[].mjd_mean`: una posición por época del campo.
+- Antes de `listed` el campo todavía no tiene épocas y responde `409 not_ready`.
+- Un objeto fuera de la grilla sale con `in_field` en falso; uno a más de 90° del centro, del otro lado del cielo, devuelve `positions` vacío.
+- Errores: `invalid_request`, `not_resolved` y `upstream_unavailable`, como en `/api/resolve`.
+
 ### 4.10 `GET /api/field/{id}/preview`
 
 Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantalla mientras carga un campo nuevo. El backend lo pide a hips2fits de CDS al crear el trabajo, en paralelo con la lista de exposiciones, y lo guarda con el campo.
 
-- Mismo formato que un plano (sección 6): Float32, la misma grilla y la misma forma que el cubo. `NaN` es sin datos.
+- Mismo formato que un plano (sección 6): Float32, la misma grilla y la misma forma que el cubo. `NaN` es sin datos y no hay `+Infinity`: la vista no marca saturación.
+- La vista puede quedar lista antes de `listed`, cuando el documento todavía no trae `grid`. Su forma no depende de las exposiciones: es la del escalón de `request.fov` (tabla de la sección 3).
 - Los valores están en las unidades del relevamiento de origen, no en MJy/sr. Sirven solo para mirar; no se comparan con los planos de SPHEREx ni entran en los modos de comparación.
 - Banda: W1 (3,4 µm), o W2 (4,6 µm) si el `band` pedido es 5 o 6. La vista queda con la banda del pedido que creó el trabajo y no cambia con `priority`. El frontend la rotula según `preview.band`, no según la banda que la persona está mirando.
 - Devuelve `409 not_ready` mientras `preview.status` es `pending` y `404 not_found` si es `unavailable`.
-- Si hips2fits no responde en 20 s, `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria. No es un error del campo.
+- Si hips2fits no responde en 20 s, `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria. No es un error del campo. Los 20 s son el tope de todo el intercambio: un solo pedido, sin reintentos ni redirecciones.
+- El backend pide la imagen con el WCS exacto de la grilla (parámetro `wcs` de hips2fits), y `preview.hips` es `CDS/P/allWISE/W1` o `CDS/P/allWISE/W2`.
+- **[VERIFICAR]** Nada de esto se pudo comprobar contra el servicio: el 15 de noviembre de 2026 hips2fits respondió 404 con la página "Page unavailable" de CDS en los siete sondeos hechos entre las 10:11 y las 13:44 UTC, y su espejo no conectó. Los parámetros salen del código de astroquery y los identificadores de la lista del nodo HiPS de IRSA. Falta confirmar que acepta el pedido, que devuelve el WCS pedido y las unidades. Cuando vuelva: `uv run python scripts/probe_hips2fits.py --save tests/fixtures/preview` desde `backend/`.
 
 ## 5. Documento de metadatos
 
@@ -327,7 +339,7 @@ Si el trabajo falla, `status` pasa a `failed` y `progress.phase` queda en la fas
 | `saturated[]` | Regiones saturadas de al menos 4 píxeles: centro, radio equivalente y cantidad de píxeles. Lista vacía si no hay |
 | `cube_offset` | Posición en bytes del plano dentro de `/cube`. `null` mientras el trabajo no termina y en planos `empty` |
 
-`detector_display` se calcula así: con todos los píxeles finitos de los planos listos del detector, `median` y `sigma` robustos, `vmin = median − 2 sigma` y `vmax = max(p99,7; median + 10 sigma)`. El control de contraste se mueve entre esos dos valores.
+`detector_display` se calcula así: con todos los píxeles finitos de los planos listos del detector, `median` y `sigma` robustos, `vmin = median − 2 sigma` y `vmax = max(p99,7; median + 10 sigma)`. El control de contraste se mueve entre esos dos valores: el corte bajo queda fijo en `vmin` y el alto baja desde `vmax` hasta `vmin + 4 sigma`, con recorrido geométrico (cada paso del control divide el ancho por el mismo factor). Con recorrido lineal casi todo el cambio visible quedaría en el último tramo, porque `vmax` está a decenas o cientos de sigma de `vmin` (105 en Barnard B3, 49 en WISE 0855 B6).
 
 ### Avisos
 
@@ -370,7 +382,7 @@ No aparece `−Infinity`.
 
 ### Capas auxiliares
 
-- **Flags** (Uint32): el bit `n` está encendido si al menos la mitad de las exposiciones que cubren ese píxel lo tienen encendido. Los bits son los de `flags[]`. Es la mayoría y no la unión para que un rayo cósmico en una exposición de veinte no marque el píxel del coadd.
+- **Flags** (Uint32): el bit `n` está encendido si al menos la mitad de las exposiciones que cubren ese píxel lo tienen encendido. Los bits son los de `flags[]`. Es la mayoría y no la unión para que un rayo cósmico en una exposición de veinte no marque el píxel del coadd. "Al menos la mitad" incluye la mitad justa. Una exposición que no declara un flag en su encabezado vota como que no lo tiene, y un bit que un archivo trae encendido sin declararlo no se cuenta. Hay una excepción a la mayoría, para los píxeles saturados (sección 7).
 - **Cobertura** (Uint16): cantidad de exposiciones que aportaron un valor válido a ese píxel. Vale 0 exactamente donde el plano es `NaN` o `+Infinity`.
 
 ## 7. Píxeles sin datos y fuentes saturadas
@@ -389,6 +401,10 @@ Medido sobre 358 recortes de Barnard (`spike/resultados/saturacion_barnard.txt`)
 
 Regla: un píxel del plano es **saturado** si ninguna exposición aportó un valor válido y al menos la mitad de las que lo cubren tienen OVERFLOW o BLOOM. Esos píxeles van como `+Infinity`, y los flags con `saturation: true` en `flags[]` son esos dos.
 
+La regla mira los dos flags juntos y la capa de flags mira cada bit por separado, así que la mitad de las exposiciones puede tener alguno de los dos sin que ninguno llegue a la mitad por su cuenta (en los cinco campos de prueba pasa en 22 de 11 029 píxeles saturados). Para que la capa explique siempre por qué un píxel está saturado, **todo píxel `+Infinity` lleva encendido al menos un flag de saturación**: si ninguno llega a la mitad, se enciende el que está en más exposiciones y, a igual cantidad, el de bit más bajo.
+
+Pegado a una región saturada queda un anillo fino de píxeles `NaN`: la reproyección es bilineal, y un píxel de la grilla no tiene valor si alguno de los cuatro píxeles nativos que usa está descartado (en Barnard, 34 píxeles contra 2258 saturados).
+
 Qué recibe el frontend:
 
 1. El valor `+Infinity` en el plano, distinguible de `NaN` sin pedir la capa auxiliar.
@@ -401,6 +417,8 @@ Cómo se muestra:
 |---|---|
 | Parpadeo, mantener apretado y suma | Blanco máximo de la escala, que es como se vería una estrella que excede el rango. En suma alcanza con que esté saturado en una de las épocas |
 | Diferencia y rojo/cian | Enmascarado: se dibuja como sin datos si está saturado en cualquiera de las dos épocas comparadas. Una resta contra un valor desconocido no significa nada |
+
+Un píxel sin datos en una sola de las épocas se trata igual en los modos de comparación: en diferencia y rojo/cian se dibuja como sin datos si falta en cualquiera de las dos; en suma se promedian las épocas que sí tienen valor, y queda sin datos si no hay ninguna.
 
 En todos los modos la región lleva un contorno (`planes[].saturated[]`) y el panel de avisos muestra `saturated_source` con el icono `alert` y texto.
 
@@ -442,13 +460,15 @@ Tiempos estimados en el escalón base, con 10 conexiones y sin otros trabajos. S
 
 Dependen de la carga de IRSA: entre el 17 % y el 46 % de los recortes recibe al menos un 503.
 
+El proceso no es el cuello de botella: leer y reproyectar una exposición lleva unos 25 ms en el escalón base y unos 50 ms en el amplio, contra 0,8 s de descarga. Un campo de 258 exposiciones suma menos de 10 s de CPU repartidos durante la descarga, y uno de 539, menos de 20 s. Más hilos casi no lo aceleran (1,3 veces con 4 u 8), así que el gestor de trabajos no cuenta con eso.
+
 ## 9. Lo que el backend garantiza al construir
 
 - **Lista de exposiciones:** SIA2, colecciones `spherex_dr1` y `spherex_qr3`. Si IRSA no responde y hay una lista guardada, se usa y se avisa con `stale_exposure_list`.
 - **Recorte más grande que el campo:** lado `fov × √2 + 4 px`, para que la grilla quede cubierta con cualquier orientación del detector.
-- **Lectura por HDU con camino alternativo:** el backend lee la respuesta de a un HDU y corta la conexión cuando ya tiene IMAGE, FLAGS, VARIANCE y ZODI, identificados por `EXTNAME` y no por posición. Con el orden actual eso ocurre antes de EPSF (0,4 MB en vez de 4,3 MB). Si IRSA cambia el orden, la misma regla sigue leyendo hasta juntar las cuatro, aunque tenga que atravesar EPSF. Si el flujo termina sin las cuatro o un encabezado no se puede interpretar, reintenta bajando la respuesta completa y abriéndola con astropy. `provenance.download_mode` y el aviso `full_download` dicen qué pasó.
-- **Reintentos:** hasta 6 por recorte, respetando `Retry-After`, y una segunda pasada al final por los que falten.
-- **Proceso:** resta de ZODI y de la mediana residual, máscara con los flags de `flags[].masked`, reproyección bilineal a la grilla, coadd por época y detector ponderado por inversa de la varianza.
+- **Lectura por HDU con camino alternativo:** el backend lee la respuesta de a un HDU y corta la conexión cuando ya tiene IMAGE, FLAGS, VARIANCE y ZODI, identificados por `EXTNAME` y no por posición. Con el orden actual eso ocurre antes de EPSF (0,4 MB en vez de 4,3 MB). Si IRSA cambia el orden, la misma regla sigue leyendo hasta juntar las cuatro, aunque tenga que atravesar EPSF. Si el flujo termina sin las cuatro o un encabezado no se puede interpretar, reintenta bajando la respuesta completa y abriéndola con astropy. `provenance.download_mode` y el aviso `full_download` dicen qué pasó. La descarga completa es solo para un problema de formato: una respuesta cortada a mitad de un HDU, vacía o que no es FITS cuenta como un intento fallido y se reintenta, y una respuesta completa a la que le faltan extensiones es una falla definitiva de ese recorte. Cada pedido tiene tres topes de tiempo: conexión (15 s), silencio entre tramos (60 s) y total para el cuerpo (180 s).
+- **Reintentos:** hasta 6 por recorte, respetando `Retry-After`, y una segunda pasada al final por los que falten. La espera que se respeta tiene un máximo de 60 s: si IRSA pide más, el recorte se da por fallido en este trabajo en vez de insistir antes de tiempo, y el campo queda `partial`. Un `refresh` posterior lo completa.
+- **Proceso:** resta de ZODI y de la mediana residual, máscara con los flags de `flags[].masked`, reproyección bilineal a la grilla, coadd por época y detector ponderado por inversa de la varianza. Los flags se reproyectan por vecino más cercano, sin mezclar bits. Un recorte guardado que no se puede leer se descarta y se vuelve a pedir una vez.
 - **Bits de FLAGS por nombre:** cada archivo declara su tabla de bits en el encabezado de FLAGS (`MSKNnnnn`) y no todos declaran los mismos: en 2242 recortes guardados hay tres tablas distintas (SNOWBALL falta en 87 y SATELLITE_HALO aparece en 6). El número de bit de cada nombre sí coincide en todos. El backend busca cada flag por nombre en cada archivo y arma `flags[]` con la unión; si alguna vez un mismo bit trae dos nombres, lo trata como error de ese recorte.
 - **Planos vacíos:** una época puede no tener exposiciones en un detector (Epsilon Indi B, época 4, D1 y D4). El plano existe en `planes[]` con `status: "empty"`.
 
@@ -465,14 +485,15 @@ Dependen de la carga de IRSA: entre el 17 % y el 46 % de los recortes recibe al 
 - Con dos trabajos activos, las 10 conexiones se reparten por turnos entre ambos, así uno grande no frena al otro.
 - Un 503 de IRSA se reintenta después de lo que indique `Retry-After`; mientras tanto esa conexión queda libre para otro recorte.
 - La posición en la cola llega por el evento `queued` y en `progress.queue_position`.
+- Los límites valen por proceso: el backend corre con un solo proceso de uvicorn. Con varios, cada uno tendría su propio cupo de 10.
 
 ## 11. Caché y campos precalculados
 
 | Qué | Clave | Vigencia |
 |---|---|---|
-| Nombre resuelto | Texto buscado | 30 días |
+| Nombre resuelto | Texto buscado, con los espacios normalizados | 30 días; después se usa solo si Sesame no responde. Un nombre desconocido no se guarda |
 | Lista de exposiciones | Centro y colección | 24 horas; después se usa solo si IRSA no responde |
-| Recorte | Exposición, centro y lado | Sin vencimiento; se borran los menos usados al pasar un tope de disco |
+| Recorte | Exposición, centro y lado | Sin vencimiento; al pasar un tope de disco (10 GB por defecto) se borran los que hace más tiempo que no se usan, hasta bajar al 90 % del tope, sin tocar lo usado en los últimos 10 minutos. El borrado corre al arrancar y al terminar cada trabajo. Un archivo guardado que no es un FITS entero se borra y se vuelve a bajar |
 | Campo: metadatos, planos, capas auxiliares y vista provisoria | `id` | Sin vencimiento |
 
 - Un campo en caché se sirve sin tocar IRSA. Abrirlo cuesta un `POST` (que ya trae los metadatos) y los planos de la banda actual: 3 o 4 pedidos de 152 kB. El resto llega con `/cube`. Objetivo: menos de 2 s desde el link hasta la primera imagen.
@@ -487,6 +508,8 @@ No son parte del contrato, pero evitan errores conocidos:
 - Textura `R32F` de WebGL2 con filtro `NEAREST`; el filtrado lineal de texturas de coma flotante necesita una extensión que no siempre está.
 - La fila 0 es el sur: sin `UNPACK_FLIP_Y_WEBGL`, la textura queda con el norte arriba.
 - Para pasar de píxel a cielo alcanza la proyección gnomónica con `crval`, `crpix` y `cdelt`; el campo es chico y no hay distorsión.
+- La máscara de un byte por píxel necesita `UNPACK_ALIGNMENT` en 1, porque los anchos de la grilla (195 y 293) son impares.
+- El redondeo a 8 bits se hace en el shader (`floor(c * 255 + 0.5) / 255`). Si se le deja a la placa, entre el 1 % y el 6 % de los píxeles sale un nivel corrido respecto de la cuenta en CPU (medido en Chrome 157 con ANGLE sobre Direct3D 11).
 
 ## 13. Fuera de este contrato
 
@@ -525,3 +548,22 @@ Al construir los modelos de los dos lados y el servidor falso aparecieron puntos
 12. **Duración de una época** (2): de 1 día a 3 meses.
 13. **Valores `null`** (5): `detectors[].display`, `preview.display`, `provenance.download_mode`, `provenance.built_at`, y `mjd_mean` y `stats` de un plano sin datos.
 14. **Tabla de flags por archivo** (9): los archivos no declaran todos los mismos bits; se leen por nombre y `flags[]` es la unión.
+
+## 16. Precisiones de la versión 1.2
+
+Salieron de construir y verificar el núcleo contra datos reales. Tampoco cambian las decisiones de la sección 14:
+
+1. **Flag de saturación garantizado** (6 y 7): todo píxel `+Infinity` lleva encendido al menos un flag de saturación en la capa auxiliar. Sin esta regla, 22 de 11 029 píxeles saturados de los campos de prueba quedaban sin ninguno.
+2. **Detalles de la capa de flags** (6 y 9): la mitad justa alcanza, un flag no declarado vota en contra, un bit no declarado no se cuenta y los flags se reproyectan por vecino más cercano.
+3. **Anillo sin datos junto a la saturación** (7): consecuencia de la reproyección bilineal.
+4. **Sin datos en una sola época** (7): cómo lo tratan diferencia, rojo/cian y suma.
+5. **`X-Plane-Rev`** (4.4 y 4.6): el plano y sus capas auxiliares dicen qué revisión traen. Las capas son siempre las de la revisión vigente.
+6. **`status` acompaña a `progress.phase`** (4.2).
+7. **`/track`** (4.9): `409 not_ready` antes de `listed`, una posición por época con `mjd_mean`, y sus errores. Los valores del ejemplo ahora salen de la propagación real de Barnard.
+8. **`/api/resolve`** (2, 4.8 y 11): redondeos, tope de 20 s, espejo de CfA, página de error de CDS como `upstream_unavailable`, y vigencia de la copia guardada.
+9. **Vista provisoria** (4.10): forma fijada por el escalón, sin `+Infinity`, un solo pedido de 20 s como máximo. Sigue sin verificar contra hips2fits.
+10. **Control de contraste** (5): corte bajo fijo y corte alto con recorrido geométrico.
+11. **Recortes** (9): cuándo se baja la respuesta completa, los tres topes de tiempo, el máximo de 60 s para `Retry-After` y qué pasa si IRSA pide más.
+12. **Caché de recortes** (11): tope de disco, criterio de borrado y archivos dañados.
+13. **Un solo proceso** (10): los límites hacia IRSA valen por proceso.
+14. **Tiempo de proceso** (8): unos 25 ms por exposición; los hilos no lo aceleran.

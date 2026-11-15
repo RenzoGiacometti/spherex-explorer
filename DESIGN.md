@@ -326,26 +326,29 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 - **`option` / `option-selected`**: celdas de 36px (44px en celular) en grilla con 4px de separación. Sirven para capa, modo, velocidad, campo de visión e idioma. El campo de visión ofrece 5′, 10′ y 30′.
 - **Selector de banda**: variante de `option` a dos líneas, con el nombre (`B3`) en `{typography.label-cap}` y el rango (`1,63–2,43`) en `{typography.data-sm}`. Las seis bandas de SPHEREx, con los rangos que informa el archivo de datos: B1 0,75–1,12 · B2 1,10–1,65 · B3 1,63–2,43 · B4 2,40–3,85 · B5 3,81–4,43 · B6 4,41–5,01 µm. La interfaz toma el rango de los metadatos del campo, no de una lista fija. Una banda sin datos en la época actual se muestra en `{colors.text-dim}` y sigue siendo elegible.
 - **Deslizador**: control nativo de rango en blanco, con etiqueta a la izquierda y valor en mono a la derecha.
+- **Conmutador**: pista de 36 × 20px con borde `{colors.hairline-strong}` y perilla blanca de 12px. Prendido: pista en blanco sólido con perilla negra. Sirve para prender y apagar una capa (flags).
+- **Foco y deshabilitado**: el foco de teclado es un contorno blanco de 2px separado 2px del control; el acento no se usa para el foco. En el visor el anillo se dibuja encima de la imagen, hacia adentro, porque un contorno del contenedor queda tapado por ella. Un control deshabilitado va al 40 % de opacidad.
 
 ### Paneles y datos
 - **`glass-panel`**: contenedor de todo control que flota sobre la imagen. Encabezado con icono de 18px y `{typography.label-cap}`.
 - **`data-row`**: etiqueta en `{typography.body-sm}` `{colors.text-mute}` a la izquierda, valor en `{typography.data}` a la derecha, separador `{colors.divider}`.
 - **Aviso de calidad**: icono `alert` en blanco y una frase en `{typography.body-sm}`. El encabezado del panel muestra la cantidad en mono. Son avisos, entre otros: una fuente saturada en el campo, una época armada con pocas exposiciones, y una comparación (diferencia, suma, rojo/cian, mantener apretado) en la que alguna de las épocas es provisoria.
-- **`search-field`**: campo de vidrio de 56px con icono, etiqueta visible encima y ejemplo de nombre y coordenadas como texto de ayuda.
+- **`search-field`**: campo de vidrio de 56px con icono, etiqueta visible encima y ejemplo de nombre y coordenadas como texto de ayuda. Los renglones de ayuda que quedan fuera del vidrio, directamente sobre la imagen, van en `{colors.text-mute}`: `{colors.text-dim}` no llega a 4,5:1 sobre un recorte real.
 - **`quick-link`**: píldora de 36px para los objetos destacados.
 
 ### Tiempo y carga
-- **Línea de tiempo**: línea base `{colors.hairline-strong}` con una marca por época. Cada época es una pasada del relevamiento, y un campo tiene 3 o 4; las marcas se ubican según su fecha. Cuatro estados: cargada (`timeline-epoch`, punto blanco de 8px), provisoria (`timeline-epoch-provisional`, anillo punteado de 8px: la imagen se armó con parte de sus exposiciones), sin cargar (punto hueco de 8px) y actual (`timeline-epoch-current`, punto ámbar de 12px con anillo). Debajo, el mes de inicio de cada época en `{typography.data-sm}`. La época actual conserva el ámbar aunque sea provisoria; lo provisorio se lee en el rótulo de la imagen.
-- **Transporte**: anterior, reproducir (blanco sólido, 44 a 64px) y siguiente.
-- **`progress-bar`**: línea de 2px, avance en `{colors.accent}`, con etiqueta en mayúsculas a la izquierda y conteo en mono a la derecha (`14 / 22 recortes · 64 %`).
+- **Línea de tiempo**: línea base `{colors.hairline-strong}` con una marca por época. Cada época es una pasada del relevamiento, y un campo tiene 3 o 4; las marcas se ubican según su fecha. Cinco estados: cargada (`timeline-epoch`, punto blanco de 8px), provisoria (`timeline-epoch-provisional`, anillo punteado de 8px: la imagen se armó con parte de sus exposiciones), sin cargar (punto hueco de 8px), sin datos (cruz de 8px en `{colors.text-dim}`: la época no tiene exposiciones en la banda actual, como la época 4 de Epsilon Indi B en B1 y B4; se puede elegir igual, como una banda sin datos) y actual (`timeline-epoch-current`, punto ámbar de 12px con anillo). Dos marcas nunca quedan a menos del ancho de una parada (56px), aunque sus fechas sean cercanas. Debajo, el mes de inicio de cada época en `{typography.data-sm}`. La época actual conserva el ámbar aunque sea provisoria; lo provisorio se lee en el rótulo de la imagen.
+- **Transporte**: anterior, reproducir (blanco sólido, 44px en escritorio y 56px en celular; hasta 64px) y siguiente.
+- **`progress-bar`**: línea de 2px, avance en `{colors.accent}`, con etiqueta en mayúsculas a la izquierda y conteo en mono a la derecha (`14 / 22 recortes · 64 %`). Mientras el avance no se conoce (en cola, listando exposiciones) un tramo ámbar recorre el riel; con `prefers-reduced-motion` queda quieto.
 
 ### Sobre la imagen
 - **`reticle`**: círculo con cuatro marcas en `{colors.accent}`, de 64px en el visor y 128px en la ventana al cielo. A su derecha, el nombre en `{typography.label-cap}` y el movimiento propio en mono.
 - **Rastro**: anillos blancos de 8px con opacidad creciente que marcan la posición del objeto en épocas anteriores.
 - **Escala y orientación**: barra de escala con su valor en mono abajo a la izquierda; rosa N/E arriba a la derecha.
 - **Marcador de destacado**: anillo ámbar de 12px con el nombre en mono.
-- **Rótulo de imagen** (`image-tag`): píldora de vidrio de 28px centrada sobre el borde superior de la imagen, con una palabra en `{typography.label-cap}` y el dato en mono. Tiene dos usos. Plano provisorio: `PROVISORIO · 9 / 18 exposiciones`. Vista de otro relevamiento mientras carga un campo nuevo: `VISTA PROVISORIA · WISE 3,4 µm`, con una segunda línea en `{typography.body-sm}` que aclara que no es una imagen de SPHEREx.
-- **Fuente saturada**: los píxeles saturados se dibujan en el blanco máximo de la escala, rodeados por un contorno circular de 1px en `{colors.hairline-strong}`. En los modos diferencia y rojo/cian esos píxeles se enmascaran (negro, como las zonas sin datos) y el contorno se mantiene. Siempre va acompañada de un aviso de calidad.
+- **Rótulo de imagen** (`image-tag`): píldora de vidrio de 28px centrada sobre el borde superior de la imagen, con una palabra en `{typography.label-cap}` y el dato en mono. Tiene dos usos. Plano provisorio: `PROVISORIO · 9 / 18 exposiciones`. Vista de otro relevamiento mientras carga un campo nuevo: `VISTA PROVISORIA · WISE 3,4 µm`, con una segunda línea en `{typography.body-sm}` que aclara que no es una imagen de SPHEREx. La segunda línea va debajo de la píldora, en su propio vidrio.
+- **Fuente saturada**: los píxeles saturados se dibujan en el blanco máximo de la escala, rodeados por un contorno circular de 1px en `{colors.text}` montado sobre un trazo de 3px en `{colors.void}`. El trazo negro de abajo hace que el contorno se lea también sobre el blanco de la propia estrella: una línea sola en `{colors.hairline-strong}` no cambiaba ningún píxel sobre el núcleo de Barnard. En los modos diferencia y rojo/cian esos píxeles se enmascaran (negro, como las zonas sin datos) y el contorno se mantiene. Siempre va acompañada de un aviso de calidad.
+- **Capa de flags**: los píxeles marcados se cubren con una trama diagonal de 1px que alterna `{colors.text}` y `{colors.void}`, así se distingue sobre cielo oscuro y sobre una estrella. No usa el acento ni un color propio. Se prende con un conmutador y va acompañada de la lista de flags presentes, con su nombre y la cantidad de píxeles.
 
 ### Espectro
 - **Gráfico**: puntos blancos con barras de error en blanco al 45 %, grilla `{colors.hairline}`, ejes en `{typography.data-sm}`. Eje X de 0,75 a 5 µm. Las bandas de H₂O, CH₄, CO₂ y CO son franjas blancas al 7 % con un trazo superior y la fórmula encima. El cursor de lectura es una línea ámbar con el valor en mono (`λ 3,31 µm · 0,05 ± 0,05`).
@@ -360,7 +363,8 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 | Celular | < 600px | Columna única; controles en la mitad inferior; paneles a 12px del borde |
 
 - **Zona del pulgar.** En celular, todo control frecuente (reproducción, épocas, banda, modo) queda en el 45 % inferior de la pantalla. La parte superior solo muestra información y la salida.
-- **Objetivos táctiles** de 44px como mínimo; el botón de reproducción mide 56 a 64px.
+- **Objetivos táctiles** de 44px como mínimo, de alto y de ancho; el botón de reproducción mide 56 a 64px.
+- **Lo que cambia de lugar en celular.** El ejemplo del buscador va en un renglón debajo del campo, porque adentro no entra (315px de texto en 203px de campo a 390px de ancho). El riel de la barra de progreso va en su propio renglón, debajo de la etiqueta y el conteo. El texto del buscador sube a 16px, para que Safari de iOS no acerque la página al enfocarlo.
 - **Ventana al cielo.** Pantalla completa del cielo en la dirección del teléfono, mira central en `{colors.accent}`, nombre del objeto bajo la mira y un único `button-primary` para abrirlo en el visor.
 - No se dibujan barras de estado ni teclados del sistema.
 

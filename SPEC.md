@@ -32,11 +32,11 @@ Las coordenadas de WISE 0855 son las de 2010. Se mueve 8,1" por año: en la épo
 
 ### Acceso
 
-- Buscar exposiciones que cubren un punto: SIA2 (`https://irsa.ipac.caltech.edu/SIA?COLLECTION=...&POS=circle+ra+dec+r`), una consulta por colección, con respuesta en VOTable. Columnas útiles: `access_url`, `t_min` y `t_max` (MJD), `energy_bandpassname` (`SPHEREx-D1` a `SPHEREx-D6`), `obs_id`, `obs_collection`, `em_min`, `em_max`. Tarda de 1 a 5 s por colección y devuelve HTTP 502 de forma intermitente. Puede atrasarse un día respecto a TAP. No pedir CSV: la columna `cloud_access` contiene comas sin entrecomillar.
+- Buscar exposiciones que cubren un punto: SIA2 (`https://irsa.ipac.caltech.edu/SIA?COLLECTION=...&POS=circle+ra+dec+r`), una consulta por colección, con respuesta en VOTable. Columnas útiles: `access_url`, `t_min` y `t_max` (MJD), `energy_bandpassname` (`SPHEREx-D1` a `SPHEREx-D6`), `obs_id`, `obs_collection`, `em_min`, `em_max`. Tarda de 1 a 5 s por colección y devuelve HTTP 502 de forma intermitente; también puede quedar caído un rato largo: el 15 de noviembre de 2026 respondió `502 Proxy Error` a 27 pedidos seguidos, hasta las 11:14 UTC, mientras el servicio de recortes andaba normalmente, y a las 13:40 UTC ya respondía. Un campo nuevo sin lista guardada falla en ese caso con `upstream_unavailable`. Puede atrasarse un día respecto a TAP. No pedir CSV: la columna `cloud_access` contiene comas sin entrecomillar.
 - Alternativa: TAP de IRSA (`https://irsa.ipac.caltech.edu/TAP`), tablas `spherex.artifact` y `spherex.plane` unidas por `planeid`, y `spherex.observation` (por `obsid`) para la colección; filtro `CONTAINS(POINT('ICRS', ra, dec), p.poly)`; columnas `a.uri`, `p.time_bounds_lower` (fecha) y `p.energy_bandpassname` (detector). Los nombres están confirmados en `TAP_SCHEMA`. **[VERIFICAR]** que la consulta responda: en la Etapa 0 agotó el tiempo de espera (más de 5 minutos) y el modo asíncrono dejó los trabajos en cola.
 - Recorte: `<access_url>?center=<ra>,<dec>d&size=<lado>`. `size` sin unidad está en grados (admite `deg`, `arcmin`, `arcsec`, `px`, y `ancho,alto`). La unidad de `center` va una sola vez, al final. Con 0,1° salen 59 × 59 px. El recorte viene en la orientación del detector y trae todas las extensiones, EPSF entera incluida (4,0 MB en total). Fuera de la imagen responde HTTP 422.
 - El servicio de recortes no comprime ni respeta `Range`. Como las extensiones de imagen vienen antes que EPSF, se puede leer el FITS de a un HDU y cortar la conexión al llegar a EPSF: 125 kB y 1,7 s por recorte en vez de 4,0 MB y 12,5 s.
-- Cuando está cargado, IRSA responde HTTP 503 `Server busy, retry later.` con `Retry-After: 5`. Le pasó a entre el 17 % y el 46 % de los recortes, también con 3 conexiones.
+- Cuando está cargado, IRSA responde HTTP 503 `Server busy, retry later.` con `Retry-After: 5`. Le pasó a entre el 17 % y el 46 % de los recortes, también con 3 conexiones. El backend respeta la espera pedida hasta un máximo de 60 s; si IRSA pide más, da el recorte por fallido en ese trabajo.
 - Rendimiento medido (campo de 0,1°, 10 conexiones, descarga cortada): 258 a 539 exposiciones en 85 a 210 s, más 10 a 23 s de proceso. El tutorial oficial informa 84 imágenes en 20 s de consulta TAP y 13 s de descarga; no se reprodujo.
 - El costo de un recorte crece con el área, porque el servicio siempre entrega píxeles nativos. Con lado `fov × √2 + 4 px`: 0,16 MB y 1,8 s para 5′; 0,40 MB y 2,3 s para 10′; 2,9 MB y 8,8 s para 30′; 11 MB y 31 s para 1°. Un campo de 10′ con recortes agrandados (WISE 0855, 258 exposiciones) tardó 207 s y quedó cubierto al 100 %.
 - Tutoriales: https://caltech-ipac.github.io/irsa-tutorials/spherex/
@@ -78,13 +78,13 @@ El formato exacto, la entrega progresiva, la cola y la caché están en `docs/co
 
 Cada exposición ve el objeto a otra longitud de onda y cada época muestrea longitudes de onda distintas. Por eso una fuente fija con color no se anula del todo al restar dos épocas del mismo detector.
 
-Rehacer el cubo desde recortes en caché tarda de 10 a 16 s: hay que guardar también el cubo armado.
+Rehacer el cubo desde recortes en caché tardaba de 10 a 16 s en la Etapa 0. El pipeline del backend procesa una exposición en unos 25 ms (de 7 a 14 s para los campos de prueba, estimado) y da los mismos planos que el de la Etapa 0, con diferencias de redondeo. Igual hay que guardar el cubo armado.
 
 ### 3.2 API
 
 | Endpoint | Devuelve |
 |---|---|
-| `GET /api/resolve?name=` | RA/Dec desde Sesame (salida XML `-ox`, con espejo en CfA por si CDS no responde), o las coordenadas si el texto lo es. Trae posición J2000, movimiento propio, paralaje y velocidad radial, y el centro del campo propagado a la época 2026,0 |
+| `GET /api/resolve?name=` | RA/Dec desde Sesame (salida XML `-ox`, con espejo en CfA por si CDS no responde), o las coordenadas si el texto lo es. Un nombre desconocido llega como HTTP 200 con un `Target` sin `Resolver`; movimiento propio, paralaje y velocidad radial aparecen solo si el catálogo los trae. Trae posición J2000, movimiento propio, paralaje y velocidad radial, y el centro del campo propagado a la época 2026,0 |
 | `POST /api/field {ra, dec, fov, band}` | `id` del campo, estado y metadatos. Es idempotente: el `id` sale de la geometría |
 | `GET /api/field/{id}/events` | SSE: `state`, `queued`, `preview`, `listed`, `progress`, `plane`, `warning`, `done`, `error` |
 | `GET /api/field/{id}/meta` | JSON: grilla, detectores con su escala de contraste, épocas, planos con estado y estadísticas, flags, avisos, avance |
@@ -168,7 +168,7 @@ Cada etapa termina en algo que se puede mostrar.
 | Estrellas brillantes saturadas (Barnard: hueco en el centro) | El núcleo se dibuja en blanco máximo con contorno y aviso, y se enmascara en diferencia y rojo/cian; las posiciones se miden ajustando las alas |
 | R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1; la fotometría sobre las alas queda como investigación |
 | El campo de 1° de la maqueta no es viable con recortes (4 GB por campo) | Campos de 5′, 10′ y 30′; para contexto amplio, el mapa de la Etapa 3 |
-| hips2fits de CDS sin responder | La vista provisoria de WISE es opcional: si falla, el campo carga igual |
+| hips2fits de CDS sin responder (pasó el 15 de noviembre de 2026: 404 con la página "Page unavailable" en siete sondeos entre las 10:11 y las 13:44 UTC) | La vista provisoria de WISE es opcional: si falla, el campo carga igual. **[VERIFICAR]** La vista está implementada contra la documentación y no se pudo probar contra el servicio |
 | Pocas épocas, movimiento subpíxel | Rojo/cian, diferencia y viaje entre misiones. La diferencia entre épocas ya muestra un dipolo claro en Barnard y en WISE 0855 |
 | CDS (Sesame, SIMBAD, VizieR) sin responder | Espejo de Sesame en CfA y caché de nombres resueltos |
 | CORS de servicios externos | Todo pasa por el backend |
