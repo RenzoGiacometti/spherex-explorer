@@ -3,7 +3,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { LanguageSelector, QuickLink, QuickLinkList, SearchField } from "@/components";
 import type { NameResolver } from "@/data/nameResolver";
 import { useLanguage } from "@/i18n/useLanguage";
-import { formatDec, formatDecimal, formatRa, formatWavelength } from "@/lib/format";
+import { formatDecimal, formatWavelength } from "@/lib/format";
 import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import styles from "./EntryPage.module.css";
 import {
@@ -11,6 +11,7 @@ import {
   type FeaturedObject,
   featuredUrlPatch,
   SEARCH_EXAMPLE,
+  typedCoordinates,
   viewerHref,
 } from "./featured";
 import { useObjectSearch } from "./useObjectSearch";
@@ -74,7 +75,7 @@ export function EntryPage({ resolver }: EntryPageProps) {
 
   const example = t("search.example", {
     name: SEARCH_EXAMPLE.label,
-    coordinates: `${formatRa(SEARCH_EXAMPLE.ra, { language })} ${formatDec(SEARCH_EXAMPLE.dec, { language })}`,
+    coordinates: typedCoordinates(SEARCH_EXAMPLE),
   });
 
   const resolvingText =

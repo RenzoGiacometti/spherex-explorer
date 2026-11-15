@@ -95,6 +95,18 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
 /** Objeto del ejemplo del buscador: su nombre y las coordenadas de su campo. */
 export const SEARCH_EXAMPLE: FeaturedObject = BARNARD;
 
+/**
+ * Coordenadas de un objeto como se pueden tipear en el buscador: grados con
+ * cuatro decimales y punto, en cualquier idioma. Son los mismos decimales del
+ * centro del campo, asi que quien copia el ejemplo abre el campo precalculado y
+ * no uno casi igual. En sexagesimales con segundos enteros no alcanza: el centro
+ * de Barnard quedaba a 1,8 segundos de arco y era otro campo.
+ */
+export function typedCoordinates(object: FeaturedObject): string {
+  const sign = object.dec < 0 ? "-" : "+";
+  return `${object.ra.toFixed(4)} ${sign}${Math.abs(object.dec).toFixed(4)}`;
+}
+
 /** Parte del estado de la URL que abre un campo en el visor. */
 export type ViewerUrlPatch = Pick<
   UrlState,

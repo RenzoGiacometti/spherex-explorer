@@ -114,7 +114,7 @@ function deferred(): { promise: Promise<Response>; resolve: (response: Response)
 
 // ---- Ayudas ----------------------------------------------------------------
 
-const EXAMPLE = "Barnard's Star · 17h 57m 47s +04° 46′ 06″";
+const EXAMPLE = "Barnard's Star · 269.4463 +4.7683";
 
 function open(search: string): void {
   window.history.replaceState(null, "", `/${search}`);
