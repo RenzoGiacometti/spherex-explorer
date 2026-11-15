@@ -14,8 +14,17 @@
 // Para sumar un campo precalculado alcanza con agregar un renglon a
 // MORE_PRECOMPUTED_OBJECTS, en src/features/entry/featured.ts.
 
-import { FEATURED_OBJECTS, type FeaturedObject, PRECOMPUTED_OBJECTS } from "@/features/entry";
-import { angularSeparation, type SkyPosition } from "./skyMath";
+import {
+  FEATURED_OBJECTS,
+  type FeaturedObject,
+  featuredUrlPatch,
+  PRECOMPUTED_OBJECTS,
+  savedFieldAt,
+  type ViewerUrlPatch,
+} from "@/features/entry";
+import { DEFAULT_VIEW_FOV } from "@/lib/fov";
+import { DEFAULT_BAND, DEFAULT_MODE } from "@/state/urlState";
+import type { SkyPosition } from "./skyMath";
 
 /** Un lugar con campo propio: nombre visible, texto que lo resuelve, centro y banda inicial. */
 export type SkyTarget = FeaturedObject;
@@ -26,27 +35,40 @@ export const SKY_TARGETS: readonly SkyTarget[] = FEATURED_OBJECTS;
 /** Todos los campos precalculados (los cinco objetos de prueba y los demas). */
 export const PRECOMPUTED_FIELDS: readonly SkyTarget[] = PRECOMPUTED_OBJECTS;
 
-/**
- * Un punto elegido en el cielo cuenta como un campo guardado si esta a menos de
- * esta distancia de su centro, en grados: un minuto de arco.
- */
-export const SAVED_FIELD_RADIUS = 1 / 60;
+/** Lo que abre un punto del cielo elegido en la esfera. */
+export interface SkyPointField {
+  /** Campo guardado cuya huella contiene al punto, o null si hay que armar uno nuevo. */
+  readonly saved: SkyTarget | null;
+  /** Estado de URL que abre ese campo en el visor. */
+  readonly patch: ViewerUrlPatch;
+}
 
-/** Campo precalculado cuyo centro esta a menos de un minuto de arco del punto: el mas cercano. */
-export function savedFieldNear(
-  position: SkyPosition,
-  fields: readonly SkyTarget[] = PRECOMPUTED_FIELDS,
-): SkyTarget | undefined {
-  let best: SkyTarget | undefined;
-  let bestDistance = SAVED_FIELD_RADIUS;
-  for (const field of fields) {
-    const distance = angularSeparation(position, field);
-    if (distance <= bestDistance) {
-      best = field;
-      bestDistance = distance;
-    }
-  }
-  return best;
+/**
+ * Campo que abre un punto del cielo elegido en la esfera: el clic libre y el
+ * centro de la ventana al cielo.
+ *
+ * La regla es una sola, la del buscador (useObjectSearch.ts) y la de la URL
+ * (state/fieldUrlSync.ts): `savedFieldAt`, de src/features/entry/featured.ts.
+ * Si el punto cae dentro de la huella de un campo guardado se abre ese campo
+ * entero, con su centro, su nombre y su banda de apertura, y no uno casi igual
+ * a su lado que habria que armar de cero. Fuera de toda huella, un campo nuevo
+ * centrado en el punto, en la banda por defecto y sin nombre.
+ */
+export function skyPointField(position: SkyPosition): SkyPointField {
+  const saved = savedFieldAt(position);
+  if (saved !== null) return { saved, patch: featuredUrlPatch(saved) };
+  return {
+    saved: null,
+    patch: {
+      ra: position.ra,
+      dec: position.dec,
+      fov: DEFAULT_VIEW_FOV,
+      band: DEFAULT_BAND,
+      mode: DEFAULT_MODE,
+      epoch: null,
+      name: null,
+    },
+  };
 }
 
 /**

@@ -10,6 +10,61 @@ import styles from "./SkySphere.module.css";
 import { attachSkyControls, type SkyControls } from "./skyControls";
 import type { Quat, SkyPosition } from "./skyMath";
 
+/** Rectangulo en pixeles del escenario, desde su esquina superior izquierda. */
+export interface SkyBox {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
+const NO_BOXES: readonly SkyBox[] = [];
+
+/** Caja del nombre de un marcador, en pixeles desde su punto del cielo. */
+interface NameShape {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Medio lado de lo que ocupa el anillo de un marcador: mide 12 px y crece a 18
+ * al pasarle el cursor.
+ */
+const RING_REACH = 10;
+/** Medio lado de la mira del punto elegido (40 px). */
+const PICK_REACH = 20;
+/** Aire, en pixeles, entre un nombre de constelacion y lo que no tiene que tocar. */
+const LABEL_GAP = 4;
+/** Duracion, en milisegundos, del corrimiento del cielo de `shiftBy`. */
+const SHIFT_MS = 320;
+
+function boxesTouch(a: SkyBox, b: SkyBox, gap = 0): boolean {
+  return (
+    a.left < b.right + gap &&
+    b.left < a.right + gap &&
+    a.top < b.bottom + gap &&
+    b.top < a.bottom + gap
+  );
+}
+
+function touchesAny(box: SkyBox, others: readonly SkyBox[], gap = 0): boolean {
+  for (const other of others) {
+    if (boxesTouch(box, other, gap)) return true;
+  }
+  return false;
+}
+
+/** Marca un elemento con `data-<name>="true"`, o le saca la marca; solo escribe si cambia. */
+function setFlag(element: HTMLElement, name: string, on: boolean): void {
+  if (on) {
+    if (element.dataset[name] !== "true") element.dataset[name] = "true";
+  } else if (element.dataset[name] !== undefined) {
+    delete element.dataset[name];
+  }
+}
+
 export interface SkyMarker extends SkyPosition {
   readonly id: string;
   /** Nombre que se lee al lado del anillo, escrito como en el catalogo. */
@@ -48,6 +103,18 @@ export interface SkySphereHandle {
   setSkyDim(amount: number): void;
   getView(): SkyView | null;
   setView(view: Partial<SkyView>): void;
+  /**
+   * Donde se ve un punto del cielo, en pixeles desde la esquina del escenario;
+   * null si no hay esfera o el punto queda fuera de la vista.
+   */
+  project(position: SkyPosition): { readonly x: number; readonly y: number } | null;
+  /** Sube o baja el cielo esos pixeles (positivo: hacia abajo) con un vuelo corto. */
+  shiftBy(dy: number): void;
+  /**
+   * Vuelve a ubicar marcadores y nombres aunque la vista no haya cambiado: se
+   * movio o cambio de tamano la interfaz que los tapa (`occluders`).
+   */
+  refresh(): void;
   /** Orientacion de la camara que marca el sensor del telefono, o null para volver al arrastre. */
   setFreeOrientation(orientation: Quat | null): void;
 }
@@ -80,6 +147,14 @@ export interface SkySphereProps {
   readonly labels?: readonly SkyLabel[] | undefined;
   /** Punto elegido: la esfera le deja una mira encima. */
   readonly pick?: SkyPosition | null | undefined;
+  /**
+   * Zonas del escenario tapadas por la interfaz de quien usa la esfera (su
+   * buscador, sus tarjetas, su credito). Se piden en cada cuadro que se dibuja.
+   * Un marcador cuyo anillo cae en una no se muestra; si lo unico que la toca
+   * es su nombre, queda el anillo sin nombre. Tampoco se escribe ahi el nombre
+   * de una constelacion.
+   */
+  readonly occluders?: (() => readonly SkyBox[]) | undefined;
   /** Clic o toque corto sobre el cielo, fuera de los marcadores: el punto que se toco. */
   readonly onSkyTap?: ((position: SkyPosition) => void) | undefined;
   /** Despues de cada cuadro: centro y campo de vision. No conviene guardarlo en estado de React. */
@@ -130,36 +205,136 @@ export function SkySphere(props: SkySphereProps) {
     if (stage === null) return;
 
     const point = { x: 0, y: 0 };
+    /** Tamano de cada nombre de constelacion: se mide una vez por texto, no en cada cuadro. */
+    const labelSizes = new Map<HTMLElement, { text: string; width: number; height: number }>();
+    /** Lugar del nombre de cada marcador respecto de su punto; null si no se muestra. */
+    const nameShapes = new Map<HTMLElement, { key: string; shape: NameShape | null }>();
+
+    /**
+     * Donde queda el nombre de un marcador respecto de su punto del cielo. Sale
+     * de la hoja de estilos: el marcador es un cuadrado centrado en el punto, y
+     * el nombre va a su costado y sube medio alto propio (`translateY(-50%)`).
+     * Se mide una vez por nombre, no en cada cuadro.
+     */
+    function nameShape(marker: SkyMarker, element: HTMLElement): NameShape | null {
+      const key = `${marker.label}|${element.dataset.unlabelled ?? ""}`;
+      const known = nameShapes.get(element);
+      if (known !== undefined && known.key === key) return known.shape;
+      const name = element.lastElementChild;
+      const shape =
+        name instanceof HTMLElement && name.offsetWidth > 0
+          ? {
+              left: name.offsetLeft - element.offsetWidth / 2,
+              top: name.offsetTop - element.offsetHeight / 2 - name.offsetHeight / 2,
+              width: name.offsetWidth,
+              height: name.offsetHeight,
+            }
+          : null;
+      nameShapes.set(element, { key, shape });
+      return shape;
+    }
+
+    /**
+     * Ubica marcadores, mira y nombres, y decide cuales se dibujan. Nada se
+     * escribe encima de otra cosa, con este orden de prioridad:
+     *
+     * 1. La interfaz de quien usa la esfera (`occluders`): lo que queda debajo
+     *    no se ve ni se puede tocar.
+     * 2. Los marcadores con su nombre y la mira del punto elegido.
+     * 3. Los nombres de las constelaciones: el que toca algo de lo anterior no
+     *    se escribe.
+     */
     function placeMarkers(scene: SkyScene): void {
+      const covers = propsRef.current.occluders?.() ?? NO_BOXES;
+      /** Lo que ya ocupa su lugar sobre el cielo: marcadores con su nombre y la mira. */
+      const taken: SkyBox[] = [];
+
       for (const marker of propsRef.current.markers) {
         const element = elementsRef.current.get(marker.id);
         if (element === undefined) continue;
-        if (scene.project(marker, point)) {
-          element.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px)`;
-          if (element.hidden) element.hidden = false;
-        } else if (!element.hidden) {
-          element.hidden = true;
+        if (!scene.project(marker, point)) {
+          if (!element.hidden) element.hidden = true;
+          continue;
         }
-      }
-      for (const label of propsRef.current.labels ?? []) {
-        const element = labelElementsRef.current.get(label.id);
-        if (element === undefined) continue;
-        if (scene.project(label, point)) {
-          element.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px) translate(-50%, -50%)`;
-          if (element.hidden) element.hidden = false;
-        } else if (!element.hidden) {
-          element.hidden = true;
+        const { x, y } = point;
+        element.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+        if (element.hidden) element.hidden = false;
+
+        const ring: SkyBox = {
+          left: x - RING_REACH,
+          top: y - RING_REACH,
+          right: x + RING_REACH,
+          bottom: y + RING_REACH,
+        };
+        const covered = touchesAny(ring, covers);
+        setFlag(element, "covered", covered);
+        if (covered) {
+          setFlag(element, "crowded", false);
+          continue;
         }
+        const shape = nameShape(marker, element);
+        if (shape === null) {
+          // Sin nombre a la vista (la ventana al cielo lo escribe debajo de la mira).
+          setFlag(element, "crowded", false);
+          taken.push(ring);
+          continue;
+        }
+        const nameBox: SkyBox = {
+          left: x + shape.left,
+          top: y + shape.top,
+          right: x + shape.left + shape.width,
+          bottom: y + shape.top + shape.height,
+        };
+        const crowded = touchesAny(nameBox, covers);
+        setFlag(element, "crowded", crowded);
+        taken.push(ring);
+        if (!crowded) taken.push(nameBox);
       }
+
       const pickElement = pickRef.current;
       const picked = propsRef.current.pick ?? null;
       if (pickElement !== null) {
         if (picked !== null && scene.project(picked, point)) {
           pickElement.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px)`;
           if (pickElement.hidden) pickElement.hidden = false;
+          taken.push({
+            left: point.x - PICK_REACH,
+            top: point.y - PICK_REACH,
+            right: point.x + PICK_REACH,
+            bottom: point.y + PICK_REACH,
+          });
         } else if (!pickElement.hidden) {
           pickElement.hidden = true;
         }
+      }
+
+      for (const label of propsRef.current.labels ?? []) {
+        const element = labelElementsRef.current.get(label.id);
+        if (element === undefined) continue;
+        if (!scene.project(label, point)) {
+          if (!element.hidden) element.hidden = true;
+          continue;
+        }
+        const { x, y } = point;
+        element.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
+        if (element.hidden) element.hidden = false;
+        let size = labelSizes.get(element);
+        if (size === undefined || size.text !== label.text) {
+          size = { text: label.text, width: element.offsetWidth, height: element.offsetHeight };
+          labelSizes.set(element, size);
+        }
+        const box: SkyBox = {
+          left: x - size.width / 2,
+          top: y - size.height / 2,
+          right: x + size.width / 2,
+          bottom: y + size.height / 2,
+        };
+        // Gana el rotulo del marcador: el nombre de la constelacion no se escribe.
+        setFlag(
+          element,
+          "covered",
+          touchesAny(box, taken, LABEL_GAP) || touchesAny(box, covers, LABEL_GAP),
+        );
       }
       // Que mapa se esta viendo (4k, fundido u 8k), a la vista en el inspector.
       const detail = scene.getDetailState();
@@ -197,6 +372,13 @@ export function SkySphere(props: SkySphereProps) {
       return;
     }
     sceneRef.current = scene;
+
+    // Con la tipografia propia ya cargada los nombres miden otra cosa: se vuelven a medir.
+    void document.fonts?.ready.then(() => {
+      labelSizes.clear();
+      nameShapes.clear();
+      scene.invalidate();
+    });
 
     const controls = attachSkyControls(stage, scene, {
       onDragChange: (dragging) => {
@@ -252,6 +434,21 @@ export function SkySphere(props: SkySphereProps) {
       setSkyDim: (amount) => sceneRef.current?.setSkyDim(amount),
       getView: () => sceneRef.current?.getView() ?? null,
       setView: (view) => sceneRef.current?.setView(view),
+      project: (position) => {
+        const out = { x: 0, y: 0 };
+        return sceneRef.current?.project(position, out) === true ? out : null;
+      },
+      shiftBy: (dy) => {
+        const scene = sceneRef.current;
+        if (scene === null) return;
+        // Como en un arrastre: bajar el cielo es mirar mas al norte.
+        const view = scene.getView();
+        void scene.flyTo(
+          { ra: view.ra, dec: view.dec + dy * scene.degreesPerPixel() },
+          { duration: SHIFT_MS },
+        );
+      },
+      refresh: () => sceneRef.current?.invalidate(),
       setFreeOrientation: (orientation) => sceneRef.current?.setFreeOrientation(orientation),
     }),
     [],

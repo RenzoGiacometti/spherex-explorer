@@ -37,6 +37,7 @@ describe("parseUrlState", () => {
       sra: null,
       sdec: null,
       tab: "spectrum",
+      constellations: false,
       embed: false,
       lang: null,
     });
@@ -53,7 +54,7 @@ describe("parseUrlState", () => {
 
   it("lee todos los parametros", () => {
     const parsed = parseUrlState(
-      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&ref=1&stretch=log&name=Barnard%27s+Star&contrast=70&flags=1&gaia=1&sobj=1&tab=lightcurve&embed=1&lang=en",
+      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&ref=1&stretch=log&name=Barnard%27s+Star&contrast=70&flags=1&gaia=1&sobj=1&tab=lightcurve&const=1&embed=1&lang=en",
     );
     expect(parsed).toEqual({
       ra: 269.4463,
@@ -72,6 +73,7 @@ describe("parseUrlState", () => {
       sra: null,
       sdec: null,
       tab: "lightcurve",
+      constellations: true,
       embed: true,
       lang: "en",
     });
@@ -329,6 +331,23 @@ describe("parseUrlState", () => {
     });
   });
 
+  describe("const (capa de constelaciones de la entrada)", () => {
+    it("se prende con 1 o true, con o sin campo", () => {
+      expect(parseUrlState("?const=1").constellations).toBe(true);
+      expect(parseUrlState("?const=true").constellations).toBe(true);
+      expect(parseUrlState(`${SPEC_EXAMPLE}&const=1`).constellations).toBe(true);
+      // No es un campo: sigue mostrandose la entrada.
+      expect(hasField(parseUrlState("?const=1"))).toBe(false);
+    });
+
+    it("queda apagada si falta o con cualquier otra cosa", () => {
+      expect(parseUrlState("").constellations).toBe(false);
+      for (const value of ["0", "false", "", "yes", "2"]) {
+        expect(parseUrlState(`?const=${value}`).constellations, value).toBe(false);
+      }
+    });
+  });
+
   describe("embed", () => {
     it("se activa con 1 o true", () => {
       expect(parseUrlState("?embed=1").embed).toBe(true);
@@ -368,7 +387,7 @@ describe("serializeUrlState", () => {
     expect(serializeUrlState(DEFAULT_URL_STATE)).toBe("");
   });
 
-  it("sin campo conserva solo embed y lang", () => {
+  it("sin campo conserva solo const, embed y lang", () => {
     expect(
       serializeUrlState(
         state({
@@ -383,6 +402,20 @@ describe("serializeUrlState", () => {
       ),
     ).toBe("?lang=en");
     expect(serializeUrlState(state({ embed: true }))).toBe("?embed=1");
+    expect(serializeUrlState(state({ constellations: true }))).toBe("?const=1");
+    expect(serializeUrlState(state({ constellations: true, embed: true, lang: "es" }))).toBe(
+      "?const=1&embed=1&lang=es",
+    );
+  });
+
+  it("escribe const solo si la capa esta prendida, tambien con un campo", () => {
+    const base = state({ ra: 133.7598, dec: -7.2422, band: 6 });
+    // Apagada es el valor por defecto: no se escribe.
+    expect(serializeUrlState({ ...base, constellations: false })).toBe(SPEC_EXAMPLE);
+    // Es de la entrada, no del campo: al abrir uno sigue en la URL, antes de embed y lang.
+    expect(serializeUrlState({ ...base, constellations: true, lang: "en" })).toBe(
+      `${SPEC_EXAMPLE}&const=1&lang=en`,
+    );
   });
 
   it("escribe los opcionales solo si estan, en orden fijo", () => {
@@ -462,10 +495,14 @@ describe("serializeUrlState", () => {
       ref: 1,
       stretch: "linear",
       name: "RW Aurigae",
+      constellations: true,
       embed: true,
       lang: "en",
     });
     expect(parseUrlState(serializeUrlState(original))).toEqual(original);
+    // Tambien sin campo, que es donde se usa la capa.
+    const entry = state({ constellations: true, lang: "es" });
+    expect(parseUrlState(serializeUrlState(entry))).toEqual(entry);
   });
 });
 
@@ -611,6 +648,64 @@ describe("useUrlState", () => {
     useUrlState.getState().update({ ra: null, dec: null }, { history: "push" });
     expect(window.location.search).toBe("?lang=en");
     expect(hasField(snapshot())).toBe(false);
+  });
+
+  describe("capa de constelaciones de la entrada", () => {
+    it("se prende y se apaga en la URL sin sumar entradas al historial", () => {
+      const before = window.history.length;
+
+      useUrlState.getState().update({ constellations: true });
+      expect(window.location.search).toBe("?const=1");
+      expect(useUrlState.getState().constellations).toBe(true);
+
+      useUrlState.getState().update({ constellations: false });
+      expect(window.location.search).toBe("");
+      expect(useUrlState.getState().constellations).toBe(false);
+      expect(window.history.length).toBe(before);
+    });
+
+    it("sobrevive al cambio de idioma", () => {
+      setLocation("?const=1");
+      useUrlState.getState().update({ lang: "en" });
+      expect(window.location.search).toBe("?const=1&lang=en");
+      useUrlState.getState().update({ lang: "es" });
+      expect(window.location.search).toBe("?const=1&lang=es");
+      expect(useUrlState.getState().constellations).toBe(true);
+    });
+
+    it("sigue prendida al abrir un campo y al volver a la entrada", () => {
+      setLocation("?const=1&lang=en");
+
+      useUrlState.getState().update({ ra: 133.7598, dec: -7.2422, band: 6 }, { history: "push" });
+      expect(window.location.search).toBe(`${SPEC_EXAMPLE}&const=1&lang=en`);
+
+      // Como vuelve el visor a la entrada (features/viewer/TopBar.tsx).
+      useUrlState
+        .getState()
+        .update({ ra: null, dec: null, epoch: null, name: null }, { history: "push" });
+      expect(window.location.search).toBe("?const=1&lang=en");
+      expect(useUrlState.getState().constellations).toBe(true);
+    });
+
+    it("sigue a atras y adelante del navegador", () => {
+      setLocation("?const=1");
+      expect(useUrlState.getState().constellations).toBe(true);
+
+      // Atras, a una entrada sin la capa; adelante, de vuelta a la que la tenia.
+      window.history.replaceState(null, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      expect(useUrlState.getState().constellations).toBe(false);
+
+      window.history.replaceState(null, "", "/?const=1");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      expect(useUrlState.getState().constellations).toBe(true);
+    });
+
+    it("ya no es un parametro ajeno: apagada se borra de la URL en vez de conservarse", () => {
+      setLocation("?const=1&utm_source=test");
+      useUrlState.getState().update({ constellations: false });
+      expect(window.location.search).toBe("?utm_source=test");
+    });
   });
 
   it("conserva los parametros que no son suyos y el fragmento", () => {

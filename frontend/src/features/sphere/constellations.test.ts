@@ -9,7 +9,6 @@ import {
   precessToB1875,
 } from "./constellations";
 import { angularSeparation } from "./skyMath";
-import { PRECOMPUTED_FIELDS, savedFieldNear } from "./targets";
 
 /** [RA, Dec, abreviatura] calculados con astropy (assets/FUENTES.md, "Constelaciones"). */
 const CHECK = check as unknown as readonly (readonly [number, number, string])[];
@@ -59,21 +58,5 @@ describe("nombres de las constelaciones", () => {
     expect(constellationLabel("UMa", "en")).toBe("Great Bear (Ursa Major)");
     expect(constellationLabel("Oct", "es")).toBe("Octante (Octans)");
     expect(constellationLabel("Ori", "en")).toBe("Orion");
-  });
-});
-
-describe("campo guardado cerca de un punto", () => {
-  const barnard = PRECOMPUTED_FIELDS.find((field) => field.id === "barnard");
-
-  it("a menos de un minuto de arco del centro, es ese campo", () => {
-    if (barnard === undefined) throw new Error("falta el campo de Barnard");
-    expect(savedFieldNear({ ra: barnard.ra, dec: barnard.dec + 0.5 / 60 })?.id).toBe("barnard");
-    expect(savedFieldNear({ ra: barnard.ra, dec: barnard.dec })?.id).toBe("barnard");
-  });
-
-  it("mas lejos, no hay campo guardado", () => {
-    if (barnard === undefined) throw new Error("falta el campo de Barnard");
-    expect(savedFieldNear({ ra: barnard.ra, dec: barnard.dec + 2 / 60 })).toBeUndefined();
-    expect(savedFieldNear({ ra: 10, dec: 10 })).toBeUndefined();
   });
 });

@@ -6,7 +6,13 @@ import { DEFAULT_URL_STATE, parseUrlState, serializeUrlState } from "@/state/url
 import barnardMeta from "@/test/fixtures/barnard/meta.json";
 import epsIndBMeta from "@/test/fixtures/epsindb/meta.json";
 import wiseMeta from "@/test/fixtures/wise0855/meta.json";
-import { PRECOMPUTED_FIELDS, pickRandomField, RANDOM_FIELDS, SKY_TARGETS } from "./targets";
+import {
+  PRECOMPUTED_FIELDS,
+  pickRandomField,
+  RANDOM_FIELDS,
+  SKY_TARGETS,
+  skyPointField,
+} from "./targets";
 
 function target(id: string) {
   const found = SKY_TARGETS.find((candidate) => candidate.id === id);
@@ -98,6 +104,65 @@ describe("campos precalculados", () => {
       "?ra=164.0925&dec=6.9952&fov=0.1667&band=6&mode=blink&name=Wolf+359",
       "?ra=43.2795&dec=16.8538&fov=0.1667&band=5&mode=blink&name=Teegarden%27s+Star",
     ]);
+  });
+});
+
+// La huella en si (cuadrado de 10 minutos de arco, coseno de la declinacion,
+// cruce de 0/360) se prueba en src/features/entry/featured.test.ts. Aca, lo
+// que la esfera abre con ella.
+describe("punto elegido en la esfera", () => {
+  const barnard = target("barnard");
+  /** Un minuto de arco, en grados. */
+  const ARCMIN = 1 / 60;
+
+  it("dentro de la huella de un campo guardado abre ese campo entero", () => {
+    // A 3 y a 4,5 minutos de arco del centro: lejos del minuto que usaba antes la esfera.
+    for (const offset of [0, 0.5 * ARCMIN, 3 * ARCMIN, -4.5 * ARCMIN]) {
+      const point = { ra: barnard.ra, dec: barnard.dec + offset };
+      const { saved, patch } = skyPointField(point);
+      expect(saved, String(offset)).toBe(barnard);
+      // El centro, el nombre y la banda del campo, no los del punto.
+      expect(patch, String(offset)).toEqual(featuredUrlPatch(barnard));
+    }
+  });
+
+  it("abre con la banda y el nombre de catalogo del campo, como el buscador", () => {
+    // WISE 0855 abre en la banda 6; el punto esta a 2 minutos de arco al este y 2 al norte.
+    const wise = target("wise-0855");
+    const east = (2 * ARCMIN) / Math.cos((wise.dec * Math.PI) / 180);
+    const { saved, patch } = skyPointField({ ra: wise.ra + east, dec: wise.dec + 2 * ARCMIN });
+    expect(saved?.id).toBe("wise-0855");
+    expect(serializeUrlState({ ...DEFAULT_URL_STATE, ...patch })).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5",
+    );
+  });
+
+  it("vale para todos los campos guardados, tengan o no marcador", () => {
+    for (const field of PRECOMPUTED_FIELDS) {
+      const { saved, patch } = skyPointField({ ra: field.ra, dec: field.dec - 4 * ARCMIN });
+      expect(saved, field.label).toBe(field);
+      expect(patch, field.label).toEqual(featuredUrlPatch(field));
+    }
+  });
+
+  it("fuera de toda huella abre un campo nuevo centrado en el punto, sin nombre", () => {
+    for (const point of [
+      // A 5,5 minutos de arco de Barnard: pasado el borde de la huella.
+      { ra: barnard.ra, dec: barnard.dec + 5.5 * ARCMIN },
+      { ra: 10.6847, dec: 41.269 },
+    ]) {
+      const { saved, patch } = skyPointField(point);
+      expect(saved).toBeNull();
+      expect(patch).toEqual({
+        ra: point.ra,
+        dec: point.dec,
+        fov: 0.1667,
+        band: 3,
+        mode: "blink",
+        epoch: null,
+        name: null,
+      });
+    }
   });
 });
 

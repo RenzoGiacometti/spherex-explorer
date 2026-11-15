@@ -130,6 +130,21 @@
   display: none;
 }
 
+/*
+ * Debajo de la interfaz de quien usa la esfera (su buscador, una tarjeta, el
+ * credito) el marcador no se dibuja: ahi no se lo puede tocar, y su nombre se
+ * mezclaria con los textos de encima. Oculto asi tampoco recibe el foco. Lo
+ * decide la esfera en cada cuadro (`occluders`, SkySphere.tsx).
+ */
+.marker[data-covered="true"] {
+  visibility: hidden;
+}
+
+/* Si lo que queda debajo de la interfaz es solo el nombre, queda el anillo. */
+.marker[data-crowded="true"] .name {
+  visibility: hidden;
+}
+
 /* Marca de comprobacion de la pagina de prueba: blanca, mas grande y sin interaccion. */
 .marker[data-kind="probe"] {
   pointer-events: none;
@@ -145,6 +160,15 @@
 .marker[data-kind="probe"] .name {
   left: calc(50% + 18px);
   font: var(--type-data-sm-font);
+}
+
+/*
+ * Con la esfera en modo de arrastre, un clic sobre el cielo elige un punto. El
+ * nombre es parte del marcador: tocarlo abre su objeto, no elige el punto de
+ * cielo que tiene debajo, que quedaria a varios grados y seria otro campo.
+ */
+.stage[data-interactive="true"] .marker[data-kind="target"] .name {
+  pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,4 +240,13 @@
 
 .label[hidden] {
   display: none;
+}
+
+/*
+ * Un nombre que tocaria el rotulo de un marcador, la mira del punto elegido o
+ * la interfaz de encima no se escribe: gana lo otro. Sigue ocupando su lugar,
+ * asi la esfera lo puede medir.
+ */
+.label[data-covered="true"] {
+  visibility: hidden;
 }

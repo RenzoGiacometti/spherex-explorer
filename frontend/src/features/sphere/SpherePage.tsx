@@ -17,7 +17,6 @@ import {
   type FoundPlace,
   featuredUrlPatch,
   SEARCH_EXAMPLE,
-  savedFieldAt,
   typedCoordinates,
   useObjectSearch,
   type ViewerUrlPatch,
@@ -26,8 +25,7 @@ import {
 import { GuideLauncher } from "@/features/guide";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
-import { DEFAULT_VIEW_FOV } from "@/lib/fov";
-import { DEFAULT_BAND, DEFAULT_MODE, DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
+import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import {
   CONSTELLATION_NAMES,
   type ConstellationFigure,
@@ -38,6 +36,7 @@ import {
 import { findPatch } from "./patches";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import {
+  type SkyBox,
   type SkyLabel,
   type SkyMarker,
   SkySphere,
@@ -53,10 +52,9 @@ import {
   pickRandomField,
   rememberRandomField,
   SKY_TARGETS,
-  savedFieldNear,
+  skyPointField,
 } from "./targets";
 import { useSphereTexts } from "./texts";
-import { useUrlFlag } from "./urlFlag";
 import { useSkyWindow } from "./useSkyWindow";
 
 /**
@@ -80,11 +78,34 @@ const WINDOW_FOV = 75;
  */
 const MIN_LOCK_RADIUS = 5;
 
-/** Parametro de la URL que prende la capa de constelaciones: `?const=1`. */
-const CONSTELLATIONS_PARAM = "const";
-
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
+
+/** Ancho de celular de DESIGN.md ("Responsive Behavior"). */
+const PHONE_QUERY = "(max-width: 599px)";
+
+/**
+ * Lo que la interfaz tapa del cielo lleva este atributo: la esfera no dibuja
+ * debajo marcadores ni nombres (`occluders`, SkySphere.tsx). `chrome` es lo que
+ * se retira al acercarse a un campo (buscador, tarjeta, credito y lectura del
+ * centro); `bar`, lo de la barra superior, que queda.
+ */
+const COVER_ATTRIBUTE = "data-sky-cover";
+
+const NO_COVER: readonly SkyBox[] = [];
+
+/**
+ * Aire, en pixeles, que tiene que quedar entre el centro de la mira del punto
+ * elegido y la interfaz: medio lado de la mira (20 px) y 8 px mas.
+ */
+const PICK_CLEARANCE = 28;
+/**
+ * Si la tarjeta del punto elegido tapa la mira, el cielo sube hasta dejarla a
+ * esta distancia del borde de la interfaz: se ve la mira y lo que la rodea.
+ */
+const PICK_REST = 72;
+/** Corrimiento minimo, en pixeles, por el que se mueve el cielo para destapar la mira. */
+const PICK_MIN_SHIFT = 4;
 
 /**
  * Tiempo que el acercamiento se queda sobre la imagen del campo antes de abrir
@@ -103,6 +124,22 @@ function fadeAt(progress: number): number {
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+/** Si la ventana tiene ancho de celular: ahi la barra superior no tiene lugar para un boton con texto. */
+function usePhoneWidth(): boolean {
+  const [phone, setPhone] = useState(
+    () => typeof window !== "undefined" && window.matchMedia?.(PHONE_QUERY).matches === true,
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || window.matchMedia === undefined) return;
+    const query = window.matchMedia(PHONE_QUERY);
+    const update = (): void => setPhone(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return phone;
 }
 
 /** Destacado mas cercano al centro de la ventana al cielo. */
@@ -164,6 +201,14 @@ export interface SpherePageProps {
  * la camara al punto y abre su campo en el visor. En un telefono suma la
  * "ventana al cielo": la esfera sigue la direccion a la que apunta el aparato.
  *
+ * Un clic sobre el cielo elige un punto: queda la mira y, sobre los accesos,
+ * una tarjeta con sus coordenadas, su constelacion y el boton que lo abre. Si
+ * el punto cae dentro de la huella de un campo guardado abre ese campo
+ * (targets.ts, `skyPointField`). Nada de esto se pisa: la esfera no dibuja
+ * marcadores ni nombres de constelaciones debajo de la interfaz (los elementos
+ * con `data-sky-cover`), y en el celular la tarjeta toma el lugar de los
+ * destacados y los accesos mientras esta abierta.
+ *
  * El buscador es uno solo: se ve como lo dibuja esta pantalla y busca con la
  * logica de src/features/entry (useObjectSearch). Si el navegador no puede
  * dibujar la esfera, quedan el buscador, "Lugar al azar" y los objetos
@@ -193,6 +238,9 @@ export function SpherePage({
   const sphereRef = useRef<SkySphereHandle>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLElement>(null);
+  /** Cuanto se ve la interfaz de abajo, de 0 a 1 (`setChrome`). */
+  const chromeRef = useRef(1);
   const topbarRef = useRef<HTMLElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
@@ -205,8 +253,9 @@ export function SpherePage({
   const [sphereStatus, setSphereStatus] = useState<SkySphereStatus>("loading");
   const [nearest, setNearest] = useState<Nearest | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
-  // Capa de constelaciones: el interruptor va en la URL y las figuras se piden al prenderla.
-  const [constellationsOn, setConstellationsOn] = useUrlFlag(CONSTELLATIONS_PARAM);
+  // Capa de constelaciones: el interruptor va en la URL (`const=1`, state/urlState.ts)
+  // y las figuras se piden al prenderla.
+  const constellationsOn = useUrlState((state) => state.constellations);
   const [figures, setFigures] = useState<readonly ConstellationFigure[] | null>(null);
   useEffect(() => {
     if (!constellationsOn || figures !== null) return;
@@ -244,6 +293,7 @@ export function SpherePage({
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
   );
+  const phone = usePhoneWidth();
   const search = useObjectSearch(resolver);
   const { status } = search;
 
@@ -282,11 +332,48 @@ export function SpherePage({
     if (page === null || bottom === null || typeof ResizeObserver === "undefined") return;
     const measure = (): void => {
       page.style.setProperty("--sky-labels-inset", `${bottom.offsetHeight}px`);
+      // Cambio lo que la interfaz tapa: la esfera vuelve a ubicar marcadores y nombres.
+      sphereRef.current?.refresh();
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(bottom);
     return () => observer.disconnect();
+  }, []);
+
+  // Despues de cada cambio de esta pantalla (otro idioma, la tarjeta, un aviso)
+  // la interfaz puede tapar otra parte del cielo aunque la vista no se mueva.
+  useEffect(() => {
+    sphereRef.current?.refresh();
+  });
+
+  /**
+   * Lo que la interfaz tapa del cielo, en pixeles de la pantalla: cada elemento
+   * marcado con `data-sky-cover`. La esfera lo pide en cada cuadro que dibuja,
+   * y debajo no pone marcadores ni nombres de constelaciones.
+   *
+   * En la ventana al cielo no se tapa nada: arriba queda la salida y abajo un
+   * solo boton. Tampoco cuenta lo de abajo cuando ya se retiro para dejar ver
+   * la imagen del campo al que se llega.
+   */
+  const coveredBoxes = useCallback((): readonly SkyBox[] => {
+    const page = pageRef.current;
+    if (page === null || windowOnRef.current) return NO_COVER;
+    const origin = page.getBoundingClientRect();
+    const chromeShown = chromeRef.current > 0.5;
+    const boxes: SkyBox[] = [];
+    for (const element of page.querySelectorAll<HTMLElement>(`[${COVER_ATTRIBUTE}]`)) {
+      if (!chromeShown && element.getAttribute(COVER_ATTRIBUTE) === "chrome") continue;
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0) continue;
+      boxes.push({
+        left: box.left - origin.left,
+        top: box.top - origin.top,
+        right: box.right - origin.left,
+        bottom: box.bottom - origin.top,
+      });
+    }
+    return boxes;
   }, []);
 
   const setFade = useCallback((opacity: number) => {
@@ -301,6 +388,7 @@ export function SpherePage({
    */
   const setChrome = useCallback((opacity: number) => {
     const page = pageRef.current;
+    chromeRef.current = opacity;
     if (page === null) return;
     page.style.setProperty("--sphere-chrome", String(opacity));
     // Invisible del todo, tampoco recibe el puntero ni el foco.
@@ -412,31 +500,60 @@ export function SpherePage({
     });
   }
 
-  /** Campo guardado a menos de un minuto de arco del punto elegido, si lo hay. */
-  const pickSaved = pick === null ? undefined : savedFieldNear(pick);
+  /**
+   * Abre un punto del cielo: el campo guardado entero si cae dentro de la huella
+   * de uno, o un campo nuevo centrado ahi. La regla es la del buscador y la de
+   * la URL (`skyPointField`, targets.ts).
+   */
+  function openPosition(position: SkyPosition): void {
+    const { saved, patch } = skyPointField(position);
+    search.reset();
+    void openPlace({
+      label: saved === null ? formatPosition(position.ra, position.dec) : saved.label,
+      patch,
+    });
+  }
 
-  /** Abre el punto elegido: el campo guardado si cae sobre uno, o un campo nuevo centrado ahi. */
+  /** Campo guardado cuya huella contiene al punto elegido, o null: lo que dice la tarjeta. */
+  const pickSaved = pick === null ? null : skyPointField(pick).saved;
+
+  /** Abre el punto elegido en el visor. */
   function handlePickOpen(): void {
     if (pick === null) return;
     setPick(null);
-    if (pickSaved !== undefined) {
-      openTarget(pickSaved);
-      return;
-    }
-    search.reset();
-    void openPlace({
-      label: formatPosition(pick.ra, pick.dec),
-      patch: {
-        ra: pick.ra,
-        dec: pick.dec,
-        fov: DEFAULT_VIEW_FOV,
-        band: DEFAULT_BAND,
-        mode: DEFAULT_MODE,
-        epoch: null,
-        name: null,
-      },
-    });
+    openPosition(pick);
   }
+
+  // La tarjeta del punto se suma sobre el buscador y lo de abajo crece hacia
+  // arriba: puede tapar justo el punto que se acaba de elegir. Si la mira queda
+  // debajo, o pegada al borde, el cielo sube lo necesario para que se vea. En un
+  // celular alto no pasa: ahi la tarjeta ocupa el lugar de los destacados y los
+  // accesos, que miden mas que ella.
+  useEffect(() => {
+    if (pick === null) return;
+    const sphere = sphereRef.current;
+    const page = pageRef.current;
+    const dock = dockRef.current;
+    if (sphere === null || page === null || dock === null) return;
+    const point = sphere.project(pick);
+    if (point === null) return;
+    const origin = page.getBoundingClientRect();
+    const box = dock.getBoundingClientRect();
+    const dockTop = box.top - origin.top;
+    const beside =
+      point.x < box.left - origin.left - PICK_CLEARANCE ||
+      point.x > box.right - origin.left + PICK_CLEARANCE;
+    if (beside || point.y <= dockTop - PICK_CLEARANCE) return;
+    // Hasta donde puede subir: debajo de la barra y, en el celular, de la lectura del centro.
+    let ceiling = 0;
+    for (const cover of coveredBoxes()) {
+      if (cover.bottom <= dockTop) ceiling = Math.max(ceiling, cover.bottom);
+    }
+    ceiling += PICK_CLEARANCE;
+    const rest = Math.max(ceiling, dockTop - PICK_REST);
+    // Por un par de pixeles no vale la pena mover el cielo.
+    if (point.y - rest >= PICK_MIN_SHIFT) sphere.shiftBy(rest - point.y);
+  }, [pick, coveredBoxes]);
 
   function handleRandom(): void {
     setPick(null);
@@ -507,24 +624,7 @@ export function SpherePage({
     }
     if (view === null) return;
     // Dentro de la huella de un campo guardado se abre ese campo, con su banda y su nombre.
-    const saved = savedFieldAt(view);
-    if (saved !== null) {
-      openTarget(saved);
-      return;
-    }
-    search.reset();
-    void openPlace({
-      label: formatPosition(view.ra, view.dec),
-      patch: {
-        ra: view.ra,
-        dec: view.dec,
-        fov: DEFAULT_VIEW_FOV,
-        band: DEFAULT_BAND,
-        mode: DEFAULT_MODE,
-        epoch: null,
-        name: null,
-      },
-    });
+    openPosition(view);
   }
 
   const targetHref = useCallback(
@@ -625,6 +725,7 @@ export function SpherePage({
         lines={constellationLines}
         labels={constellationLabels}
         pick={windowOn ? null : pick}
+        occluders={coveredBoxes}
         onSkyTap={handleSkyTap}
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
@@ -647,31 +748,46 @@ export function SpherePage({
       ) : null}
 
       <header ref={topbarRef} className={styles.topbar}>
-        <p className={styles.brand}>{tCommon("app.name")}</p>
+        <p className={styles.brand} data-sky-cover="bar">
+          {tCommon("app.name")}
+        </p>
         {windowOn ? (
           // En la ventana al cielo, arriba solo queda la salida.
           <IconButton icon="close" label={t("window.exit")} onClick={skyWindow.stop} />
         ) : (
-          <div className={styles.topActions}>
+          <div className={styles.topActions} data-sky-cover="bar">
             {sphereStatus === "no-webgl" ? null : (
               // Capa de constelaciones: prendida, el boton va relleno en blanco.
               <IconButton
                 icon="layers"
                 label={t(constellationsOn ? "constellations.hide" : "constellations.show")}
                 pressed={constellationsOn}
-                onClick={() => setConstellationsOn(!constellationsOn)}
+                onClick={() => updateUrl({ constellations: !constellationsOn })}
               />
             )}
-            {/* "Acerca de": que es, uso de IA y creditos de los datos. Se ve con y sin esfera. */}
-            <Button
-              className={styles.action}
-              variant="ghost"
-              icon="info"
-              aria-haspopup="dialog"
-              onClick={() => setAboutOpen(true)}
-            >
-              {tAbout("open")}
-            </Button>
+            {/*
+              "Acerca de": que es, uso de IA y creditos de los datos. Se ve con y sin
+              esfera. En el celular va solo el icono: con el texto, la capa de
+              constelaciones y el idioma no entran en la barra.
+            */}
+            {phone ? (
+              <IconButton
+                icon="info"
+                label={tAbout("open")}
+                aria-haspopup="dialog"
+                onClick={() => setAboutOpen(true)}
+              />
+            ) : (
+              <Button
+                className={styles.action}
+                variant="ghost"
+                icon="info"
+                aria-haspopup="dialog"
+                onClick={() => setAboutOpen(true)}
+              >
+                {tAbout("open")}
+              </Button>
+            )}
             {/* El idioma va en la URL (`lang`); App lo aplica a i18next. */}
             <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
           </div>
@@ -679,7 +795,11 @@ export function SpherePage({
       </header>
       {aboutOpen ? <AboutDialog onClose={() => setAboutOpen(false)} /> : null}
 
-      <p className={styles.readout} data-hidden={sphereStatus === "no-webgl"}>
+      <p
+        className={styles.readout}
+        data-hidden={sphereStatus === "no-webgl"}
+        data-sky-cover="chrome"
+      >
         <span className={styles.readoutLabel}>{t("center")}</span>{" "}
         <span ref={readoutRef} className={styles.readoutValue} />
       </p>
@@ -701,7 +821,12 @@ export function SpherePage({
             </Button>
           </main>
         ) : (
-          <main className={styles.dock}>
+          <main
+            ref={dockRef}
+            className={styles.dock}
+            data-pick={pick !== null}
+            data-sky-cover="chrome"
+          >
             {notices.map((notice) => (
               <p key={notice} className={styles.notice} role="status">
                 <Icon name="alert" size={18} className={styles.noticeIcon} />
@@ -723,23 +848,30 @@ export function SpherePage({
                 </QuickLink>
               ))}
             </QuickLinkList>
+            {/*
+              Tarjeta del punto elegido. Se lee de corrido (punto, constelacion, si
+              el campo esta guardado, abrir, cerrar); donde va cada parte lo decide
+              la hoja de estilos, que en el celular la pone en lugar de los
+              destacados y los accesos.
+            */}
             {pick === null ? null : (
               <section className={styles.pick} aria-label={t("pick.title")}>
-                <div className={styles.pickHead}>
+                <div className={styles.pickPoint}>
                   <h2 className={styles.pickTitle}>{t("pick.title")}</h2>
-                  <IconButton icon="close" label={t("pick.close")} onClick={() => setPick(null)} />
+                  <p className={styles.pickCoordinates}>{formatPosition(pick.ra, pick.dec)}</p>
                 </div>
-                <p className={styles.pickCoordinates}>{formatPosition(pick.ra, pick.dec)}</p>
-                <p className={styles.pickLine}>
-                  {t("pick.constellation", {
-                    name: constellationLabel(constellationAt(pick), language),
-                  })}
-                </p>
-                <p className={styles.pickNote} role="status">
-                  {pickSaved === undefined
-                    ? t("pick.new")
-                    : t("pick.saved", { name: pickSaved.label })}
-                </p>
+                <div className={styles.pickInfo}>
+                  <p>
+                    {t("pick.constellation", {
+                      name: constellationLabel(constellationAt(pick), language),
+                    })}
+                  </p>
+                  <p className={styles.pickNote} role="status">
+                    {pickSaved === null
+                      ? t("pick.new")
+                      : t("pick.saved", { name: pickSaved.label })}
+                  </p>
+                </div>
                 <Button
                   className={classNames(styles.action, styles.pickOpen)}
                   variant="ghost"
@@ -749,6 +881,12 @@ export function SpherePage({
                 >
                   {t("pick.open")}
                 </Button>
+                <IconButton
+                  className={styles.pickClose}
+                  icon="close"
+                  label={t("pick.close")}
+                  onClick={() => setPick(null)}
+                />
               </section>
             )}
             {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
@@ -819,7 +957,9 @@ export function SpherePage({
         <p className={styles.visuallyHidden} role="status">
           {liveText}
         </p>
-        <p className={styles.credit}>{t("credit")}</p>
+        <p className={styles.credit} data-sky-cover="chrome">
+          {t("credit")}
+        </p>
       </div>
     </div>
   );

@@ -244,11 +244,19 @@
 /*
  * Tarjeta del punto elegido: vidrio, como el aviso. Coordenadas en mono, la
  * constelacion, si el campo ya esta guardado o hay que armarlo, y el boton.
+ *
+ * Es baja a proposito, dos renglones: va sobre los accesos y todo lo de abajo
+ * crece hacia arriba con ella, sobre el cielo que se esta mirando. Arriba, el
+ * punto con el boton de abrir y el de cerrar; abajo, la constelacion y el aviso.
  */
 .pick {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "point open close"
+    "info info info";
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
   padding: var(--glass-panel-padding);
   border: 1px solid var(--color-hairline);
   border-radius: var(--glass-panel-radius);
@@ -266,11 +274,20 @@
   }
 }
 
-.pickHead {
+.pickPoint {
+  grid-area: point;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
+  flex-direction: column;
+  gap: var(--space-xxs);
+  min-width: 0;
+}
+
+/* La constelacion y el aviso, seguidos; si no entran en un renglon, el aviso baja. */
+.pickInfo {
+  grid-area: info;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs) var(--space-md);
 }
 
 .pickTitle {
@@ -291,8 +308,11 @@
 }
 
 .pickOpen {
-  align-self: flex-start;
-  margin-top: var(--space-xs);
+  grid-area: open;
+}
+
+.pickClose {
+  grid-area: close;
 }
 
 /* Credito de la imagen del cielo: NASA pide que se la nombre como fuente. */
@@ -390,10 +410,53 @@
     align-self: stretch;
   }
 
+  /*
+   * En el celular no entra todo. Mientras hay un punto elegido, su tarjeta
+   * ocupa el lugar de los cinco objetos y de los accesos, que vuelven al
+   * cerrarla: el buscador y los botones de abajo no se mueven de la zona del
+   * pulgar. Con los accesos apilados la tarjeta mide menos que lo que
+   * reemplaza, asi que lo de abajo no crece sobre el cielo ni tapa el punto.
+   */
+  .dock[data-pick="true"] .featured,
+  .dock[data-pick="true"] .shortcuts {
+    display: none;
+  }
+
+  /* El boton de abrir baja a su propio renglon, a todo el ancho. */
+  .pick {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "point close"
+      "info info"
+      "open open";
+  }
+
   .credit {
     align-self: center;
     max-width: 100%;
     text-align: center;
+  }
+}
+
+/*
+ * Celular bajo: un telefono chico, o uno comun con las barras del navegador a
+ * la vista. Con los tres accesos apilados no queda cielo (a 360 x 640 px lo de
+ * abajo llegaba hasta la lectura del centro, sin un pixel donde tocar). Ahi van
+ * en un solo renglon que se desliza hacia el costado, igual que los destacados
+ * que tienen encima. Desde 760 px de alto, apilados, quedan mas de 130 px de
+ * cielo, y por eso el limite va ahi.
+ */
+@media (max-width: 599px) and (max-height: 759px) {
+  .shortcuts {
+    flex-wrap: nowrap;
+    margin: calc(-1 * var(--space-xs)) calc(-1 * var(--space-sm));
+    padding: var(--space-xs) var(--space-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .shortcuts .action {
+    flex: none;
   }
 }
 

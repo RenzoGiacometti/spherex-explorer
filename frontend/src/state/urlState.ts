@@ -24,6 +24,9 @@
 //   sra, sdec  punto elegido en grados ICRS (5 decimales), si no es el objeto:
 //            al abrir el link se vuelve a pedir su espectro y se abre el panel
 //   tab      pestana abierta de ese panel: lightcurve (opcional; sin ella, el espectro)
+//   const    1 con la capa de constelaciones de la esfera de entrada prendida
+//            (src/features/sphere). Es de la entrada, no del campo: se escribe
+//            con y sin campo, asi al volver del visor la capa sigue prendida
 //   embed    1 oculta la interfaz alrededor del visor
 //   lang     es o en; sin el, el idioma sale del navegador
 //
@@ -114,6 +117,8 @@ export interface UrlState {
   sdec: number | null;
   /** Pestana abierta del panel del punto elegido; sin punto, la del espectro. */
   tab: SourceTabName;
+  /** Capa de constelaciones de la esfera de entrada prendida (`const` en la URL). */
+  constellations: boolean;
   /** Oculta la interfaz alrededor del visor. */
   embed: boolean;
   /** Idioma pedido en la URL; null si se detecta por el navegador. */
@@ -137,10 +142,15 @@ export const DEFAULT_URL_STATE: UrlState = {
   sra: null,
   sdec: null,
   tab: DEFAULT_TAB,
+  constellations: false,
   embed: false,
   lang: null,
 };
 
+/**
+ * Nombres de los parametros en la URL. Casi todos se llaman como su clave del
+ * estado; la capa de constelaciones (`constellations`) se escribe `const`.
+ */
 const URL_KEYS = [
   "ra",
   "dec",
@@ -158,6 +168,7 @@ const URL_KEYS = [
   "sra",
   "sdec",
   "tab",
+  "const",
   "embed",
   "lang",
 ] as const;
@@ -283,6 +294,7 @@ export function parseUrlState(search: string, options: ParseUrlOptions = {}): Ur
     sdec: hasPoint ? roundCoordinate(sdec, POINT_DECIMALS) : null,
     // La pestana es la del panel del punto: sin punto no hay panel abierto.
     tab: sobj || hasPoint ? parseTab(params.get("tab")) : DEFAULT_TAB,
+    constellations: parseSwitch(params.get("const")),
     embed: parseSwitch(params.get("embed")),
     lang: matchLanguage(params.get("lang")),
   };
@@ -292,7 +304,8 @@ export function parseUrlState(search: string, options: ParseUrlOptions = {}): Ur
  * Escribe el estado como cadena de consulta, con "?" adelante o vacia.
  * Con un campo van siempre ra, dec, fov, band y mode; epoch, ref, stretch y
  * name solo si estan, y contrast, flags, gaia, el punto elegido (sobj, o sra
- * y sdec) y tab solo si no valen lo de partida. Sin campo solo quedan embed y lang.
+ * y sdec) y tab solo si no valen lo de partida. Sin campo solo quedan const,
+ * embed y lang, que son de la pagina y no del campo.
  */
 export function serializeUrlState(state: UrlState): string {
   const params = new URLSearchParams();
@@ -321,6 +334,7 @@ export function serializeUrlState(state: UrlState): string {
     }
     if ((isObject || hasPoint) && state.tab !== DEFAULT_TAB) params.set("tab", state.tab);
   }
+  if (state.constellations) params.set("const", "1");
   if (state.embed) params.set("embed", "1");
   if (state.lang !== null) params.set("lang", state.lang);
 
@@ -339,7 +353,8 @@ export function normalizeUrlState(state: UrlState): UrlState {
 export interface UrlUpdateOptions {
   /**
    * "replace" (por defecto) cambia la entrada actual del historial; sirve para
-   * banda, modo, epoca, referencia, estirado, contraste, capas o punto elegido.
+   * banda, modo, epoca, referencia, estirado, contraste, capas (las del visor y
+   * la de constelaciones de la entrada) o punto elegido.
    * "push" agrega una entrada; sirve para abrir otro campo.
    */
   history?: "push" | "replace";
@@ -370,6 +385,7 @@ function pickState(store: UrlState): UrlState {
     sra: store.sra,
     sdec: store.sdec,
     tab: store.tab,
+    constellations: store.constellations,
     embed: store.embed,
     lang: store.lang,
   };
