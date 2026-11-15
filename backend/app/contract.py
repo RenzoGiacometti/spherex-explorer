@@ -253,6 +253,13 @@ class Progress(ContractModel):
       (`ready`, `partial` o `empty`); una revision `building` no suma.
     - `phase` no tiene un valor para la falla: si el trabajo falla, queda en la
       fase en la que estaba y lo que manda es `status: "failed"`.
+    - `listing_attempt` y `retry_in_s` son opcionales y viajan juntos, solo
+      mientras el trabajo lista las exposiciones (`phase: "listing"`); fuera de
+      eso las dos claves no aparecen en el JSON. `listing_attempt` es el numero
+      del intento de listado en curso o, si `retry_in_s` no es `null`, del que
+      viene: 1 en el primero, 2 o mas si IRSA no respondio y se esta
+      reintentando. `retry_in_s` son los segundos que faltan para ese intento,
+      o `null` si se esta consultando ahora.
     """
 
     phase: ProgressPhase
@@ -264,6 +271,16 @@ class Progress(ContractModel):
     planes_total: int = 0
     planes_ready: int = 0
     elapsed_s: float = 0.0
+    listing_attempt: int | None = None
+    retry_in_s: float | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_listing_retry(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if data.get("listing_attempt") is None:
+            data.pop("listing_attempt", None)
+            data.pop("retry_in_s", None)
+        return data
 
 
 class PreviewInfo(ContractModel):

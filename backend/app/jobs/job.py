@@ -100,6 +100,9 @@ _SETTLED_PLANE_STATUSES: frozenset[str] = CUBE_PLANE_STATUSES | {"empty"}
 # que haya llegado ninguno, IRSA no esta entregando recortes: el trabajo falla ahi en vez de insistir con
 # los cientos que faltan, que con el servicio caido serian decenas de minutos ocupando un lugar de la cola.
 GIVE_UP_AFTER_LOST = 10
+# Pausa, en segundos, antes de cada reintento del listado cuando IRSA no responde: la primera antes del
+# segundo intento; agotada la lista se repite la ultima. El total lo acota `Settings.listing_retry_s`.
+LISTING_RETRY_WAITS_S = (10.0, 20.0, 30.0, 45.0, 60.0)
 # Detector con el que se describe la vista provisoria mientras esta pendiente: W2, la banda que se pide siempre.
 PREVIEW_DETECTOR = 6
 
@@ -262,6 +265,10 @@ class FieldJob:
             for key, rev in floor[1].items():
                 self._base_revs[key] = max(self._base_revs.get(key, 0), rev)
         self._stop_requested = False
+        # Espera entre dos intentos de listado: `stop` la corta avisando a `_wake`. `_retry_due` es la
+        # hora de `deps.clock` del proximo intento mientras dura esa espera (lo protege `lock`).
+        self._wake = threading.Condition()
+        self._retry_due: float | None = None
         # Con la vista de WISE desactivada (`Settings.preview_enabled`) no hay nada que esperar.
         self._preview_closed = self.silent or not settings.preview_enabled
         self._progress_interval = 1.0 / settings.progress_events_per_s if settings.progress_events_per_s > 0 else 0.0
@@ -302,6 +309,9 @@ class FieldJob:
             meta = self.meta.model_copy(deep=True)
             if self.in_flight:
                 meta.progress.elapsed_s = self._elapsed()
+                if self._retry_due is not None:
+                    # Lo que falta ahora para el proximo intento de listado, no lo que faltaba al anunciarlo.
+                    meta.progress.retry_in_s = round(max(0.0, self._retry_due - self.deps.clock()), 1)
         return meta
 
     def revision_floor(self) -> RevisionFloor:
@@ -342,6 +352,9 @@ class FieldJob:
         """Pide que el trabajo corte. No espera a que lo haga."""
         self._stop_requested = True
         self.inbox.put(_STOP)
+        with self._wake:
+            # Por si esta esperando para volver a listar (`_wait_to_list_again`).
+            self._wake.notify_all()
 
     def publish(self, name: EventName, payload: BaseModel) -> FieldEvent | None:
         """Publica un evento del trabajo. Hay que llamarlo con `lock` tomado."""
@@ -392,6 +405,7 @@ class FieldJob:
             self.meta.status = "listing"
             self.meta.progress.phase = "listing"
             self.meta.progress.queue_position = 0
+            self.meta.progress.listing_attempt = 1
             self._publish_progress(force=True)
         if self.silent:
             return
@@ -465,13 +479,44 @@ class FieldJob:
     # ------------------------------------------------------------------ listado
 
     def _list(self) -> ExposureList:
+        """Lista las exposiciones. Si IRSA no responde, reintenta con pausas crecientes antes de fallar.
+
+        `deps.list_exposures` ya hace sus propios intentos por coleccion (unos
+        30 s); si aun asi sale con `upstream_unavailable`, el trabajo no falla
+        ahi: espera (`LISTING_RETRY_WAITS_S`) y vuelve a listar, hasta que pasen
+        `settings.listing_retry_s` segundos desde que empezo. Sigue en la fase
+        `listing` y avisa con `progress.listing_attempt` y `progress.retry_in_s`.
+        La vista provisoria va por su hilo y sale igual mientras tanto. Un
+        `refresh` silencioso no insiste: el campo guardado se sigue sirviendo.
+        """
         request = self.request
-        try:
-            listing = self.deps.list_exposures(request.ra, request.dec, self.settings, self.list_refresh)
-        except ApiError:
-            raise
-        except Exception as exc:
-            raise upstream_unavailable(f"no se pudo listar las exposiciones: {type(exc).__name__}: {exc}") from exc
+        budget = 0.0 if self.silent else self.settings.listing_retry_s
+        started = self.deps.clock()
+        attempt = 1
+        while True:
+            try:
+                listing = self.deps.list_exposures(request.ra, request.dec, self.settings, self.list_refresh)
+                break
+            except ApiError as exc:
+                self._check_stop()
+                remaining = budget - (self.deps.clock() - started)
+                asked = exc.retry_after or 0.0
+                # Si IRSA pide esperar mas de lo que queda, no se lo vuelve a consultar antes: falla.
+                if exc.code != "upstream_unavailable" or remaining <= 0 or asked > remaining:
+                    raise
+                scheduled = LISTING_RETRY_WAITS_S[min(attempt, len(LISTING_RETRY_WAITS_S)) - 1]
+                pause = max(min(scheduled, remaining), asked)
+                logger.warning(
+                    "campo %s: el listado fallo (intento %d): %s; se reintenta en %.0f s",
+                    self.field_id,
+                    attempt,
+                    exc.message,
+                    pause,
+                )
+            except Exception as exc:
+                raise upstream_unavailable(f"no se pudo listar las exposiciones: {type(exc).__name__}: {exc}") from exc
+            attempt += 1
+            self._wait_to_list_again(attempt, pause)
         self._check_stop()
         if not listing.exposures:
             if not listing.stale:
@@ -481,6 +526,32 @@ class FieldJob:
                 f"({request.ra:.4f}, {request.dec:+.4f})"
             )
         return listing
+
+    def _wait_to_list_again(self, attempt: int, pause: float) -> None:
+        """Espera `pause` segundos antes del intento de listado numero `attempt` y lo anuncia con `progress`.
+
+        La espera no ocupa cupo de conexiones y se corta si el trabajo se
+        detiene (`stop` avisa a `_wake`). Va por `deps.wait`, como la de los
+        hilos de descarga: en los tests no se espera de verdad.
+        """
+        due = self.deps.clock() + pause
+        with self.lock:
+            self._retry_due = due
+            self.meta.progress.listing_attempt = attempt
+            self.meta.progress.retry_in_s = round(pause, 1)
+            self._publish_progress(force=True)
+        with self._wake:
+            while True:
+                if self._stop_requested:
+                    raise JobStopped
+                remaining = due - self.deps.clock()
+                if remaining <= 0:
+                    break
+                self.deps.wait(self._wake, remaining)
+        with self.lock:
+            self._retry_due = None
+            self.meta.progress.retry_in_s = None
+            self._publish_progress(force=True)
 
     def _plan(self, listing: ExposureList) -> None:
         """Arma epocas, detectores y planos, publica `listed` y deja listos los recortes a pedir."""
@@ -541,6 +612,9 @@ class FieldJob:
             progress = meta.progress
             progress.phase = "downloading"
             progress.queue_position = 0
+            # Solo valen mientras se lista: desde aca no viajan mas.
+            progress.listing_attempt = None
+            progress.retry_in_s = None
             progress.cutouts_total = len(exposures)
             progress.planes_total = len(infos)
             progress.planes_ready = self._planes_ready()

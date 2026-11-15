@@ -20,6 +20,10 @@ _GAP = r"(?:\s*,\s*|\s+)"
 
 # Dos numeros en grados: `269.4463 4.7683`, `269.4463, +4.7683`.
 _DECIMAL = re.compile(rf"^({_NUMBER}){_GAP}({_NUMBER})$")
+# Coma decimal: una coma pegada a un digito de cada lado (`269,4463`).
+_DECIMAL_COMMA = re.compile(r"(?<=\d),(?=\d)")
+# Signo menos tipografico (U+2212), que algunos teclados y paginas ponen en vez del guion.
+_MINUS_SIGN = chr(0x2212)
 
 # RA en horas y Dec en grados, con letras: `08h55m10.831s -07d14m42.53s`.
 # Para Dec se aceptan tambien los signos de grado (U+00B0), minuto (apostrofo o
@@ -49,19 +53,33 @@ def parse_coordinates(text: str) -> tuple[float, float] | None:
     - Sexagesimal, con RA en horas: `08h55m10.831s -07d14m42.53s`,
       `08:55:10.83 -07:14:42.5`, `08 55 10.83 -07 14 42.5`.
 
+    Los decimales pueden venir con coma (`269,4463 +4,7683`,
+    `08h55m10,831s -07d14m42,53s`) y el signo menos puede ser el tipografico
+    (U+2212). Una coma entre dos numeros con punto sigue siendo el separador
+    (`269.4463,4.7683`); `10,20` tambien se lee como dos valores.
+
     `ra` queda en [0, 360). Si el texto tiene forma de coordenadas pero esta
-    fuera de rango (por ejemplo `dec` mayor que 90), lanza `ApiError`
-    `invalid_request` en vez de devolver `None`, para no mandarlo a Sesame.
+    fuera de rango (`dec` mayor que 90, `ra` de 400 grados o de 25 horas), lanza
+    `ApiError` `invalid_request` en vez de devolver `None`, para no mandarlo a
+    Sesame: `ra` no se envuelve.
     """
-    cleaned = text.strip()
+    cleaned = text.strip().replace(_MINUS_SIGN, "-")
     if not cleaned:
         return None
+    found = _parse(cleaned)
+    if found is None and "," in cleaned:
+        # Coma decimal: solo si con la coma como separador no era una coordenada. Las comas
+        # entre dos digitos pasan a punto; la que separa RA de Dec, si la hay, queda.
+        found = _parse(_DECIMAL_COMMA.sub(".", cleaned))
+    return found
 
+
+def _parse(cleaned: str) -> tuple[float, float] | None:
     match = _DECIMAL.match(cleaned)
     if match:
         ra, dec = float(match.group(1)), float(match.group(2))
         _check_dec(dec)
-        return _wrap_ra(ra), dec
+        return _check_ra(ra), dec
 
     for pattern in (_LETTERS, _COLONS, _SPACES):
         match = pattern.match(cleaned)
@@ -86,7 +104,14 @@ def _check_dec(dec: float) -> None:
         raise invalid_request(f"dec={dec!r} fuera de rango: se admite de -90 a 90 grados")
 
 
+def _check_ra(ra: float) -> float:
+    """`ra` en grados decimales tiene que estar en [0, 360): fuera de eso es un error, no se envuelve."""
+    if not 0.0 <= ra < 360.0:
+        raise invalid_request(f"ra={ra!r} fuera de rango: se admite de 0 a 360 grados")
+    return ra + 0.0  # `-0.0` pasa a `0.0`
+
+
 def _wrap_ra(ra: float) -> float:
-    """Lleva `ra` a [0, 360). Un valor negativo muy chico da 360.0 por redondeo: se lleva a 0."""
+    """`ra` sexagesimal, ya con horas, minutos y segundos en rango: 360.0 por redondeo se lleva a 0."""
     wrapped = ra % 360.0
     return 0.0 if wrapped >= 360.0 else wrapped

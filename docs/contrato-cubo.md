@@ -206,6 +206,8 @@ Resuelve un nombre con Sesame, o interpreta el texto como coordenadas si lo son.
 - Redondeos: `j2000` a 6 decimales, `field_center` a 4, `moved_arcsec` a 1, `per_year_arcsec` a 2, y movimiento propio, paralaje y velocidad radial a 3. `name` va con los espacios normalizados.
 - Con los servidores de nombres colgados, responde `upstream_unavailable` como mucho en 20 s. El backend consulta Sesame en CDS y, si no responde, su espejo en CfA.
 
+Formas de coordenadas que acepta `name`: grados decimales (`269.4463 +4.7683`, con espacio o coma entre los dos valores) y sexagesimales (`17h57m47s +04d46m06s`, `17:57:47 +04:46:06`, con o sin los signos de grado y primas). Acepta la coma decimal (`269,4463 +4,7683`) y el signo menos tipográfico (U+2212). Una ascensión recta fuera de [0, 360) grados, o de 24 horas o más, responde `422 invalid_request` igual que una declinación fuera de ±90: no se envuelve. (`POST /api/field` sí sigue envolviendo `ra`.)
+
 ### 4.9 `GET /api/field/{id}/track?name=`
 
 Posición esperada de un objeto en cada época de un campo, para la mira y el rastro. Incluye movimiento propio y paralaje.
@@ -243,6 +245,15 @@ Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantal
 - Medido el 15 de noviembre de 2026 contra IRSA: 5,8 s para un campo sin nada en caché (de 2 a 7 s según el mosaico, `docs/contexto-2.md`).
 - `SPHEREX_PREVIEW_ENABLED=0` la apaga: el campo nace con `preview.status = "unavailable"`, no se emite el evento `preview` y `/preview` responde `404`.
 - Historia: la primera versión pedía la vista a hips2fits de CDS (`app/preview/hips2fits.py`, W1 o W2 según la banda, en las unidades del relevamiento). Ese servicio respondió 404 todo el 15 de noviembre de 2026 y nunca se pudo verificar; el módulo quedó en el repositorio, sin uso.
+
+### 4.11 Listado de exposiciones cuando IRSA no responde
+
+El listado por SIA2 falla seguido y por rachas largas (el 15 de noviembre de 2026 respondió `502` en 0,6 s durante más de una hora). Una consulta hace 6 intentos por colección con esperas de 2 a 10 s, es decir que un SIA2 que rechaza se agota en 30 s. Por eso el trabajo no falla ahí:
+
+- Ante `upstream_unavailable` del listado, el trabajo espera 10, 20, 30, 45 y después 60 s y vuelve a listar, hasta `SPHEREX_LISTING_RETRY_S` segundos (300 por defecto) desde que empezó a listar. La espera no ocupa cupo de conexiones y respeta `Retry-After`.
+- Mientras tanto sigue en `phase: "listing"` y los eventos `progress` traen dos campos opcionales: `listing_attempt` (entero; 1 en el primer intento, 2 o más cuando está reintentando) y `retry_in_s` (segundos hasta el próximo intento, o `null` mientras el intento está en curso). Solo aparecen en esa fase. El visor los usa para avisar que el archivo de datos está lento y que sigue intentando.
+- La vista provisoria de WISE sigue disponible durante los reintentos.
+- Agotado el plazo, sale `error` con `upstream_unavailable`, como antes. Un trabajo que reintenta ocupa uno de los lugares de `max_active_jobs` durante ese tiempo.
 
 ## 5. Documento de metadatos
 
@@ -320,7 +331,7 @@ Es el mismo objeto en `POST /api/field`, en `GET .../meta` y en los eventos `sta
 | `epochs[]` | Una entrada por pasada, con sus fechas y cantidad de exposiciones |
 | `planes[]` | Una entrada por cada combinación de época y detector, ordenadas por época y después por detector. Siempre están todas, también las vacías |
 | `flags[]` | Bits de FLAGS leídos del encabezado de los archivos: la unión de los que declaran los archivos bajados, ordenada por `bit`. `masked` dice si el pipeline descarta los píxeles con ese bit; `saturation`, si cuenta como saturación |
-| `progress` | Avance. `phase` es `queued`, `listing`, `downloading`, `finishing` o `done`. Los nueve campos van siempre |
+| `progress` | Avance. `phase` es `queued`, `listing`, `downloading`, `finishing` o `done`. Los nueve campos van siempre En `listing` puede traer además `listing_attempt` y `retry_in_s` (sección 4.11) |
 | `progress.planes_total`, `planes_ready` | Cuentan todos los planos, también los `empty`. Un plano cuenta como listo cuando tiene su revisión definitiva o está vacío |
 | `progress.cutouts_*` | `cutouts_done` cuenta los recortes bajados o leídos de la caché, sin los fallidos; `cutouts_cached`, cuántos de esos salieron de la caché. El avance de la barra es `(cutouts_done + cutouts_failed) / cutouts_total` |
 | `preview` | Vista provisoria de WISE (sección 4.10). `status` es `pending`, `ready` o `unavailable`. `display` trae su propia escala, calculada como la de un detector, y es `null` hasta que la vista está lista. Está presente desde el primer `state` |
@@ -504,7 +515,7 @@ El proceso no es el cuello de botella: leer y reproyectar una exposición lleva 
 - **Completar un campo incompleto.** `POST /api/field` con `refresh: true` sobre un campo `partial` que vive en la caché responde `202` y el campo se vuelve a armar como un trabajo visible con el mismo `id`: `queued`, `listing`, `downloading` y eventos como en un campo nuevo. Usa la lista de exposiciones guardada si sigue vigente y los recortes que ya están en la caché, así que a IRSA solo se le piden los que faltaron. Las revisiones de los planos siguen numerando desde las anteriores y el campo termina con su `rev` anterior más 1; mientras se arma, `rev` vale 0 y los planos responden `409` hasta que se republican. El visor ofrece el botón "Completar el campo" y conserva lo que ya se ve mientras tanto. Sobre un campo `ready` sigue valiendo el refresh silencioso (`200`); sobre uno precalculado, o con `SPHEREX_PRECOMPUTED_ONLY=1`, responde `200` sin armar nada. `precompute.py --refresh` no cambia.
 - **Compresión.** Toda respuesta de 1 kB o más sale con gzip si el cliente lo acepta (JSON, planos, cubo y el frontend compilado), con `Vary: Accept-Encoding` y sin cambiar `Cache-Control`; el cubo comprimido no lleva `Content-Length`. El flujo de eventos nunca se comprime y `/aux` sigue negociando por su cuenta. En un plano la ganancia es chica (152 100 bytes pasan a unos 140 500).
 - **Descargas en el despliegue público:** 4 en paralelo (`SPHEREX_MAX_CUTOUT_DOWNLOADS=4`); el tope sigue en 10. El 15 de noviembre de 2026 IRSA respondió `503 Server busy` a buena parte de los pedidos con 10 en paralelo y bien con 4.
-- **Campo cercano** (`SPHEREX_NEARBY_FIELD_ARCSEC`, 60 en el despliegue público y 0 en desarrollo): si el centro pedido está a menos de esa distancia del de un campo ya armado del mismo escalón, `POST /api/field` responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido. No vale con `refresh`.
+- **Campo cercano** (`SPHEREX_NEARBY_FIELD_ARCSEC`, 300 en el despliegue público y 0 en desarrollo): si el centro pedido cae dentro de la huella de un campo ya armado del mismo escalón (la diferencia en ascensión recta, por cos(dec), y la diferencia en declinación son las dos menores o iguales a esa tolerancia; 300″ es la mitad del lado de un campo de 10′), `POST /api/field` responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido. Si caen varios, gana el más cercano. No vale con `refresh`.
 - **Modo solo precalculados** (`SPHEREX_PRECOMPUTED_ONLY=1`): el backend no crea trabajos ni toca IRSA. `POST /api/field` de un campo que no está armado responde `404 not_found`, salvo que su centro esté a menos de 1 minuto de arco del de un campo armado del mismo escalón: en ese caso responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido.
 - Tiempos medidos al precalcular contra IRSA el 15 de noviembre de 2026, con 10 descargas en paralelo: Barnard, 358 exposiciones en 148 s; Epsilon Indi B, 458 en 157 s; WISE 0855, 258 en 138 s (4 recortes fallidos, campo `partial`).
 - Un campo en caché no se actualiza solo. `refresh: true` vuelve a listar y, si aparecieron exposiciones, reconstruye los planos afectados y sube `rev`. Mientras tanto se sigue sirviendo la revisión anterior.

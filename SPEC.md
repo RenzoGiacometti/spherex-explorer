@@ -182,7 +182,7 @@ Cada etapa termina en algo que se puede mostrar.
 
 | Riesgo | Mitigación |
 |---|---|
-| IRSA lento o con fallos durante la demo (confirmado: 502 en SIA2 y TAP, 503 en recortes, TAP sin responder) | Caché y precálculo; la demo corre sobre objetos en caché. Un campo nuevo tarda de 2 a 3 minutos: barra de progreso obligatoria |
+| IRSA lento o con fallos durante la demo (confirmado: 502 en SIA2 y TAP, 503 en recortes, TAP sin responder) | Caché y precálculo; la demo corre sobre objetos en caché. Un campo nuevo tarda de 2 a 3 minutos: barra de progreso obligatoria. Si SIA2 rechaza el listado, el trabajo reintenta con pausas crecientes durante 5 minutos antes de fallar, y el visor avisa que el archivo de datos está lento (contrato, sección 4.11). El 15 de noviembre de 2026 a las 17:55 SIA2 respondía `502` en 0,6 s a las dos colecciones |
 | WISE 0855 mezclado con una estrella de fondo (a 4" en mayo de 2026, acercándose) | Se detecta en D6, donde la estrella aporta poco; marcar la posición esperada y mostrar la diferencia entre épocas |
 | Estrellas brillantes saturadas (Barnard: hueco en el centro) | El núcleo se dibuja en blanco máximo con contorno y aviso, y se enmascara en diferencia y rojo/cian; las posiciones se miden ajustando las alas |
 | R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1, que tampoco está libre de saturación: 37 de 56 exposiciones, y el criterio se cumple con los 18 puntos válidos. La fotometría sobre las alas queda como investigación |

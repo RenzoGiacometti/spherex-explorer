@@ -967,7 +967,7 @@ def test_cors_allows_the_dev_frontend(make_client: Factory, sample_fields: Sampl
 
 def test_resolve_coordinates(make_client: Factory) -> None:
     client = make_client()
-    for text in ["269.4463 4.7683", "269.4463, +4.7683", " 269.4463,4.7683 ", "629.4463 4.7683"]:
+    for text in ["269.4463 4.7683", "269.4463, +4.7683", " 269.4463,4.7683 ", "269,4463 +4,7683"]:
         response = client.get("/api/resolve", params={"name": text})
         assert response.status_code == 200
         resolved = ResolveResponse.model_validate(response.json())
@@ -984,8 +984,9 @@ def test_resolve_coordinates(make_client: Factory) -> None:
     south = ResolveResponse.model_validate(client.get("/api/resolve", params={"name": "133.7598 -7.2422"}).json())
     assert south.field_center.dec == -7.2422
 
-    out_of_range = client.get("/api/resolve", params={"name": "10 95"})
-    assert (out_of_range.status_code, error_code(out_of_range)) == (422, "invalid_request")
+    for text in ["10 95", "629.4463 4.7683"]:  # `dec` o `ra` fuera de rango: `ra` no se envuelve
+        out_of_range = client.get("/api/resolve", params={"name": text})
+        assert (out_of_range.status_code, error_code(out_of_range)) == (422, "invalid_request")
     for params in [{"name": "   "}, {}]:
         response = client.get("/api/resolve", params=params)
         assert (response.status_code, error_code(response)) == (422, "invalid_request")

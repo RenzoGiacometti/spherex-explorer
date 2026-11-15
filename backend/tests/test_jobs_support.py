@@ -160,6 +160,7 @@ class FakeIrsa:
         self.stale = stale
         self.listed_at = listed_at
         self.list_error: BaseException | None = None
+        self.list_failures: list[BaseException] = []  # lo que lanzan los proximos listados, uno cada uno
         self.list_gate: threading.Event | None = None  # si esta, la lista espera a que se lo abra
         self.before_list: Callable[[float, float], None] | None = None
         self.list_calls: list[bool] = []  # el `refresh` de cada llamada
@@ -197,6 +198,10 @@ class FakeIrsa:
             assert self.list_gate.wait(WAIT_S), "nadie abrio la lista de exposiciones"
         if self.list_error is not None:
             raise self.list_error
+        with self._lock:
+            failure = self.list_failures.pop(0) if self.list_failures else None
+        if failure is not None:
+            raise failure
         return ExposureList(
             exposures=list(self.exposures), listed_at=self.listed_at or utc_timestamp(), stale=self.stale
         )

@@ -248,6 +248,9 @@ def describe_progress(meta: FieldMeta) -> str:
     if progress.phase == "queued":
         return "en cola"
     if progress.phase == "listing":
+        if (progress.listing_attempt or 1) > 1:
+            # IRSA no respondio al listado: el trabajo reintenta solo (`Settings.listing_retry_s`).
+            return f"listando exposiciones... IRSA no responde, intento {progress.listing_attempt}"
         return "listando exposiciones..."
     return (
         f"recortes {progress.cutouts_done + progress.cutouts_failed}/{progress.cutouts_total} "

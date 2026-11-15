@@ -46,13 +46,15 @@ RUN mkdir -p /app/cache && chown -R spherex:spherex /app/cache && chmod -R u+rwX
 # sirve lo precalculado y nunca toca IRSA.
 # 4 descargas en paralelo contra IRSA: con 10 responde `503 Server busy` a buena parte de los
 # pedidos; con 4 responde bien. /docs, /redoc y /openapi.json van apagados en la version publica.
+# SPHEREX_NEARBY_FIELD_ARCSEC=300: un pedido que cae dentro de la huella de un campo ya armado
+# (10 minutos de arco de lado, 300 segundos de arco a cada lado del centro) abre ese campo.
 ENV SPHEREX_STATIC_DIR=/app/static \
     SPHEREX_CACHE_DIR=/app/cache \
     SPHEREX_MAX_ACTIVE_JOBS=2 \
     SPHEREX_MAX_QUEUED_JOBS=10 \
     SPHEREX_MAX_CUTOUT_DOWNLOADS=4 \
     SPHEREX_DOCS_ENABLED=0 \
-    SPHEREX_NEARBY_FIELD_ARCSEC=60 \
+    SPHEREX_NEARBY_FIELD_ARCSEC=300 \
     SPHEREX_CUTOUT_CACHE_MAX_GB=2 \
     PYTHONUNBUFFERED=1 \
     PORT=7860

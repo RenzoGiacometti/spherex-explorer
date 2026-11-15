@@ -166,7 +166,7 @@ Medido el 2026-11-15 contra IRSA: Barnard (358 exposiciones) en 148 s, Epsilon I
 
 El `Dockerfile` de la raíz arma una imagen de un solo proceso: la API, el frontend compilado (`SPHEREX_STATIC_DIR`) y los campos precalculados, que salen sin tocar IRSA. Un campo que no está precalculado se arma contra IRSA igual que en desarrollo, con 2 trabajos activos y hasta 10 en cola (`SPHEREX_MAX_ACTIVE_JOBS`, `SPHEREX_MAX_QUEUED_JOBS`); la interfaz avisa que tarda unos minutos. Lo que se arma queda en la caché del contenedor y se pierde al redesplegar.
 
-- `SPHEREX_NEARBY_FIELD_ARCSEC=60`: un pedido a menos de 1 minuto de arco del centro de un campo ya armado abre ese campo en vez de armar otro casi igual.
+- `SPHEREX_NEARBY_FIELD_ARCSEC=300`: un pedido que cae dentro de la huella de un campo ya armado (10′ de lado) abre ese campo en vez de armar otro casi igual.
 - `SPHEREX_PRECOMPUTED_ONLY=1` vuelve al modo que solo sirve lo ya armado: cualquier otro campo responde `404 not_found` y nunca se toca IRSA.
 - El frontend se compila con `VITE_WIDE_FIELD=0`: no ofrece el campo de 30′, que no se probó con datos reales.
 - 4 descargas en paralelo contra IRSA (`SPHEREX_MAX_CUTOUT_DOWNLOADS=4`), `/docs` apagado (`SPHEREX_DOCS_ENABLED=0`) y el proceso corre como el usuario `spherex` (uid 1000), con `/app/cache` como única carpeta escribible.
@@ -205,7 +205,8 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 | `SPHEREX_HIPS2FITS_URL`, `SPHEREX_PREVIEW_HIPS_W1`, `SPHEREX_PREVIEW_HIPS_W2` | hips2fits de CDS, `CDS/P/allWISE/W1` y `W2` | Servicio e imágenes de la vista provisoria |
 | `SPHEREX_PREVIEW_ENABLED` | 0 | Con 1, pide la vista provisoria de WISE. Apagada: el campo sale con `preview.status = "unavailable"` |
 | `SPHEREX_PRECOMPUTED_ONLY` | 0 | Con 1, solo sirve campos ya armados y no toca IRSA |
-| `SPHEREX_NEARBY_FIELD_ARCSEC` | 0 | Distancia al centro de un campo ya armado por debajo de la cual un pedido abre ese campo; 0 lo desactiva |
+| `SPHEREX_NEARBY_FIELD_ARCSEC` | 0 | Mitad del lado de la huella, alrededor del centro de un campo ya armado, dentro de la cual un pedido abre ese campo; 0 lo desactiva |
+| `SPHEREX_LISTING_RETRY_S` | 300 | Tiempo durante el que un trabajo reintenta el listado de exposiciones cuando SIA2 no responde, antes de fallar |
 | `SPHEREX_STATIC_DIR` | vacío | Carpeta del frontend compilado, servida en `/` |
 
 ## Datos en disco

@@ -6,6 +6,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import itertools
+import math
 import threading
 from collections.abc import Iterator, Mapping
 from pathlib import Path
@@ -805,6 +806,62 @@ def test_irsa_down_without_a_saved_list_fails_and_the_next_request_retries(build
     later = harness.bus.of(request.field_id)[len(events) :]
     assert [event.id for event in later] == list(range(1, len(later) + 1))  # un trabajo nuevo numera desde 1
     assert later[0].event == "state" and later[-1].event == "done"
+
+
+def test_listing_is_retried_while_irsa_is_down(build: HarnessFactory) -> None:
+    harness = build({(1, 3): 2})
+    down = upstream_unavailable("SIA2 spherex_dr1: HTTP 502 tras 6 intentos; no hay una lista guardada")
+    harness.irsa.list_failures = [down, down]
+    request = harness.request()
+    meta = harness.run(request)
+    assert meta.status == "ready" and len(harness.irsa.list_calls) == 3
+    events = harness.bus.of(request.field_id)
+    validate_events(events)
+    names = [event.event for event in events]
+    assert "error" not in names and names[-1] == "done"
+    # La vista provisoria no se descarta por los reintentos.
+    assert names.index("preview") < names.index("listed") and meta.preview.status == "ready"
+    # Sigue en `listing`: el numero de intento y lo que falta para el proximo, con pausas crecientes.
+    progress = [event.data for event in events if event.event == "progress"]
+    listing = [item for item in progress if item["phase"] == "listing"]
+    assert [(item["listing_attempt"], item["retry_in_s"]) for item in listing] == [
+        (1, None), (2, 10.0), (2, None), (3, 20.0), (3, None),
+    ]  # fmt: skip
+    # Fuera del listado esas dos claves no viajan, ni quedan en el documento guardado.
+    later = [item for item in progress if item["phase"] != "listing"]
+    assert later and all("listing_attempt" not in item and "retry_in_s" not in item for item in later)
+    assert set(meta.progress.model_dump(mode="json")) == set(later[-1])
+
+
+@pytest.mark.parametrize(("budget_s", "calls"), [(0.0, 1), (25.0, 3), (300.0, 9)])
+def test_listing_gives_up_when_the_retry_time_runs_out(build: HarnessFactory, budget_s: float, calls: int) -> None:
+    # Pausas de 10, 20, 30, 45, 60, 60 y 60 s, recortadas a lo que queda del tiempo de reintento.
+    harness = build({(1, 3): 2}, listing_retry_s=budget_s)
+    harness.irsa.list_error = upstream_unavailable("SIA2 caido (simulado)")
+    request = harness.request()
+    meta = harness.run(request)
+    assert (meta.status, meta.progress.phase) == ("failed", "listing")
+    assert len(harness.irsa.list_calls) == calls
+    assert meta.progress.listing_attempt == calls and meta.progress.retry_in_s is None
+    error = harness.bus.last(request.field_id, "error").data["error"]
+    assert (error["code"], error["message"]) == ("upstream_unavailable", "SIA2 caido (simulado)")
+
+
+def test_a_request_inside_the_footprint_of_a_stored_field_opens_that_field(build: HarnessFactory) -> None:
+    harness = build({(1, 3): 2}, nearby_field_arcsec=300.0)
+    stored = harness.run(harness.request(10.0, 20.0))
+    assert stored.status == "ready"
+    stretch = 1.0 / math.cos(math.radians(20.0))  # grados de `ra` por grado de cielo a esa declinacion
+    # Hasta 300" en cada eje. Las dos primeras estan en una esquina: 288" por eje, 407" en diagonal.
+    inside = ((10.0 + 0.08 * stretch, 20.08), (10.0 - 0.08 * stretch, 19.92), (10.0, 20.0832), (10.0003, 20.0))
+    for ra, dec in inside:
+        assert harness.manager.submit(harness.request(ra, dec)).id == stored.id, (ra, dec)
+    assert len(harness.irsa.list_calls) == 1
+    # Con un solo eje a 324" ya es otro campo.
+    for ra, dec in ((10.0 + 0.09 * stretch, 20.0), (10.0, 19.91)):
+        other = harness.manager.submit(harness.request(ra, dec))
+        assert other.id != stored.id and other.status == "queued", (ra, dec)
+        assert harness.manager.wait_idle(20.0)
 
 
 def test_an_unexpected_error_listing_is_reported_as_unavailable(build: HarnessFactory) -> None:

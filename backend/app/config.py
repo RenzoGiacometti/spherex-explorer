@@ -75,6 +75,12 @@ class Settings:
     # y espera base entre ellos, que crece con cada intento (2, 4, 6, 8 y 10 s: 30 s en total).
     sia_attempts: int = 6
     sia_retry_wait_s: float = 2.0
+    # Si aun asi el listado de un campo nuevo falla con `upstream_unavailable`, el trabajo lo
+    # reintenta con pausas crecientes (10, 20, 30, 45 y despues 60 s) hasta pasar estos segundos
+    # desde que empezo a listar; recien entonces falla (SIA2 estuvo caido mas de una hora el
+    # 2026-11-15). Mientras tanto ocupa su lugar de `max_active_jobs`, no cupo de conexiones.
+    # 0 o menos: falla al primer intento.
+    listing_retry_s: float = 300.0
     # Espera que se informa cuando un 503 o un 429 llega sin `Retry-After` legible (IRSA manda 5).
     irsa_retry_after_default_s: float = 5.0
     # Maximo de `IrsaBusy.retry_after`, pida lo que pida IRSA: un `Retry-After` de horas no
@@ -87,10 +93,12 @@ class Settings:
     # `data/fields`): pedir cualquier otro responde 404 `not_found` y nunca se toca IRSA.
     # Es el modo del despliegue publico.
     precomputed_only: bool = False
-    # Un pedido cuyo centro esta a menos de estos segundos de arco del de un campo ya armado
-    # del mismo escalon abre ese campo en vez de armar otro casi igual (coordenadas tipeadas
-    # a mano, con menos decimales): ahorra unas 350 descargas a IRSA. 0 lo desactiva. En modo
-    # `precomputed_only` vale al menos 60.
+    # Un pedido cuyo centro cae dentro de un cuadrado de este semilado, en segundos de arco,
+    # alrededor del centro de un campo ya armado del mismo escalon abre ese campo en vez de armar
+    # otro: la diferencia en ascension recta (por cos(dec)) y la diferencia en declinacion tienen
+    # que ser las dos menores o iguales. Con 300 el cuadrado es la huella del campo base (10
+    # minutos de arco de lado): el punto pedido ya esta en la imagen guardada. Ahorra unas 350
+    # descargas a IRSA. 0 lo desactiva. En modo `precomputed_only` vale al menos 60.
     nearby_field_arcsec: float = 0.0
     # Carpeta con el frontend compilado (`frontend/dist`). Si se indica, el backend lo sirve
     # en `/` desde el mismo origen que la API; vacio, solo responde `/api`.

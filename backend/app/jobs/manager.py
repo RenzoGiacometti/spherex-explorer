@@ -288,8 +288,9 @@ class JobManager:
                 if not completing:
                     self._start_refresh(request, stored)
                     return stored
-            # Un centro casi igual al de un campo armado (coordenadas tipeadas a mano, con menos
-            # decimales) abre ese campo en vez de armar otro o de responder que no existe.
+            # Un centro que cae dentro de la huella de un campo armado (o casi igual al suyo:
+            # coordenadas tipeadas a mano, con menos decimales) abre ese campo en vez de armar otro
+            # o de responder que no existe.
             tolerance = self._settings.nearby_field_arcsec
             if self._settings.precomputed_only:
                 tolerance = max(tolerance, NEARBY_FIELD_ARCSEC)
@@ -755,15 +756,25 @@ class JobManager:
     # ------------------------------------------------------------------ almacen
 
     def _nearby_stored(self, request: NormalizedRequest, tolerance_arcsec: float) -> FieldMeta | None:
-        """Campo terminado del mismo escalon con el centro a menos de `tolerance_arcsec` del pedido."""
+        """Campo terminado del mismo escalon en cuya huella cae el centro del pedido; si hay varios, el mas cercano.
+
+        La huella es un cuadrado de semilado `tolerance_arcsec` alrededor del
+        centro del campo guardado: la diferencia en ascension recta (por
+        cos(dec)) y la diferencia en declinacion tienen que ser las dos menores
+        o iguales a la tolerancia. No es una distancia circular: un pedido en
+        una esquina de la imagen guardada tambien la abre.
+        """
         best: tuple[float, FieldMeta] | None = None
         for field_id in self._store.list_ids():
             meta = self._stored(field_id)
             if meta is None or abs(meta.request.fov - request.fov) > 1e-3:
                 continue
-            d_ra = ((request.ra - meta.request.ra + 180.0) % 360.0 - 180.0) * math.cos(math.radians(request.dec))
-            separation = math.hypot(d_ra, request.dec - meta.request.dec) * 3600.0
-            if separation <= tolerance_arcsec and (best is None or separation < best[0]):
+            d_ra = ((request.ra - meta.request.ra + 180.0) % 360.0 - 180.0) * math.cos(math.radians(meta.request.dec))
+            d_dec = request.dec - meta.request.dec
+            if max(abs(d_ra), abs(d_dec)) * 3600.0 > tolerance_arcsec:
+                continue
+            separation = math.hypot(d_ra, d_dec)
+            if best is None or separation < best[0]:
                 best = (separation, meta)
         return best[1] if best is not None else None
 

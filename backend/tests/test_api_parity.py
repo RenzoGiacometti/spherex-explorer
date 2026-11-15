@@ -255,9 +255,10 @@ def test_resolve(servers: tuple[Pair, Settings]) -> None:
         resolved = pair.get("/api/resolve", params={"name": query})
         assert resolved.json()["name"] == main_name and resolved.json()["query"] == query
         assert pair.get("/api/resolve", params={"name": main_name}).json()["query"] == main_name
-    for text in ("269.4463 4.7683", "08h55m10.831s -07d14m42.53s", "  08:55:10.83   -07:14:42.5 ", "629.4463, 4.7683"):
+    for text in ("269.4463 4.7683", "08h55m10.831s -07d14m42.53s", "  08:55:10.83   -07:14:42.5 ", "269,4463 +4,7683"):
         assert pair.get("/api/resolve", params={"name": text}).json()["source"] == "coordinates"
-    for params in ({"name": ""}, {"name": "10 95"}, {"name": "25:00:00 +10:00:00"}, {}):
+    # Una `ra` fuera de rango es un error, como la `dec`: no se envuelve.
+    for params in ({"name": ""}, {"name": "10 95"}, {"name": "25:00:00 +10:00:00"}, {"name": "629.4463, 4.7683"}, {}):
         assert pair.get("/api/resolve", params=params).status_code == 422, params
 
 
