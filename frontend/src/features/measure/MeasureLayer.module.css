@@ -1,0 +1,51 @@
+/*
+ * Dibujos del medidor sobre la imagen (DESIGN.md, nivel 1: "anotacion directa
+ * sobre la imagen, sin fondo"). Igual que las demas anotaciones del visor,
+ * cada linea clara va montada sobre un trazo de vacio de 3 px, asi se lee
+ * sobre cielo oscuro y sobre el blanco de una estrella saturada. Todo en
+ * blanco: el acento es de la mira del objeto buscado.
+ */
+.layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+}
+
+/* Trazo de vacio que va debajo de cada linea. */
+.halo {
+  fill: none;
+  stroke: var(--color-void);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* La linea clara de 1 px: marcas y trayectoria medida. */
+.line {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Lo que no se midio sino que se predice: el tramo a cinco anios y su circulo de error. */
+.dashed {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1px;
+  stroke-dasharray: 4 3;
+}
+
+/* Rotulo de la prediccion: dato en mono, con borde de vacio. */
+.label {
+  fill: var(--color-text);
+  stroke: var(--color-void);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}

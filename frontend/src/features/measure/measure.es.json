@@ -1,0 +1,78 @@
+{
+  "panel": {
+    "title": "Medir movimiento",
+    "count": "{{marked}} / {{total}}",
+    "toggle": "Marcar con clic",
+    "hint": "Un clic sobre el objeto en cada época. La marca se ajusta sola al centro de la fuente.",
+    "current": "En pantalla",
+    "currentMarked": "{{date}} · marcada",
+    "currentUnmarked": "{{date}} · sin marcar",
+    "currentNone": "sin imagen",
+    "markCenter": "Marcar en el centro de la vista",
+    "clear": "Borrar marcas",
+    "measuring": "Fuente saturada: midiendo con la capa de cobertura…",
+    "needTwo": "Hace falta marcar el objeto en otra época para medir cuánto se movió.",
+    "sameDate": "Las marcas son de la misma fecha: hace falta otra época."
+  },
+  "marks": {
+    "title": "Marcas",
+    "label": "{{date}} · {{band}}",
+    "centroid": "±{{sigma}} · centroide",
+    "wings": "±{{sigma}} · alas",
+    "wingsPending": "±{{sigma}} · alas, provisoria"
+  },
+  "result": {
+    "title": "Resultado",
+    "displacement": "Desplazamiento",
+    "interval": "Intervalo",
+    "years": "{{value}} años",
+    "motion": "Movimiento propio",
+    "perYear": "{{value}} ± {{sigma}} ″/año",
+    "components": "Este, norte",
+    "componentsValue": "{{east}}, {{north}} ″/año",
+    "angle": "Ángulo de posición",
+    "predictionPosition": "Posición el {{date}}",
+    "predictionError": "Error de esa posición",
+    "withError": "{{value}} ± {{sigma}}"
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "motion": "Según {{name}}",
+    "motionValue": "{{value}} ″/año",
+    "difference": "Diferencia",
+    "differenceValue": "{{value}} ″/año · {{sigmas}} σ",
+    "agrees": "Coincide con el catálogo dentro del error de la medición.",
+    "differs": "Difiere del catálogo más de lo que explica el error de la medición.",
+    "mismatch": "Lo marcado está a {{offset}} de donde el catálogo ubica a {{name}}: es otro objeto.",
+    "note": "El valor de catálogo sale de las posiciones esperadas en las mismas épocas, con la misma cuenta."
+  },
+  "notice": {
+    "wings": "Fuente saturada: el centro sale de ajustar las alas, no del núcleo.",
+    "coverage": "Falta la capa de cobertura de alguna marca: su posición es provisoria.",
+    "season": "Las marcas son de estaciones opuestas y con dos no se puede separar la paralaje. Hace falta una tercera época.",
+    "seasonWings": "Las marcas son de estaciones opuestas: con dos no se puede separar la paralaje ni el corrimiento de las alas saturadas, y el error lo refleja. Hace falta una tercera época.",
+    "scatter": "Las marcas no caen sobre una trayectoria: el error se agrandó {{factor}} veces. Conviene revisar que sea el mismo objeto en todas.",
+    "seasonal": "Con tres épocas o más se descuenta el vaivén de seis meses (paralaje y asimetría de la imagen)."
+  },
+  "failure": {
+    "outside": "Ese punto está fuera de la imagen.",
+    "no-data": "Ahí no hay datos suficientes para medir.",
+    "no-source": "Ahí no hay una fuente que se distinga del ruido. Conviene acercar la imagen y hacer clic sobre el objeto.",
+    "no-fit": "La fuente está saturada y las alas no alcanzaron para ubicarla.",
+    "no-image": "La época que se ve no tiene imagen en esta banda."
+  },
+  "layer": {
+    "prediction": "+{{years}} años",
+    "summary": "Medición de movimiento propio",
+    "summaryMarks": "Épocas marcadas: {{n}}.",
+    "summaryMotion": "Movimiento propio: {{value}} ± {{sigma}} segundos de arco por año.",
+    "summaryPrediction": "La línea punteada llega a la posición predicha {{years}} años después."
+  },
+  "dev": {
+    "title": "Medidor de movimiento propio",
+    "empty": "Esta página necesita un campo en la URL. Objetos de prueba:",
+    "links": "Objetos de prueba",
+    "viewerLabel": "Imagen del campo. Con la marca activada, un clic mide la posición del objeto.",
+    "auto": "Marcar las posiciones de catálogo"
+  }
+}

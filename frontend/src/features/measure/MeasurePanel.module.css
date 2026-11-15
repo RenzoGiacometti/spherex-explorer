@@ -1,0 +1,65 @@
+/* Piezas del panel del medidor que no estan en las primitivas del sistema de diseno. */
+
+/* Renglon de apoyo: que hace el control, o de donde sale un valor. */
+.hint {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+/* Lo que dice la comparacion con el catalogo, en una frase. */
+.verdict {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Los botones ocupan el ancho del panel: el texto en espanol es largo. */
+.action {
+  width: 100%;
+}
+
+/* Un bloque del panel (marcas, resultado, catalogo) con su encabezado. */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-divider);
+}
+
+.heading {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* El movimiento propio es el dato del panel: va con mas peso, sin cambiar de color. */
+.strong {
+  font-weight: 500;
+}
+
+/* Ascension recta y declinacion, una debajo de la otra, alineadas a la derecha. */
+.position {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-divider);
+}
