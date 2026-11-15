@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "key": "23.4621_+30.6602_0.1667",
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      23.4621,
+      30.6602
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "layers": [
+    {
+      "key": "dss1",
+      "survey": "DSS",
+      "generation": "DSS1",
+      "band": "R",
+      "wave_um": 0.65,
+      "file": "dss1.f32",
+      "mjd": 33271.0,
+      "date": "1949-12-21",
+      "year": 1949.97,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.7003,
+      "display": {
+        "vmin": -3462.67,
+        "vmax": 17313.4,
+        "median": 0.0,
+        "sigma": 1731.34
+      },
+      "valid_fraction": 1.0,
+      "plate": "E30",
+      "plate_survey": "POSSI-E",
+      "telescope": "Palomar Schmidt",
+      "emulsion": "103aE",
+      "filter": "plexi",
+      "exposure_min": 45.0,
+      "copyright": "STScI/AURA",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=poss1_red&r=23.462100&d=30.660200&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": {
+        "ra": 23.46206,
+        "dec": 30.660166,
+        "x": 97.04,
+        "y": 96.96,
+        "in_field": true
+      }
+    },
+    {
+      "key": "dss2_red",
+      "survey": "DSS",
+      "generation": "DSS2",
+      "band": "R",
+      "wave_um": 0.65,
+      "file": "dss2_red.f32",
+      "mjd": 48534.0,
+      "date": "1991-10-05",
+      "year": 1991.758,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.008,
+      "display": {
+        "vmin": -4521.79,
+        "vmax": 22608.9,
+        "median": 0.0,
+        "sigma": 2260.89
+      },
+      "valid_fraction": 1.0,
+      "plate": "SF04267",
+      "plate_survey": "POSSII-F",
+      "telescope": "Oschin Schmidt - D",
+      "emulsion": "IIIaF",
+      "filter": "RG610",
+      "exposure_min": 75.0,
+      "copyright": "Caltech/Palomar",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=23.462100&d=30.660200&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": {
+        "ra": 23.462068,
+        "dec": 30.660174,
+        "x": 97.03,
+        "y": 96.97,
+        "in_field": true
+      }
+    }
+  ],
+  "generated_at": "2026-11-15T23:14:09Z"
+}

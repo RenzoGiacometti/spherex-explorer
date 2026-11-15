@@ -148,5 +148,15 @@
     "height_deg": 0.166563,
     "band": 5,
     "epoch": 3
+  },
+  "m-33": {
+    "file": "m-33.png",
+    "field": "a0e785c244718cc0",
+    "ra": 23.4621,
+    "dec": 30.6602,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 2,
+    "epoch": 2
   }
 }

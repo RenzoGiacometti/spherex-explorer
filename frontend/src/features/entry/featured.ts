@@ -139,6 +139,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - Wolf 359: banda 6, la unica con exposiciones validas ademas de una de la 1.
  * - M 82: banda 1, la unica donde el nucleo no satura.
  * - M 31: banda 5 (senal sobre ruido de 98); el nucleo satura en las bandas 1 a 4.
+ * - M 33: banda 2 (senal sobre ruido de 93, un 13 % mas que la 3).
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -242,6 +243,15 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     dec: 41.2687,
     band: 5,
     aliases: ["Messier 31", "Andromeda Galaxy", "Galaxia de Andromeda"],
+  },
+  {
+    id: "m-33",
+    label: "M 33",
+    name: "M 33",
+    ra: 23.4621,
+    dec: 30.6602,
+    band: 2,
+    aliases: ["Messier 33", "Triangulum Galaxy", "Galaxia del Triangulo"],
   },
 ];
 

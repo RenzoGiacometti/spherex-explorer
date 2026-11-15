@@ -134,6 +134,7 @@ describe("savedFieldByName", () => {
     "m-42": ["M42", "M 42", "Orion Nebula", "Nebulosa de Orion", "Nebulosa de Orión"],
     "m-1": ["M1", "M 1", "Crab Nebula", "Nebulosa del Cangrejo"],
     "m-31": ["M31", "M 31", "Messier 31", "Andromeda Galaxy", "Galaxia de Andrómeda"],
+    "m-33": ["M33", "M 33", "Messier 33", "Triangulum Galaxy", "Galaxia del Triángulo"],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {

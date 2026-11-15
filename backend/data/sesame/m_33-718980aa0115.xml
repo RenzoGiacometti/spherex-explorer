@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>M 33</name>
+  <!-- Q215216 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 9ms [9] -->
+    <oid>1522778</oid>
+    <oname>M 33</oname>
+    <otype>GiG</otype>
+    <jpos>01:33:50.89 +30:39:36.6</jpos>
+    <jradeg>23.46206906218</jradeg>
+    <jdedeg>30.66017511198</jdedeg>
+    <refPos>2020yCat.1350....0G</refPos>
+    <errRAmas>0.2833</errRAmas><errDEmas>0.2380</errDEmas>
+    <pm>
+      <v>1.088</v><e>0.430</e><q>A</q><r>2020yCat.1350....0G</r>
+      <pa>41</pa>
+      <pmRA>0.707</pmRA><epmRA>0.336</epmRA>
+      <pmDE>0.827</pmDE><epmDE>0.269</epmDE>
+    </pm>
+    <Vel><v>-179.2</v><e>1.7</e><q>C</q><r>2012AJ....144....4M</r></Vel>
+    <MType>SA(s)cd</MType>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,23:00:29z)==== -->
