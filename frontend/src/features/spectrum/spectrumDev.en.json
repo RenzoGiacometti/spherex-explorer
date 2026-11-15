@@ -1,0 +1,15 @@
+{
+  "title": "Spectrum panel",
+  "intro": "Stage 2 test page. Shows the panel with the precomputed spectra of the five test objects, without the viewer.",
+  "object": "Object",
+  "live": "Ask the backend (/api/spectrum)",
+  "source": {
+    "fixture": "Precomputed data stored in the repository.",
+    "live": "Response from the backend right now."
+  },
+  "loading": "Loading the spectrum",
+  "error": "The spectrum could not be loaded: {{reason}}",
+  "status": "Document status",
+  "exposures": "Exposures measured",
+  "points": "Valid points"
+}
