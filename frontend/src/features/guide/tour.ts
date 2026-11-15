@@ -9,8 +9,9 @@
 //   locate    marca el objeto en la imagen   un clic o un toque cerca de su posicion
 //   closing   lee que es lo que encontro     el boton Terminar
 //
-// Al activar rojo/cian el recorrido deja lista la comparacion: elige la epoca
-// de referencia (`pickReferenceEpoch`) y el estirado lineal (viewerControls.ts).
+// Dos cosas las cambia el recorrido por su cuenta (viewerControls.ts): al
+// elegir B6 pasa el estirado a lineal, y al activar rojo/cian elige la epoca
+// de referencia (`pickReferenceEpoch`).
 //
 // Lo que se ve en el campo real (precalculado el 15 de noviembre de 2026), y
 // por eso las consignas dicen lo que dicen:
@@ -41,6 +42,11 @@
 //
 // Un suavizado (probado como filtro de 3 y 5 px sobre la imagen) no suma: baja
 // la senial un poco mas que el ruido.
+//
+// El estirado lineal va desde que se elige B6 porque tambien mejora el
+// parpadeo: en cada cuadro de las epocas 2 y 3 el objeto pasa de 6,3 y 6,9
+// sigma (asinh) a 15,0 y 18,3. Ahi se ve como una estrella mas (hay entre 6 y
+// 11 mas brillantes en la vista); lo que lo delata es que se corre.
 
 import { FEATURED_OBJECTS, featuredUrlPatch, type ViewerUrlPatch } from "@/features/entry/featured";
 import type { ViewFov } from "@/lib/fov";
@@ -66,7 +72,7 @@ export const TOUR_PLAY_MODE: ViewMode = "blink";
 /** Modo que pide el tercer paso. */
 export const TOUR_MODE: ViewMode = "redcyan";
 
-/** Estirado con el que se compara: el que deja el fondo oscuro. */
+/** Estirado del recorrido desde que se elige la banda: el que deja el fondo oscuro. */
 export const TOUR_STRETCH: StretchKind = "linear";
 
 /**

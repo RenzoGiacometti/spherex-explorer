@@ -6,8 +6,8 @@
 // pide nada: mira la URL y lo que el visor publica en el documento
 // (viewerDom.ts). Los controles del visor siguen andando como siempre; el
 // recorrido espera a que la persona haga lo que pide cada paso. Lo unico que
-// cambia por su cuenta es la comparacion, al activar rojo/cian: la epoca de
-// referencia y el estirado (viewerControls.ts).
+// cambia por su cuenta es el estirado, al elegir B6, y la epoca de referencia,
+// al activar rojo/cian (viewerControls.ts).
 //
 // Mientras dura, la mira y el rastro que el visor dibuja sobre el objeto quedan
 // ocultos: el recorrido consiste en encontrarlo. Aparecen en el cierre, o al
@@ -43,7 +43,7 @@ import {
   type TourSignals,
   type TourStep,
 } from "./tour";
-import { prepareComparison } from "./viewerControls";
+import { applyReference, applyStretch } from "./viewerControls";
 import {
   findImageRoot,
   findViewerPage,
@@ -177,26 +177,35 @@ function TourOverlay() {
     }
   }, [step]);
 
-  // ---- La comparacion -------------------------------------------------------
+  // ---- Lo que el recorrido cambia en el visor -------------------------------
 
-  // Apenas se activa rojo/cian, el recorrido deja lista la comparacion en la
-  // que el objeto se distingue (tour.ts): la ultima epoca contra la mas lejana
-  // de las bien armadas, con el estirado lineal. Lo hace por los controles del
-  // visor, asi que queda a la vista y la persona lo puede cambiar.
+  // Los dos cambios van por los controles del visor (viewerControls.ts): quedan
+  // a la vista en sus paneles y la persona los puede deshacer. Las medidas que
+  // los justifican estan en tour.ts.
+
+  // Apenas se elige B6, el estirado pasa a lineal: el fondo queda oscuro y el
+  // objeto se despega, en el parpadeo y en la comparacion que sigue.
+  const bandReached = step === "band" && stepReached;
+  useEffect(() => {
+    if (!bandReached) return;
+    void applyStretch({
+      stretchGroup,
+      toolsOpen: toolsOpenLabel,
+      toolsClose: toolsCloseLabel,
+      stretch: TOUR_STRETCH,
+    });
+  }, [bandReached, stretchGroup, toolsOpenLabel, toolsCloseLabel]);
+
+  // Apenas se activa rojo/cian, la comparacion queda entre la ultima epoca y
+  // la mas lejana de las bien armadas.
   const comparisonReached = step === "redcyan" && stepReached;
   useEffect(() => {
     if (!comparisonReached) return;
     const url = useUrlState.getState();
     // Sin epoca fija la actual (A) es la ultima.
     if (url.epoch !== null) url.update({ epoch: null });
-    void prepareComparison({
-      labels: {
-        referenceGroup,
-        stretchGroup,
-        toolsOpen: toolsOpenLabel,
-        toolsClose: toolsCloseLabel,
-      },
-      stretch: TOUR_STRETCH,
+    void applyReference({
+      referenceGroup,
       pickReference: (current) => {
         const { meta, band: shown } = useFieldStore.getState();
         const epochs = (meta?.planes ?? [])
@@ -206,7 +215,7 @@ function TourOverlay() {
       },
       cancelled: () => !useGuideStore.getState().active,
     });
-  }, [comparisonReached, referenceGroup, stretchGroup, toolsOpenLabel, toolsCloseLabel]);
+  }, [comparisonReached, referenceGroup]);
 
   // ---- Ubicar el objeto -----------------------------------------------------
 
