@@ -1,0 +1,24 @@
+{
+  "source": "hips2fits de CDS (https://alasky.cds.unistra.fr/hips-image-services/hips2fits)",
+  "note": "No hay ninguna imagen real guardada: el servicio estuvo caido en los tres sondeos del 2026-11-15. Cuando responda, `uv run python scripts/probe_hips2fits.py --save tests/fixtures/preview` guarda aca el FITS y su resumen.",
+  "responses": [
+    {
+      "file": "cds_page_unavailable.html",
+      "url": "https://alasky.cds.unistra.fr/hips-image-services/hips2fits",
+      "params": {
+        "hips": "CDS/P/allWISE/W1",
+        "format": "fits",
+        "wcs": "WCS de la grilla base de WISE 0855 (RA 133.7598, Dec -7.2422, 195 x 195 px de 3.075 segundos de arco)"
+      },
+      "queried_at": "2026-11-15T10:11:01Z",
+      "status": 404,
+      "content_type": "text/html",
+      "case": "Pagina 'Page unavailable' de CDS con el servicio caido."
+    }
+  ],
+  "probes": [
+    { "queried_at": "2026-11-15T10:11:01Z", "status": 404, "seconds": 1.2, "result": "Page unavailable" },
+    { "queried_at": "2026-11-15T10:33:25Z", "status": 404, "seconds": 1.2, "result": "Page unavailable" },
+    { "queried_at": "2026-11-15T10:40:23Z", "status": 404, "seconds": 1.5, "result": "Page unavailable" }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "source": "Sesame, espejo de CfA (https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?), y la pagina de error de CDS",
+  "note": "Respuestas reales guardadas tal como llegaron, para los casos que no cubren los cinco objetos de prueba de fixtures/sesame. No las usa el servidor falso.",
+  "responses": [
+    {
+      "file": "nombre_inexistente.xml",
+      "query": "Objeto Inexistente 12345",
+      "url": "https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?Objeto%20Inexistente%2012345",
+      "queried_at": "2026-11-15T10:12:06Z",
+      "status": 200,
+      "case": "Nombre que Sesame no conoce: un <Target> sin <Resolver>."
+    },
+    {
+      "file": "abell_2218.xml",
+      "query": "Abell 2218",
+      "url": "https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?Abell%202218",
+      "queried_at": "2026-11-15T10:12:36Z",
+      "status": 200,
+      "case": "Objeto sin movimiento propio, paralaje ni velocidad radial (trae <z>, que no se lee). El nombre principal viene con dos espacios."
+    },
+    {
+      "file": "m_87.xml",
+      "query": "M 87",
+      "url": "https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?M%2087",
+      "queried_at": "2026-11-15T10:12:22Z",
+      "status": 200,
+      "case": "Movimiento propio sin paralaje ni velocidad radial. <oname> va despues de los demas elementos."
+    },
+    {
+      "file": "cds_page_unavailable.html",
+      "url": "https://alasky.cds.unistra.fr/hips-image-services/hips2fits",
+      "queried_at": "2026-11-15T10:11:01Z",
+      "status": 404,
+      "content_type": "text/html",
+      "case": "Pagina 'Page unavailable' que devolvian los servicios de CDS en Estrasburgo mientras estaban caidos. Es la misma de fixtures/preview: sirve para probar que una pagina de error no se toma por un nombre desconocido."
+    }
+  ]
+}

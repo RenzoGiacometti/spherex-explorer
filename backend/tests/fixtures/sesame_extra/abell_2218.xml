@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>Abell 2218</name>
+  <!-- Q316319 #1 -->
+  <Resolver name="Sc=Simbad (CDS, via client/server)"><!--delay: 72ms [45] -->
+    <oid>376627</oid>
+    <otype>ClG</otype>
+    <jpos>16:35:54.00 +66:13:00.0</jpos>
+    <jradeg>248.975</jradeg>
+    <jdedeg>66.21666667</jdedeg>
+    <refPos>2001ApJ...554L.129M</refPos>
+    <z><v>0.1745</v><e>0.0055</e><q>D</q><r>2022A&amp;A...658A..59X</r></z>
+    <oname>ACO  2218</oname>
+    <nrefs>831</nrefs>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,10:12:36z)==== -->

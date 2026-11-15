@@ -2,7 +2,7 @@
 
 FastAPI + astropy. Arma el cubo del campo a partir de recortes de IRSA y lo sirve al frontend. El contrato con el frontend está en [`docs/contrato-cubo.md`](../docs/contrato-cubo.md) y manda sobre este código; el alcance, en [`SPEC.md`](../SPEC.md).
 
-Estado: cimientos de la Etapa 1. Están implementados la configuración, los modelos del contrato, la geometría, las estadísticas, el almacén de campos en disco, el modelo de error, la lectura de coordenadas y el servidor falso. El acceso a IRSA, el pipeline, la resolución de nombres con Sesame, la vista provisoria y el gestor de trabajos tienen la firma y la documentación, y lanzan `NotImplementedError`.
+Estado: núcleo de la Etapa 1. Además de los cimientos (configuración, modelos del contrato, geometría, estadísticas, almacén de campos en disco, modelo de error, lectura de coordenadas y servidor falso) están implementados y probados el acceso a IRSA, el pipeline, la resolución de nombres con Sesame y la propagación por movimiento propio. La vista provisoria de WISE está implementada pero sin verificar contra hips2fits, que estuvo caído. Faltan el gestor de trabajos y las rutas reales: tienen la firma y la documentación, y lanzan `NotImplementedError`.
 
 ## Instalar
 
@@ -22,7 +22,19 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Los tests no usan la red: `tests/conftest.py` hace fallar cualquier conexión que no sea local. Los datos reales guardados van en `tests/fixtures/`.
+Los tests no usan la red: `tests/conftest.py` hace fallar cualquier conexión que no sea local. Los datos reales guardados van en `tests/fixtures/`. Los tests de IRSA, Sesame y la vista provisoria hablan con un servidor HTTP local que sirve esas respuestas guardadas.
+
+### Pruebas contra los servicios reales
+
+No son parte de la batería: se corren a mano y usan la red.
+
+```powershell
+uv run python scripts/smoke_irsa.py
+uv run python scripts/probe_hips2fits.py --save tests/fixtures/preview
+```
+
+- `smoke_irsa.py` lista las exposiciones de Barnard por SIA2 y baja 3 recortes de a uno, con una caché temporal fuera del repositorio. Códigos de salida: 0, lista y recortes bien; 3, recortes bien y SIA2 sin responder; 1, algún recorte falló o bajó completo; 2, no se pudo probar nada. La última corrida (15 de noviembre de 2026, 13:43 UTC) terminó en 0: 3 de 3 recortes cortados antes de EPSF, de 400 a 403 kB y de 1,3 a 2,3 s cada uno.
+- `probe_hips2fits.py` hace un pedido a hips2fits con la grilla de un campo. Con `--save tests/fixtures/preview` guarda la respuesta, y con un FITS real guardado se activa solo el test que hoy se saltea. Todavía no hay ninguno: el servicio respondió 404 en todos los sondeos del 15 de noviembre.
 
 ## Servidor falso
 
@@ -62,7 +74,7 @@ Si corre a la vez que el backend real, va en otro puerto; el frontend elige a cu
 
 ### Qué entrega el flujo de eventos
 
-Es lo que hace el servidor falso y lo que tiene que hacer el backend real. Estos puntos están fijados en la versión 1.1 del contrato (sección 15); acá va el resumen.
+Es lo que hace el servidor falso y lo que tiene que hacer el backend real. Estos puntos están fijados en el contrato (secciones 15 y 16); acá va el resumen. El servidor falso todavía no manda la cabecera `X-Plane-Rev` ni responde `409` en `/track` antes de `listed`, que son de la versión 1.2.
 
 - En `listed` los planos sin exposiciones ya vienen `empty` y no tienen evento `plane`. Los demás vienen `pending`.
 - `flags` llega como lista vacía en `listed`: los bits salen del encabezado del primer archivo que se baja. Desde ese momento están en `GET .../meta`; ningún evento `plane` los lleva.
@@ -122,9 +134,29 @@ uv run uvicorn app.api.main:app --port 8000
 
 Por ahora solo responde `GET /api/health`.
 
+Tiene que correr con un solo proceso de uvicorn (sin `--workers`): el límite de 10 descargas hacia IRSA y la protección de la caché de recortes valen por proceso.
+
+### Lo que el gestor de trabajos tiene que hacer con estas piezas
+
+- Si `load_exposure` lanza `OSError`, `KeyError` o `ValueError` sobre un recorte, llamar a `discard_cutout(path, settings)` y volver a pedirlo una vez.
+- Llamar a `prune_cutout_cache` al arrancar y al terminar cada trabajo: no se llama sola.
+- `fetch_cutout` hace un solo intento. Ante `IrsaBusy`, soltar el cupo y esperar `retry_after` (ya acotado a 60 s); si `requested` es mayor, dar el recorte por fallido en ese trabajo.
+- `resolve()`, `field_track()`, `list_exposures()`, `fetch_cutout()` y `fetch_preview()` bloquean: desde una ruta `async` se llaman en un hilo.
+- Más hilos casi no aceleran `load_exposure` (retiene el GIL): unas 30 a 40 exposiciones por segundo en total.
+
 ## Configuración
 
 Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SPHEREX_<NOMBRE>`: `SPHEREX_DATA_DIR`, `SPHEREX_CACHE_DIR`, `SPHEREX_MAX_ACTIVE_JOBS`, etc. Las descargas simultáneas contra IRSA nunca pasan de 10, aunque la variable diga más.
+
+| Variable | Por defecto | Qué hace |
+|---|---|---|
+| `SPHEREX_SIA_URL` | SIA2 de IRSA | Servicio de la lista de exposiciones |
+| `SPHEREX_SIA_ATTEMPTS`, `SPHEREX_SIA_RETRY_WAIT_S` | 6, 2 | Intentos por colección y espera entre ellos |
+| `SPHEREX_IRSA_CONNECT_TIMEOUT_S`, `SPHEREX_IRSA_READ_TIMEOUT_S`, `SPHEREX_IRSA_TOTAL_TIMEOUT_S` | 15, 60, 180 | Topes de un pedido a IRSA: conexión, silencio entre tramos y total del cuerpo |
+| `SPHEREX_IRSA_RETRY_AFTER_DEFAULT_S`, `SPHEREX_IRSA_RETRY_AFTER_MAX_S` | 5, 60 | Espera si IRSA no manda `Retry-After`, y máximo que se respeta |
+| `SPHEREX_CUTOUT_CACHE_MAX_GB` | 10 | Tope de disco de la caché de recortes |
+| `SPHEREX_SESAME_URLS`, `SPHEREX_SESAME_TIMEOUT_S`, `SPHEREX_SESAME_TOTAL_TIMEOUT_S` | CDS y CfA, 10, 20 | Servidores de nombres, en orden, y sus plazos |
+| `SPHEREX_HIPS2FITS_URL`, `SPHEREX_PREVIEW_HIPS_W1`, `SPHEREX_PREVIEW_HIPS_W2` | hips2fits de CDS, `CDS/P/allWISE/W1` y `W2` | Servicio e imágenes de la vista provisoria |
 
 ## Datos en disco
 
@@ -132,6 +164,8 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 data/fields/     campos precalculados (se versionan)
 cache/           caché de ejecución (ignorada por git): fields/, cutouts/, sia/, sesame/
 ```
+
+En `cache/cutouts` cada recorte es `<archivo de la exposición>__<ra>_<dec>_<lado>_img.fits` si se cortó antes de EPSF, o `_full.fits` si hubo que bajarlo entero. En `cache/sia`, `<colección>__<ra>_<dec>.xml` con un `.json` al lado.
 
 Un campo es una carpeta `<id>/`, igual en `data/fields`, en `cache/fields` y en las muestras:
 
@@ -158,14 +192,17 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/api/errors.py` | `ApiError` y el cuerpo de error del contrato | Hecho |
 | `app/api/main.py` | Aplicación real | Solo `/api/health` |
 | `app/fake.py` | Servidor falso | Hecho |
-| `app/irsa/limits.py` | Límite global de conexiones hacia IRSA | Pendiente |
-| `app/irsa/sia.py` | Lista de exposiciones por SIA2 | Pendiente |
-| `app/irsa/cutouts.py` | Descarga de un recorte, leyendo por HDU | Pendiente |
-| `app/pipeline/exposure.py` | Cargar, enmascarar y reproyectar un recorte | Pendiente |
-| `app/pipeline/coadd.py` | Coadd incremental de un plano | Pendiente |
-| `app/pipeline/epochs.py` | Regla de 60 días | Pendiente |
+| `app/irsa/limits.py` | Límite global de conexiones hacia IRSA | Hecho |
+| `app/irsa/sia.py` | Lista de exposiciones por SIA2, con caché y copia vencida como respaldo | Hecho |
+| `app/irsa/cutouts.py` | Descarga de un recorte, leyendo por HDU; caché en disco con tope | Hecho |
+| `app/irsa/transport.py` | Sesión por hilo, timeouts, plazo total y lectura de `Retry-After` | Hecho |
+| `app/pipeline/exposure.py` | Cargar, enmascarar y reproyectar un recorte | Hecho |
+| `app/pipeline/coadd.py` | Coadd incremental de un plano | Hecho |
+| `app/pipeline/flag_table.py` | Unión de las tablas de bits de los archivos: `flags[]` del campo | Hecho |
+| `app/pipeline/epochs.py` | Regla de 60 días | Hecho |
 | `app/resolve/coords.py` | Lectura de un texto como coordenadas, en grados o sexagesimales | Hecho |
-| `app/resolve/sesame.py`, `motion.py` | Sesame, propagación y trayectoria | Pendiente |
-| `app/preview/hips2fits.py` | Vista provisoria de WISE | Pendiente, salvo la elección de banda (`preview_band`) |
+| `app/resolve/sesame.py`, `motion.py` | Sesame (CDS y espejo de CfA), propagación y trayectoria | Hecho |
+| `app/resolve/service.py` | `resolve()` y `field_track()`: las respuestas de `/api/resolve` y `/track` | Hecho |
+| `app/preview/hips2fits.py` | Vista provisoria de WISE | Hecho, sin verificar contra el servicio |
 | `app/jobs/events.py` | Eventos SSE | Pendiente |
 | `app/jobs/manager.py` | Cola y planificación de trabajos | Pendiente |

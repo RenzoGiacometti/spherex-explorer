@@ -58,6 +58,27 @@ class Settings:
     max_queued_jobs: int = 20
     cutout_attempts: int = 6
 
+    # Acceso a IRSA (app/irsa). Servicio SIA2 (SPEC.md, seccion "Acceso") y tiempos de
+    # espera en segundos: el de lectura es el silencio maximo entre dos tramos de una respuesta.
+    sia_url: str = "https://irsa.ipac.caltech.edu/SIA"
+    irsa_connect_timeout_s: float = 15.0
+    irsa_read_timeout_s: float = 60.0
+    # Tope de tiempo de un recorte entero (los dos pedidos del modo `full` incluidos) y de cada
+    # intento de SIA2: una respuesta que llega de a poco no dispara el timeout de lectura.
+    # 0 o menos lo desactiva.
+    irsa_total_timeout_s: float = 180.0
+    # SIA2 devuelve 502 de forma intermitente, a veces durante minutos: intentos por coleccion
+    # y espera base entre ellos, que crece con cada intento (2, 4, 6, 8 y 10 s: 30 s en total).
+    sia_attempts: int = 6
+    sia_retry_wait_s: float = 2.0
+    # Espera que se informa cuando un 503 o un 429 llega sin `Retry-After` legible (IRSA manda 5).
+    irsa_retry_after_default_s: float = 5.0
+    # Maximo de `IrsaBusy.retry_after`, pida lo que pida IRSA: un `Retry-After` de horas no
+    # puede dejar parado un recorte. Lo que pidio de verdad queda en `IrsaBusy.requested`.
+    irsa_retry_after_max_s: float = 60.0
+    # Tope de disco de la cache de recortes (contrato, seccion 11); 0 o menos lo desactiva.
+    cutout_cache_max_gb: float = 10.0
+
     # Identidad del campo.
     field_epoch: float = FIELD_EPOCH
     pipeline_version: str = PIPELINE_VERSION
@@ -73,6 +94,24 @@ class Settings:
 
     # Vista provisoria de WISE: si hips2fits no responde en este tiempo, se descarta.
     preview_timeout_s: float = 20.0
+    # Servicio hips2fits de CDS y HiPS de WISE de cada banda (app/preview/hips2fits.py).
+    # SIN VERIFICAR contra el servicio: el 2026-11-15 estaba caido. La URL sale de
+    # astroquery.hips2fits y los identificadores de la lista del nodo HiPS de IRSA
+    # (`creator_did = ivo://CDS/P/allWISE/W1` y `.../W2`); el detalle, en ese modulo.
+    hips2fits_url: str = "https://alasky.cds.unistra.fr/hips-image-services/hips2fits"
+    preview_hips_w1: str = "CDS/P/allWISE/W1"
+    preview_hips_w2: str = "CDS/P/allWISE/W2"
+
+    # Sesame (app/resolve/sesame.py): servidores en el orden en que se consultan, CDS y
+    # su espejo en CfA (las URL del spike), y timeout de cada intento.
+    sesame_urls: tuple[str, ...] = (
+        "https://cds.unistra.fr/cgi-bin/nph-sesame/-ox/S?",
+        "https://vizier.cfa.harvard.edu/viz-bin/nph-sesame/-ox/S?",
+    )
+    sesame_timeout_s: float = 10.0
+    # Tope de toda la resolucion de un nombre, sumando servidores, reintentos y pausas;
+    # se reparte entre los servidores que falten consultar. 0 o menos lo desactiva.
+    sesame_total_timeout_s: float = 20.0
 
     # SSE: comentario `: ping` tras este silencio, y tope de eventos `progress`.
     sse_ping_s: float = 15.0

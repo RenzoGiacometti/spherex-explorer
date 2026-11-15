@@ -87,6 +87,7 @@ class CutoutFile:
     mode: Literal["truncated", "full"]  # cortado antes de EPSF, o respuesta completa
     from_cache: bool
     nbytes: int  # bytes recibidos de IRSA (0 si salio de la cache)
+    reason: str | None = None  # por que no se pudo cortar la descarga; solo en un `full` recien bajado
 
 
 @dataclass(frozen=True)
