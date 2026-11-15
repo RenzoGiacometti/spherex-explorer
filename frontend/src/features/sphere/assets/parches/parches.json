@@ -188,5 +188,15 @@
     "height_deg": 0.166563,
     "band": 5,
     "epoch": 3
+  },
+  "ugps-0722": {
+    "file": "ugps-0722.png",
+    "field": "fdd01819dc3a5ded",
+    "ra": 110.6097,
+    "dec": -5.6735,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 1
   }
 }

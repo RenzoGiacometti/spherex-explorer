@@ -78,6 +78,7 @@ describe("campos precalculados", () => {
       "M 81",
       "M 101",
       "M 104",
+      "UGPS J072227.51-054031.2",
     ]);
     expect(new Set(PRECOMPUTED_FIELDS.map((field) => field.id)).size).toBe(
       PRECOMPUTED_FIELDS.length,

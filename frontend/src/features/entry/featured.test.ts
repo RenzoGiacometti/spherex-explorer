@@ -138,6 +138,13 @@ describe("savedFieldByName", () => {
     "m-81": ["M81", "M 81", "Messier 81", "Bode's Galaxy", "Galaxia de Bode"],
     "m-101": ["M101", "M 101", "Messier 101", "Pinwheel Galaxy", "Galaxia del Molinete"],
     "m-104": ["M104", "M 104", "Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
+    "ugps-0722": [
+      "UGPS J0722-0540",
+      "UGPS 0722-05",
+      "ugps j0722-05",
+      "UGPS J072227.51-054031.2",
+      "WISE J072227.27-054029.9",
+    ],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {

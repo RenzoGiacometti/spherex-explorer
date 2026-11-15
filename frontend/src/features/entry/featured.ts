@@ -143,6 +143,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - M 81: banda 5 (senal sobre ruido de 239); el nucleo satura en las bandas 1 a 4.
  * - M 101: banda 3, la de mejor senal (136); no satura en ninguna.
  * - M 104: banda 5 (senal sobre ruido de 188); el nucleo satura en las bandas 1 a 4.
+ * - UGPS J0722-0540: banda 5 (senal sobre ruido de 18); en las bandas 1 a 4 no pasa de 3.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -282,6 +283,25 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     dec: -11.6231,
     band: 5,
     aliases: ["Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
+  },
+  {
+    id: "ugps-0722",
+    label: "UGPS J0722-0540",
+    // Nombre completo del catalogo, con el que lo resolvio el servicio de nombres
+    // (backend/data/sesame/ugps_j072227_51_054031_2-*.xml).
+    name: "UGPS J072227.51-054031.2",
+    ra: 110.6097,
+    dec: -5.6735,
+    band: 5,
+    aliases: [
+      // Formas cortas del nombre de catalogo de arriba: las mismas cifras, recortadas.
+      "UGPS 0722-05",
+      "UGPS 0722-0540",
+      "UGPS J0722-05",
+      // Nombre principal con el que responde el servicio de nombres
+      // (backend/data/sesame/ugps_j072227_51_054031_2-*.xml).
+      "WISE J072227.27-054029.9",
+    ],
   },
 ];
 
