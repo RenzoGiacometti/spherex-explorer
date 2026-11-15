@@ -198,5 +198,15 @@
     "height_deg": 0.166563,
     "band": 5,
     "epoch": 1
+  },
+  "2mass-0415": {
+    "file": "2mass-0415.png",
+    "field": "baaad0979c9e8591",
+    "ra": 63.8475,
+    "dec": -9.5814,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 1
   }
 }

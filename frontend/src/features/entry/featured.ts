@@ -144,6 +144,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - M 101: banda 3, la de mejor senal (136); no satura en ninguna.
  * - M 104: banda 5 (senal sobre ruido de 188); el nucleo satura en las bandas 1 a 4.
  * - UGPS J0722-0540: banda 5 (senal sobre ruido de 18); en las bandas 1 a 4 no pasa de 3.
+ * - 2MASS J0415-0935: banda 5 (senal sobre ruido de 18,5); en las demas no pasa de 9.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -301,6 +302,25 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
       // Nombre principal con el que responde el servicio de nombres
       // (backend/data/sesame/ugps_j072227_51_054031_2-*.xml).
       "WISE J072227.27-054029.9",
+    ],
+  },
+  {
+    id: "2mass-0415",
+    label: "2MASS J0415-0935",
+    // Nombre completo del catalogo, con el que lo resolvio el servicio de nombres
+    // (backend/data/sesame/2mass_j04151954_0935066-*.xml).
+    name: "2MASS J04151954-0935066",
+    ra: 63.8475,
+    dec: -9.5814,
+    band: 5,
+    aliases: [
+      // Formas cortas del nombre de catalogo de arriba: las mismas cifras, recortadas.
+      "2MASS 0415-0935",
+      "2MASS J0415-09",
+      "2M 0415-0935",
+      // Nombre principal con el que responde el servicio de nombres
+      // (backend/data/sesame/2mass_j04151954_0935066-*.xml).
+      "2MASSI J0415195-093506",
     ],
   },
 ];

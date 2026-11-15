@@ -145,6 +145,13 @@ describe("savedFieldByName", () => {
       "UGPS J072227.51-054031.2",
       "WISE J072227.27-054029.9",
     ],
+    "2mass-0415": [
+      "2MASS J0415-0935",
+      "2MASS 0415-0935",
+      "2m 0415-0935",
+      "2MASS J04151954-0935066",
+      "2MASSI J0415195-093506",
+    ],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {
