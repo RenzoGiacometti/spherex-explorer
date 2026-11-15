@@ -1,0 +1,22 @@
+.transport {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/*
+ * Celular: el boton de reproducir mide 56 px (DESIGN.md, "Objetivos tactiles":
+ * 56 a 64), con el icono de 24 px que lleva ese tamano. Solo cuando no se pidio
+ * un tamano: los que se piden con `playSize` quedan como estan.
+ */
+@media (max-width: 599px) {
+  .transport .playAuto {
+    --icon-button-side: 56px;
+  }
+
+  .transport .playAuto svg {
+    width: 24px;
+    height: 24px;
+  }
+}

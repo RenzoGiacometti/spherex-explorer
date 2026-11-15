@@ -1,0 +1,105 @@
+{
+  "title": "Galería de componentes",
+  "state": {
+    "disabled": "Deshabilitado",
+    "paused": "En pausa",
+    "playing": "Reproduciendo"
+  },
+  "band": {
+    "title": "Banda",
+    "group": "Banda infrarroja",
+    "note": "B5 no tiene datos en esta época y se puede elegir. B6 está deshabilitada."
+  },
+  "mode": {
+    "title": "Modo",
+    "group": "Modo de comparación"
+  },
+  "image": {
+    "title": "Imagen",
+    "contrast": "Contraste",
+    "fov": "Campo de visión",
+    "flags": "Píxeles marcados",
+    "trail": "Rastro de épocas anteriores"
+  },
+  "speed": {
+    "title": "Velocidad",
+    "group": "Velocidad de reproducción"
+  },
+  "imageTag": {
+    "title": "Rótulo de imagen",
+    "provisional": "Provisorio",
+    "exposures": "{{used}} / {{total}} exposiciones",
+    "preview": "Vista provisoria",
+    "survey": "WISE {{wave}}",
+    "note": "No es una imagen de SPHEREx."
+  },
+  "search": {
+    "title": "Búsqueda y destacados",
+    "label": "Buscar por nombre o coordenadas",
+    "submit": "Buscar",
+    "hint": "Un nombre de catálogo o una ascensión recta y una declinación.",
+    "submitted": "Se buscó: {{query}}",
+    "error": "No se encontró ningún objeto con ese nombre.",
+    "featured": "Destacados",
+    "featuredNav": "Objetos destacados",
+    "motion": "{{value}} / año"
+  },
+  "timeline": {
+    "title": "Línea de tiempo",
+    "position": "Época {{n}} de {{total}}",
+    "threeEpochs": "Tres épocas, la actual es provisoria",
+    "closeEpochs": "Dos épocas muy cercanas y una sin datos en la banda"
+  },
+  "progress": {
+    "loading": "Cargando datos",
+    "cutouts": "{{done}} / {{total}} recortes · {{percent}}",
+    "queued": "En cola",
+    "position": "Posición {{n}}",
+    "done": "Campo completo"
+  },
+  "buttons": {
+    "title": "Botones",
+    "open": "Abrir en el visor",
+    "random": "Lugar al azar",
+    "link": "Enlace al visor",
+    "back": "Volver a la entrada",
+    "share": "Compartir",
+    "layers": "Capas",
+    "close": "Cerrar",
+    "zoomOut": "Alejar",
+    "zoomIn": "Acercar"
+  },
+  "tools": {
+    "bands": "Banda",
+    "blink": "Modo",
+    "contrast": "Contraste",
+    "fov": "Campo de visión"
+  },
+  "icons": {
+    "title": "Iconos"
+  },
+  "metadata": {
+    "title": "Metadatos",
+    "object": "Objeto",
+    "ra": "AR (J2000)",
+    "dec": "Dec (J2000)",
+    "epoch": "Época",
+    "band": "Banda",
+    "pixelScale": "Escala de píxel",
+    "field": "Campo",
+    "epochs": "Épocas disponibles",
+    "source": "Fuente"
+  },
+  "notices": {
+    "title": "Avisos de calidad",
+    "saturated": "Hay una fuente saturada en el campo: su centro no tiene medición válida.",
+    "fewExposures": "Época 1: imagen armada con pocas exposiciones; puede tener huecos y gradientes.",
+    "provisional": "Una de las épocas comparadas es provisoria.",
+    "empty": "Este campo no tiene avisos.",
+    "single": "Aviso suelto"
+  },
+  "padding": {
+    "title": "Panel amplio",
+    "body": "Relleno de 24 px, para el panel de espectro."
+  }
+}

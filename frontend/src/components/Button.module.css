@@ -1,0 +1,55 @@
+/* button-primary y button-ghost: pildora de 44 px con texto en button-cap. */
+.button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: var(--button-ghost-height);
+  margin: 0;
+  padding: var(--button-ghost-padding);
+  border: 1px solid transparent;
+  border-radius: var(--button-ghost-radius);
+  font: var(--type-button-cap-font);
+  letter-spacing: var(--type-button-cap-tracking);
+  text-transform: var(--type-button-cap-transform);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* El acento como relleno: cuarto uso permitido, la accion principal de la vista. */
+.primary {
+  min-height: var(--button-primary-height);
+  padding: var(--button-primary-padding);
+  border-color: var(--button-primary-bg);
+  border-radius: var(--button-primary-radius);
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+/* DESIGN.md: transparente, borde blanco de 1 px, texto blanco. */
+.ghost {
+  border-color: var(--color-text);
+  background-color: transparent;
+  color: var(--button-ghost-text);
+}
+
+.ghost:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Un texto largo (el espanol ocupa mas) baja de linea en vez de desbordar. */
+.text {
+  padding-block: var(--space-xxs);
+}

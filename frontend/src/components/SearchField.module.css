@@ -1,0 +1,124 @@
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.label {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* search-field: campo de vidrio de 56 px. El boton de 44 px queda a 6 px del borde. */
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: var(--search-field-height);
+  padding: 0 6px 0 var(--space-md);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--search-field-radius);
+  background-color: var(--search-field-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  color: var(--search-field-text);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .field {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+/* El foco del campo de texto se marca en el borde del campo entero. */
+.field:focus-within {
+  border-color: var(--color-text);
+}
+
+.icon {
+  color: var(--color-text-mute);
+}
+
+.input {
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background-color: transparent;
+  color: inherit;
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.input::placeholder {
+  color: var(--color-text-dim);
+  opacity: 1;
+}
+
+/* Sin la cruz propia del navegador: el juego de iconos es uno solo. */
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  appearance: none;
+}
+
+/*
+ * Renglones de ayuda debajo del campo. Van directo sobre la imagen, sin vidrio,
+ * igual que la etiqueta de arriba: en text-mute. En text-dim una parte del
+ * texto quedaba por debajo de 4,5:1 sobre un recorte real.
+ */
+.example,
+.hint {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+/* El ejemplo va dentro del campo; este renglon es para el celular. */
+.example {
+  display: none;
+}
+
+/* El error se comunica con el icono alert y texto, sin color semantico. */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.errorIcon {
+  margin-top: 1px;
+}
+
+/*
+ * En celular el texto del campo sube a 16 px: con menos, Safari de iOS acerca
+ * la pagina al tomar el foco. A ese tamano el ejemplo de nombre y coordenadas
+ * no entra en el campo (unos 315 px en 203) y salia cortado: se saca del campo
+ * y se muestra entero en el renglon de abajo.
+ */
+@media (max-width: 599px) {
+  .input {
+    font-size: 16px;
+  }
+
+  .input::placeholder {
+    color: transparent;
+  }
+
+  .example {
+    display: block;
+  }
+}

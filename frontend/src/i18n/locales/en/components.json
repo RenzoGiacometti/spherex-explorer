@@ -1,0 +1,26 @@
+{
+  "segmented": {
+    "noData": "no data"
+  },
+  "timeline": {
+    "epoch": "Epoch {{n}}, {{date}}, {{state}}",
+    "legend": "Timeline key",
+    "state": {
+      "loaded": "loaded",
+      "provisional": "provisional",
+      "unloaded": "not loaded",
+      "empty": "no data",
+      "current": "current"
+    }
+  },
+  "transport": {
+    "label": "Playback",
+    "previous": "Previous epoch",
+    "play": "Play",
+    "pause": "Pause",
+    "next": "Next epoch"
+  },
+  "notices": {
+    "repeated": "{{n}} times"
+  }
+}

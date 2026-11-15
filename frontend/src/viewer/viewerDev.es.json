@@ -1,0 +1,84 @@
+{
+  "title": "Visor de imágenes: página de desarrollo",
+  "status": {
+    "loading": "Cargando los planos de muestra",
+    "error": "No se pudieron cargar los planos de muestra"
+  },
+  "viewer": {
+    "label": "Imagen de SPHEREx del campo de muestra {{sample}}",
+    "help": "Rueda o pellizco para acercar, arrastre para desplazar, doble clic para volver. Con el foco en la imagen: flechas, más, menos y cero."
+  },
+  "controls": {
+    "sample": "Campo de muestra",
+    "mode": "Modo",
+    "plane": "Plano",
+    "stretch": "Estirado",
+    "contrast": "Contraste",
+    "view": "Vista",
+    "renderer": "Dibujo",
+    "highlight": "Resaltado",
+    "annotations": "Contorno de saturación y posición del objeto",
+    "blink": "Parpadear entre A y B",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "reset": "Vista de partida"
+  },
+  "samples": {
+    "barnard": "Barnard, época 1, B3",
+    "wise0855": "WISE 0855, época 2, B6"
+  },
+  "modes": {
+    "single": "Un plano",
+    "difference": "Diferencia (B − A)",
+    "sum": "Suma (A a D)",
+    "redcyan": "Rojo/cian (A y B)"
+  },
+  "stretches": {
+    "linear": "Lineal",
+    "log": "Logarítmico",
+    "asinh": "Asinh"
+  },
+  "views": {
+    "ten": "Cubo entero",
+    "five": "Cinco minutos (acercamiento 2)"
+  },
+  "renderers": {
+    "webgl2": "WebGL2",
+    "canvas2d": "Canvas 2D"
+  },
+  "highlights": {
+    "none": "Ninguno",
+    "noData": "Sin datos",
+    "saturated": "Saturados"
+  },
+  "note": {
+    "synthetic": "A es el plano real. B, C y D son el mismo plano corrido unos píxeles, para probar los modos de comparación: no son datos reales."
+  },
+  "readout": {
+    "renderer": "Dibujando con",
+    "version": "Versión",
+    "cuts": "Cortes",
+    "zoom": "Acercamiento",
+    "none": "ninguno"
+  },
+  "checks": {
+    "title": "Dibujo frente a la referencia en CPU",
+    "description": "Diferencia máxima por canal, de 0 a 255, entre los píxeles que deja cada dibujo (readPixels) y la composición de referencia.",
+    "pending": "Calculando",
+    "unavailable": "WebGL2 no está disponible en este navegador: solo se comprobó el dibujo con canvas 2D.",
+    "summary": "{{renderer}}: diferencia máxima {{maxDiff}} en {{count}} comprobaciones",
+    "details": "Todas las comprobaciones",
+    "column": {
+      "renderer": "Dibujo",
+      "sample": "Campo",
+      "mode": "Modo",
+      "stretch": "Estirado",
+      "highlight": "Resaltado",
+      "scale": "Escala",
+      "maxDiff": "Dif. máx.",
+      "different": "Píxeles distintos"
+    },
+    "yes": "sí",
+    "no": "no"
+  }
+}

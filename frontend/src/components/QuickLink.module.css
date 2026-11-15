@@ -1,0 +1,54 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+/* quick-link: pildora de 36 px sobre el cielo, con el negro al 55 % para que el texto se lea. */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--quick-link-height);
+  padding: var(--quick-link-padding);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--quick-link-radius);
+  background-color: color-mix(in srgb, var(--quick-link-bg) 55%, transparent);
+  color: var(--quick-link-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+  text-decoration: none;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Un nombre de catalogo muy largo se corta con puntos suspensivos en vez de desbordar. */
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link:hover {
+  border-color: var(--color-text);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.detail {
+  color: var(--color-text-mute);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+/* Objetivo tactil de 44 px como minimo en celular. */
+@media (max-width: 599px) {
+  .link {
+    min-height: 44px;
+  }
+}

@@ -1,0 +1,83 @@
+.progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xxs) var(--space-sm);
+  min-width: 0;
+}
+
+.label {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+/* progress-bar: riel de 2 px en hairline-strong. */
+.rail {
+  flex: 1 1 40px;
+  min-width: 40px;
+  height: var(--progress-bar-height);
+  overflow: hidden;
+  border-radius: var(--progress-bar-radius);
+  background-color: var(--progress-bar-bg);
+}
+
+/* El avance en ambar. */
+.fill {
+  width: var(--progress-value);
+  height: 100%;
+  background-color: var(--progress-bar-text);
+  transition: width 200ms linear;
+}
+
+/* Avance desconocido: un tramo que recorre el riel. */
+.indeterminate {
+  width: 30%;
+  animation: sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(334%);
+  }
+}
+
+.count {
+  color: var(--color-text-mute);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+  white-space: nowrap;
+}
+
+/*
+ * Celular: el riel va en su propio renglon, debajo de la etiqueta y el conteo.
+ * En el mismo renglon le quedaban unos 56 px de los 336 del panel.
+ */
+@media (max-width: 599px) {
+  .rail {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .count {
+    margin-left: auto;
+  }
+}
+
+/* Sin animaciones: el tramo queda quieto al principio del riel. */
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+
+  .indeterminate {
+    animation: none;
+  }
+}

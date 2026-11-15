@@ -1,0 +1,168 @@
+/* Galeria de componentes (pagina de desarrollo). */
+
+.page {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Recorte real de SPHEREx detras de todo, como en el visor: sin marco ni esquinas redondeadas. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+/* Barra superior transparente: marca a la izquierda, idioma a la derecha. */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  min-height: 64px;
+}
+
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xxs) var(--space-md);
+  min-width: 0;
+}
+
+/* La marca conserva su escritura ("SPHEREx"): no se pasa a mayusculas. */
+.brandName {
+  font: var(--type-button-cap-font);
+  font-size: 15px;
+  letter-spacing: 2.4px;
+}
+
+.title {
+  color: var(--color-text-mute);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+/* Las mismas tres columnas de la maqueta del visor: 300, el resto y 320. */
+.columns {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: var(--space-md);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+/* Piezas que van directo sobre la imagen, sin panel. */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) 0;
+}
+
+.stageTitle {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.grow {
+  display: flex;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.epochHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xxs) var(--space-sm);
+}
+
+.epochDate {
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.caption {
+  color: var(--color-text-dim);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.body {
+  color: var(--color-text-mute);
+}
+
+/* Riel de herramientas, como en el visor de celular. */
+.rail {
+  display: flex;
+  gap: var(--space-xxs);
+}
+
+.icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: var(--space-md) var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.iconCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.iconName {
+  color: var(--color-text-dim);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+}
+
+@media (max-width: 1179px) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular: columna unica y paneles a 12 px del borde. */
+@media (max-width: 599px) {
+  .content {
+    padding: 0 var(--space-sm) var(--space-sm);
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

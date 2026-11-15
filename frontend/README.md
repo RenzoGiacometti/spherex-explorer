@@ -63,6 +63,7 @@ Los tests no usan la red. Además de los tests de cada módulo hay guardas que r
 - `src/test/guards.test.ts`: ningún color literal fuera de `src/styles/tokens.css`, ningún emoji ni dingbat, ningún violeta ni púrpura, y ningún texto de interfaz escrito a mano en los componentes.
 - `src/test/tokens.test.ts`: `tokens.css` dice lo mismo que el front matter de `DESIGN.md`.
 - `src/i18n/resources.test.ts`: español e inglés tienen las mismas claves.
+- `src/components/layout.design.test.ts` y `src/viewer/ImageViewer.design.test.ts`: leen las hojas de estilo y comprueban medidas de DESIGN.md (objetivos táctiles, anillo de foco). jsdom no hace layout: el tamaño real se mide en un navegador.
 - `src/api/fixtures.test.ts`: los datos de muestra de `src/test/fixtures` (campos, trayectorias y la transcripción de eventos SSE de un campo nuevo, generados por el backend) pasan por los esquemas del frontend sin que se pierda ni cambie nada.
 
 ## Hooks de git
@@ -96,6 +97,21 @@ src/
     errors.ts           ApiError y lectura del cuerpo de error
   state/
     urlState.ts         estado en la URL (store de zustand)
+    fieldStore.ts       estado del campo: metadatos, eventos, planos, capas, vista provisoria, objeto buscado
+    fieldUrlSync.ts     une la URL con el store del campo (useFieldUrlSync)
+  data/                 piezas del store: reductor de eventos, cola de descargas, selectores, resolución de nombres
+  components/           primitivas del sistema de diseño (botones, selectores, paneles, línea de tiempo, avisos);
+                        se importan desde components/index.ts
+  viewer/               visor de imágenes
+    planeImage.ts       plano listo para dibujar: valores sin no finitos y máscara de un byte por píxel
+    stretch.ts          estirados (lineal, log, asinh) y cortes del contraste
+    compose.ts          composición de referencia en CPU: un plano, diferencia, suma, rojo/cian
+    webglRenderer.ts    dibujo con WebGL2 (R32F + R8)
+    canvas2dRenderer.ts dibujo alternativo sin WebGL
+    view.ts             encuadre, acercamiento y desplazamiento
+    ImageViewer.tsx     componente de React; entrega la transformación a lo que se dibuja encima
+    testSupport.ts      contextos de canvas simulados para los tests
+  dev/                  páginas de desarrollo (/?dev=<id>) y registro de sus textos
   lib/
     format.ts           coordenadas, fechas y números con el formato de DESIGN.md
     wcs.ts              proyección gnomónica: píxel a cielo y cielo a píxel
@@ -105,12 +121,36 @@ src/
     fixtures/           datos de muestra generados por el backend
 ```
 
-Todavía no existen y llegan con las tareas siguientes: `src/components/` (primitivas del sistema de diseño), `src/viewer/` (visor WebGL2) y `src/state/fieldStore.ts` (estado del campo).
+Todavía falta unir las piezas: `App.tsx` y `src/features/` siguen mostrando los marcadores de posición, y no usan el store, los componentes ni el visor. Llega con la tarea siguiente (modos, paneles, capa de flags, entrada).
+
+## Páginas de desarrollo
+
+Con `pnpm dev`, cualquier archivo `src/**/<id>.devpage.tsx` que exporte `devPage` se abre en `/?dev=<id>`. No existen en el sitio compilado.
+
+- `/?dev=gallery`: las primitivas de `src/components` en todos sus estados, sobre un recorte real. `&lang=es` o `&lang=en`.
+- `/?dev=viewer`: el visor con los planos de muestra. Compara lo que dibuja cada camino (WebGL2 y canvas 2D) con la composición de referencia en CPU y deja el resultado en atributos `data-*`. Los parámetros de la URL (`sample`, `compose`, `plane`, `stretch`, `contrast`, `home`, `renderer`, `highlight`, `marks`, `ui`, `lang`) están en el encabezado de `src/viewer/viewer.devpage.tsx`.
+
+Los textos de una página de desarrollo van al lado de la página (`<nombre>.es.json`, `<nombre>.en.json`) y los registra ella con `registerDevTexts` (`src/dev/devTexts.ts`). No van en `src/i18n/resources.ts`: lo que se importa ahí viaja en el sitio compilado.
+
+Para mirar una página en un navegador sin ventana:
+
+- `chrome --headless=new --screenshot` con `--window-size` maqueta la página a un tamaño menor que el pedido (884 × 802 para 900 × 900) y no sirve para comprobar alineación ni anchos de celular. Las capturas se sacan por el protocolo de DevTools, con emulación de dispositivo.
+- El camino sin WebGL se prueba con `--disable-3d-apis`. Con `--disable-gpu` sigue habiendo WebGL2 por el controlador de software.
+
+## Probar contra el servidor falso
+
+La prueba de punta a punta del store se saltea si no se le da un servidor. Con el servidor falso del backend en un puerto (`uv run uvicorn app.fake:app --port 8011`, con `SPHEREX_FAKE_SECONDS=6` para que un campo nuevo dure 6 s):
+
+```powershell
+$env:SPHEREX_FAKE_URL = "http://127.0.0.1:8011"
+pnpm exec vitest run src/state/fieldStore.fake-server.test.ts
+```
 
 ## Convenciones
 
 - Estilos con CSS Modules (`Componente.module.css`) y variables de `tokens.css`. Ningún color literal fuera de ese archivo; la tipografía se aplica con las clases `.type-*` o con las variables `--type-*`.
-- Ningún texto de interfaz en los componentes: todo sale de `src/i18n/locales`, en español e inglés. Un namespace nuevo se registra en `src/i18n/resources.ts`.
+- Ningún texto de interfaz en los componentes: todo sale de `src/i18n/locales`, en español e inglés. Un namespace nuevo se registra en `src/i18n/resources.ts`, salvo los textos de una página de desarrollo, que van al lado de la página.
 - Todo número que ve la persona pasa por `src/lib/format.ts`.
 - El JSON del backend entra siempre por los esquemas de `src/api/schema.ts`. Si cambia el contrato, se cambia el esquema y los tipos lo siguen.
+- Los tests de una pantalla que monta `ImageViewer` usan `createFakeCanvasContexts` de `src/viewer/testSupport.ts`: jsdom no implementa `getContext`.
 - Importaciones internas con el alias `@/`. Exportaciones con nombre, sin `export default` (Biome lo exige).

@@ -1,0 +1,6 @@
+/* El grosor sale del token; el atributo del SVG queda como respaldo. */
+.icon {
+  display: block;
+  flex-shrink: 0;
+  stroke-width: var(--effect-icon-stroke);
+}

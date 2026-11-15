@@ -1,0 +1,213 @@
+/* ---- Marca de epoca ------------------------------------------------------ */
+
+.marker {
+  display: block;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-radius: var(--timeline-epoch-radius);
+}
+
+/* timeline-epoch: punto blanco de 8 px. */
+.loaded {
+  width: var(--timeline-epoch-size);
+  height: var(--timeline-epoch-size);
+  background-color: var(--timeline-epoch-bg);
+}
+
+/* Sin cargar: punto hueco de 8 px. */
+.unloaded {
+  width: var(--timeline-epoch-size);
+  height: var(--timeline-epoch-size);
+  border: 1px solid var(--color-text-mute);
+  background-color: var(--color-void);
+}
+
+/*
+ * Sin datos: una cruz de 8 px en text-dim, dibujada en SVG. DESIGN.md todavia
+ * no define este estado; sigue el criterio de la banda sin datos (atenuada).
+ */
+.empty {
+  width: var(--timeline-epoch-size);
+  height: var(--timeline-epoch-size);
+  overflow: visible;
+}
+
+.emptyFill {
+  fill: var(--color-void);
+}
+
+.emptyCross {
+  fill: none;
+  stroke: var(--color-text-dim);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+/* timeline-epoch-provisional: anillo punteado de 8 px, dibujado en SVG. */
+.provisional {
+  width: var(--timeline-epoch-provisional-size);
+  height: var(--timeline-epoch-provisional-size);
+  overflow: visible;
+}
+
+.provisionalFill {
+  fill: var(--timeline-epoch-provisional-bg);
+}
+
+.provisionalRing {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 0.01 3.393;
+}
+
+/*
+ * timeline-epoch-current: punto ambar de 12 px con anillo. Es uno de los
+ * cuatro usos del acento. El anillo es un borde, no una sombra.
+ */
+.current {
+  display: grid;
+  place-items: center;
+  width: calc(var(--timeline-epoch-current-size) + 8px);
+  height: calc(var(--timeline-epoch-current-size) + 8px);
+  border: 1px solid var(--timeline-epoch-current-bg);
+  background-color: var(--color-void);
+}
+
+.current::after {
+  content: "";
+  width: var(--timeline-epoch-current-size);
+  height: var(--timeline-epoch-current-size);
+  border-radius: var(--timeline-epoch-current-radius);
+  background-color: var(--timeline-epoch-current-bg);
+}
+
+/* ---- Pista --------------------------------------------------------------- */
+
+/* fieldset sin el aspecto del navegador. `--epoch-stop-width` llega desde Timeline.tsx. */
+.track {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.track:disabled {
+  opacity: 0.4;
+}
+
+/*
+ * Caja de la pista, con alto propio. Las capas de adentro son absolutas y se
+ * miden contra este div. No cuelgan directo del fieldset: ahi Chrome y Edge
+ * resuelven con alto 0 una capa con top y bottom en 0, y la parada (el area
+ * que recibe el toque) quedaba de 56 x 0 en vez de 56 x 52.
+ */
+.rail {
+  position: relative;
+  height: 52px;
+}
+
+/* Linea base en hairline-strong, a la altura del centro de las marcas. */
+.baseline {
+  position: absolute;
+  top: 18px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background-color: var(--color-hairline-strong);
+}
+
+/* Las marcas se reparten dejando lugar a los costados para la fecha de las puntas. */
+.stops {
+  position: absolute;
+  top: 0;
+  right: calc(var(--epoch-stop-width) / 2);
+  left: calc(var(--epoch-stop-width) / 2);
+  height: 100%;
+}
+
+/* Parada de una epoca: 56 x 52, por encima de los 44 px de un objetivo tactil. */
+.stop {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--epoch-stop-width);
+  height: 100%;
+  margin-left: calc(var(--epoch-stop-width) / -2);
+  color: var(--timeline-epoch-text);
+  cursor: pointer;
+}
+
+/* El radio nativo cubre la marca y su fecha: recibe el clic, el foco y las flechas. */
+.input {
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.markerBox {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+}
+
+.input:focus-visible + .markerBox {
+  outline: 2px solid var(--color-text);
+  outline-offset: -2px;
+}
+
+.date {
+  margin-top: -2px;
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+  white-space: nowrap;
+}
+
+.currentStop {
+  color: var(--timeline-epoch-current-text);
+}
+
+/* ---- Referencias --------------------------------------------------------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs) var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.legendMarker {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}

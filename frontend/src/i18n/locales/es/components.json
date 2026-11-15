@@ -1,0 +1,26 @@
+{
+  "segmented": {
+    "noData": "sin datos"
+  },
+  "timeline": {
+    "epoch": "Época {{n}}, {{date}}, {{state}}",
+    "legend": "Referencias de la línea de tiempo",
+    "state": {
+      "loaded": "cargada",
+      "provisional": "provisoria",
+      "unloaded": "sin cargar",
+      "empty": "sin datos",
+      "current": "actual"
+    }
+  },
+  "transport": {
+    "label": "Reproducción",
+    "previous": "Época anterior",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "next": "Época siguiente"
+  },
+  "notices": {
+    "repeated": "{{n}} veces"
+  }
+}

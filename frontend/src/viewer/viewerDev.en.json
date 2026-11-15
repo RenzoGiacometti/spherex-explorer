@@ -1,0 +1,84 @@
+{
+  "title": "Image viewer: development page",
+  "status": {
+    "loading": "Loading the sample planes",
+    "error": "The sample planes could not be loaded"
+  },
+  "viewer": {
+    "label": "SPHEREx image of the sample field {{sample}}",
+    "help": "Wheel or pinch to zoom, drag to pan, double-click to go back. With the image focused: arrow keys, plus, minus and zero."
+  },
+  "controls": {
+    "sample": "Sample field",
+    "mode": "Mode",
+    "plane": "Plane",
+    "stretch": "Stretch",
+    "contrast": "Contrast",
+    "view": "View",
+    "renderer": "Renderer",
+    "highlight": "Highlight",
+    "annotations": "Saturation outline and object position",
+    "blink": "Blink between A and B",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "reset": "Home view"
+  },
+  "samples": {
+    "barnard": "Barnard, epoch 1, B3",
+    "wise0855": "WISE 0855, epoch 2, B6"
+  },
+  "modes": {
+    "single": "Single plane",
+    "difference": "Difference (B − A)",
+    "sum": "Sum (A to D)",
+    "redcyan": "Red/cyan (A and B)"
+  },
+  "stretches": {
+    "linear": "Linear",
+    "log": "Logarithmic",
+    "asinh": "Asinh"
+  },
+  "views": {
+    "ten": "Whole cube",
+    "five": "Five arcminutes (zoom 2)"
+  },
+  "renderers": {
+    "webgl2": "WebGL2",
+    "canvas2d": "Canvas 2D"
+  },
+  "highlights": {
+    "none": "None",
+    "noData": "No data",
+    "saturated": "Saturated"
+  },
+  "note": {
+    "synthetic": "A is the real plane. B, C and D are the same plane shifted by a few pixels, to try the comparison modes: they are not real data."
+  },
+  "readout": {
+    "renderer": "Drawing with",
+    "version": "Version",
+    "cuts": "Cuts",
+    "zoom": "Zoom",
+    "none": "none"
+  },
+  "checks": {
+    "title": "Rendering against the CPU reference",
+    "description": "Largest per-channel difference, from 0 to 255, between the pixels each renderer leaves (readPixels) and the reference composition.",
+    "pending": "Computing",
+    "unavailable": "WebGL2 is not available in this browser: only the canvas 2D renderer was checked.",
+    "summary": "{{renderer}}: largest difference {{maxDiff}} over {{count}} checks",
+    "details": "All checks",
+    "column": {
+      "renderer": "Renderer",
+      "sample": "Field",
+      "mode": "Mode",
+      "stretch": "Stretch",
+      "highlight": "Highlight",
+      "scale": "Scale",
+      "maxDiff": "Max diff.",
+      "different": "Different pixels"
+    },
+    "yes": "yes",
+    "no": "no"
+  }
+}

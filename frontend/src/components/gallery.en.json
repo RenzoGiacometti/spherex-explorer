@@ -1,0 +1,105 @@
+{
+  "title": "Component gallery",
+  "state": {
+    "disabled": "Disabled",
+    "paused": "Paused",
+    "playing": "Playing"
+  },
+  "band": {
+    "title": "Band",
+    "group": "Infrared band",
+    "note": "B5 has no data in this epoch and can still be picked. B6 is disabled."
+  },
+  "mode": {
+    "title": "Mode",
+    "group": "Comparison mode"
+  },
+  "image": {
+    "title": "Image",
+    "contrast": "Contrast",
+    "fov": "Field of view",
+    "flags": "Flagged pixels",
+    "trail": "Trail of earlier epochs"
+  },
+  "speed": {
+    "title": "Speed",
+    "group": "Playback speed"
+  },
+  "imageTag": {
+    "title": "Image tag",
+    "provisional": "Provisional",
+    "exposures": "{{used}} / {{total}} exposures",
+    "preview": "Provisional view",
+    "survey": "WISE {{wave}}",
+    "note": "This is not a SPHEREx image."
+  },
+  "search": {
+    "title": "Search and featured objects",
+    "label": "Search by name or coordinates",
+    "submit": "Search",
+    "hint": "A catalog name, or a right ascension and a declination.",
+    "submitted": "Searched for: {{query}}",
+    "error": "No object was found with that name.",
+    "featured": "Featured",
+    "featuredNav": "Featured objects",
+    "motion": "{{value}} / year"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "position": "Epoch {{n}} of {{total}}",
+    "threeEpochs": "Three epochs, the current one is provisional",
+    "closeEpochs": "Two epochs close together and one with no data in the band"
+  },
+  "progress": {
+    "loading": "Loading data",
+    "cutouts": "{{done}} / {{total}} cutouts · {{percent}}",
+    "queued": "In queue",
+    "position": "Position {{n}}",
+    "done": "Field complete"
+  },
+  "buttons": {
+    "title": "Buttons",
+    "open": "Open in the viewer",
+    "random": "Random place",
+    "link": "Link to the viewer",
+    "back": "Back to the start",
+    "share": "Share",
+    "layers": "Layers",
+    "close": "Close",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in"
+  },
+  "tools": {
+    "bands": "Band",
+    "blink": "Mode",
+    "contrast": "Contrast",
+    "fov": "Field of view"
+  },
+  "icons": {
+    "title": "Icons"
+  },
+  "metadata": {
+    "title": "Metadata",
+    "object": "Object",
+    "ra": "RA (J2000)",
+    "dec": "Dec (J2000)",
+    "epoch": "Epoch",
+    "band": "Band",
+    "pixelScale": "Pixel scale",
+    "field": "Field",
+    "epochs": "Epochs available",
+    "source": "Source"
+  },
+  "notices": {
+    "title": "Quality notices",
+    "saturated": "There is a saturated source in the field: its center has no valid measurement.",
+    "fewExposures": "Epoch 1: image built from few exposures; it may have gaps and gradients.",
+    "provisional": "One of the compared epochs is provisional.",
+    "empty": "This field has no notices.",
+    "single": "Single notice"
+  },
+  "padding": {
+    "title": "Roomy panel",
+    "body": "24 px padding, for the spectrum panel."
+  }
+}

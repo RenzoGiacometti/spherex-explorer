@@ -1,0 +1,67 @@
+/*
+ * Visor de imagenes. DESIGN.md: la imagen es el contenido, sobre negro puro
+ * (`{colors.void}`), sin marco ni esquinas redondeadas.
+ */
+
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-void);
+  cursor: grab;
+  /* Los gestos los maneja el visor: sin desplazamiento ni zoom del navegador. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/*
+ * Foco del teclado. El contorno de base.css no sirve aca: un `outline` del
+ * contenedor se pinta debajo del canvas, que lo cubre entero, y no se ve. El
+ * anillo va en un `::after`, que por ser el ultimo hijo posicionado queda
+ * encima del canvas y de la capa de encima.
+ *
+ * Hacia adentro, porque el visor suele llegar a los bordes de la ventana.
+ * Blanco de 2px con una linea negra por fuera: se distingue tanto sobre el
+ * fondo negro como sobre una zona quemada de la imagen.
+ */
+.root:focus-visible {
+  outline: none;
+}
+
+.root:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 2px solid var(--color-text);
+  outline: 1px solid var(--color-void);
+  /* El anillo es un aviso: no recibe el puntero ni frena el arrastre. */
+  pointer-events: none;
+}
+
+.root[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Si el canvas no llega a la densidad de la pantalla, que no se suavice. */
+  image-rendering: pixelated;
+}
+
+/* Capa para dibujar encima (mira, rastro, escala, brujula, contornos). */
+.overlay {
+  position: absolute;
+  inset: 0;
+  /*
+   * Lo que se dibuja encima no frena el arrastre. Un hijo interactivo lo vuelve
+   * a activar con `pointer-events: auto`: el visor no sigue ni captura los
+   * punteros que empiezan en el (ImageViewer.tsx, `startedOnOverlay`).
+   */
+  pointer-events: none;
+}
