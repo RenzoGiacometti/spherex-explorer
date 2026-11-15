@@ -134,11 +134,18 @@ class ApiBackend:
     # -------------------------------------------------------------------- campo
 
     def submit(self, body: FieldRequest) -> tuple[int, FieldResponse]:
-        """`POST /api/field`: codigo HTTP (200 si el campo esta terminado, 202 si no) y cuerpo."""
+        """`POST /api/field`: codigo HTTP (200 si el campo esta terminado, 202 si no) y cuerpo.
+
+        Con `refresh` sobre un campo de la cache que quedo `partial`, el gestor
+        lo vuelve a armar a la vista para completarlo y la respuesta es 202
+        (`JobManager.submit` con `complete_partial`). Sobre un campo `ready`, uno
+        precalculado o en modo `precomputed_only` sigue siendo 200 con el
+        documento guardado.
+        """
         request = geometry.normalize_request(
             body.ra, body.dec, body.fov, body.band, body.refresh, pipeline=self.settings.pipeline_version
         )
-        meta = self.manager.submit(request)
+        meta = self.manager.submit(request, complete_partial=True)
         response = FieldResponse(id=meta.id, status=meta.status, events_url=events_url(meta.id), meta=meta)
         return (200 if meta.status in FINISHED_FIELD_STATUSES else 202), response
 

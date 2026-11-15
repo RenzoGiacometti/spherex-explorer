@@ -91,7 +91,8 @@ def test_a_new_field_through_the_api_with_the_real_cutouts(stub: IrsaStub, tmp_p
     )
     app = create_app(settings, deps=deps)
 
-    with TestClient(app) as client:
+    # Sin gzip: se comparan los bytes y el `Content-Length` sin comprimir (httpx pide gzip por defecto).
+    with TestClient(app, headers={"Accept-Encoding": "identity"}) as client:
         manager = app.state.backend.manager
         # 1. POST con el centro de Barnard, con mas decimales de los que entran en el `id`.
         posted = client.post("/api/field", json={"ra": RA, "dec": DEC, "band": 3})

@@ -91,6 +91,9 @@ class Settings:
     # Carpeta con el frontend compilado (`frontend/dist`). Si se indica, el backend lo sirve
     # en `/` desde el mismo origen que la API; vacio, solo responde `/api`.
     static_dir: str = ""
+    # Documentacion interactiva de la API (`/docs`, `/redoc` y `/openapi.json`). Prendida en
+    # desarrollo; la imagen del despliegue publico la apaga con `SPHEREX_DOCS_ENABLED=0`.
+    docs_enabled: bool = True
 
     # Identidad del campo.
     field_epoch: float = FIELD_EPOCH

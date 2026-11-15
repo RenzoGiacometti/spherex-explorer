@@ -117,7 +117,9 @@ def servers(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[Pair, Se
     seed_sesame(settings, main_names=True)
     before = fixture_snapshot()
     fake_app = create_fake_app(FIELDS_DIR, sesame_dir=SESAME_DIR, seconds=100.0, settings=Settings())
-    with TestClient(create_app(settings)) as real, TestClient(fake_app) as fake:
+    # La aplicacion real comprime si el cliente acepta gzip y el servidor falso no: se comparan sin comprimir.
+    identity = {"Accept-Encoding": "identity"}
+    with TestClient(create_app(settings), headers=identity) as real, TestClient(fake_app, headers=identity) as fake:
         yield Pair(real, fake), settings
     assert fixture_snapshot() == before, "la aplicacion real escribio en los campos de muestra"
 
@@ -192,7 +194,7 @@ def test_planes_aux_cube_and_preview(
         for params in (None, {"rev": plane.rev - 1}, {"rev": plane.rev + 1}):
             other = pair.get(url, params=params)
             assert other.content == current.content and other.headers["cache-control"] == "no-cache"
-        packed = pair.get(aux_url)
+        packed = pair.get(aux_url, headers={"Accept-Encoding": "gzip"})
         assert packed.headers["content-encoding"] == "gzip" and packed.headers["x-plane-rev"] == str(plane.rev)
         plain = pair.get(aux_url, headers={"Accept-Encoding": "identity"})
         assert "content-encoding" not in plain.headers and len(plain.content) == 6 * size // 4

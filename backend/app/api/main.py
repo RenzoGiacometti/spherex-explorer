@@ -29,6 +29,19 @@ Como esta armado:
   (`app.api.errors`), tambien las del framework y las rutas que no existen.
 - No hay CORS: el frontend llega por el mismo origen (el proxy de `/api` de
   Vite en desarrollo). El servidor falso si lo tiene, porque es de desarrollo.
+- Espectro: `GET /api/spectrum` es el router de `app.spectrum.router`, sumado
+  aca con el mismo modelo de error.
+- Compresion (`app.api.compression`): si el cliente acepta gzip, sale
+  comprimido todo lo que pese 1 kB o mas: JSON, los planos y el cubo (el
+  contrato permite gzip negociado) y el frontend compilado. Dos respuestas
+  quedan como estan: el flujo de eventos (cada evento sale entero y en el
+  momento) y `/aux`, que ya negocia gzip por su cuenta y llega con
+  `Content-Encoding`. Las cabeceras de cache no cambian; se suma
+  `Vary: Accept-Encoding`.
+- `/docs`, `/redoc` y `/openapi.json` existen solo con `settings.docs_enabled`
+  (la imagen publica los apaga).
+- Frontend compilado: si `settings.static_dir` esta, se sirve en `/` con las
+  cabeceras de cache de `app.api.static.FrontendFiles`.
 """
 
 from __future__ import annotations
@@ -41,10 +54,10 @@ from typing import Annotated
 from fastapi import FastAPI, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse, Response, StreamingResponse
-from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.api.backend import ApiBackend
+from app.api.compression import NegotiatedGZipMiddleware
 from app.api.errors import register_error_handlers
 from app.api.headers import (
     BINARY_MEDIA_TYPE,
@@ -56,12 +69,14 @@ from app.api.headers import (
     json_with_etag,
     revision_cache_control,
 )
+from app.api.static import FrontendFiles
 from app.config import Settings, get_settings
 from app.contract import FieldRequest, PriorityRequest
 from app.jobs.deps import JobDeps
 from app.jobs.events import PING, FieldEvent, encode_sse
 from app.jobs.manager import JobManager
 from app.jobs.store import cube_nbytes
+from app.spectrum.router import router as spectrum_router
 
 # Silencio minimo entre dos `: ping`, por si la configuracion trae un valor que no sirve.
 _MIN_PING_S = 0.01
@@ -115,10 +130,20 @@ def create_app(
         finally:
             await run_in_threadpool(backend.stop)
 
-    app = FastAPI(title="SPHEREx Explorer API", version=__version__, lifespan=lifespan)
+    docs = settings.docs_enabled
+    app = FastAPI(
+        title="SPHEREx Explorer API",
+        version=__version__,
+        lifespan=lifespan,
+        docs_url="/docs" if docs else None,
+        redoc_url="/redoc" if docs else None,
+        openapi_url="/openapi.json" if docs else None,
+    )
     app.state.settings = settings
     app.state.backend = backend
     register_error_handlers(app)
+    # No toca el flujo de eventos ni lo que ya trae `Content-Encoding` (`/aux`): ver app/api/compression.py.
+    app.add_middleware(NegotiatedGZipMiddleware)
 
     @app.get("/api/health")
     async def health() -> dict[str, str]:
@@ -190,10 +215,13 @@ def create_app(
         resolved = await run_in_threadpool(backend.resolve, name)
         return JSONResponse(content=resolved.model_dump(mode="json"))
 
+    # `GET /api/spectrum` (app/spectrum/router.py). Toma la configuracion de `app.state.settings`.
+    app.include_router(spectrum_router)
+
     if settings.static_dir:
         # Despliegue de un solo proceso: el frontend ya compilado (frontend/dist) sale del mismo
         # origen que la API. Va al final para que las rutas de /api tengan prioridad.
-        app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="frontend")
+        app.mount("/", FrontendFiles(directory=settings.static_dir, html=True), name="frontend")
 
     return app
 

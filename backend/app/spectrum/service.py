@@ -28,6 +28,10 @@ Documento (claves en snake_case, como el contrato del cubo):
     warnings    avisos (`saturated_source`, `offset_source`, `masked_exposures`,
                 `wave_table_version`)
 
+`saturated_source` tiene la forma del aviso del mismo nombre del documento del
+campo (docs/contrato-cubo.md, seccion 5): `ra`, `dec`, `radius_arcsec` (aca, el
+radio de la apertura), `epochs` y `detectors`; suma `n_exposures` y `n_total`.
+
 `offset_source` avisa que, en esos detectores, la luz dentro de la apertura no
 esta centrada en el objeto: hay otra fuente adentro. Le pasa a WISE 0855, que
 tiene una estrella de fondo a pocos segundos de arco (SPEC.md, seccion 2): por
@@ -479,11 +483,16 @@ def build_document(
         if result.measurement.status == "saturated" and result.detector in saturated_detectors
     ]
     if saturated:
+        # Misma forma que el aviso `saturated_source` del documento del campo (docs/contrato-cubo.md,
+        # seccion 5): `ra`, `dec`, `radius_arcsec`, `epochs` y `detectors`. Aca el radio es el de la
+        # apertura (`aperture.radius_arcsec`), que es donde se busco la saturacion. `n_exposures` y
+        # `n_total` son de este modulo.
         warnings.append(
             {
                 "code": "saturated_source",
                 "ra": _round(target.ra, 5),
                 "dec": _round(target.dec, 5),
+                "radius_arcsec": _round(config.radius_px * NATIVE_PIXEL_ARCSEC, 2),
                 "epochs": sorted({epoch for _, epoch in saturated}),
                 "detectors": sorted(saturated_detectors),
                 "n_exposures": len(saturated),

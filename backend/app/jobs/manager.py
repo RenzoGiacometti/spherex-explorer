@@ -234,7 +234,7 @@ class JobManager:
 
     # ------------------------------------------------------------------ pedidos
 
-    def submit(self, request: NormalizedRequest) -> FieldMeta:
+    def submit(self, request: NormalizedRequest, *, complete_partial: bool = False) -> FieldMeta:
         """Pide un campo y devuelve su documento de metadatos actual. Es idempotente.
 
         - Si el campo esta en el almacen y terminado, devuelve sus metadatos sin
@@ -254,6 +254,20 @@ class JobManager:
         deteniendo. Un campo que quedo a medio armar o fallido no cuenta como
         existente: se arma de nuevo. Sobre un campo precalculado `refresh` se
         ignora.
+
+        `complete_partial` es lo que pide la API (`ApiBackend.submit`): con
+        `request.refresh` sobre un campo terminado en `partial` que vive en la
+        cache, en vez del trabajo aparte y silencioso se crea un trabajo comun
+        con el mismo `id`, que se ve como el de un campo nuevo (`queued`,
+        `listing`, `downloading` y sus eventos) y devuelve ese documento, con el
+        que quien llama responde 202. Usa la lista de exposiciones guardada si
+        sigue vigente y los recortes que ya estan en la cache: a IRSA solo se le
+        piden los que faltaron. Las revisiones siguen numerando desde las del
+        campo guardado. Mientras dura, el campo no tiene planos hasta que cada
+        uno se vuelve a publicar; si falla queda `failed` y otro `POST` lo arma
+        de nuevo con lo que haya en la cache de recortes. Sin `complete_partial`
+        (el script de precalculo) un `partial` se actualiza como cualquier otro
+        campo terminado, sin dejar de servir lo que tiene.
         """
         field_id = request.field_id
         with self._lock:
@@ -265,10 +279,15 @@ class JobManager:
                     self._reprioritize(job, request.band)
                 return job.snapshot()
             stored = self._stored(field_id)
+            completing = False
             if stored is not None:
-                if request.refresh and not self._settings.precomputed_only:
+                # En modo `precomputed_only` no se arman trabajos: `refresh` no hace nada.
+                if not request.refresh or self._settings.precomputed_only:
+                    return stored
+                completing = complete_partial and self._can_complete(field_id, stored)
+                if not completing:
                     self._start_refresh(request, stored)
-                return stored
+                    return stored
             # Un centro casi igual al de un campo armado (coordenadas tipeadas a mano, con menos
             # decimales) abre ese campo en vez de armar otro o de responder que no existe.
             tolerance = self._settings.nearby_field_arcsec
@@ -285,8 +304,9 @@ class JobManager:
                 self._check_no_coverage(request)
             self._check_capacity()
             # Un intento anterior que no termino (fallido, o de otra corrida del backend) deja la
-            # revision de cada plano: este trabajo sigue numerando desde ahi.
-            previous = job.snapshot() if job is not None else self._leftover(field_id)
+            # revision de cada plano: este trabajo sigue numerando desde ahi. Lo mismo con el campo
+            # `partial` que se va a completar.
+            previous = job.snapshot() if job is not None else (stored if completing else self._leftover(field_id))
             job = FieldJob(
                 self,
                 request,
@@ -295,9 +315,14 @@ class JobManager:
                 self._bus,
                 self._deps,
                 position=len(self._waiting) + 1,
-                list_refresh=request.refresh,
+                # Completar un `partial` no vuelve a listar si la lista guardada sigue vigente.
+                list_refresh=request.refresh and not completing,
                 previous=previous,
+                floor=job.revision_floor() if job is not None else None,
             )
+            if completing:
+                # Desde aca lo que hay en el almacen ya no es un campo terminado.
+                self._forget_stored(field_id)
             # Si habia un trabajo fallido de este campo, este lo reemplaza: es el reintento.
             self._jobs[field_id] = job
             job.announce()
@@ -546,6 +571,15 @@ class JobManager:
         self._refreshing[field_id] = job
         self._waiting.append(job)
         self._pump()
+
+    def _can_complete(self, field_id: str, stored: FieldMeta) -> bool:
+        """Si un campo terminado se puede volver a armar a la vista para completarlo. Con el candado.
+
+        Solo un `partial` de la cache: uno precalculado se regenera con su
+        script, y mientras corre un `refresh` silencioso del campo no se arranca
+        otro trabajo sobre los mismos archivos.
+        """
+        return stored.status == "partial" and field_id not in self._refreshing and not self._is_precomputed(field_id)
 
     def _is_precomputed(self, field_id: str) -> bool:
         folder = self._store.locate(field_id)

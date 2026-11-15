@@ -11,10 +11,11 @@
   y `field_center` de `/api/resolve`.
 
 Responde el documento de `service.py`. Una fuente saturada no es un error:
-llega con `status: "saturated"`, `points` vacio y el aviso `saturated_source`.
+llega con `status: "saturated"`, `points` vacio y el aviso `saturated_source`,
+que tiene la forma del aviso del mismo nombre del documento del campo.
 Errores, con el cuerpo del contrato: `invalid_request` y `not_found`.
 
-Para sumarla al backend: `app.include_router(router)` en `app/api/main.py`.
+La suma a la aplicacion `create_app` de `app/api/main.py` (`app.include_router(router)`).
 """
 
 from __future__ import annotations

@@ -49,7 +49,9 @@ def build(tmp_path: Path) -> Iterator[HarnessFactory]:
 
 
 def client_of(harness: Harness) -> TestClient:
-    return TestClient(create_app(manager=harness.manager))
+    # Sin gzip: estas pruebas miran los bytes y el `Content-Length` de cada recurso tal como los arma la
+    # ruta. La aplicacion comprime lo que pasa de 1 kB si el cliente lo acepta, y httpx lo pide por defecto.
+    return TestClient(create_app(manager=harness.manager), headers={"Accept-Encoding": "identity"})
 
 
 def serial(build: HarnessFactory, counts: dict[tuple[int, int], int] | None = None, **options: Any) -> Harness:
@@ -147,7 +149,7 @@ def test_every_resource_at_each_stage_of_a_new_field(build: HarnessFactory) -> N
         assert (response.headers["cache-control"], response.headers["x-plane-rev"]) == ("no-cache", "1"), params
 
     # Las capas auxiliares son las de esa misma revision.
-    aux = client.get(f"{base}/aux/1/3")
+    aux = client.get(f"{base}/aux/1/3", headers={"Accept-Encoding": "gzip"})
     assert aux.status_code == 200
     assert aux.headers["content-type"] == "application/octet-stream"
     assert (aux.headers["cache-control"], aux.headers["x-plane-rev"]) == ("no-cache", "1")
@@ -200,7 +202,7 @@ def test_every_resource_at_each_stage_of_a_new_field(build: HarnessFactory) -> N
     assert client.get(f"{base}/plane/1/5", params={"rev": 2}).headers["cache-control"] == IMMUTABLE
 
     # Capas auxiliares: comprimidas como estan en disco, o sin comprimir si el cliente no acepta gzip.
-    packed = client.get(f"{base}/aux/1/3")
+    packed = client.get(f"{base}/aux/1/3", headers={"Accept-Encoding": "gzip"})
     assert (packed.headers["content-encoding"], packed.headers["x-plane-rev"]) == ("gzip", "2")
     plain = client.get(f"{base}/aux/1/3", headers={"Accept-Encoding": "identity"})
     assert "content-encoding" not in plain.headers and plain.headers["content-length"] == str(AUX_NBYTES)

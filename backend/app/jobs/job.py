@@ -90,6 +90,9 @@ logger = logging.getLogger(__name__)
 
 JobState = Literal["queued", "active", "done", "failed", "stopped"]
 
+# Revision del campo y de cada plano que ya numero un intento anterior (`FieldJob.revision_floor`).
+RevisionFloor = tuple[int, dict[Key, int]]
+
 # Estados de un plano que ya no va a cambiar en esta pasada.
 _SETTLED_PLANE_STATUSES: frozenset[str] = CUBE_PLANE_STATUSES | {"empty"}
 
@@ -191,6 +194,7 @@ class FieldJob:
         base: FieldMeta | None = None,
         list_refresh: bool = False,
         previous: FieldMeta | None = None,
+        floor: RevisionFloor | None = None,
     ) -> None:
         self.host = host
         self.request = request
@@ -240,11 +244,20 @@ class FieldJob:
         # fallido, o lo que quedo en el almacen al apagarse el backend). Las revisiones de este trabajo
         # siguen desde ahi: esos binarios ya se sirvieron con `?rev=N` como `immutable`, y la misma URL
         # no puede pasar a devolver otros bytes (contrato, seccion 5: "el binario de una revision no cambia").
+        # `previous` tambien puede ser un campo terminado en `partial` que este trabajo vuelve a armar
+        # para completarlo (`JobManager.submit` con `complete_partial`): vale lo mismo, y ademas la
+        # revision del campo sigue a la que tenia, porque `/cube?rev=N` ya se sirvio como `immutable`.
         self._base_revs: dict[Key, int] = (
             {(plane.epoch, plane.detector): plane.rev for plane in previous.planes or ()}
             if previous is not None
             else {}
         )
+        self._base_field_rev = previous.rev if previous is not None else 0
+        if floor is not None:
+            # Lo que ya habia numerado el trabajo al que este reemplaza (ver `revision_floor`).
+            self._base_field_rev = max(self._base_field_rev, floor[0])
+            for key, rev in floor[1].items():
+                self._base_revs[key] = max(self._base_revs.get(key, 0), rev)
         self._stop_requested = False
         # Con la vista de WISE desactivada (`Settings.preview_enabled`) no hay nada que esperar.
         self._preview_closed = self.silent or not settings.preview_enabled
@@ -287,6 +300,20 @@ class FieldJob:
             if self.in_flight:
                 meta.progress.elapsed_s = self._elapsed()
         return meta
+
+    def revision_floor(self) -> RevisionFloor:
+        """Revision del campo y de cada plano desde las que sigue numerando quien reintente este trabajo.
+
+        El documento de un trabajo que fallo no alcanza: un plano que no llego a
+        tener binario en este intento figura con `rev` 0, y el campo tambien,
+        aunque un intento anterior ya haya servido revisiones mas altas.
+        """
+        with self.lock:
+            revs = dict(self._base_revs)
+            for plane in self.meta.planes or ():
+                key = (plane.epoch, plane.detector)
+                revs[key] = max(revs.get(key, 0), plane.rev)
+            return max(self._base_field_rev, self.meta.rev), revs
 
     def announce(self) -> None:
         """Primeros eventos del trabajo: `state` (con el id 1) y `queued` con la posicion inicial."""
@@ -836,7 +863,8 @@ class FieldJob:
             final.provenance.download_mode = self._download_mode()
             final.provenance.built_at = self.deps.timestamp()
         final.status = "partial" if final.progress.cutouts_failed > 0 else "ready"
-        final.rev = 1
+        # 1 en un campo nuevo; en uno que ya habia terminado y se volvio a armar, la siguiente.
+        final.rev = self._base_field_rev + 1
         final.progress.phase = "done"
         final.progress.queue_position = 0
         final.progress.elapsed_s = self._elapsed()

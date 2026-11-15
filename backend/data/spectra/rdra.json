@@ -151,6 +151,7 @@
    "code": "saturated_source",
    "ra": 248.16723,
    "dec": 66.75502,
+   "radius_arcsec": 9.23,
    "epochs": [
     1,
     2,

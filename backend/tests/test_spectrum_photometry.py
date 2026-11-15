@@ -294,6 +294,9 @@ def test_barnard_is_reported_as_saturated_instead_of_a_spectrum() -> None:
     (warning,) = [item for item in document["warnings"] if item["code"] == "saturated_source"]
     assert warning["detectors"] == [3, 6]
     assert warning["n_exposures"] == 12
+    # La forma del aviso `saturated_source` del documento del campo (contrato, seccion 5).
+    assert {"ra", "dec", "radius_arcsec", "epochs", "detectors"} <= set(warning)
+    assert warning["radius_arcsec"] == document["aperture"]["radius_arcsec"]
     assert {item["detector"]: item["n_saturated"] for item in document["detectors"]} == {3: 6, 6: 6}
 
 

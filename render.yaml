@@ -19,3 +19,7 @@ services:
         value: "2"
       - key: SPHEREX_MAX_QUEUED_JOBS
         value: "10"
+      # Descargas en paralelo contra IRSA. Con 10 responde "503 Server busy" a buena parte de
+      # los pedidos; con 4 responde bien.
+      - key: SPHEREX_MAX_CUTOUT_DOWNLOADS
+        value: "4"
