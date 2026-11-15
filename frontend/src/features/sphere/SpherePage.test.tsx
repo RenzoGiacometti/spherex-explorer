@@ -44,23 +44,6 @@ const BARNARD = {
   moved_arcsec: 270.4,
 };
 
-const WISE_0855 = {
-  query: "WISE J085510.83-071442.5",
-  name: "WISEA J085510.74-071442.5",
-  source: "sesame",
-  object_type: "BD*",
-  j2000: { ra: 133.818908, dec: -7.247048 },
-  motion: {
-    pm_ra: -8123.7,
-    pm_dec: 673.2,
-    parallax: 439.0,
-    radial_velocity: null,
-    per_year_arcsec: 8.15,
-  },
-  field_center: { ra: 133.7598, dec: -7.2422, epoch: 2026.0 },
-  moved_arcsec: 211.7,
-};
-
 function coordinates(query: string, ra: number, dec: number) {
   return {
     query,
@@ -126,6 +109,13 @@ function deferred(): { promise: Promise<Response>; resolve: (response: Response)
 
 const EXAMPLE = "Barnard's Star · 269.4463 +4.7683";
 
+/**
+ * Otro nombre de catalogo de Barnard's Star. No esta entre los alias de los
+ * campos guardados (featured.ts), que se abren sin red: este pasa por
+ * /api/resolve como cualquier nombre.
+ */
+const OTHER_NAME = "BD+04 3561a";
+
 function open(search: string): void {
   window.history.replaceState(null, "", `/${search}`);
   useUrlState.getState().syncFromLocation();
@@ -183,6 +173,8 @@ function clickLink(link: HTMLElement, init: MouseEventInit = {}): boolean {
 
 beforeEach(async () => {
   open("");
+  // "Lugar al azar" recuerda el ultimo campo en la pestana (targets.ts).
+  window.sessionStorage.clear();
   initI18n("es");
   await setLanguage("es");
   // Un navegador sin WebGL: el contexto no se puede crear, y three.js y la esfera lo avisan.
@@ -247,6 +239,22 @@ describe("SpherePage sin WebGL", () => {
     );
     expect(window.history.length).toBe(before + 1);
     expect(announced()).toBe(`Abriendo ${last.label}…`);
+  });
+
+  it("Lugar al azar no repite el campo anterior al volver a la entrada", () => {
+    const last = RANDOM_FIELDS[RANDOM_FIELDS.length - 1] as SkyTarget;
+    const first = render(<SpherePage random={() => 0.999} />);
+    fireEvent.click(randomButton());
+    expect(useUrlState.getState().ra).toBe(last.ra);
+
+    // El visor reemplaza a la entrada; al volver, la pantalla se monta de nuevo.
+    first.unmount();
+    open("");
+    render(<SpherePage random={() => 0.999} />);
+    fireEvent.click(randomButton());
+
+    const other = RANDOM_FIELDS[RANDOM_FIELDS.length - 2] as SkyTarget;
+    expect(useUrlState.getState()).toMatchObject({ ra: other.ra, dec: other.dec });
   });
 
   // ---- Destacados ----------------------------------------------------------
@@ -336,11 +344,11 @@ describe("SpherePage sin WebGL", () => {
       render(<SpherePage resolver={fake.resolver} />);
       const before = window.history.length;
 
-      searchFor("  Barnard's Star ");
+      searchFor(`  ${OTHER_NAME} `);
 
       // Resolviendo: se dice, y no se puede volver a enviar ni pedir otro lugar.
-      expect(fake.names).toEqual(["Barnard's Star"]);
-      expect(announced()).toBe("Buscando Barnard's Star…");
+      expect(fake.names).toEqual(["BD+04 3561a"]);
+      expect(announced()).toBe("Buscando BD+04 3561a…");
       expect(isDisabled(submitButton())).toBe(true);
       expect(isDisabled(randomButton())).toBe(true);
       expect(screen.getByRole("search").getAttribute("aria-busy")).toBe("true");
@@ -351,7 +359,7 @@ describe("SpherePage sin WebGL", () => {
       await waitFor(() => expect(useUrlState.getState().ra).toBe(269.4463));
       // field_center, a 4,5 minutos de arco de la posicion de catalogo (j2000).
       expect(window.location.search).toBe(
-        "?ra=269.4463&dec=4.7683&fov=0.1667&band=3&mode=blink&name=Barnard%27s+Star",
+        "?ra=269.4463&dec=4.7683&fov=0.1667&band=3&mode=blink&name=BD%2B04+3561a",
       );
       expect(urlState()).toEqual({
         ...DEFAULT_URL_STATE,
@@ -360,7 +368,7 @@ describe("SpherePage sin WebGL", () => {
         fov: 0.1667,
         band: 3,
         mode: "blink",
-        name: "Barnard's Star",
+        name: "BD+04 3561a",
       });
       expect(window.history.length).toBe(before + 1);
       expect(screen.queryByRole("alert")).toBeNull();
@@ -370,22 +378,23 @@ describe("SpherePage sin WebGL", () => {
       const fake = backend(() => json(BARNARD));
       render(<SpherePage resolver={fake.resolver} />);
 
-      fireEvent.change(input(), { target: { value: "Barnard's Star" } });
+      fireEvent.change(input(), { target: { value: OTHER_NAME } });
       fireEvent.click(submitButton());
 
       await waitFor(() => expect(useUrlState.getState().dec).toBe(4.7683));
-      expect(fake.names).toEqual(["Barnard's Star"]);
+      expect(fake.names).toEqual([OTHER_NAME]);
     });
 
     it("por coordenadas: pasa por /api/resolve y abre el campo sin nombre", async () => {
-      const fake = backend((name) => json(coordinates(name, 133.7598, -7.2422)));
+      // M 31: lejos de todo campo guardado.
+      const fake = backend((name) => json(coordinates(name, 10.6847, 41.269)));
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("133.7598 -7.2422");
+      searchFor("10.6847 +41.2690");
 
-      await waitFor(() => expect(useUrlState.getState().ra).toBe(133.7598));
-      expect(fake.names).toEqual(["133.7598 -7.2422"]);
-      expect(window.location.search).toBe("?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink");
+      await waitFor(() => expect(useUrlState.getState().ra).toBe(10.6847));
+      expect(fake.names).toEqual(["10.6847 +41.2690"]);
+      expect(window.location.search).toBe("?ra=10.6847&dec=41.269&fov=0.1667&band=3&mode=blink");
       expect(urlState().name).toBeNull();
     });
 
@@ -400,23 +409,95 @@ describe("SpherePage sin WebGL", () => {
       expect(fake.names).toEqual(["08h 55m 02s -07° 14′ 32″"]);
     });
 
-    it("el apodo de un destacado se busca por su nombre de catalogo", async () => {
+    it("unas coordenadas con coma decimal llegan al backend como se escribieron", async () => {
+      const fake = backend((name) => json(coordinates(name, 10.6847, 41.269)));
+      render(<SpherePage resolver={fake.resolver} />);
+
+      searchFor("10,6847 +41,2690");
+
+      await waitFor(() => expect(useUrlState.getState().ra).toBe(10.6847));
+      expect(fake.names).toEqual(["10,6847 +41,2690"]);
+    });
+
+    // ---- Campos guardados --------------------------------------------------
+
+    it.each([
+      ["wise 0855", "WISE 0855", 133.7598, -7.2422, 6, "WISE J085510.83-071442.5"],
+      ["W0855", "WISE 0855", 133.7598, -7.2422, 6, "WISE J085510.83-071442.5"],
+      ["Barnards Star", "Barnard's Star", 269.4463, 4.7683, 3, "Barnard's Star"],
+      ["m51", "M 51", 202.4696, 47.1953, 3, "M 51"],
+      ["Nebulosa del Cangrejo", "M 1", 83.6324, 22.0174, 3, "M 1"],
+    ] as const)(
+      "el alias %s abre su campo guardado sin pasar por la red",
+      async (text, label, ra, dec, band, name) => {
+        const fake = backend(() => errorResponse("upstream_unavailable", 503, true));
+        render(<SpherePage resolver={fake.resolver} />);
+
+        searchFor(text);
+
+        await waitFor(() => expect(useUrlState.getState().ra).toBe(ra));
+        expect(fake.names).toEqual([]);
+        // Con el nombre que resuelve el backend (el visor lo vuelve a pedir) y su banda.
+        expect(urlState()).toEqual({
+          ...DEFAULT_URL_STATE,
+          ra,
+          dec,
+          fov: 0.1667,
+          band,
+          mode: "blink",
+          name,
+        });
+        expect(announced()).toBe(`Abriendo ${label}…`);
+      },
+    );
+
+    it.each([
+      // Coordenadas de 2010 de WISE 0855: a 126 segundos de arco del centro guardado.
+      [
+        "08h55m10.831s -07d14m42.53s",
+        { ra: 133.7951, dec: -7.2451 },
+        "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5",
+      ],
+      [
+        "17h57m47s +04d46m06s",
+        { ra: 269.4458, dec: 4.7683 },
+        "?ra=269.4463&dec=4.7683&fov=0.1667&band=3&mode=blink&name=Barnard%27s+Star",
+      ],
+      // El centro exacto, como en el ejemplo del buscador.
+      [
+        "133.7598 -7.2422",
+        { ra: 133.7598, dec: -7.2422 },
+        "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5",
+      ],
+    ] as const)(
+      "las coordenadas %s caen en un campo guardado y lo abren completo",
+      async (text, center, search) => {
+        const fake = backend((name) => json(coordinates(name, center.ra, center.dec)));
+        render(<SpherePage resolver={fake.resolver} />);
+
+        searchFor(text);
+
+        await waitFor(() => expect(useUrlState.getState().ra).not.toBeNull());
+        expect(fake.names).toEqual([text]);
+        // El centro, el nombre y la banda del campo guardado, no las coordenadas buscadas.
+        expect(window.location.search).toBe(search);
+      },
+    );
+
+    it("el nombre de otro objeto que cae en un campo guardado lo abre con el nombre buscado", async () => {
+      // NGC 5195, la companiera de M 51: a 4,4 minutos de arco de su centro.
       const fake = backend((name) =>
-        name === "WISE J085510.83-071442.5" ? json(WISE_0855) : errorResponse("not_resolved", 404),
+        json({ ...coordinates(name, 202.4983, 47.2661), name: "NGC 5195", source: "sesame" }),
       );
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("wise 0855");
+      searchFor("NGC 5195");
 
-      await waitFor(() => expect(useUrlState.getState().ra).toBe(133.7598));
-      expect(fake.names).toEqual(["WISE J085510.83-071442.5"]);
-      // El visor vuelve a resolver `name`: tiene que ser el que el catalogo conoce.
-      expect(urlState()).toMatchObject({
-        dec: -7.2422,
-        name: "WISE J085510.83-071442.5",
-        // Un destacado buscado por nombre abre en su banda: WISE 0855 solo se detecta en la 6.
-        band: 6,
-      });
+      await waitFor(() => expect(useUrlState.getState().ra).toBe(202.4696));
+      expect(fake.names).toEqual(["NGC 5195"]);
+      expect(window.location.search).toBe(
+        "?ra=202.4696&dec=47.1953&fov=0.1667&band=3&mode=blink&name=NGC+5195",
+      );
     });
 
     it("abre con la vista, la banda y el modo por defecto aunque la URL traiga otros", async () => {
@@ -428,6 +509,8 @@ describe("SpherePage sin WebGL", () => {
 
       await waitFor(() => expect(useUrlState.getState().ra).toBe(269.4463));
       expect(urlState()).toEqual({
+        // Lo demas del estado de la URL queda en su valor por defecto.
+        ...DEFAULT_URL_STATE,
         ra: 269.4463,
         dec: 4.7683,
         fov: 0.1667,
@@ -443,15 +526,23 @@ describe("SpherePage sin WebGL", () => {
       });
     });
 
-    it("vacio o con solo espacios no pide nada", () => {
+    it.each([
+      ["vacio", ""],
+      ["con solo espacios", "   "],
+    ] as const)("%s no pide nada y avisa que falta el texto", async (_case, text) => {
       const fake = backend(() => json(BARNARD));
       render(<SpherePage resolver={fake.resolver} />);
 
-      fireEvent.submit(screen.getByRole("search"));
-      searchFor("   ");
+      searchFor(text);
 
+      const alert = await screen.findByRole("alert");
+      expect(alert.textContent).toBe(esEntry.search.empty);
+      expect(document.activeElement).toBe(input());
       expect(fake.names).toEqual([]);
-      expect(announced()).toBe("");
+      expect(urlState()).toEqual(DEFAULT_URL_STATE);
+
+      // Al escribir se va el aviso.
+      fireEvent.change(input(), { target: { value: "M" } });
       expect(screen.queryByRole("alert")).toBeNull();
     });
 
@@ -473,9 +564,10 @@ describe("SpherePage sin WebGL", () => {
       ],
       ["red caida", () => Promise.reject(new TypeError("Failed to fetch")), esErrors.code.network],
       [
+        // Coordenadas fuera de rango: un texto propio, que no habla del campo de vision.
         "texto que el backend rechaza",
         () => errorResponse("invalid_request", 422),
-        esErrors.code.invalid_request,
+        esEntry.search.invalidCoordinates,
       ],
       [
         "respuesta fuera del contrato",
@@ -534,16 +626,16 @@ describe("SpherePage sin WebGL", () => {
       });
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("Barnard's Star");
+      searchFor(OTHER_NAME);
       expect((await screen.findByRole("alert")).textContent).toBe(NAME_SERVICE_DOWN);
 
       fireEvent.submit(screen.getByRole("search"));
       // Mientras reintenta no queda el error anterior a la vista.
       expect(screen.queryByRole("alert")).toBeNull();
-      expect(announced()).toBe("Buscando Barnard's Star…");
+      expect(announced()).toBe(`Buscando ${OTHER_NAME}…`);
 
       await waitFor(() => expect(useUrlState.getState().ra).toBe(269.4463));
-      expect(fake.names).toEqual(["Barnard's Star", "Barnard's Star"]);
+      expect(fake.names).toEqual([OTHER_NAME, OTHER_NAME]);
     });
 
     it("al corregir el texto se borra el error", async () => {
@@ -565,10 +657,10 @@ describe("SpherePage sin WebGL", () => {
       const fake = backend(() => answer.promise);
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("Barnard's Star");
+      searchFor(OTHER_NAME);
       expect(fake.signals[0]?.aborted).toBe(false);
 
-      fireEvent.change(input(), { target: { value: "Barnard's Sta" } });
+      fireEvent.change(input(), { target: { value: "BD+04 3561" } });
 
       expect(fake.signals[0]?.aborted).toBe(true);
       expect(isDisabled(submitButton())).toBe(false);
@@ -588,7 +680,7 @@ describe("SpherePage sin WebGL", () => {
       const fake = backend(() => answer.promise);
       render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("Barnard's Star");
+      searchFor(OTHER_NAME);
       clickLink(screen.getByRole("link", { name: "R Draconis" }));
       expect(fake.signals[0]?.aborted).toBe(true);
 
@@ -608,7 +700,7 @@ describe("SpherePage sin WebGL", () => {
       const resolver: NameResolver = { resolve: () => answered };
       render(<SpherePage resolver={resolver} />);
 
-      searchFor("Barnard's Star");
+      searchFor(OTHER_NAME);
       clickLink(screen.getByRole("link", { name: "R Draconis" }));
 
       await act(async () => {
@@ -622,7 +714,7 @@ describe("SpherePage sin WebGL", () => {
       const fake = backend(() => deferred().promise);
       const { unmount } = render(<SpherePage resolver={fake.resolver} />);
 
-      searchFor("Barnard's Star");
+      searchFor(OTHER_NAME);
       unmount();
 
       expect(fake.signals[0]?.aborted).toBe(true);

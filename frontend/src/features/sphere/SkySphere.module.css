@@ -114,26 +114,20 @@
   letter-spacing: var(--type-data-tracking);
   font-variant-numeric: var(--type-data-numeric);
   white-space: nowrap;
-  opacity: 0;
+  /*
+   * El nombre va siempre, no solo al pasar el cursor: un anillo sin rotulo no
+   * dice que objeto marca. La sombra en el negro del fondo lo separa de las
+   * estrellas y de la Via Lactea.
+   */
+  text-shadow:
+    0 0 2px var(--color-void),
+    0 0 6px var(--color-void);
   pointer-events: none;
-  transition: opacity 160ms ease-out;
-}
-
-.marker:hover .name,
-.marker:focus-visible .name {
-  opacity: 1;
 }
 
 /* En la mira de la ventana al cielo el nombre va debajo, no al lado. */
 .marker[data-unlabelled="true"] .name {
   display: none;
-}
-
-/* Sin cursor no hay "pasar por encima": en pantallas tactiles el nombre va siempre. */
-@media (hover: none) {
-  .name {
-    opacity: 1;
-  }
 }
 
 /* Marca de comprobacion de la pagina de prueba: blanca, mas grande y sin interaccion. */
@@ -151,13 +145,11 @@
 .marker[data-kind="probe"] .name {
   left: calc(50% + 18px);
   font: var(--type-data-sm-font);
-  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .canvas,
-  .ring,
-  .name {
+  .ring {
     transition: none;
   }
 }

@@ -4,6 +4,8 @@
     "submit": "Search",
     "example": "{{name}} · {{coordinates}}",
     "resolving": "Searching for {{query}}…",
+    "empty": "Type a name or coordinates.",
+    "invalidCoordinates": "Those coordinates are not valid. Right ascension goes from 0 to 360 degrees (or 0 to 24 hours) and declination from -90 to +90 degrees.",
     "advice": {
       "not_resolved": "Try another name, or search by coordinates."
     },

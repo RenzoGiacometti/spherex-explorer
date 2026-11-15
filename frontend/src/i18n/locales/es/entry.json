@@ -4,6 +4,8 @@
     "submit": "Buscar",
     "example": "{{name}} · {{coordinates}}",
     "resolving": "Buscando {{query}}…",
+    "empty": "Hay que escribir un nombre o unas coordenadas.",
+    "invalidCoordinates": "Esas coordenadas no son válidas. La ascensión recta va de 0 a 360 grados (o de 0 a 24 horas) y la declinación, de -90 a +90 grados.",
     "advice": {
       "not_resolved": "Se puede probar con otro nombre o con coordenadas."
     },

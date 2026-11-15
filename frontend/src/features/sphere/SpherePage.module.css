@@ -193,6 +193,15 @@
   gap: var(--space-sm);
 }
 
+/*
+ * Los cinco objetos del desafio como `quick-link`, en un renglon sobre los
+ * accesos y alineados con ellos. El selector lleva `.dock` para ganarle al
+ * centrado de la lista (components/QuickLink.module.css).
+ */
+.dock .featured {
+  justify-content: flex-start;
+}
+
 /* Ventana al cielo: abajo, en la zona del pulgar, solo el boton principal. */
 .windowDock {
   display: flex;
@@ -303,6 +312,24 @@
 
   .actions {
     flex-direction: column;
+  }
+
+  /*
+   * En el celular los cinco no entran en un renglon y dos renglones le sacan
+   * lugar al cielo: van en uno solo que se desliza hacia el costado, sangrado
+   * hasta el borde de la pantalla para que se note que sigue. El relleno
+   * vertical deja lugar al anillo de foco, que el desplazamiento recortaria.
+   */
+  .dock .featured {
+    flex-wrap: nowrap;
+    margin: calc(-1 * var(--space-xs)) calc(-1 * var(--space-sm));
+    padding: var(--space-xs) var(--space-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .dock .featured > * {
+    flex: none;
   }
 
   .guide {

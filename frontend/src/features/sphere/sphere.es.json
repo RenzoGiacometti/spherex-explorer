@@ -7,6 +7,7 @@
   "random": "Lugar al azar",
   "markers": {
     "nav": "Objetos destacados",
+    "sky": "Objetos destacados sobre el cielo",
     "open": "Abrir {{name}} en el visor"
   },
   "opening": "Abriendo {{name}}…",

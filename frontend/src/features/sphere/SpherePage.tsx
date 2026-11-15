@@ -17,6 +17,7 @@ import {
   type FoundPlace,
   featuredUrlPatch,
   SEARCH_EXAMPLE,
+  savedFieldAt,
   typedCoordinates,
   useObjectSearch,
   type ViewerUrlPatch,
@@ -34,7 +35,7 @@ import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
 import { ENTRY_SHORTCUTS, type EntryShortcut } from "./shortcuts";
 import { angularSeparation, clamp } from "./skyMath";
-import { pickRandomField, SKY_TARGETS } from "./targets";
+import { lastRandomFieldId, pickRandomField, rememberRandomField, SKY_TARGETS } from "./targets";
 import { useSphereTexts } from "./texts";
 import { useSkyWindow } from "./useSkyWindow";
 
@@ -133,12 +134,12 @@ export interface SpherePageProps {
 /**
  * Pantalla de entrada de la aplicacion: lo que se ve cuando la URL no trae
  * coordenadas (SPEC.md, Etapa 4). El cielo a pantalla completa, los cinco
- * objetos de prueba marcados, el buscador, el boton "Lugar al azar", el que
- * inicia el recorrido guiado (src/features/guide) y, a su lado, dos accesos
- * directos (shortcuts.ts): el viaje en el tiempo y la cortina. Elegir un
- * lugar acerca la camara al punto y abre su campo en el visor. En un telefono
- * suma la "ventana al cielo": la esfera sigue la direccion a la que apunta el
- * aparato.
+ * objetos de prueba marcados y tambien listados como accesos sobre el
+ * buscador, el buscador, el boton "Lugar al azar", el que inicia el recorrido
+ * guiado (src/features/guide) y, a su lado, dos accesos directos
+ * (shortcuts.ts): el viaje en el tiempo y la cortina. Elegir un lugar acerca
+ * la camara al punto y abre su campo en el visor. En un telefono suma la
+ * "ventana al cielo": la esfera sigue la direccion a la que apunta el aparato.
  *
  * El buscador es uno solo: se ve como lo dibuja esta pantalla y busca con la
  * logica de src/features/entry (useObjectSearch). Si el navegador no puede
@@ -172,7 +173,6 @@ export function SpherePage({
   const inputRef = useRef<HTMLInputElement>(null);
   const openingRef = useRef(false);
   const restoreTimerRef = useRef<number | null>(null);
-  const lastRandomRef = useRef<string | null>(null);
 
   const [query, setQuery] = useState("");
   const [opening, setOpening] = useState<string | null>(null);
@@ -304,8 +304,10 @@ export function SpherePage({
   }
 
   function handleRandom(): void {
-    const field = pickRandomField(lastRandomRef.current, random);
-    lastRandomRef.current = field.id;
+    // El anterior se recuerda fuera de esta pantalla (targets.ts): al volver del
+    // visor el boton lleva a otro campo, no al mismo del que se viene.
+    const field = pickRandomField(lastRandomFieldId(), random);
+    rememberRandomField(field.id);
     openTarget(field);
   }
 
@@ -314,6 +316,15 @@ export function SpherePage({
     // Despues de un fallo el foco vuelve al campo, para corregir o reintentar.
     if (result.outcome === "failed") inputRef.current?.focus();
     if (result.outcome === "found") await openPlace(result.place);
+  }
+
+  /**
+   * El campo de busqueda no avisa cuando se lo envia vacio (SearchField). El
+   * envio del formulario sube hasta el renglon que lo contiene, y ahi se pide
+   * un nombre o unas coordenadas en vez de no hacer nada.
+   */
+  function handleEmptySubmit(): void {
+    if (query.trim() === "" && !busy) void handleSubmit("");
   }
 
   function handleQueryChange(value: string): void {
@@ -359,6 +370,12 @@ export function SpherePage({
       return;
     }
     if (view === null) return;
+    // Dentro de la huella de un campo guardado se abre ese campo, con su banda y su nombre.
+    const saved = savedFieldAt(view);
+    if (saved !== null) {
+      openTarget(saved);
+      return;
+    }
     search.reset();
     void openPlace({
       label: formatPosition(view.ra, view.dec),
@@ -418,12 +435,19 @@ export function SpherePage({
   }
 
   let errorText: string | undefined;
-  if (status.kind === "error" && opening === null) {
+  if (status.kind === "empty" && opening === null) {
+    errorText = tEntry("search.empty");
+    hintText = undefined;
+  } else if (status.kind === "error" && opening === null) {
     if (status.code === "upstream_unavailable") {
       // /api/resolve solo sale a la red por un nombre: lo caido es el servicio
       // de nombres, no el archivo de datos del texto generico. Las coordenadas
       // no pasan por el, asi que se invita a probar con ellas.
       errorText = tEntry("search.nameServiceDown", { coordinates: exampleCoordinates });
+    } else if (status.code === "invalid_request") {
+      // El backend rechaza asi unas coordenadas fuera de rango. El texto generico
+      // habla del campo de vision, que en el buscador no se elige: va uno propio.
+      errorText = tEntry("search.invalidCoordinates");
     } else {
       const message = tErrors(`code.${status.code}`);
       // Un nombre que no existe tiene una salida a mano: se dice al lado del motivo.
@@ -454,7 +478,8 @@ export function SpherePage({
       <SkySphere
         ref={sphereRef}
         label={t("stage.label")}
-        markersLabel={t("markers.nav")}
+        // La lista de accesos de abajo ya se llama "Objetos destacados": esta lleva otro nombre.
+        markersLabel={t("markers.sky")}
         markers={markers}
         onMarkerClick={(marker, event) => handleTargetClick(marker.id, event)}
         initialView={initialView ?? INITIAL_VIEW}
@@ -534,19 +559,21 @@ export function SpherePage({
                 <span>{notice}</span>
               </p>
             ))}
-            {sphereStatus !== "no-webgl" ? null : (
-              <QuickLinkList label={t("markers.nav")}>
-                {SKY_TARGETS.map((target) => (
-                  <QuickLink
-                    key={target.id}
-                    href={targetHref(target)}
-                    onClick={(event) => handleTargetClick(target.id, event)}
-                  >
-                    {target.label}
-                  </QuickLink>
-                ))}
-              </QuickLinkList>
-            )}
+            {/*
+              Los cinco objetos del desafio, siempre a la vista: al entrar la esfera
+              muestra uno o dos marcadores y el resto queda fuera de la pantalla.
+            */}
+            <QuickLinkList label={t("markers.nav")} className={styles.featured}>
+              {SKY_TARGETS.map((target) => (
+                <QuickLink
+                  key={target.id}
+                  href={targetHref(target)}
+                  onClick={(event) => handleTargetClick(target.id, event)}
+                >
+                  {target.label}
+                </QuickLink>
+              ))}
+            </QuickLinkList>
             {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
             <div className={styles.shortcuts}>
               <GuideLauncher className={classNames(styles.action, styles.guide)} />
@@ -569,7 +596,7 @@ export function SpherePage({
                 </Button>
               ))}
             </div>
-            <div className={styles.searchRow}>
+            <div className={styles.searchRow} onSubmit={handleEmptySubmit}>
               <SearchField
                 className={styles.search}
                 label={tEntry("search.label")}

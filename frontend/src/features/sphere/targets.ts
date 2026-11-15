@@ -53,3 +53,32 @@ export function pickRandomField(
   if (chosen === undefined) throw new Error("no hay campos precalculados");
   return chosen;
 }
+
+/** Clave de sessionStorage con el `id` del ultimo campo que eligio "Lugar al azar". */
+const LAST_RANDOM_KEY = "skyblink.lastRandomField";
+
+/** Respaldo en memoria: solo se usa si el navegador no deja escribir en sessionStorage. */
+let lastRandomInMemory: string | null = null;
+
+/**
+ * `id` del ultimo campo que eligio "Lugar al azar" en esta pestana, o null. Se
+ * guarda fuera de la pantalla de entrada, que se desmonta al abrir el visor:
+ * al volver (o al recargar) el boton no repite el campo del que se viene.
+ */
+export function lastRandomFieldId(): string | null {
+  try {
+    return window.sessionStorage.getItem(LAST_RANDOM_KEY) ?? lastRandomInMemory;
+  } catch {
+    return lastRandomInMemory;
+  }
+}
+
+export function rememberRandomField(id: string): void {
+  try {
+    window.sessionStorage.setItem(LAST_RANDOM_KEY, id);
+    lastRandomInMemory = null;
+  } catch {
+    // Sin sessionStorage (modo privado, permisos) alcanza con la memoria.
+    lastRandomInMemory = id;
+  }
+}

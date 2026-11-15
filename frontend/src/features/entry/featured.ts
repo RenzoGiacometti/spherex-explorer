@@ -36,6 +36,12 @@ export interface FeaturedObject {
   readonly dec: number;
   /** Banda con la que abre el visor. */
   readonly band: Band;
+  /**
+   * Otras formas de escribir el nombre, ademas de `label` y `name`. El buscador
+   * las reconoce sin distinguir mayusculas, espacios, guiones, apostrofos ni
+   * acentos, y abre el campo sin pasar por el servicio de nombres.
+   */
+  readonly aliases: readonly string[];
 }
 
 const BARNARD: FeaturedObject = {
@@ -45,6 +51,7 @@ const BARNARD: FeaturedObject = {
   ra: 269.4463,
   dec: 4.7683,
   band: 3,
+  aliases: ["Barnard", "Barnard Star", "Estrella de Barnard", "GJ 699", "Gliese 699", "HIP 87937"],
 };
 
 const EPSILON_INDI_B: FeaturedObject = {
@@ -54,6 +61,7 @@ const EPSILON_INDI_B: FeaturedObject = {
   ra: 331.0966,
   dec: -56.8006,
   band: 3,
+  aliases: ["Eps Ind B", "Eps Indi B", "Epsilon Ind B", "ε Ind B", "ε Indi B"],
 };
 
 const WISE_0855: FeaturedObject = {
@@ -66,6 +74,14 @@ const WISE_0855: FeaturedObject = {
   dec: -7.2422,
   // Solo se detecta en los detectores 5 y 6 (SPEC.md, seccion 2).
   band: 6,
+  aliases: [
+    "W0855",
+    "W0855-0714",
+    "WISE 0855-0714",
+    "WISE J0855-0714",
+    // Nombre principal con el que responde el servicio de nombres.
+    "WISEA J085510.74-071442.5",
+  ],
 };
 
 const RW_AURIGAE: FeaturedObject = {
@@ -76,6 +92,7 @@ const RW_AURIGAE: FeaturedObject = {
   dec: 30.4013,
   // El detector 1 es el unico donde no satura (SPEC.md, seccion 2 y Etapa 2).
   band: 1,
+  aliases: ["RW Aur"],
 };
 
 const R_DRACONIS: FeaturedObject = {
@@ -85,6 +102,7 @@ const R_DRACONIS: FeaturedObject = {
   ra: 248.1672,
   dec: 66.755,
   band: 3,
+  aliases: ["R Dra"],
 };
 
 /** Los cinco objetos de prueba, en el orden en que se muestran. */
@@ -126,9 +144,26 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 217.3698,
     dec: -62.6739,
     band: 3,
+    aliases: ["Proxima", "Proxima Cen", "Alpha Centauri C", "Alpha Cen C", "GJ 551", "Gliese 551"],
   },
-  { id: "luhman-16", label: "Luhman 16", name: "Luhman 16", ra: 162.2955, dec: -53.317, band: 5 },
-  { id: "wolf-359", label: "Wolf 359", name: "Wolf 359", ra: 164.0925, dec: 6.9952, band: 6 },
+  {
+    id: "luhman-16",
+    label: "Luhman 16",
+    name: "Luhman 16",
+    ra: 162.2955,
+    dec: -53.317,
+    band: 5,
+    aliases: ["Luhman 16 AB", "WISE 1049-5319", "WISE J104915.57-531906.1"],
+  },
+  {
+    id: "wolf-359",
+    label: "Wolf 359",
+    name: "Wolf 359",
+    ra: 164.0925,
+    dec: 6.9952,
+    band: 6,
+    aliases: ["CN Leo", "CN Leonis", "GJ 406", "Gliese 406"],
+  },
   {
     id: "teegarden",
     label: "Teegarden's Star",
@@ -136,11 +171,51 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 43.2795,
     dec: 16.8538,
     band: 5,
+    aliases: ["Teegarden", "Teegarden Star", "Estrella de Teegarden"],
   },
-  { id: "m-82", label: "M 82", name: "M 82", ra: 148.9685, dec: 69.6797, band: 1 },
-  { id: "m-51", label: "M 51", name: "M 51", ra: 202.4696, dec: 47.1953, band: 3 },
-  { id: "m-42", label: "M 42", name: "M 42", ra: 83.8201, dec: -5.3876, band: 3 },
-  { id: "m-1", label: "M 1", name: "M 1", ra: 83.6324, dec: 22.0174, band: 3 },
+  {
+    id: "m-82",
+    label: "M 82",
+    name: "M 82",
+    ra: 148.9685,
+    dec: 69.6797,
+    band: 1,
+    aliases: ["Messier 82", "NGC 3034", "Cigar Galaxy", "Galaxia del Cigarro"],
+  },
+  {
+    id: "m-51",
+    label: "M 51",
+    name: "M 51",
+    ra: 202.4696,
+    dec: 47.1953,
+    band: 3,
+    aliases: ["Messier 51", "NGC 5194", "Whirlpool Galaxy", "Galaxia del Remolino"],
+  },
+  {
+    id: "m-42",
+    label: "M 42",
+    name: "M 42",
+    ra: 83.8201,
+    dec: -5.3876,
+    band: 3,
+    aliases: [
+      "Messier 42",
+      "NGC 1976",
+      "Orion Nebula",
+      "Great Orion Nebula",
+      "Nebulosa de Orion",
+      "Gran Nebulosa de Orion",
+    ],
+  },
+  {
+    id: "m-1",
+    label: "M 1",
+    name: "M 1",
+    ra: 83.6324,
+    dec: 22.0174,
+    band: 3,
+    aliases: ["Messier 1", "NGC 1952", "Crab Nebula", "Nebulosa del Cangrejo"],
+  },
   {
     id: "kapteyn",
     label: "Kapteyn's Star",
@@ -148,6 +223,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 77.9853,
     dec: -45.0596,
     band: 3,
+    aliases: ["Kapteyn", "Kapteyn Star", "Estrella de Kapteyn", "GJ 191", "Gliese 191", "VZ Pic"],
   },
 ];
 
@@ -196,41 +272,71 @@ export function viewerHref(state: UrlState): string {
   return `${import.meta.env.BASE_URL}${serializeUrlState(state)}`;
 }
 
-function normalize(text: string): string {
-  return text.trim().replace(/\s+/g, " ").toLowerCase();
+/**
+ * Clave con la que se comparan los nombres: sin mayusculas, acentos, espacios,
+ * guiones, puntos ni apostrofos. "Barnards Star", "barnard's-star" y
+ * "BARNARD'S STAR" dan la misma.
+ */
+function aliasKey(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[\s\-_.'`´‐-―‘’−]/g, "");
 }
 
+/** Cada forma de escribir el nombre de un campo guardado, por su clave. */
+const SAVED_FIELD_BY_ALIAS: ReadonlyMap<string, FeaturedObject> = new Map(
+  PRECOMPUTED_OBJECTS.flatMap((object) =>
+    [object.label, object.name, ...object.aliases].map((alias): [string, FeaturedObject] => [
+      aliasKey(alias),
+      object,
+    ]),
+  ),
+);
+
 /**
- * Texto que hay que mandarle a /api/resolve para lo que escribio la persona.
- * Es el mismo texto, salvo que sea el nombre visible de un destacado que el
- * servicio de nombres no conoce: "WISE 0855" se busca por su nombre de catalogo.
+ * Campo guardado que se llama asi, o null. Compara con el nombre visible, el de
+ * catalogo y los alias de cada campo, sin red: "WISE 0855", que el servicio de
+ * nombres no conoce, o "M51" abren su campo aunque ese servicio no responda.
  */
-export function resolvableName(text: string): string {
-  const wanted = normalize(text);
-  return FEATURED_OBJECTS.find((object) => normalize(object.label) === wanted)?.name ?? text;
+export function savedFieldByName(text: string): FeaturedObject | null {
+  return SAVED_FIELD_BY_ALIAS.get(aliasKey(text)) ?? null;
 }
 
-/** Diferencia maxima, en grados, para tomar un centro como el de un campo precalculado. */
-const SAME_CENTER_DEG = 1e-4;
+/** Mitad del lado de un campo guardado, en grados: miden 10 minutos de arco. */
+const FIELD_HALF_SIDE_DEG = 10 / 60 / 2;
+
+const DEG = Math.PI / 180;
 
 /**
- * Banda de apertura de lo buscado, si es un campo precalculado: se reconoce
- * por el texto (su nombre visible o el de catalogo) o por el centro del campo
- * que resolvio el backend. Es la misma banda con la que abren el marcador y
- * "Lugar al azar". `null` para cualquier otro lugar.
+ * Campo guardado cuya huella contiene ese punto del cielo, o null. La huella es
+ * el cuadrado de 10 minutos de arco centrado en el centro del campo: la
+ * diferencia en ascension recta (por el camino corto, y por el coseno de la
+ * declinacion del centro) y la diferencia en declinacion tienen que ser menores
+ * que la mitad del lado. Si el punto cae en mas de una, gana el centro mas
+ * cercano.
+ *
+ * Sirve para que unas coordenadas de catalogo abran el campo guardado: las de
+ * 2010 de WISE 0855 quedan a 126 segundos de arco del centro, que es la
+ * posicion de 2026.
  */
-export function openingBand(
-  text: string,
-  center?: { readonly ra: number; readonly dec: number },
-): FeaturedObject["band"] | null {
-  const wanted = normalize(text);
-  const match = PRECOMPUTED_OBJECTS.find(
-    (object) =>
-      normalize(object.label) === wanted ||
-      normalize(object.name) === wanted ||
-      (center !== undefined &&
-        Math.abs(object.ra - center.ra) < SAME_CENTER_DEG &&
-        Math.abs(object.dec - center.dec) < SAME_CENTER_DEG),
-  );
-  return match?.band ?? null;
+export function savedFieldAt(
+  position: { readonly ra: number; readonly dec: number },
+  fields: readonly FeaturedObject[] = PRECOMPUTED_OBJECTS,
+): FeaturedObject | null {
+  let best: FeaturedObject | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const field of fields) {
+    const deltaRa = ((((position.ra - field.ra + 180) % 360) + 360) % 360) - 180;
+    const east = deltaRa * Math.cos(field.dec * DEG);
+    const north = position.dec - field.dec;
+    if (Math.abs(east) >= FIELD_HALF_SIDE_DEG || Math.abs(north) >= FIELD_HALF_SIDE_DEG) continue;
+    const distance = Math.hypot(east, north);
+    if (distance < bestDistance) {
+      best = field;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }

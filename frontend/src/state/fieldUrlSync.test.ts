@@ -15,8 +15,8 @@ import barnardMeta from "@/test/fixtures/meta-barnard.json";
 import wiseMeta from "@/test/fixtures/meta-wise0855.json";
 import { useFieldStore } from "./fieldStore";
 import { createFakeBackend } from "./fieldStore.testkit";
-import { bindFieldToUrl, useFieldUrlSync } from "./fieldUrlSync";
-import { type UrlState, useUrlState } from "./urlState";
+import { bindFieldToUrl, savedFieldPatch, useFieldUrlSync } from "./fieldUrlSync";
+import { parseUrlState, type UrlState, useUrlState } from "./urlState";
 
 const WISE_URL = "/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink";
 
@@ -56,6 +56,96 @@ describe("bindFieldToUrl", () => {
     unbind();
     useUrlState.getState().update({ band: 4 });
     expect(seen).toHaveLength(3);
+  });
+});
+
+describe("savedFieldPatch", () => {
+  const WISE_NAME = "WISE J085510.83-071442.5";
+
+  it("lleva unas coordenadas dentro de la huella al campo guardado, con su nombre y su banda", () => {
+    // Coordenadas de 2010 de WISE 0855: a 126 segundos de arco del centro guardado.
+    const search = "?ra=133.7951&dec=-7.2451";
+    expect(savedFieldPatch(parseUrlState(search), search)).toEqual({
+      ra: 133.7598,
+      dec: -7.2422,
+      name: WISE_NAME,
+      band: 6,
+    });
+    // El centro exacto sin nombre tambien: le faltan el nombre y la banda.
+    const center = "?ra=133.7598&dec=-7.2422&fov=0.1667&mode=sum";
+    expect(savedFieldPatch(parseUrlState(center), center)).toEqual({
+      ra: 133.7598,
+      dec: -7.2422,
+      name: WISE_NAME,
+      band: 6,
+    });
+  });
+
+  it("respeta la banda que la URL ya trae", () => {
+    const search = "?ra=133.7951&dec=-7.2451&band=2";
+    expect(savedFieldPatch(parseUrlState(search), search)).toEqual({
+      ra: 133.7598,
+      dec: -7.2422,
+      name: WISE_NAME,
+      band: 2,
+    });
+  });
+
+  it("no toca una URL con nombre, sin campo, fuera de toda huella o que ya es el campo guardado", () => {
+    for (const search of [
+      "",
+      "?lang=en",
+      // El link completo al campo guardado, armado sin nombre: se ve como se dejo.
+      WISE_URL.slice(1),
+      // Ya trae un nombre: alguien eligio ese objeto.
+      "?ra=133.7951&dec=-7.2451&name=Otro+objeto",
+      `?ra=133.7598&dec=-7.2422&band=6&name=${encodeURIComponent(WISE_NAME)}`,
+      // M 31, y un punto a 10 minutos de arco de Barnard.
+      "?ra=10.6847&dec=41.269",
+      "?ra=269.4463&dec=4.935",
+    ]) {
+      expect(savedFieldPatch(parseUrlState(search), search), search).toBeNull();
+    }
+  });
+});
+
+describe("bindFieldToUrl con un campo guardado", () => {
+  it("un link con coordenadas dentro de la huella abre el campo guardado y corrige la URL", () => {
+    const seen: UrlState[] = [];
+    const field = { getState: () => ({ syncWithUrl: (url: UrlState) => seen.push(url) }) };
+    openUrl("/?ra=133.7951&dec=-7.2451&lang=en");
+    const before = window.history.length;
+
+    const unbind = bindFieldToUrl(useUrlState, field);
+
+    // Lo unico que se aplica es el campo guardado: el de al lado no se llega a pedir.
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toMatchObject({
+      ra: 133.7598,
+      dec: -7.2422,
+      band: 6,
+      name: "WISE J085510.83-071442.5",
+      lang: "en",
+    });
+    expect(window.location.search).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5&lang=en",
+    );
+    // Se corrige la misma entrada del historial.
+    expect(window.history.length).toBe(before);
+
+    // Lo mismo al navegar despues a otro punto sin nombre; la banda escrita se respeta.
+    useUrlState
+      .getState()
+      .update({ ra: 269.4458, dec: 4.7683, band: 2, name: null }, { history: "push" });
+    expect(seen).toHaveLength(2);
+    expect(seen[1]).toMatchObject({ ra: 269.4463, dec: 4.7683, band: 2, name: "Barnard's Star" });
+    expect(window.history.length).toBe(before + 1);
+
+    // Un punto lejos de todo campo guardado pasa como esta.
+    useUrlState.getState().update({ ra: 10.6847, dec: 41.269, name: null }, { history: "push" });
+    expect(seen[2]).toMatchObject({ ra: 10.6847, dec: 41.269, name: null });
+
+    unbind();
   });
 });
 

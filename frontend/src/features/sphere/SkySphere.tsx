@@ -12,7 +12,7 @@ import type { Pointing, SkyPosition } from "./skyMath";
 
 export interface SkyMarker extends SkyPosition {
   readonly id: string;
-  /** Nombre que aparece al pasar el cursor, escrito como en el catalogo. */
+  /** Nombre que se lee al lado del anillo, escrito como en el catalogo. */
   readonly label: string;
   /** Link al visor. Sin el, el marcador es solo una marca (pagina de prueba). */
   readonly href?: string | undefined;
