@@ -1,0 +1,63 @@
+{
+  "panel": {
+    "title": "Spectrum",
+    "summary": "{{points}} points · {{epochs}} epochs",
+    "unnamed": "Point on the sky",
+    "source": {
+      "precomputed": "Precomputed",
+      "computed": "Measured now"
+    },
+    "saturatedTitle": "Saturated source: no reliable spectrum",
+    "saturatedBody": "The source is too bright for SPHEREx: its centre was saturated in {{n}} of {{total}} exposures and none gave a valid measurement. No spectrum is shown, to avoid giving false numbers.",
+    "emptyTitle": "No valid measurements at this point",
+    "emptyBody": "None of the {{n}} exposures gave a clean measurement: there were discarded pixels inside the aperture.",
+    "footnote": "Aperture photometry on each exposure: {{radius}} radius, background from an annulus, no aperture correction. Each exposure sees the object at a different wavelength and on a different date."
+  },
+  "chart": {
+    "label": "Spectrum of {{name}}: flux in millijanskys against wavelength, from 0.75 to 5 micrometres. {{points}} points.",
+    "axisX": "Wavelength",
+    "axisY": "Flux",
+    "hint": "Move the pointer over the chart, or use the arrow keys, to read a value.",
+    "readout": "λ {{wavelength}} · {{flux}} ± {{error}} mJy",
+    "readoutBand": "{{band}} · {{n}} exposures",
+    "saturatedBand": "saturated",
+    "noDataBand": "no data",
+    "legendBinned": "Average per channel, with its error",
+    "legendExposure": "Each exposure",
+    "showExposures": "Show each exposure"
+  },
+  "molecule": {
+    "h2o": "Water",
+    "ch4": "Methane",
+    "co2": "Carbon dioxide",
+    "co": "Carbon monoxide"
+  },
+  "fingerprint": {
+    "title": "Chemical fingerprint",
+    "hintTag": "Hint",
+    "intro": "Compares the flux inside each band with the flux on both sides. It is a hint, not a detection: it does not replace a model fit.",
+    "excluded": "Bands that fall in {{bands}} are not evaluated: the light measured there mostly belongs to another source.",
+    "at": "at {{wavelength}}",
+    "depth": "{{depth}} absorption",
+    "level": {
+      "strong": "strong",
+      "moderate": "moderate",
+      "weak": "weak",
+      "none": "not detected",
+      "unknown": "no data"
+    },
+    "barLabel": "{{molecule}}: {{level}}"
+  },
+  "listen": {
+    "play": "Listen",
+    "stop": "Stop",
+    "description": "Sweeps the spectrum from left to right in {{seconds}} seconds: more flux sounds higher, and stretches without data are silent.",
+    "unsupported": "This browser cannot play sound."
+  },
+  "notice": {
+    "saturated": "Saturated source in {{bands}}: {{n}} of {{total}} exposures could not be measured.",
+    "offset": "In {{bands}} the measured light is offset {{offset}} from the object: another source is inside the aperture and those points mostly belong to it.",
+    "masked": "{{n}} of {{total}} exposures were discarded because of bad pixels inside the aperture.",
+    "waveTable": "These exposures come from a different processing version than the wavelength table: wavelengths could be shifted."
+  }
+}
