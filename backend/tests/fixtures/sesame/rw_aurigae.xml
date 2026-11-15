@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>RW Aurigae</name>
+  <!-- Q199043 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 0ms [0] -->
+    <INFO>from cache</INFO>
+    <oid>756681</oid>
+    <oname>V* RW Aur</oname>
+    <otype>TT*</otype>
+    <jpos>05:07:49.56 +30:24:05.1</jpos>
+    <jradeg>76.95652603458</jradeg>
+    <jdedeg>30.40143817389</jdedeg>
+    <refPos>2007A&amp;A...474..653V</refPos>
+    <errRAmas>3.31</errRAmas><errDEmas>2.00</errDEmas>
+    <pm>
+      <v>21.58</v><e>4.41</e><q>A</q><r>2007A&amp;A...474..653V</r>
+      <pa>160</pa>
+      <pmRA>7.23</pmRA><epmRA>2.23</epmRA>
+      <pmDE>-20.33</pmDE><epmDE>3.81</epmDE>
+    </pm>
+    <plx><v>15.42</v><e>3.69</e><q>A</q><r>2007A&amp;A...474..653V</r></plx>
+    <Vel><v>15.000</v><e>0.030</e><q>A</q><r>2012ApJ...745..119N</r></Vel>
+    <spType>K1/5e+K5e</spType><spNum>0.02021200.0000.0000000001100000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,06:53:08z)==== -->

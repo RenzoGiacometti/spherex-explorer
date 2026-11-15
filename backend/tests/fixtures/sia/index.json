@@ -1,0 +1,24 @@
+{
+  "source": "spike/cache/sia (Etapa 0)",
+  "object": "Barnard's Star",
+  "center": {
+    "ra": 269.446287,
+    "dec": 4.768255
+  },
+  "queries": [
+    {
+      "file": "spherex_dr1__269.446287_+4.768255.xml",
+      "collection": "spherex_dr1",
+      "url": "https://irsa.ipac.caltech.edu/SIA?COLLECTION=spherex_dr1&POS=circle+269.446287+4.768255+0.000278",
+      "queried_at": "2026-11-15T06:21:09Z",
+      "rows": 239
+    },
+    {
+      "file": "spherex_qr3__269.446287_+4.768255.xml",
+      "collection": "spherex_qr3",
+      "url": "https://irsa.ipac.caltech.edu/SIA?COLLECTION=spherex_qr3&POS=circle+269.446287+4.768255+0.000278",
+      "queried_at": "2026-11-15T06:21:10Z",
+      "rows": 119
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "generated_by": "backend/scripts/make_sample_fields.py",
+  "samples": [
+    {
+      "label": "wise0855",
+      "id": "4022da836c5a1505",
+      "pipeline": "muestra-1",
+      "object": "WISE J085510.83-071442.5",
+      "track_name": "WISEA J085510.74-071442.5",
+      "track_file": "track_wisea-j085510-74-071442-5.json",
+      "source": "spike/out/wise0855-10min",
+      "status": "partial",
+      "fov": 0.1667,
+      "shape": [
+        195,
+        195
+      ],
+      "epochs": 3,
+      "contract_step": true,
+      "data_fov": 0.1667,
+      "data_shape": [
+        195,
+        195
+      ],
+      "margin_px": 0,
+      "note": "Datos en todo el campo. El objeto se ve en los detectores 5 y 6. Un recorte fallido en (2, 3)."
+    },
+    {
+      "label": "epsindb",
+      "id": "02a1d503e540822b",
+      "pipeline": "muestra-1",
+      "object": "Epsilon Indi B",
+      "track_name": "* eps Ind B",
+      "track_file": "track_eps-ind-b.json",
+      "source": "spike/out/epsindb",
+      "status": "partial",
+      "fov": 0.1667,
+      "shape": [
+        195,
+        195
+      ],
+      "epochs": 4,
+      "contract_step": true,
+      "data_fov": 0.1,
+      "data_shape": [
+        117,
+        117
+      ],
+      "margin_px": 39,
+      "note": "Cuatro epocas. Planos vacios en (4, 1) y (4, 4), planos pobres en (1, 1) y (1, 4) y un recorte fallido en (2, 6). Datos solo en los 6 minutos centrales: el resto del campo va sin datos."
+    },
+    {
+      "label": "barnard",
+      "id": "4a2e877f8ee4efd2",
+      "pipeline": "muestra-1",
+      "object": "Barnard's Star",
+      "track_name": "NAME Barnard's star",
+      "track_file": "track_name-barnard-s-star.json",
+      "source": "spike/out/barnard",
+      "status": "ready",
+      "fov": 0.1667,
+      "shape": [
+        195,
+        195
+      ],
+      "epochs": 3,
+      "contract_step": true,
+      "data_fov": 0.1,
+      "data_shape": [
+        117,
+        117
+      ],
+      "margin_px": 39,
+      "note": "Nucleo saturado (+Infinity) en los 18 planos. La estrella se corre 10 segundos de arco al norte. Datos solo en los 6 minutos centrales: el resto del campo va sin datos."
+    }
+  ]
+}
