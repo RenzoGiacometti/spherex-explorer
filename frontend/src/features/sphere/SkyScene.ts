@@ -44,7 +44,12 @@ import {
 import {
   clamp,
   DEG,
-  normalize,
+  QUAT_IDENTITY,
+  type Quat,
+  quatAngle,
+  quatNormalize,
+  quatRotate,
+  quatSlerp,
   raDecToVector,
   type SkyPosition,
   slerpDirection,
@@ -141,6 +146,12 @@ const INERTIA_MIN_SPEED_PX = 8;
 const INERTIA_MAX_SPEED = 400;
 /** Con que rapidez la camara sigue al sensor de orientacion (1/s). */
 const ORIENTATION_FOLLOW = 14;
+/** Por debajo de este angulo (grados) entre la camara y el sensor, la camara ya llego. */
+const ORIENTATION_REST = 1e-3;
+/** Tiempo, en segundos, en que la vista vuelve al norte arriba al salir de la orientacion libre. */
+const SETTLE_TIME = 0.45;
+/** Hacia donde mira la camara en sus propios ejes. */
+const CAMERA_FORWARD: Vec3 = [0, 0, -1];
 
 export interface FlyOptions {
   /** Campo de vision al llegar. Por defecto, el actual. */
@@ -373,12 +384,16 @@ export class SkyScene {
   private dec: number;
   private fov: number;
 
-  // Orientacion libre (ventana al cielo): direccion y "arriba" que marca el sensor.
+  // Orientacion libre (ventana al cielo): la camara toma el cuaternion del
+  // sensor tal cual, sin pasar por ascension recta, declinacion ni `lookAt`,
+  // asi que no hay un "arriba" de referencia que falle en los polos.
   private free = false;
-  private freeForward = new Vector3(1, 0, 0);
-  private freeUp = new Vector3(0, 1, 0);
-  private targetForward = new Vector3(1, 0, 0);
-  private targetUp = new Vector3(0, 1, 0);
+  private freeQuat: Quat = QUAT_IDENTITY;
+  private targetQuat: Quat = QUAT_IDENTITY;
+  // Al salir de la orientacion libre la vista gira hasta el norte arriba en
+  // vez de saltar: orientacion de la que sale y segundos que le quedan.
+  private settleFrom: Quat | null = null;
+  private settleLeft = 0;
 
   private velocityRa = 0;
   private velocityDec = 0;
@@ -504,7 +519,7 @@ export class SkyScene {
   /** Centro de lo que se ve y campo de vision. En orientacion libre el centro sale del sensor. */
   getView(): SkyView {
     if (!this.free) return { ra: this.ra, dec: this.dec, fov: this.fov };
-    const center = vectorToRaDec([this.freeForward.x, this.freeForward.y, this.freeForward.z]);
+    const center = vectorToRaDec(quatRotate(this.freeQuat, CAMERA_FORWARD));
     return { ra: center.ra, dec: center.dec, fov: this.fov };
   }
 
@@ -535,6 +550,21 @@ export class SkyScene {
   }
 
   // ---- Movimiento con el norte arriba -------------------------------------
+  //
+  // El arrastre, la rueda y el teclado mueven una vista que siempre tiene el
+  // norte arriba (ascension recta y declinacion del centro), que es como se ve
+  // un campo en el visor. Esa referencia tiene un limite conocido cerca de los
+  // polos celestes, que no es un salto sino un tope:
+  //
+  // - La declinacion del centro no pasa de MAX_DEC: no se puede cruzar el polo
+  //   arrastrando, hay que rodearlo.
+  // - Por encima de unos 78 grados, el arrastre horizontal mueve el cielo mas
+  //   despacio que el dedo (`cosDecLimit`), porque girar alrededor del polo lo
+  //   que pide el dedo haria dar vueltas la imagen.
+  //
+  // Sacarlo pide un arrastre de orientacion libre (el cielo sigue al dedo con un
+  // cuaternion, como en la ventana al cielo) y decidir cuando y como vuelve el
+  // norte arriba, del que dependen los vuelos y los parches. Queda anotado.
 
   setView(view: Partial<SkyView>): void {
     if (view.ra !== undefined) this.ra = wrapDegrees(view.ra);
@@ -720,25 +750,28 @@ export class SkyScene {
   // ---- Orientacion libre (ventana al cielo) -------------------------------
 
   /**
-   * Con una orientacion, la camara deja el norte arriba y sigue al sensor:
-   * `forward` es hacia donde mira y `up` el arriba de la pantalla, los dos en
-   * el sistema de la escena. Con null vuelve a la vista con el norte arriba,
-   * centrada en lo que se estaba mirando.
+   * Con una orientacion, la camara deja el norte arriba y sigue al sensor: es
+   * el cuaternion de la camara en el sistema de la escena
+   * (`deviceToSceneQuaternion`, skyMath.ts). Con null vuelve a la vista con el
+   * norte arriba, centrada en lo que se estaba mirando.
    */
-  setFreeOrientation(pointing: { forward: Vec3; up: Vec3 } | null): void {
-    if (pointing === null) {
+  setFreeOrientation(orientation: Quat | null): void {
+    if (orientation === null) {
       if (!this.free) return;
-      const center = vectorToRaDec([this.freeForward.x, this.freeForward.y, this.freeForward.z]);
+      const center = vectorToRaDec(quatRotate(this.freeQuat, CAMERA_FORWARD));
       this.free = false;
       this.ra = center.ra;
       this.dec = clamp(center.dec, -MAX_DEC, MAX_DEC);
+      // El norte arriba puede quedar muy girado respecto de como se sostenia el
+      // telefono (cerca de un polo, hasta media vuelta): se llega girando.
+      if (!this.reducedMotion) {
+        this.settleFrom = this.freeQuat;
+        this.settleLeft = SETTLE_TIME;
+      }
       this.dirty = true;
       return;
     }
-    const forward = normalize(pointing.forward);
-    const up = normalize(pointing.up);
-    this.targetForward.set(forward[0], forward[1], forward[2]);
-    this.targetUp.set(up[0], up[1], up[2]);
+    this.targetQuat = quatNormalize(orientation);
     if (!this.free) {
       // Primer dato del sensor: sin transicion desde la vista anterior.
       this.free = true;
@@ -746,8 +779,8 @@ export class SkyScene {
       this.velocityRa = 0;
       this.velocityDec = 0;
       this.driftRate = 0;
-      this.freeForward.copy(this.targetForward);
-      this.freeUp.copy(this.targetUp);
+      this.freeQuat = this.targetQuat;
+      this.settleFrom = null;
     }
     this.dirty = true;
   }
@@ -765,6 +798,7 @@ export class SkyScene {
     if (this.advanceInertia(dt)) changed = true;
     if (this.advanceDrift(dt)) changed = true;
     if (this.advanceOrientation(dt)) changed = true;
+    if (this.advanceSettle(dt)) changed = true;
     if (this.advanceDetail(time)) changed = true;
     if (this.advancePatches(dt)) changed = true;
     if (!changed) return;
@@ -829,12 +863,20 @@ export class SkyScene {
 
   private advanceOrientation(dt: number): boolean {
     if (!this.free) return false;
-    const gap = 1 - this.freeForward.dot(this.targetForward) + (1 - this.freeUp.dot(this.targetUp));
-    if (gap < 1e-9) return false;
-    // Filtro pasabajos: el sensor tiembla y la camara lo sigue con un retardo corto.
+    if (quatAngle(this.freeQuat, this.targetQuat) < ORIENTATION_REST) return false;
+    // Filtro pasabajos: el sensor tiembla y la camara lo sigue con un retardo
+    // corto. Interpolando cuaterniones el giro es uno solo y por el camino mas
+    // corto, mire adonde mire la camara.
     const blend = dt === 0 ? 1 : 1 - Math.exp(-dt * ORIENTATION_FOLLOW);
-    this.freeForward.lerp(this.targetForward, blend).normalize();
-    this.freeUp.lerp(this.targetUp, blend).normalize();
+    this.freeQuat = quatSlerp(this.freeQuat, this.targetQuat, blend);
+    return true;
+  }
+
+  /** Vuelta al norte arriba despues de la orientacion libre. */
+  private advanceSettle(dt: number): boolean {
+    if (this.settleFrom === null) return false;
+    this.settleLeft -= dt;
+    if (this.settleLeft <= 0 || this.free) this.settleFrom = null;
     return true;
   }
 
@@ -1066,7 +1108,7 @@ export class SkyScene {
   private advancePatches(dt: number): boolean {
     if (this.patches.length === 0) return false;
     const view: Vec3 = this.free
-      ? [this.freeForward.x, this.freeForward.y, this.freeForward.z]
+      ? quatRotate(this.freeQuat, CAMERA_FORWARD)
       : raDecToVector(this.ra, this.dec);
     const scale = this.degreesPerPixel();
     // Mitad de la diagonal de la ventana, con margen: lo que queda mas lejos no se ve.
@@ -1099,15 +1141,30 @@ export class SkyScene {
     this.camera.fov = this.verticalFov();
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
+    const orientation = this.camera.quaternion;
     if (this.free) {
-      this.forward.copy(this.freeForward);
-      this.camera.up.copy(this.freeUp);
+      const [x, y, z, w] = this.freeQuat;
+      orientation.set(x, y, z, w);
     } else {
+      // Vista con el norte arriba: el polo celeste es la referencia del "arriba".
+      // La declinacion no pasa de MAX_DEC, asi que la referencia nunca degenera.
       const [x, y, z] = raDecToVector(this.ra, this.dec);
       this.forward.set(x, y, z);
       this.camera.up.set(0, 1, 0);
+      this.camera.lookAt(this.forward);
+      const from = this.settleFrom;
+      if (from !== null) {
+        const left = clamp(this.settleLeft / SETTLE_TIME, 0, 1);
+        const blended = quatSlerp(
+          [orientation.x, orientation.y, orientation.z, orientation.w],
+          from,
+          easeInOutCubic(left),
+        );
+        orientation.set(blended[0], blended[1], blended[2], blended[3]);
+      }
     }
-    this.camera.lookAt(this.forward);
+    // Hacia donde mira la camara de verdad, para ubicar los marcadores.
+    this.forward.set(0, 0, -1).applyQuaternion(orientation);
     this.camera.updateMatrixWorld();
   }
 

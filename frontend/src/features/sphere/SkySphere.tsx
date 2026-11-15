@@ -8,7 +8,7 @@ import { SKY_PATCHES } from "./patches";
 import { type FlyOptions, SkyScene, type SkyView } from "./SkyScene";
 import styles from "./SkySphere.module.css";
 import { attachSkyControls, type SkyControls } from "./skyControls";
-import type { Pointing, SkyPosition } from "./skyMath";
+import type { Quat, SkyPosition } from "./skyMath";
 
 export interface SkyMarker extends SkyPosition {
   readonly id: string;
@@ -42,8 +42,8 @@ export interface SkySphereHandle {
   setSkyDim(amount: number): void;
   getView(): SkyView | null;
   setView(view: Partial<SkyView>): void;
-  /** Orientacion que marca el sensor del telefono, o null para volver al arrastre. */
-  setFreeOrientation(pointing: Pointing | null): void;
+  /** Orientacion de la camara que marca el sensor del telefono, o null para volver al arrastre. */
+  setFreeOrientation(orientation: Quat | null): void;
 }
 
 export interface SkySphereProps {
@@ -200,7 +200,7 @@ export function SkySphere(props: SkySphereProps) {
       setSkyDim: (amount) => sceneRef.current?.setSkyDim(amount),
       getView: () => sceneRef.current?.getView() ?? null,
       setView: (view) => sceneRef.current?.setView(view),
-      setFreeOrientation: (pointing) => sceneRef.current?.setFreeOrientation(pointing),
+      setFreeOrientation: (orientation) => sceneRef.current?.setFreeOrientation(orientation),
     }),
     [],
   );

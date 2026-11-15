@@ -1,9 +1,11 @@
 // Ventana al cielo: el telefono como ventana (SPEC.md, Etapa 4).
 //
-// Con el sensor de orientacion, la ubicacion y la hora actual se sabe a que
-// punto del cielo apunta la camara trasera: la orientacion da altitud y azimut,
-// y la latitud con el tiempo sidereo local los pasa a ascension recta y
-// declinacion (skyMath.ts).
+// Con el sensor de orientacion, la ubicacion y la hora actual se sabe como
+// esta orientada la camara trasera respecto del cielo: los tres angulos del
+// sensor dan la orientacion del telefono en el horizonte local, y la latitud
+// con el tiempo sidereo local la llevan al sistema ecuatorial. Todo va en un
+// cuaternion (`deviceToSceneQuaternion`, skyMath.ts) que la escena le asigna a
+// la camara tal cual.
 //
 // Que hace falta, y que pasa si falta (la esfera queda en modo de arrastre y
 // la pantalla dice el motivo):
@@ -26,9 +28,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type DeviceAngles,
-  deviceToScene,
+  deviceToSceneQuaternion,
   type Observer,
-  type Pointing,
+  type Quat,
   shortestDelta,
   wrapDegrees,
 } from "./skyMath";
@@ -52,8 +54,8 @@ export type SkyWindowState =
   | { readonly kind: "unavailable"; readonly issue: SkyWindowIssue };
 
 export interface SkyWindowOptions {
-  /** Recibe la orientacion en cada dato del sensor, y null al salir. */
-  readonly onPointing: (pointing: Pointing | null) => void;
+  /** Recibe la orientacion de la camara en cada dato del sensor, y null al salir. */
+  readonly onOrientation: (orientation: Quat | null) => void;
   /**
    * Acepta una orientacion relativa como si fuera absoluta. Solo para la pagina
    * de prueba: los sensores simulados de las herramientas de desarrollo no
@@ -146,10 +148,13 @@ function createAngleReader(
   };
 }
 
-export function useSkyWindow({ onPointing, allowRelative = false }: SkyWindowOptions): SkyWindow {
+export function useSkyWindow({
+  onOrientation,
+  allowRelative = false,
+}: SkyWindowOptions): SkyWindow {
   const [state, setState] = useState<SkyWindowState>(OFF);
-  const onPointingRef = useRef(onPointing);
-  onPointingRef.current = onPointing;
+  const onPointingRef = useRef(onOrientation);
+  onPointingRef.current = onOrientation;
   /** Apaga los sensores de la sesion en curso; null si no hay ninguna. */
   const teardownRef = useRef<(() => void) | null>(null);
   /** Cambia en cada `start` y `stop`: lo que llega de una sesion vieja se descarta. */
@@ -220,7 +225,7 @@ export function useSkyWindow({ onPointing, allowRelative = false }: SkyWindowOpt
         running = true;
         setState({ kind: "on" });
       }
-      onPointingRef.current(deviceToScene(latest, screenAngle(), observer, new Date()));
+      onPointingRef.current(deviceToSceneQuaternion(latest, screenAngle(), observer, new Date()));
     };
     const onOrientation = (event: DeviceOrientationEvent): void => {
       if (sessionRef.current !== session) return;

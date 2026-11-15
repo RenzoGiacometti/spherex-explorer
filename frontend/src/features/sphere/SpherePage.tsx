@@ -182,7 +182,7 @@ export function SpherePage({
   const { status } = search;
 
   const skyWindow = useSkyWindow({
-    onPointing: (pointing) => sphereRef.current?.setFreeOrientation(pointing),
+    onOrientation: (orientation) => sphereRef.current?.setFreeOrientation(orientation),
     allowRelative: allowRelativeOrientation,
   });
   const windowState = skyWindow.state;
