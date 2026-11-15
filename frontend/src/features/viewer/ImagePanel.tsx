@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { GlassPanel, SegmentedControl, type SegmentedOption, Slider } from "@/components";
 import { useLanguage } from "@/i18n/useLanguage";
+import { PRECOMPUTED_ONLY } from "@/lib/deploy";
 import { formatArcminutes, formatInteger, formatPercent } from "@/lib/format";
-import { fieldFovForView, VIEW_FOVS, type ViewFov } from "@/lib/fov";
+import { DEFAULT_VIEW_FOV, fieldFovForView, VIEW_FOVS, type ViewFov } from "@/lib/fov";
 import { useUrlState } from "@/state/urlState";
 import { MAX_CONTRAST, MIN_CONTRAST, STRETCH_KINDS, type StretchKind } from "@/viewer/stretch";
 import { FlagsControl } from "./FlagsControl";
@@ -37,7 +38,11 @@ export function ImagePanel({ controller }: ImagePanelProps) {
     ariaLabel: t(`image.stretchName.${kind}`),
   }));
 
-  const fovOptions: SegmentedOption<ViewFov>[] = VIEW_FOVS.map((side) => ({
+  // En el despliegue publico solo existen los campos del escalon base: no se ofrece 30'.
+  const sides = PRECOMPUTED_ONLY
+    ? VIEW_FOVS.filter((side) => fieldFovForView(side) === fieldFovForView(DEFAULT_VIEW_FOV))
+    : VIEW_FOVS;
+  const fovOptions: SegmentedOption<ViewFov>[] = sides.map((side) => ({
     value: side,
     label: formatArcminutes(side, language),
     ariaLabel: t("image.fovOption", { n: formatInteger(side * 60) }),

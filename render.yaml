@@ -1,0 +1,9 @@
+# Despliegue publico en Render (https://render.com) a partir del Dockerfile de la raiz.
+# Un solo servicio web: API, frontend compilado y campos precalculados. No toca IRSA.
+services:
+  - type: web
+    name: spherex-explorer
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health

@@ -14,6 +14,8 @@ COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml 
 COPY frontend/scripts ./scripts
 RUN pnpm install --frozen-lockfile
 COPY frontend/ ./
+# El despliegue solo tiene el escalon base: la interfaz no ofrece el campo de 30'.
+ENV VITE_PRECOMPUTED_ONLY=1
 RUN pnpm build
 
 # ---- Backend ----
