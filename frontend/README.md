@@ -1,4 +1,4 @@
-# SPHEREx Explorer: frontend
+# SkyBlink: frontend
 
 React + Vite + TypeScript estricto. Habla con el backend solo por `/api`, según `docs/contrato-cubo.md`. El sistema de diseño está en `DESIGN.md` y el alcance en `SPEC.md`, los dos en la raíz del repositorio.
 

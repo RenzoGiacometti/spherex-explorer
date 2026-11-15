@@ -1,6 +1,7 @@
-# SPHEREx Explorer — especificación (NASA Space Apps 2026)
+# SkyBlink — especificación (NASA Space Apps 2026)
 
 Documento de trabajo para construir con Claude Code. Equipo: 2 personas.
+El nombre público de la herramienta es SkyBlink; "SPHEREx" nombra solo la misión y sus datos. El repositorio y algunos nombres internos conservan el nombre de trabajo, SPHEREx Explorer.
 Estado: borrador v3, actualizado con la Etapa 0 y con el contrato de la Etapa 1 aprobado (15 de noviembre de 2026; mediciones en `spike/RESULTADOS.md`, contrato en `docs/contrato-cubo.md`). Lo marcado con **[VERIFICAR]** no está confirmado y hay que probarlo antes de depender de ello.
 
 ## 1. Objetivo

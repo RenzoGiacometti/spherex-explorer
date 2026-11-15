@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: SPHEREx-Explorer
-description: Sistema de diseño de SPHEREx Explorer, una herramienta web pública para explorar imágenes infrarrojas del cielo de la misión SPHEREx de NASA y detectar objetos que se mueven o cambian de brillo. Fondo negro puro, la imagen astronómica como contenido, paneles de vidrio flotantes, un único acento ámbar usado con moderación y tipografía monoespaciada para todo dato numérico. Interfaz en español e inglés.
+description: Sistema de diseño de SkyBlink, una herramienta web pública para explorar imágenes infrarrojas del cielo de la misión SPHEREx de NASA y detectar objetos que se mueven o cambian de brillo. Fondo negro puro, la imagen astronómica como contenido, paneles de vidrio flotantes, un único acento ámbar usado con moderación y tipografía monoespaciada para todo dato numérico. Interfaz en español e inglés.
 
 colors:
   void: "#000000"
@@ -207,7 +207,7 @@ components:
 
 ## Overview
 
-SPHEREx Explorer muestra el cielo infrarrojo y deja que cualquiera, con o sin formación en astronomía, busque objetos que se mueven o cambian de brillo. El sistema parte de una idea: la imagen astronómica es el contenido y la interfaz no compite con ella. El lienzo es negro puro, los controles flotan sobre la imagen en paneles de vidrio semitransparente, y todo lo que no sea imagen se resuelve en blanco, grises y un único acento.
+SkyBlink muestra el cielo infrarrojo y deja que cualquiera, con o sin formación en astronomía, busque objetos que se mueven o cambian de brillo. El sistema parte de una idea: la imagen astronómica es el contenido y la interfaz no compite con ella. El lienzo es negro puro, los controles flotan sobre la imagen en paneles de vidrio semitransparente, y todo lo que no sea imagen se resuelve en blanco, grises y un único acento.
 
 Hereda de su referencia de partida la austeridad del negro y blanco, las etiquetas en mayúsculas con tracking abierto, el botón de píldora con contorno y las líneas finas en lugar de sombras. Se aparta de ella en cinco puntos deliberados: usa otra familia tipográfica (IBM Plex), agrega un acento ámbar, agrega una voz monoespaciada para los datos, reemplaza la navegación y las bandas opacas por paneles flotantes con desenfoque, y admite un juego de iconos de línea.
 
@@ -295,7 +295,7 @@ Las tres se cargan desde Google Fonts. Sustitutos: Arial Narrow, Helvetica Neue 
 - **Recorrido guiado.** En la entrada, un `button-ghost` sobre vidrio con el icono `target` ("Recorrido guiado: encontrá a WISE 0855"), en un renglón propio encima del buscador; en celular ocupa todo el ancho. En el visor, el recorrido es una tarjeta de vidrio de 320px con el número de paso en mono (`3 / 6`), una consigna corta y, si hace falta, un botón; un anillo en `{colors.accent}` rodea el control que hay que usar. La tarjeta no tapa la mira ni el control señalado; en el último paso va a la izquierda del panel de espectro.
 - **Barra superior del visor.** Sus dos extremos van sobre vidrio (a la izquierda: salida, marca, nombre del objeto y coordenadas; a la derecha: idioma). El centro de la barra sigue transparente. Sin el vidrio, las coordenadas en `{colors.text-mute}` no se leían sobre el gris medio del modo diferencia.
 - **Zona libre del visor.** La imagen se encuadra en la zona que dejan libre la barra, las dos columnas y el muelle de abajo, no en la ventana entera; al acercar, la imagen sigue por debajo de los paneles hasta los bordes de la ventana. Con el panel de espectro abierto la columna derecha se ensancha y la imagen se reencuadra en lo que queda.
-- **Marca.** `SPHEREx Explorer` en IBM Plex Sans Condensed 600 de 15px con tracking de 2,4px, igual en la entrada y en el visor.
+- **Marca.** `SkyBlink` en IBM Plex Sans Condensed 600 de 15px con tracking de 2,4px, igual en la entrada y en el visor.
 
 ## Elevation & Depth
 

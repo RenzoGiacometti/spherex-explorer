@@ -1,4 +1,4 @@
-# Backend de SPHEREx Explorer
+# Backend de SkyBlink
 
 FastAPI + astropy. Arma el cubo del campo a partir de recortes de IRSA y lo sirve al frontend. El contrato con el frontend está en [`docs/contrato-cubo.md`](../docs/contrato-cubo.md) y manda sobre este código; el alcance, en [`SPEC.md`](../SPEC.md).
 
