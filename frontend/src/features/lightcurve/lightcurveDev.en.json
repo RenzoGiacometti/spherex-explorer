@@ -1,0 +1,15 @@
+{
+  "title": "Light curve panel",
+  "intro": "Test page. Shows the panel with the precomputed curves of the five test objects, without the viewer. Barnard's Star and Epsilon Indi B are the control stars: they should not vary.",
+  "object": "Object",
+  "live": "Ask the backend (/api/lightcurve)",
+  "source": {
+    "fixture": "Precomputed data stored in the repository.",
+    "live": "Response from the backend right now."
+  },
+  "loading": "Loading the light curve",
+  "error": "The light curve could not be loaded: {{reason}}",
+  "status": "Document status",
+  "verdict": "Verdict",
+  "exposures": "Exposures measured"
+}
