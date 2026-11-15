@@ -8,8 +8,12 @@
 //   ra, dec  centro del campo en grados ICRS (4 decimales, como normaliza el backend)
 //   fov      lado de la vista en grados: 0.0833 (5'), 0.1667 (10') o 0.5 (30')
 //   band     detector que se esta mirando, de 1 a 6
-//   mode     blink, difference, sum, redcyan o hold
+//   mode     blink, difference, sum, redcyan, hold o journey
 //   epoch    epoca actual, desde 1 (opcional)
+//   ref      epoca de referencia (B) elegida a mano, desde 1 (opcional; sin
+//            ella el visor elige la mejor cubierta y mas lejana en fecha)
+//   stretch  estirado elegido a mano: linear, log o asinh (opcional; sin el,
+//            el del modo: lineal en difference y redcyan, asinh en los demas)
 //   name     nombre del objeto, para la mira y el rastro (opcional)
 //   embed    1 oculta la interfaz alrededor del visor
 //   lang     es o en; sin el, el idioma sale del navegador
@@ -19,9 +23,14 @@
 import { create } from "zustand";
 import { type Language, matchLanguage } from "@/i18n/languages";
 import { DEFAULT_VIEW_FOV, snapViewFov, type ViewFov } from "@/lib/fov";
+import { STRETCH_KINDS, type StretchKind } from "@/viewer/stretch";
 
-/** Modos del visor: parpadeo, diferencia, suma, rojo/cian y mantener apretado. */
-export const VIEW_MODES = ["blink", "difference", "sum", "redcyan", "hold"] as const;
+/**
+ * Modos del visor: parpadeo, diferencia, suma, rojo/cian, mantener apretado y
+ * viaje entre misiones (2MASS, WISE y las epocas de SPHEREx en orden de fecha;
+ * solo en los campos con contexto guardado, en los demas cae a parpadeo).
+ */
+export const VIEW_MODES = ["blink", "difference", "sum", "redcyan", "hold", "journey"] as const;
 
 export type ViewMode = (typeof VIEW_MODES)[number];
 
@@ -52,6 +61,10 @@ export interface UrlState {
   mode: ViewMode;
   /** Epoca actual, desde 1; null si la URL no la fija. */
   epoch: number | null;
+  /** Epoca de referencia (B) elegida a mano, desde 1; null si la elige el visor. */
+  ref: number | null;
+  /** Estirado elegido a mano; null si va el del modo. */
+  stretch: StretchKind | null;
   /** Nombre del objeto, para la mira y el rastro. */
   name: string | null;
   /** Oculta la interfaz alrededor del visor. */
@@ -67,12 +80,26 @@ export const DEFAULT_URL_STATE: UrlState = {
   band: DEFAULT_BAND,
   mode: DEFAULT_MODE,
   epoch: null,
+  ref: null,
+  stretch: null,
   name: null,
   embed: false,
   lang: null,
 };
 
-const URL_KEYS = ["ra", "dec", "fov", "band", "mode", "epoch", "name", "embed", "lang"] as const;
+const URL_KEYS = [
+  "ra",
+  "dec",
+  "fov",
+  "band",
+  "mode",
+  "epoch",
+  "ref",
+  "stretch",
+  "name",
+  "embed",
+  "lang",
+] as const;
 
 const KNOWN_KEYS: ReadonlySet<string> = new Set(URL_KEYS);
 
@@ -108,6 +135,10 @@ function parseEpoch(text: string | null): number | null {
   return text !== null && /^[1-9]\d{0,2}$/.test(text) ? Number(text) : null;
 }
 
+function parseStretch(text: string | null): StretchKind | null {
+  return STRETCH_KINDS.find((kind) => kind === text) ?? null;
+}
+
 function parseName(text: string | null): string | null {
   const name = text?.trim() ?? "";
   return name === "" || name.length > MAX_NAME_LENGTH ? null : name;
@@ -137,6 +168,8 @@ export function parseUrlState(search: string): UrlState {
     band: parseBand(params.get("band")),
     mode: parseMode(params.get("mode")),
     epoch: parseEpoch(params.get("epoch")),
+    ref: parseEpoch(params.get("ref")),
+    stretch: parseStretch(params.get("stretch")),
     name: parseName(params.get("name")),
     embed: embed === "1" || embed === "true",
     lang: matchLanguage(params.get("lang")),
@@ -145,8 +178,8 @@ export function parseUrlState(search: string): UrlState {
 
 /**
  * Escribe el estado como cadena de consulta, con "?" adelante o vacia.
- * Con un campo van siempre ra, dec, fov, band y mode; epoch y name solo si
- * estan. Sin campo solo quedan embed y lang.
+ * Con un campo van siempre ra, dec, fov, band y mode; epoch, ref, stretch y
+ * name solo si estan. Sin campo solo quedan embed y lang.
  */
 export function serializeUrlState(state: UrlState): string {
   const params = new URLSearchParams();
@@ -158,6 +191,8 @@ export function serializeUrlState(state: UrlState): string {
     params.set("band", String(state.band));
     params.set("mode", state.mode);
     if (state.epoch !== null) params.set("epoch", String(state.epoch));
+    if (state.ref !== null) params.set("ref", String(state.ref));
+    if (state.stretch !== null) params.set("stretch", state.stretch);
     if (state.name !== null) params.set("name", state.name);
   }
   if (state.embed) params.set("embed", "1");
@@ -178,7 +213,7 @@ export function normalizeUrlState(state: UrlState): UrlState {
 export interface UrlUpdateOptions {
   /**
    * "replace" (por defecto) cambia la entrada actual del historial; sirve para
-   * banda, modo o epoca. "push" agrega una entrada; sirve para abrir otro campo.
+   * banda, modo, epoca, referencia o estirado. "push" agrega una entrada; sirve para abrir otro campo.
    */
   history?: "push" | "replace";
 }
@@ -198,6 +233,8 @@ function pickState(store: UrlState): UrlState {
     band: store.band,
     mode: store.mode,
     epoch: store.epoch,
+    ref: store.ref,
+    stretch: store.stretch,
     name: store.name,
     embed: store.embed,
     lang: store.lang,
@@ -237,7 +274,13 @@ export const useUrlState = create<UrlStore>()((set, get) => ({
   ...readLocation(),
 
   update(patch, options) {
-    const next = normalizeUrlState({ ...pickState(get()), ...patch });
+    const previous = pickState(get());
+    const merged = { ...previous, ...patch };
+    // La epoca de referencia es del campo: otro centro no la hereda, salvo que el cambio la traiga.
+    if (!("ref" in patch) && (merged.ra !== previous.ra || merged.dec !== previous.dec)) {
+      merged.ref = null;
+    }
+    const next = normalizeUrlState(merged);
     writeLocation(next, options?.history ?? "replace");
     set(next);
   },

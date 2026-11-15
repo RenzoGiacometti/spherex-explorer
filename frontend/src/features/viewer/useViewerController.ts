@@ -1,7 +1,8 @@
-// Estado de la pantalla del visor que no esta en la URL ni en el store del
-// campo: el reproductor, la epoca de referencia, mantener apretado, el
-// contraste, el estirado y la capa de flags. Con eso, la URL y los planos
-// bajados arma lo que se ve (viewModel.ts) y la escena que dibuja ImageViewer.
+// Estado de la pantalla del visor que no esta en el store del campo: el
+// reproductor, mantener apretado, el contraste, la capa de flags, el viaje
+// entre misiones y la capa de Gaia. Con eso, la URL (modo, epoca actual, epoca
+// de referencia, estirado) y los planos bajados arma lo que se ve (viewModel.ts)
+// y la escena que dibuja ImageViewer.
 //
 // Se usa una sola vez, en ViewerPage, que reparte el resultado a los paneles.
 
@@ -13,8 +14,18 @@ import {
   selectPreview,
   type VisiblePreview,
 } from "@/data/selectors";
+import {
+  type ContextDocument,
+  DEFAULT_ARROW_STEP,
+  type GaiaCatalog,
+  type JourneyFrame,
+  mjdToYear,
+  orderFrames,
+  spherexFrame,
+  surveyFrame,
+} from "@/features/context";
 import { useFieldStore } from "@/state/fieldStore";
-import { useUrlState, type ViewMode } from "@/state/urlState";
+import { DEFAULT_MODE, useUrlState, type ViewMode } from "@/state/urlState";
 import {
   NO_COLOR,
   NO_DATA_COLOR_VARIABLE,
@@ -27,13 +38,13 @@ import type { Scene } from "@/viewer/compose";
 import {
   contrastCuts,
   DEFAULT_CONTRAST,
-  DEFAULT_STRETCH,
   type DisplayRange,
   type StretchKind,
 } from "@/viewer/stretch";
+import { type FieldContextStatus, useFieldContext } from "./useFieldContext";
 import { type FlagLayer, useFlagLayer } from "./useFlagLayer";
 import { useHoldKey } from "./useHoldKey";
-import { deriveView, stepEpoch, type ViewModel } from "./viewModel";
+import { defaultStretchForMode, deriveView, stepEpoch, type ViewModel } from "./viewModel";
 
 /** Velocidades del reproductor. */
 export const PLAYBACK_SPEEDS = [0.5, 1, 2] as const;
@@ -51,11 +62,55 @@ export const FRAME_MS = 800;
 
 /**
  * De donde sale lo que se dibuja: planos de SPHEREx, la vista provisoria de
- * otro relevamiento (contrato, seccion 4.10) o nada todavia.
+ * otro relevamiento (contrato, seccion 4.10), una capa de otra mision del
+ * viaje (2MASS o WISE, docs/contexto.md) o nada todavia.
  */
-export type ImageSource = "spherex" | "preview" | "none";
+export type ImageSource = "spherex" | "preview" | "survey" | "none";
+
+/** Viaje entre misiones (modo `journey`): 2MASS, WISE y las epocas de SPHEREx en orden de fecha. */
+export interface JourneyControl {
+  /** Estado del contexto del campo: explica por que el modo no se puede elegir. */
+  readonly status: FieldContextStatus;
+  /** El campo tiene contexto guardado y la pantalla lo muestra: el modo se puede elegir. */
+  readonly available: boolean;
+  /** Cuadros del viaje; vacio fuera del modo. */
+  readonly frames: readonly JourneyFrame[];
+  /** Cuadro que se esta viendo, o null si la epoca actual no tiene cuadro. */
+  readonly currentId: string | null;
+  /** Cuadro de otra mision que se esta viendo; null si se ve una epoca de SPHEREx. */
+  readonly survey: JourneyFrame | null;
+  readonly playing: boolean;
+  /** Elige un cuadro. Una epoca de SPHEREx pasa a ser la actual en la URL. */
+  select(id: string): void;
+  setPlaying(playing: boolean): void;
+}
+
+/** Capa de Gaia: fuentes del catalogo del campo con su movimiento propio. */
+export interface GaiaControl {
+  /** Estado del contexto del campo: explica por que la capa no se puede prender. */
+  readonly status: FieldContextStatus;
+  /** Catalogo del campo; null si no tiene o todavia no llego. */
+  readonly catalog: GaiaCatalog | null;
+  /** Grilla del campo segun el contexto, para ubicar las fuentes. */
+  readonly grid: ContextDocument["grid"] | null;
+  readonly on: boolean;
+  setOn(on: boolean): void;
+  /** Paso del largo de las flechas (`ARROW_YEAR_STEPS`). */
+  readonly arrowStep: number;
+  setArrowStep(step: number): void;
+  /** Magnitud G limite y el recorrido que ofrece el catalogo. */
+  readonly maxGMag: number;
+  setMaxGMag(magnitude: number): void;
+  readonly magRange: readonly [number, number];
+  /** Anio juliano de la imagen que se ve: las fuentes se dibujan donde estaban. */
+  readonly year: number;
+}
 
 export interface ViewerController {
+  /**
+   * Modo que se ve. Es el de la URL, salvo `journey` en un campo sin contexto
+   * guardado (o en `embed`), que cae a `blink`.
+   */
   readonly mode: ViewMode;
   /** Planos de la banda actual, uno por epoca. */
   readonly entries: readonly BandPlane[];
@@ -84,7 +139,7 @@ export interface ViewerController {
   selectEpoch(epoch: number): void;
 
   // ---- Comparacion ----
-  /** Elige la epoca de referencia (B). */
+  /** Elige la epoca de referencia (B): queda en la URL (`ref`). */
   setReference(epoch: number): void;
   /** Se esta viendo B en el modo `hold`. */
   readonly holding: boolean;
@@ -94,10 +149,15 @@ export interface ViewerController {
   /** Posicion del control de contraste, de 0 a 1 (`contrastCuts`). */
   readonly contrast: number;
   setContrast(contrast: number): void;
+  /** Estirado: el elegido a mano (`stretch` en la URL) o, si no, el del modo. */
   readonly stretch: StretchKind;
   setStretch(stretch: StretchKind): void;
   /** Capa de flags: si esta prendida, que cubre y que flags hay en la imagen que se ve. */
   readonly flags: FlagLayer;
+
+  // ---- Contexto de otras misiones ----
+  readonly journey: JourneyControl;
+  readonly gaia: GaiaControl;
 }
 
 /** Variable de tokens.css con el color claro de la trama de flags (`{colors.text}`). */
@@ -105,6 +165,18 @@ const HATCH_COLOR_VARIABLE = "--color-text";
 
 /** Sin imagen de SPHEREx en pantalla no hay epocas de las que pedir flags. */
 const NO_EPOCHS: readonly number[] = [];
+
+const NO_FRAMES: readonly JourneyFrame[] = [];
+
+/** Epoca de referencia de Gaia DR3 (features/context/gaia.ts): donde se dibuja si no hay fecha. */
+const GAIA_REFERENCE_YEAR = 2016;
+
+/** Magnitud G limite de partida de la capa de Gaia, y el recorrido si el contexto no lo trae. */
+const DEFAULT_GAIA_MAGNITUDE = 17;
+const FALLBACK_MAG_RANGE: readonly [number, number] = [5, 21];
+
+/** Identificador del cuadro del viaje de una epoca de SPHEREx (`spherexFrame`). */
+const SPHEREX_FRAME_ID = /^spherex-(\d+)$/;
 
 /** Color de los pixeles sin datos, leido una vez de tokens.css. */
 function readNoDataColor(): Rgb {
@@ -134,34 +206,55 @@ function nextFrame(frames: readonly number[], previous: number | null): number |
 }
 
 export function useViewerController(): ViewerController {
-  const mode = useUrlState((state) => state.mode);
+  const urlMode = useUrlState((state) => state.mode);
   const urlEpoch = useUrlState((state) => state.epoch);
+  const urlReference = useUrlState((state) => state.ref);
+  const urlStretch = useUrlState((state) => state.stretch);
+  const embed = useUrlState((state) => state.embed);
   const update = useUrlState((state) => state.update);
 
   const request = useFieldStore((state) => state.request);
+  const band = useFieldStore((state) => state.band);
+  const gridShape = useFieldStore((state) => state.meta?.grid?.shape);
   const entries = useFieldStore(selectBandPlanes);
   const bandInfo = useFieldStore(selectBandInfo);
   const preview = useFieldStore(selectPreview);
+  const context = useFieldContext();
+
+  // El viaje entre misiones necesita el contexto del campo, y en `embed` no
+  // hay donde poner su control. Mientras el contexto esta en camino el modo de
+  // la URL se respeta; si resulta que no hay, cae a parpadeo.
+  const journeyAvailable = context.status === "ready" && !embed;
+  const journeyPending = !embed && (context.status === "loading" || context.status === "idle");
+  const mode: ViewMode =
+    urlMode === "journey" && !journeyAvailable && !journeyPending ? DEFAULT_MODE : urlMode;
 
   const [playing, setPlayingState] = useState(false);
   const [frame, setFrame] = useState<number | null>(null);
   const [speed, setSpeed] = useState<PlaybackSpeed>(DEFAULT_SPEED);
-  const [chosenReference, setChosenReference] = useState<number | null>(null);
   const [holding, setHoldingState] = useState(false);
   const [contrast, setContrast] = useState(DEFAULT_CONTRAST);
-  const [stretch, setStretch] = useState<StretchKind>(DEFAULT_STRETCH);
   const [noDataColor] = useState(readNoDataColor);
   const [hatchColor] = useState(() => readHatchColor(noDataColor));
+  /** Capa de otra mision elegida en el viaje; null si se ve una epoca de SPHEREx. */
+  const [journeySurvey, setJourneySurvey] = useState<string | null>(null);
+  const [journeyPlaying, setJourneyPlayingState] = useState(false);
+  const [gaiaOn, setGaiaOn] = useState(false);
+  const [arrowStep, setArrowStep] = useState<number>(DEFAULT_ARROW_STEP);
+  const [chosenMagnitude, setChosenMagnitude] = useState<number | null>(null);
 
-  // Otro campo: lo elegido para el anterior (cuadro, referencia) ya no vale.
-  // El contraste, el estirado y la velocidad son gustos de la persona y quedan.
+  // Otro campo: lo elegido para el anterior (cuadro, capa del viaje, magnitud
+  // limite) ya no vale. El contraste, la velocidad y la capa de Gaia prendida
+  // son gustos de la persona y quedan. La epoca de referencia la limpia la URL.
   const [seenRequest, setSeenRequest] = useState(request);
   if (seenRequest !== request) {
     setSeenRequest(request);
     setPlayingState(false);
     setFrame(null);
-    setChosenReference(null);
     setHoldingState(false);
+    setJourneySurvey(null);
+    setJourneyPlayingState(false);
+    setChosenMagnitude(null);
   }
   // El modo tambien cambia desde afuera (atras y adelante en el historial).
   if (playing && mode !== "blink") {
@@ -169,19 +262,107 @@ export function useViewerController(): ViewerController {
     setFrame(null);
   }
   if (holding && mode !== "hold") setHoldingState(false);
+  // Al salir del viaje se vuelve a SPHEREx: al entrar de nuevo arranca por la epoca actual.
+  if (mode !== "journey" && (journeySurvey !== null || journeyPlaying)) {
+    setJourneySurvey(null);
+    setJourneyPlayingState(false);
+  }
 
-  const view = useMemo(
+  const spherexView = useMemo(
     () =>
       deriveView({
         entries,
         mode,
         urlEpoch,
         frameEpoch: playing ? frame : null,
-        chosenReference,
+        chosenReference: urlReference,
         holding,
       }),
-    [entries, mode, urlEpoch, playing, frame, chosenReference, holding],
+    [entries, mode, urlEpoch, playing, frame, urlReference, holding],
   );
+
+  // ---- Viaje entre misiones -----------------------------------------------
+
+  const { document: contextDocument, layers: contextLayers } = context;
+  // Las capas del contexto solo sirven si estan en la grilla del campo abierto.
+  const contextShape = contextDocument?.grid.shape;
+  const sameGrid =
+    contextShape !== undefined &&
+    (gridShape === undefined ||
+      (gridShape[0] === contextShape[0] && gridShape[1] === contextShape[1]));
+
+  const journeyFrames = useMemo<readonly JourneyFrame[]>(() => {
+    if (mode !== "journey") return NO_FRAMES;
+    const list: JourneyFrame[] = [];
+    if (contextDocument !== null && sameGrid) {
+      for (const layer of contextDocument.surveys) {
+        // Sin escala de contraste la capa no tiene pixeles validos: no hay cuadro que mostrar.
+        if (layer.display === null) continue;
+        const values = contextLayers.get(layer.key)?.values ?? null;
+        list.push(surveyFrame(layer, contextDocument.grid.shape, values));
+      }
+    }
+    for (const entry of entries) {
+      // Una epoca sin datos en la banda no es una parada del viaje.
+      if (entry.plane?.status === "empty") continue;
+      const image = entry.loaded?.image ?? null;
+      list.push(
+        spherexFrame({
+          epoch: entry.epoch,
+          detector: band,
+          waveRangeUm: [bandInfo?.waveMinUm ?? 0, bandInfo?.waveMaxUm ?? 0],
+          display: bandInfo?.display ?? null,
+          shape: image === null ? [1, 1] : [image.height, image.width],
+          values: image?.values ?? null,
+        }),
+      );
+    }
+    return orderFrames(list);
+  }, [mode, contextDocument, contextLayers, sameGrid, entries, band, bandInfo]);
+
+  const survey =
+    journeySurvey === null
+      ? null
+      : (journeyFrames.find((item) => item.id === journeySurvey && item.mission !== "SPHEREx") ??
+        null);
+  const surveyImage = survey === null ? null : (contextLayers.get(survey.id)?.image ?? null);
+  const surveyDisplay = survey?.image?.display ?? null;
+  const surveyShown = survey !== null && surveyImage !== null && surveyDisplay !== null;
+
+  // Con una capa de otra mision en pantalla no se compone ninguna epoca de
+  // SPHEREx: no hay flags, mira ni espectro que mostrar sobre ella.
+  const view = useMemo<ViewModel>(
+    () =>
+      survey === null
+        ? spherexView
+        : {
+            ...spherexView,
+            composition: null,
+            issue: null,
+            missing: surveyShown ? null : "pending",
+            provisional: false,
+          },
+    [spherexView, survey, surveyShown],
+  );
+
+  const spherexFrameId = view.current === null ? null : `spherex-${view.current}`;
+  const journeyCurrentId =
+    survey?.id ??
+    (journeyFrames.some((item) => item.id === spherexFrameId) ? spherexFrameId : null);
+
+  const selectJourneyFrame = useCallback(
+    (id: string) => {
+      const match = SPHEREX_FRAME_ID.exec(id);
+      if (match === null) {
+        setJourneySurvey(id);
+        return;
+      }
+      setJourneySurvey(null);
+      update({ epoch: Number(match[1]) });
+    },
+    [update],
+  );
+  const setJourneyPlaying = useCallback((next: boolean) => setJourneyPlayingState(next), []);
 
   // ---- Reproductor --------------------------------------------------------
 
@@ -243,10 +424,19 @@ export function useViewerController(): ViewerController {
 
   const setMode = useCallback(
     (next: ViewMode) => {
+      // Sin contexto guardado el viaje no se puede elegir (el boton esta deshabilitado).
+      if (next === "journey" && !journeyAvailable) return;
       update({ mode: next });
     },
-    [update],
+    [update, journeyAvailable],
   );
+
+  // ---- Comparacion y estirado ---------------------------------------------
+
+  const setReference = useCallback((epoch: number) => update({ ref: epoch }), [update]);
+  // Diferencia y rojo/cian abren en lineal; lo elegido a mano manda en todos los modos.
+  const stretch = urlStretch ?? defaultStretchForMode(mode);
+  const setStretch = useCallback((next: StretchKind) => update({ stretch: next }), [update]);
 
   // ---- Mantener apretado --------------------------------------------------
 
@@ -256,26 +446,40 @@ export function useViewerController(): ViewerController {
   // ---- Escena -------------------------------------------------------------
 
   const { composition } = view;
-  const source: ImageSource = composition
-    ? "spherex"
-    : preview !== null && preview.display !== null
-      ? "preview"
-      : "none";
-  // La vista provisoria trae su propia escala: sus valores no son MJy/sr.
+  const source: ImageSource =
+    survey !== null
+      ? surveyShown
+        ? "survey"
+        : "none"
+      : composition
+        ? "spherex"
+        : preview !== null && preview.display !== null
+          ? "preview"
+          : "none";
+  // La vista provisoria y las capas de otras misiones traen su propia escala:
+  // sus valores no son los MJy/sr del detector.
   const display: DisplayRange | null =
-    source === "preview" ? (preview?.display ?? null) : (bandInfo?.display ?? null);
+    source === "survey"
+      ? surveyDisplay
+      : source === "preview"
+        ? (preview?.display ?? null)
+        : (bandInfo?.display ?? null);
   const previewImage = source === "preview" ? (preview?.image ?? null) : null;
+  const shownSurveyImage = source === "survey" ? surveyImage : null;
 
   // ---- Capa de flags --------------------------------------------------------
 
   // Los flags son de los planos de SPHEREx que se ven: en una comparacion, de
-  // todas las epocas que entran. La vista provisoria no tiene.
+  // todas las epocas que entran. La vista provisoria y las otras misiones no tienen.
   const flags = useFlagLayer(composition?.epochs ?? NO_EPOCHS);
   const flagMask = flags.mask;
 
   const scene = useMemo<Scene | null>(() => {
     if (display === null) return null;
     const cuts = contrastCuts(display, contrast);
+    if (shownSurveyImage) {
+      return { mode: "single", planes: [shownSurveyImage], stretch, cuts, noDataColor };
+    }
     if (composition) {
       const first = composition.planes[0];
       // La trama solo va si la mascara es de esta grilla.
@@ -294,7 +498,63 @@ export function useViewerController(): ViewerController {
       return { mode: "single", planes: [previewImage], stretch, cuts, noDataColor };
     }
     return null;
-  }, [composition, previewImage, display, contrast, stretch, noDataColor, flagMask, hatchColor]);
+  }, [
+    composition,
+    previewImage,
+    shownSurveyImage,
+    display,
+    contrast,
+    stretch,
+    noDataColor,
+    flagMask,
+    hatchColor,
+  ]);
+
+  // ---- Capa de Gaia ---------------------------------------------------------
+
+  // Las fuentes se dibujan donde estaban en la fecha de lo que se ve: la capa
+  // de otra mision o la epoca de SPHEREx (en una comparacion, la actual).
+  const shownEpoch =
+    composition === null
+      ? current
+      : composition.mode === "single"
+        ? (composition.epochs[0] ?? null)
+        : current;
+  const shownMjd = entries.find((entry) => entry.epoch.epoch === shownEpoch)?.epoch.mjd_mean;
+  const gaiaYear =
+    survey?.year ??
+    (shownMjd === undefined
+      ? (context.gaia?.ref_epoch ?? GAIA_REFERENCE_YEAR)
+      : mjdToYear(shownMjd));
+  const gaiaInfo = contextDocument?.gaia ?? null;
+  const magMin = gaiaInfo?.g_mag_min ?? FALLBACK_MAG_RANGE[0];
+  const magMax = gaiaInfo?.g_mag_max ?? FALLBACK_MAG_RANGE[1];
+  const magRange = useMemo<readonly [number, number]>(() => [magMin, magMax], [magMin, magMax]);
+  const maxGMag = chosenMagnitude ?? Math.min(DEFAULT_GAIA_MAGNITUDE, Math.ceil(magMax));
+
+  const journey: JourneyControl = {
+    status: context.status,
+    available: journeyAvailable,
+    frames: journeyFrames,
+    currentId: journeyCurrentId,
+    survey,
+    playing: journeyPlaying && mode === "journey",
+    select: selectJourneyFrame,
+    setPlaying: setJourneyPlaying,
+  };
+  const gaia: GaiaControl = {
+    status: context.status,
+    catalog: sameGrid ? context.gaia : null,
+    grid: sameGrid ? (contextDocument?.grid ?? null) : null,
+    on: gaiaOn,
+    setOn: setGaiaOn,
+    arrowStep,
+    setArrowStep,
+    maxGMag,
+    setMaxGMag: setChosenMagnitude,
+    magRange,
+    year: gaiaYear,
+  };
 
   return {
     mode,
@@ -311,7 +571,7 @@ export function useViewerController(): ViewerController {
     setSpeed,
     step,
     selectEpoch,
-    setReference: setChosenReference,
+    setReference,
     holding,
     setHolding,
     contrast,
@@ -319,5 +579,7 @@ export function useViewerController(): ViewerController {
     stretch,
     setStretch,
     flags,
+    journey,
+    gaia,
   };
 }

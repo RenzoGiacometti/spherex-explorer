@@ -7,6 +7,7 @@ import { DEFAULT_VIEW_FOV, fieldFovForView, VIEW_FOVS, type ViewFov } from "@/li
 import { useUrlState } from "@/state/urlState";
 import { MAX_CONTRAST, MIN_CONTRAST, STRETCH_KINDS, type StretchKind } from "@/viewer/stretch";
 import { FlagsControl } from "./FlagsControl";
+import { GaiaControl } from "./GaiaControl";
 import type { ViewerController } from "./useViewerController";
 
 export interface ImagePanelProps {
@@ -17,7 +18,8 @@ export interface ImagePanelProps {
 const CONTRAST_STEPS = 100;
 
 /**
- * Panel Imagen: contraste, estirado, campo de vision y capa de flags. El
+ * Panel Imagen: contraste, estirado, campo de vision, capa de flags y capa de
+ * Gaia (deshabilitada, con su explicacion, en los campos sin contexto). El
  * contraste mueve el corte alto entre los dos extremos de la escala del
  * detector (`contrastCuts`). Las vistas de 5 y 10 minutos comparten cubo (5 es
  * un acercamiento al doble); la de 30 abre el escalon amplio, que es otro campo.
@@ -52,7 +54,7 @@ export function ImagePanel({ controller }: ImagePanelProps) {
   function changeFov(next: ViewFov): void {
     // Otro escalon es otro campo, con sus propias epocas: la elegida ya no vale.
     const sameField = fieldFovForView(next) === fieldFovForView(fov);
-    update(sameField ? { fov: next } : { fov: next, epoch: null });
+    update(sameField ? { fov: next } : { fov: next, epoch: null, ref: null });
   }
 
   return (
@@ -72,6 +74,7 @@ export function ImagePanel({ controller }: ImagePanelProps) {
        * conmutador tiene que verse sin desplazar la columna.
        */}
       <FlagsControl layer={controller.flags} />
+      <GaiaControl gaia={controller.gaia} />
       <SegmentedControl
         label={t("image.stretch")}
         options={stretchOptions}

@@ -4,8 +4,9 @@
 //
 //   A  epoca actual: la de la linea de tiempo (`epoch` en la URL). Si la URL no
 //      la fija, la ultima que tiene imagen.
-//   B  epoca de referencia: la que se elige en el panel Modo. Si no se eligio,
-//      la primera que tiene imagen y no es A.
+//   B  epoca de referencia: la que se elige en el panel Modo (`ref` en la URL).
+//      Si no se eligio, entre las bien cubiertas, la mas lejana en fecha a A
+//      (`pickReferenceEpoch`).
 //
 //   modo        que se dibuja                              compose.ts
 //   blink       A, o el cuadro del reproductor             single [A]
@@ -13,6 +14,8 @@
 //   difference  A menos B                                  difference [B, A]
 //   redcyan     A en rojo y B en cian                      redcyan [A, B]
 //   sum         promedio de las epocas con imagen          sum [todas]
+//   journey     A, como blink sin reproductor; los cuadros de otras misiones
+//               los pone useViewerController.ts         single [A]
 //
 // compose.ts resta el segundo plano menos el primero, por eso la diferencia
 // lleva B adelante.
@@ -21,6 +24,7 @@ import type { BandPlane } from "@/data/selectors";
 import type { ViewMode } from "@/state/urlState";
 import { MAX_SCENE_PLANES, type SceneMode } from "@/viewer/compose";
 import type { PlaneImage } from "@/viewer/planeImage";
+import { DEFAULT_STRETCH, type StretchKind } from "@/viewer/stretch";
 
 /** Lo que eligio la persona y lo que hay para mostrar. */
 export interface ViewSelection {
@@ -31,7 +35,7 @@ export interface ViewSelection {
   readonly urlEpoch: number | null;
   /** Cuadro del reproductor mientras reproduce, o null si esta en pausa. */
   readonly frameEpoch: number | null;
-  /** Epoca de referencia elegida en el panel, o null si no se eligio. */
+  /** Epoca de referencia elegida en el panel (`ref` en la URL), o null si no se eligio. */
   readonly chosenReference: number | null;
   /** Se esta manteniendo apretado (modo `hold`). */
   readonly holding: boolean;
@@ -112,14 +116,84 @@ function defaultCurrent(entries: readonly BandPlane[]): number | null {
   return chosen ? epochOf(chosen) : null;
 }
 
+/** Lo que hace falta saber de una epoca para elegir la referencia por defecto. */
+export interface ReferenceCandidate {
+  readonly epoch: number;
+  /** Fecha media de la epoca (MJD). */
+  readonly mjd: number;
+  /** Exposiciones de la epoca en la banda que se ve. */
+  readonly exposures: number;
+}
+
 /**
- * Epoca B cuando no se eligio: la primera con imagen que no sea A. Mientras no
- * llega ninguna, la primera que va a tener datos.
+ * Parte de las exposiciones de la epoca mejor cubierta que tiene que tener una
+ * epoca para servir de referencia por defecto.
+ */
+export const REFERENCE_MIN_COVERAGE = 0.5;
+
+/**
+ * Epoca de referencia (B) por defecto entre las candidatas (las que no son A):
+ * de las que tienen al menos la mitad de las exposiciones de la mejor cubierta,
+ * la mas lejana en fecha a la epoca actual. Asi la comparacion no se hace
+ * contra una epoca ruidosa y el objeto tuvo el mayor tiempo posible para
+ * moverse o variar (WISE 0855 en B6: de 2,5 a 7,6 sigmas en la diferencia).
+ *
+ * Si dos quedan a la misma distancia gana la de mas exposiciones y, si
+ * empatan, la mas antigua. Sin fecha actual gana la mejor cubierta. null si no
+ * hay candidatas.
+ */
+export function pickReferenceEpoch(
+  candidates: readonly ReferenceCandidate[],
+  currentMjd: number | null,
+): number | null {
+  const best = candidates.reduce((most, item) => Math.max(most, item.exposures), 0);
+  const covered = candidates.filter((item) => item.exposures >= best * REFERENCE_MIN_COVERAGE);
+  let chosen: ReferenceCandidate | null = null;
+  let chosenDistance = -1;
+  for (const item of covered) {
+    const distance = currentMjd === null ? 0 : Math.abs(item.mjd - currentMjd);
+    const better =
+      chosen === null ||
+      distance > chosenDistance ||
+      (distance === chosenDistance &&
+        (item.exposures > chosen.exposures ||
+          (item.exposures === chosen.exposures && item.epoch < chosen.epoch)));
+    if (better) {
+      chosen = item;
+      chosenDistance = distance;
+    }
+  }
+  return chosen?.epoch ?? null;
+}
+
+/**
+ * Epoca B cuando no se eligio: `pickReferenceEpoch` entre las que tienen
+ * imagen y no son A. Mientras no llega ninguna, entre las que van a tener
+ * datos. Las exposiciones son las del plano de la banda que se ve.
  */
 function defaultReference(entries: readonly BandPlane[], current: number | null): number | null {
   const others = entries.filter((entry) => epochOf(entry) !== current);
-  const chosen = others.find(hasImage) ?? others.find((entry) => !isEmpty(entry)) ?? others[0];
-  return chosen ? epochOf(chosen) : null;
+  const withImage = others.filter(hasImage);
+  const withData = others.filter((entry) => !isEmpty(entry));
+  const pool = withImage.length > 0 ? withImage : withData.length > 0 ? withData : others;
+  const currentEntry = entries.find((entry) => epochOf(entry) === current);
+  return pickReferenceEpoch(
+    pool.map((entry) => ({
+      epoch: epochOf(entry),
+      mjd: entry.epoch.mjd_mean,
+      exposures: entry.plane?.n_exposures ?? 0,
+    })),
+    currentEntry?.epoch.mjd_mean ?? null,
+  );
+}
+
+/**
+ * Estirado con el que abre cada modo si la persona no eligio uno: lineal en
+ * los que restan o superponen dos epocas (diferencia y rojo/cian), donde el
+ * asinh aplasta justo los cambios chicos que se buscan; el del visor en los demas.
+ */
+export function defaultStretchForMode(mode: ViewMode): StretchKind {
+  return mode === "difference" || mode === "redcyan" ? "linear" : DEFAULT_STRETCH;
 }
 
 function single(entry: BandPlane | undefined): Composition | null {
@@ -129,7 +203,9 @@ function single(entry: BandPlane | undefined): Composition | null {
 
 /** Decide que se ve. */
 export function deriveView(selection: ViewSelection): ViewModel {
-  const { entries, mode } = selection;
+  const { entries } = selection;
+  // El viaje entre misiones muestra las epocas de SPHEREx de a una, como el parpadeo.
+  const mode = selection.mode === "journey" ? "blink" : selection.mode;
   const find = (epoch: number | null): BandPlane | undefined =>
     epoch === null ? undefined : entries.find((entry) => epochOf(entry) === epoch);
   const withImage = entries.filter(hasImage);

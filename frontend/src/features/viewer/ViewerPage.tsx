@@ -8,7 +8,8 @@
 //            zona libre        la imagen se encuadra aca
 //            columna derecha   Metadatos y Avisos de calidad; arriba de ellos,
 //                              el espectro cuando esta abierto (la columna se ensancha)
-//            muelle inferior   transporte, linea de tiempo y estado de la carga
+//            muelle inferior   transporte, linea de tiempo y estado de la carga;
+//                              en el modo `journey`, el control del viaje entre misiones
 //
 //   phone    menos de 600 px (DESIGN.md, "Responsive Behavior"): arriba, la
 //            salida, el objeto y la cantidad de avisos; la imagen; y en el 45 %
@@ -20,7 +21,8 @@
 //   embed    `embed=1` en la URL: solo la imagen con sus anotaciones y una
 //            franja con el transporte y el enlace al visor completo.
 //
-// Sobre la imagen, en los tres, van las anotaciones (ImageAnnotations.tsx).
+// Sobre la imagen, en los tres, van las anotaciones (ImageAnnotations.tsx) y,
+// si esta prendida, la capa de Gaia (GaiaOverlay.tsx).
 //
 // Un clic sobre la imagen pide el espectro de ese punto (useSpectrum.ts) y abre
 // SpectrumDock. En `embed` no: ahi solo va la imagen.
@@ -32,7 +34,9 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { IconButton } from "@/components";
 import { contractGridShape } from "@/data/gridShape";
+import { MissionJourney } from "@/features/context";
 import { useFieldStore } from "@/state/fieldStore";
 import { useUrlState } from "@/state/urlState";
 import type { ImageSize } from "@/viewer/compose";
@@ -40,6 +44,7 @@ import { type ImageClick, ImageViewer, type ViewerOverlay } from "@/viewer/Image
 import { homeZoomForViewFov } from "@/viewer/view";
 import { BandPanel } from "./BandPanel";
 import { EmbedBar } from "./EmbedBar";
+import { GaiaOverlay } from "./GaiaOverlay";
 import { ImageAnnotations } from "./ImageAnnotations";
 import { ImagePanel } from "./ImagePanel";
 import { MetadataPanel } from "./MetadataPanel";
@@ -70,7 +75,18 @@ export function ViewerPage() {
   const gridShape = useFieldStore((state) => state.meta?.grid?.shape);
   const requestFov = useFieldStore((state) => state.request?.fov);
   const controller = useViewerController();
-  const { view, scene, source } = controller;
+  const { view, scene, source, journey } = controller;
+  // El control del viaje ocupa el lugar de la linea de tiempo mientras dura el modo.
+  const journeyOn = controller.mode === "journey";
+  const journeyControl = journeyOn ? (
+    <MissionJourney
+      frames={journey.frames}
+      currentId={journey.currentId}
+      onSelect={journey.select}
+      playing={journey.playing}
+      onPlayingChange={journey.setPlaying}
+    />
+  ) : null;
   const notices = useQualityNotices(view.provisional);
 
   const viewerRef = useRef<HTMLDivElement | null>(null);
@@ -157,7 +173,9 @@ export function ViewerPage() {
       data-source={source}
       data-scene={scene?.mode}
       data-epochs={view.composition?.epochs.join(",")}
-      data-playing={controller.playing ? "true" : undefined}
+      data-playing={controller.playing || journey.playing ? "true" : undefined}
+      data-context={journey.status}
+      data-journey-frame={journeyOn ? (journey.currentId ?? undefined) : undefined}
       data-flags={controller.flags.status}
       data-spectrum={spectrumOpen ? "open" : undefined}
     >
@@ -195,11 +213,14 @@ export function ViewerPage() {
           onImageClick={canPick ? handleImageClick : undefined}
         >
           {(overlay: ViewerOverlay) => (
-            <ImageAnnotations
-              overlay={overlay}
-              controller={controller}
-              spectrumMark={spectrumOpen ? spectrumMark : null}
-            />
+            <>
+              <GaiaOverlay overlay={overlay} gaia={controller.gaia} shown={source !== "none"} />
+              <ImageAnnotations
+                overlay={overlay}
+                controller={controller}
+                spectrumMark={spectrumOpen ? spectrumMark : null}
+              />
+            </>
           )}
         </ImageViewer>
       </div>
@@ -222,7 +243,7 @@ export function ViewerPage() {
 
       {layout === "desktop" ? (
         <div className={styles.dock}>
-          <TimelineDock controller={controller} />
+          {journeyControl ?? <TimelineDock controller={controller} />}
         </div>
       ) : null}
 
@@ -235,12 +256,28 @@ export function ViewerPage() {
           >
             <ModePanel controller={controller} variant="compact" />
             <BandPanel currentEpoch={view.current} variant="compact" />
-            <TimelineDock
-              controller={controller}
-              variant="phone"
-              onOpenTools={() => openTools("tools")}
-              toolsOpen={openSection !== null}
-            />
+            {journeyControl === null ? (
+              <TimelineDock
+                controller={controller}
+                variant="phone"
+                onOpenTools={() => openTools("tools")}
+                toolsOpen={openSection !== null}
+              />
+            ) : (
+              <>
+                {journeyControl}
+                {/* El boton de herramientas vive en la linea de tiempo: en el viaje va aparte. */}
+                <div className={styles.journeyTools}>
+                  <IconButton
+                    icon="contrast"
+                    shape="square"
+                    label={t("tools.open")}
+                    aria-expanded={openSection !== null}
+                    onClick={() => openTools("tools")}
+                  />
+                </div>
+              </>
+            )}
           </div>
           {spectrumOpen ? (
             <div className={styles.sheet}>

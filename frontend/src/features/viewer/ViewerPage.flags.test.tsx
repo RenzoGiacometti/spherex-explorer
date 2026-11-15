@@ -276,7 +276,8 @@ describe("ViewerPage: capa de flags", () => {
   });
 
   it("en una comparacion cubre lo de todas las epocas que entran", async () => {
-    const { backend, container } = openViewer(WISE);
+    // Con la epoca 1 de referencia (la automatica seria la 2, mejor cubierta).
+    const { backend, container } = openViewer(`${WISE}&ref=1`);
     await shown("3");
     fireEvent.click(toggle());
     await flags("ready");
@@ -304,7 +305,7 @@ describe("ViewerPage: capa de flags", () => {
   });
 
   it("en mantener apretado muestra los flags de la epoca que esta en pantalla", async () => {
-    const { container } = openViewer(WISE.replace("mode=blink", "mode=hold"));
+    const { container } = openViewer(`${WISE.replace("mode=blink", "mode=hold")}&ref=1`);
     await shown("3");
     fireEvent.click(toggle());
     await flags("ready");

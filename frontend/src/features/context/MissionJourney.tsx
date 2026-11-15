@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import {
   classNames,
   DataGroup,
@@ -37,7 +38,6 @@ import {
   stopLabels,
 } from "./journey";
 import styles from "./MissionJourney.module.css";
-import { useContextTexts } from "./texts";
 
 // Punto medio (U+00B7): separa la banda de su longitud de onda, como en el rotulo de imagen.
 const SEPARATOR = String.fromCodePoint(0x00b7);
@@ -116,7 +116,7 @@ export function MissionJourney({
   intervalMs = DEFAULT_JOURNEY_INTERVAL_MS,
   className,
 }: MissionJourneyProps) {
-  const t = useContextTexts();
+  const { t } = useTranslation("context");
   const language = useLanguage();
   const groupName = useId();
   const [stopsRef, trackWidth] = useElementWidth();

@@ -8,6 +8,7 @@ import {
   selectTargetPosition,
   selectTargetTrail,
 } from "@/data/selectors";
+import { frameBandText, frameDateText } from "@/features/context";
 import { useLanguage } from "@/i18n/useLanguage";
 import {
   formatArcseconds,
@@ -91,7 +92,7 @@ export interface SpectrumMark {
  * - arriba a la izquierda, el modo y la banda; arriba a la derecha, la rosa N/E;
  * - abajo a la izquierda, la barra de escala con su valor;
  * - arriba al centro, el rotulo de la imagen: plano provisorio con sus
- *   exposiciones, o vista de otro relevamiento;
+ *   exposiciones, vista de otro relevamiento o capa de otra mision del viaje;
  * - el contorno de cada region saturada de los planos que se ven y, abajo a la
  *   derecha, el aviso de que hay una fuente saturada;
  * - la mira sobre el objeto buscado en la epoca que se ve, con su nombre y su
@@ -105,8 +106,11 @@ export interface SpectrumMark {
  */
 export function ImageAnnotations({ overlay, controller, spectrumMark }: ImageAnnotationsProps) {
   const { t } = useTranslation("viewer");
+  const { t: tContext } = useTranslation("context");
   const language = useLanguage();
   const { view, source, preview, entries, mode } = controller;
+  // Capa de otra mision del viaje, si es lo que se ve.
+  const survey = source === "survey" ? controller.journey.survey : null;
   const { transform, frame, image, viewport } = overlay;
   const composition = source === "spherex" ? view.composition : null;
 
@@ -159,6 +163,15 @@ export function ImageAnnotations({ overlay, controller, spectrumMark }: ImageAnn
         label={t("stage.preview")}
         value={`${preview.survey} ${formatWavelength(preview.waveUm, language, 1)}`}
         note={t("stage.previewNote")}
+      />
+    );
+  } else if (survey !== null) {
+    tagHeight = TAG_HEIGHT_WITH_NOTE;
+    tag = (
+      <ImageTag
+        label={survey.mission}
+        value={`${frameBandText(survey, language)} ${SEPARATOR} ${frameDateText(survey)}`}
+        note={tContext("journey.notSpherex")}
       />
     );
   } else if (composition?.mode === "single") {
@@ -393,6 +406,16 @@ export function ImageAnnotations({ overlay, controller, spectrumMark }: ImageAnn
         {composition ? (
           <li>{t("annotations.summary.band", { mode: modeText, band: bandText })}</li>
         ) : null}
+        {survey === null ? null : (
+          <li>
+            {tContext("journey.frame", {
+              mission: survey.mission,
+              band: survey.band,
+              date: frameDateText(survey),
+            })}
+            {`. ${tContext("journey.notSpherex")}.`}
+          </li>
+        )}
         {reticleShown && name !== null ? (
           <li>
             {t("annotations.summary.target", { name })}

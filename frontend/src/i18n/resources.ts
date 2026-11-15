@@ -9,12 +9,14 @@
 
 import enCommon from "./locales/en/common.json";
 import enComponents from "./locales/en/components.json";
+import enContext from "./locales/en/context.json";
 import enEntry from "./locales/en/entry.json";
 import enErrors from "./locales/en/errors.json";
 import enSpectrum from "./locales/en/spectrum.json";
 import enViewer from "./locales/en/viewer.json";
 import esCommon from "./locales/es/common.json";
 import esComponents from "./locales/es/components.json";
+import esContext from "./locales/es/context.json";
 import esEntry from "./locales/es/entry.json";
 import esErrors from "./locales/es/errors.json";
 import esSpectrum from "./locales/es/spectrum.json";
@@ -26,6 +28,7 @@ export const resources = {
   es: {
     common: esCommon,
     components: esComponents,
+    context: esContext,
     entry: esEntry,
     errors: esErrors,
     spectrum: esSpectrum,
@@ -34,6 +37,7 @@ export const resources = {
   en: {
     common: enCommon,
     components: enComponents,
+    context: enContext,
     entry: enEntry,
     errors: enErrors,
     spectrum: enSpectrum,

@@ -22,19 +22,31 @@ export interface ModePanelProps {
 const PAIR_MODES: readonly ViewMode[] = ["difference", "redcyan", "hold"];
 
 /**
- * Panel Modo: los cinco modos de la URL y, para los que comparan, la epoca de
- * referencia (B). La epoca actual (A) se elige en la linea de tiempo.
+ * Panel Modo: los modos de la URL y, para los que comparan, la epoca de
+ * referencia (B). La epoca actual (A) se elige en la linea de tiempo. El viaje
+ * entre misiones queda deshabilitado, con su explicacion, en los campos sin
+ * contexto guardado.
  */
 export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
   const { t } = useTranslation("viewer");
-  const { mode, entries, view } = controller;
+  const { t: tContext } = useTranslation("context");
+  const { mode, entries, view, journey } = controller;
   const usesPair = PAIR_MODES.includes(mode);
   const compact = variant === "compact";
 
   const modeOptions: SegmentedOption<ViewMode>[] = VIEW_MODES.map((item) => ({
     value: item,
     label: t(`mode.${item}`),
+    // El viaje entre misiones necesita contexto guardado para el campo.
+    disabled: item === "journey" && !journey.available,
   }));
+  // Por que el viaje esta deshabilitado, a la vista: no hay contexto o no se pudo cargar.
+  const journeyNote =
+    journey.status === "unavailable" || journey.status === "error" ? (
+      <p className={compact ? styles.stripHint : styles.hint} data-journey={journey.status}>
+        {tContext(`availability.${journey.status}`)}
+      </p>
+    ) : null;
 
   const referenceOptions: SegmentedOption<number>[] = entries.map((entry) => {
     const number = formatInteger(entry.epoch.epoch);
@@ -108,6 +120,7 @@ export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
         {/* Lo que mas se usa va mas abajo, cerca del pulgar: el boton de mantener y los modos. */}
         {mode === "hold" ? <HoldButton controller={controller} /> : null}
         {modes}
+        {journeyNote}
       </GlassPanel>
     );
   }
@@ -135,6 +148,7 @@ export function ModePanel({ controller, variant = "panel" }: ModePanelProps) {
       {mode === "hold" ? <HoldButton controller={controller} /> : null}
 
       {issue}
+      {journeyNote}
     </GlassPanel>
   );
 }

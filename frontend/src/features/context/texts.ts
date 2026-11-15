@@ -1,22 +1,18 @@
-// Textos del contexto (es, en) y como se usan.
+// Textos de las paginas de desarrollo del contexto y como se registran.
 //
-// Los textos estan al lado de los componentes (`context.es.json`,
-// `context.en.json`) y se suman a i18next al cargar este modulo, con el
-// namespace "context". Todavia no figuran en src/i18n/resources.ts: esta
-// etapa agrego solo archivos nuevos. Por eso las claves no pasan por el tipado
-// global de i18next y se tipan aca, contra el JSON en espanol: `useContextTexts`
-// devuelve una funcion que solo acepta claves que existen.
+// Los textos de los componentes (`MissionJourney`, `GaiaLayer`, `GaiaControls`)
+// estan en src/i18n/locales/<idioma>/context.json, registrados en
+// src/i18n/resources.ts: se leen con `useTranslation("context")` y sus claves
+// pasan por el tipado global de i18next.
 //
-// Al integrar: mover los dos JSON a src/i18n/locales/<idioma>/context.json,
-// sumarlos a `resources` y reemplazar `useContextTexts()` por
-// `useTranslation("context")`. Las claves no cambian.
+// Lo que queda aca es para la pagina de prueba (`context.devpage.tsx`): sus
+// textos van al lado (`contextDev.*.json`), no viajan en el sitio compilado y
+// se suman a i18next al cargar la pagina, con claves tipadas contra su JSON.
 
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { i18n } from "@/i18n";
 import type { Language } from "@/i18n/languages";
-import contextEn from "./context.en.json";
-import contextEs from "./context.es.json";
 
 /** Rutas con puntos de las hojas de un arbol de textos: "journey.title". */
 type TextKey<Tree, Prefix extends string = ""> = {
@@ -55,14 +51,3 @@ export function useTexts<Tree>(namespace: string): Texts<Tree> {
     [t, namespace],
   );
 }
-
-export const CONTEXT_NAMESPACE = "context";
-
-registerTexts(CONTEXT_NAMESPACE, { es: contextEs, en: contextEn });
-
-/** Textos de los componentes de contexto. */
-export function useContextTexts(): Texts<typeof contextEs> {
-  return useTexts<typeof contextEs>(CONTEXT_NAMESPACE);
-}
-
-export type ContextTexts = ReturnType<typeof useContextTexts>;

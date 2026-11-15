@@ -32,7 +32,8 @@
     "difference": "Diferencia",
     "sum": "Suma",
     "redcyan": "Rojo/cian",
-    "hold": "Mantener apretado"
+    "hold": "Mantener apretado",
+    "journey": "Viaje entre misiones"
   },
   "comparison": {
     "group": "Modo de comparación",
@@ -43,7 +44,8 @@
       "difference": "A menos B: la época actual menos la de referencia.",
       "redcyan": "A en rojo y B en cian. Lo que no cambió queda gris.",
       "sum": "Promedio de las épocas con imagen: {{n}}.",
-      "hold": "Se ve A. Mientras se mantiene apretado el botón o la barra espaciadora, se ve B."
+      "hold": "Se ve A. Mientras se mantiene apretado el botón o la barra espaciadora, se ve B.",
+      "journey": "2MASS, WISE y las épocas de SPHEREx, en orden de fecha. Se recorre con el control de abajo."
     },
     "holdButton": "Mantener para ver B",
     "issue": {

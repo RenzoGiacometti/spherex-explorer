@@ -36,6 +36,7 @@
 //                                  data-gaia-total
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import { isApiError } from "@/api/errors";
 import { isListed, type ListedFieldMeta } from "@/api/types";
@@ -60,7 +61,7 @@ import {
 } from "./journey";
 import { frameBandText, frameDateText, MissionJourney } from "./MissionJourney";
 import type { ContextDocument, GaiaCatalog } from "./schema";
-import { registerTexts, useContextTexts, useTexts } from "./texts";
+import { registerTexts, useTexts } from "./texts";
 
 // Los textos de la pagina van al lado y se registran al cargar este modulo.
 const DEV_NAMESPACE = "contextDev";
@@ -240,7 +241,7 @@ function TargetMark({ layout, point, label }: TargetMarkProps) {
 
 function ContextDevPage() {
   const t = useDevTexts();
-  const tc = useContextTexts();
+  const { t: tc } = useTranslation("context");
   const language = useLanguage();
   const [initial] = useState(() => readInitialState(window.location.search));
 

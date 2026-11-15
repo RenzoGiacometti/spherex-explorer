@@ -29,6 +29,11 @@
     "arrowYears": "{{years}} years",
     "magnitude": "Limiting G magnitude",
     "epochNote": "Positions moved to {{year}}. Each arrow shows where the source is heading.",
-    "layer": "Gaia DR3 sources with their proper motion: {{count}}"
+    "layer": "Gaia DR3 sources with their proper motion: {{count}}",
+    "toggle": "Gaia layer"
+  },
+  "availability": {
+    "unavailable": "For now, context from other missions is only available for some precomputed fields.",
+    "error": "The context from other missions could not be loaded for this field."
   }
 }

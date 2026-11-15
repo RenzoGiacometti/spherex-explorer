@@ -27,6 +27,15 @@
   padding: var(--space-xxs);
 }
 
+/* Renglon de explicacion dentro de la tira del celular. */
+.stripHint {
+  margin: 0;
+  padding: 0 var(--space-xs);
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
 /* Un aviso dentro de la tira lleva su propio aire: el panel casi no tiene relleno. */
 .stripNotice {
   padding: var(--space-xxs) var(--space-xs);

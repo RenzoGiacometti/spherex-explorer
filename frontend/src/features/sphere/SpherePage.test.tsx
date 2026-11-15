@@ -426,6 +426,8 @@ describe("SpherePage sin WebGL", () => {
         band: 3,
         mode: "blink",
         epoch: null,
+        ref: null,
+        stretch: null,
         name: "Barnard's Star",
         // El idioma y el modo embed son de la pagina, no del campo: se conservan.
         embed: true,

@@ -26,6 +26,8 @@ describe("parseUrlState", () => {
       band: 3,
       mode: "blink",
       epoch: null,
+      ref: null,
+      stretch: null,
       name: null,
       embed: false,
       lang: null,
@@ -43,7 +45,7 @@ describe("parseUrlState", () => {
 
   it("lee todos los parametros", () => {
     const parsed = parseUrlState(
-      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&name=Barnard%27s+Star&embed=1&lang=en",
+      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&ref=1&stretch=log&name=Barnard%27s+Star&embed=1&lang=en",
     );
     expect(parsed).toEqual({
       ra: 269.4463,
@@ -52,6 +54,8 @@ describe("parseUrlState", () => {
       band: 1,
       mode: "difference",
       epoch: 2,
+      ref: 1,
+      stretch: "log",
       name: "Barnard's Star",
       embed: true,
       lang: "en",
@@ -146,8 +150,8 @@ describe("parseUrlState", () => {
   });
 
   describe("mode", () => {
-    it("acepta los cinco modos", () => {
-      for (const mode of ["blink", "difference", "sum", "redcyan", "hold"]) {
+    it("acepta los seis modos", () => {
+      for (const mode of ["blink", "difference", "sum", "redcyan", "hold", "journey"]) {
         expect(parseUrlState(`?mode=${mode}`).mode).toBe(mode);
       }
     });
@@ -168,6 +172,35 @@ describe("parseUrlState", () => {
     it("queda en null si es invalida", () => {
       for (const value of ["0", "-1", "1.5", "abc", "", "1000"]) {
         expect(parseUrlState(`?epoch=${value}`).epoch, value).toBeNull();
+      }
+    });
+  });
+
+  describe("ref", () => {
+    it("acepta enteros desde 1", () => {
+      expect(parseUrlState("?ref=1").ref).toBe(1);
+      expect(parseUrlState("?ref=3").ref).toBe(3);
+    });
+
+    it("queda en null (la elige el visor) si falta o es invalida", () => {
+      expect(parseUrlState("").ref).toBeNull();
+      for (const value of ["0", "-1", "1.5", "abc", "", "1000"]) {
+        expect(parseUrlState(`?ref=${value}`).ref, value).toBeNull();
+      }
+    });
+  });
+
+  describe("stretch", () => {
+    it("acepta los tres estirados", () => {
+      for (const stretch of ["linear", "log", "asinh"]) {
+        expect(parseUrlState(`?stretch=${stretch}`).stretch).toBe(stretch);
+      }
+    });
+
+    it("queda en null (el del modo) si falta o es invalido", () => {
+      expect(parseUrlState("").stretch).toBeNull();
+      for (const value of ["", "LINEAR", "sqrt", "1"]) {
+        expect(parseUrlState(`?stretch=${value}`).stretch, value).toBeNull();
       }
     });
   });
@@ -225,7 +258,17 @@ describe("serializeUrlState", () => {
 
   it("sin campo conserva solo embed y lang", () => {
     expect(
-      serializeUrlState(state({ band: 5, mode: "sum", epoch: 2, name: "x", lang: "en" })),
+      serializeUrlState(
+        state({
+          band: 5,
+          mode: "sum",
+          epoch: 2,
+          ref: 1,
+          stretch: "linear",
+          name: "x",
+          lang: "en",
+        }),
+      ),
     ).toBe("?lang=en");
     expect(serializeUrlState(state({ embed: true }))).toBe("?embed=1");
   });
@@ -250,6 +293,19 @@ describe("serializeUrlState", () => {
     );
   });
 
+  it("escribe la referencia y el estirado solo si se eligieron, despues de la epoca", () => {
+    const base = state({ ra: 133.7598, dec: -7.2422, band: 6, mode: "difference" });
+    expect(serializeUrlState(base)).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=difference",
+    );
+    expect(serializeUrlState({ ...base, epoch: 3, ref: 2, stretch: "asinh", name: "x" })).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=difference&epoch=3&ref=2&stretch=asinh&name=x",
+    );
+    expect(serializeUrlState({ ...base, stretch: "linear" })).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=difference&stretch=linear",
+    );
+  });
+
   it("redondea las coordenadas a 4 decimales y sin ceros de relleno", () => {
     expect(serializeUrlState(state({ ra: 10.123456, dec: -0.00001 }))).toBe(
       "?ra=10.1235&dec=0&fov=0.1667&band=3&mode=blink",
@@ -267,6 +323,8 @@ describe("serializeUrlState", () => {
       band: 2,
       mode: "hold",
       epoch: 2,
+      ref: 1,
+      stretch: "linear",
       name: "RW Aurigae",
       embed: true,
       lang: "en",
@@ -282,8 +340,10 @@ describe("normalizeUrlState", () => {
     );
   });
 
-  it("descarta epoch y name si no hay campo", () => {
-    expect(normalizeUrlState(state({ epoch: 2, name: "x", band: 5 }))).toEqual(DEFAULT_URL_STATE);
+  it("descarta epoch, ref, stretch y name si no hay campo", () => {
+    expect(
+      normalizeUrlState(state({ epoch: 2, ref: 1, stretch: "log", name: "x", band: 5 })),
+    ).toEqual(DEFAULT_URL_STATE);
   });
 });
 
@@ -331,6 +391,37 @@ describe("useUrlState", () => {
     useUrlState.getState().update({ ra: 269.4463, dec: 4.7683 }, { history: "push" });
     expect(window.history.length).toBe(before + 1);
     expect(window.location.search).toBe("?ra=269.4463&dec=4.7683&fov=0.1667&band=1&mode=blink");
+  });
+
+  it("update escribe la referencia y el estirado reemplazando la entrada del historial", () => {
+    setLocation(`${SPEC_EXAMPLE}&epoch=3`);
+    const before = window.history.length;
+
+    useUrlState.getState().update({ ref: 2 });
+    useUrlState.getState().update({ stretch: "linear" });
+
+    expect(window.history.length).toBe(before);
+    expect(window.location.search).toBe(`${SPEC_EXAMPLE}&epoch=3&ref=2&stretch=linear`);
+    // Volver a los valores automaticos los saca de la URL.
+    useUrlState.getState().update({ ref: null, stretch: null });
+    expect(window.location.search).toBe(`${SPEC_EXAMPLE}&epoch=3`);
+  });
+
+  it("otro campo no hereda la epoca de referencia; el estirado si", () => {
+    setLocation(`${SPEC_EXAMPLE}&ref=2&stretch=log`);
+
+    useUrlState.getState().update({ band: 5 });
+    expect(useUrlState.getState().ref).toBe(2);
+
+    useUrlState.getState().update({ ra: 269.4463, dec: 4.7683 }, { history: "push" });
+    expect(useUrlState.getState().ref).toBeNull();
+    expect(useUrlState.getState().stretch).toBe("log");
+    expect(window.location.search).toBe(
+      "?ra=269.4463&dec=4.7683&fov=0.1667&band=5&mode=blink&stretch=log",
+    );
+    // Salvo que el mismo cambio la traiga (un link armado a mano).
+    useUrlState.getState().update({ ra: 133.7598, dec: -7.2422, ref: 1 }, { history: "push" });
+    expect(useUrlState.getState().ref).toBe(1);
   });
 
   it("update normaliza valores invalidos en vez de guardarlos", () => {

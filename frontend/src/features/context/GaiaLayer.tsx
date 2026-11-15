@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { classNames, GlassPanel, Slider, Toggle } from "@/components";
+import { useTranslation } from "react-i18next";
+import { ControlHeader, classNames, GlassPanel, Slider, Toggle } from "@/components";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDecimal, formatInteger } from "@/lib/format";
 import type { GridWcs } from "@/lib/wcs";
@@ -13,7 +14,6 @@ import {
   gaiaMarkers,
 } from "./gaia";
 import type { GaiaCatalog } from "./schema";
-import { useContextTexts } from "./texts";
 
 /** Fuentes que se dibujan como mucho: las mas brillantes. Mas que esto tapa la imagen. */
 export const DEFAULT_GAIA_LIMIT = 400;
@@ -69,7 +69,7 @@ export function GaiaLayer({
   highlightIndex = null,
   className,
 }: GaiaLayerProps) {
-  const t = useContextTexts();
+  const { t } = useTranslation("context");
   const markers = useMemo(
     () => gaiaMarkers(catalog, grid, { year, arrowYears, maxGMag, limit }),
     [catalog, grid, year, arrowYears, maxGMag, limit],
@@ -134,6 +134,16 @@ export interface GaiaControlsProps {
   readonly total: number;
   /** Anio al que estan llevadas las posiciones. */
   readonly year: number;
+  /**
+   * `panel` (por defecto) es un panel propio, con encabezado. `inline` va
+   * dentro de otro panel (el de Imagen del visor, junto a la capa de flags):
+   * solo el conmutador y, con la capa prendida, sus dos controles.
+   */
+  readonly variant?: "panel" | "inline";
+  /** La capa no se puede prender (el campo no tiene catalogo guardado). */
+  readonly disabled?: boolean;
+  /** Frase corta que explica por que esta deshabilitada. Solo en `inline`. */
+  readonly disabledNote?: string | undefined;
   readonly className?: string | undefined;
 }
 
@@ -152,20 +162,19 @@ export function GaiaControls({
   shown,
   total,
   year,
+  variant = "panel",
+  disabled = false,
+  disabledNote,
   className,
 }: GaiaControlsProps) {
-  const t = useContextTexts();
+  const { t } = useTranslation("context");
   const language = useLanguage();
   const [magMin, magMax] = magRange;
   const arrowYears = arrowYearsForStep(arrowStep);
-  return (
-    <GlassPanel
-      title={t("gaia.title")}
-      icon="target"
-      aside={t("gaia.count", { shown: formatInteger(shown), total: formatInteger(total) })}
-      className={className}
-    >
-      <Toggle label={t("gaia.show")} checked={visible} onChange={onVisibleChange} />
+  const count = t("gaia.count", { shown: formatInteger(shown), total: formatInteger(total) });
+
+  const sliders = (
+    <>
       <Slider
         label={t("gaia.arrowScale")}
         min={0}
@@ -193,6 +202,44 @@ export function GaiaControls({
       <p className={styles.note}>
         {t("gaia.epochNote", { year: formatDecimal(year, language, 1) })}
       </p>
+    </>
+  );
+
+  if (variant === "inline") {
+    const shownOn = visible && !disabled;
+    return (
+      <div
+        className={classNames(styles.inline, className)}
+        data-gaia={disabled ? "disabled" : visible ? "on" : "off"}
+      >
+        <Toggle
+          label={t("gaia.toggle")}
+          checked={shownOn}
+          onChange={onVisibleChange}
+          disabled={disabled}
+        />
+        {disabled && disabledNote !== undefined ? (
+          <p className={styles.note}>{disabledNote}</p>
+        ) : null}
+        {shownOn ? (
+          <>
+            <ControlHeader label={t("gaia.title")} value={count} />
+            {sliders}
+          </>
+        ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <GlassPanel title={t("gaia.title")} icon="target" aside={count} className={className}>
+      <Toggle
+        label={t("gaia.show")}
+        checked={visible}
+        onChange={onVisibleChange}
+        disabled={disabled}
+      />
+      {sliders}
     </GlassPanel>
   );
 }

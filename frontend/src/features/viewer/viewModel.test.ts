@@ -4,7 +4,13 @@ import { describe, expect, it } from "vitest";
 import type { Epoch, Plane, PlaneStatus } from "@/api/types";
 import type { BandPlane } from "@/data/selectors";
 import { type PlaneImage, toPlaneImage } from "@/viewer/planeImage";
-import { deriveView, stepEpoch, type ViewSelection } from "./viewModel";
+import {
+  defaultStretchForMode,
+  deriveView,
+  pickReferenceEpoch,
+  stepEpoch,
+  type ViewSelection,
+} from "./viewModel";
 
 type Kind = "ready" | "building" | "pending" | "empty";
 
@@ -58,6 +64,14 @@ function entries(...kinds: Kind[]): BandPlane[] {
   return kinds.map((kind, index) => entry(index + 1, kind));
 }
 
+/** Las mismas epocas con otra cantidad de exposiciones en el plano de la banda. */
+function withExposures(list: readonly BandPlane[], exposures: readonly number[]): BandPlane[] {
+  return list.map((item, index) => ({
+    ...item,
+    plane: item.plane ? { ...item.plane, n_exposures: exposures[index] ?? 0 } : null,
+  }));
+}
+
 function view(selection: Partial<ViewSelection> & Pick<ViewSelection, "entries">) {
   return deriveView({
     mode: "blink",
@@ -109,8 +123,23 @@ describe("deriveView: epocas A y B", () => {
     expect(view({ entries: list, chosenReference: 2 }).reference).toBe(2);
     expect(view({ entries: list, chosenReference: 3 }).reference).toBe(1);
     expect(view({ entries: list, chosenReference: 7 }).reference).toBe(1);
-    // Si A pasa a ser la primera, B es la siguiente con imagen.
-    expect(view({ entries: list, urlEpoch: 1 }).reference).toBe(2);
+    // Si A pasa a ser la primera, B es la mas lejana en fecha: la ultima.
+    expect(view({ entries: list, urlEpoch: 1 }).reference).toBe(3);
+  });
+
+  it("por defecto B es una epoca bien cubierta, la mas lejana en fecha a A", () => {
+    // WISE 0855 en B6: 3, 21 y 21 exposiciones. La epoca 1 es la mas lejana, pero ruidosa.
+    const wise = withExposures(entries("ready", "ready", "ready"), [3, 21, 21]);
+    expect(view({ entries: wise }).reference).toBe(2);
+    expect(view({ entries: wise, urlEpoch: 2 }).reference).toBe(3);
+    // Con la epoca 1 como actual, la 3 es bien cubierta y la mas lejana.
+    expect(view({ entries: wise, urlEpoch: 1 }).reference).toBe(3);
+  });
+
+  it("por defecto B sale de las epocas con imagen mientras el campo carga", () => {
+    // La epoca 2 es la mejor cubierta pero su imagen todavia no llego.
+    const loading = withExposures(entries("ready", "pending", "ready"), [3, 21, 21]);
+    expect(view({ entries: loading }).reference).toBe(1);
   });
 
   it("antes de `listed` no hay epocas", () => {
@@ -122,6 +151,51 @@ describe("deriveView: epocas A y B", () => {
       composition: null,
       missing: "waiting",
     });
+  });
+});
+
+describe("pickReferenceEpoch", () => {
+  const candidate = (epoch: number, mjd: number, exposures: number) => ({ epoch, mjd, exposures });
+
+  it("descarta las epocas con menos de la mitad de las exposiciones de la mejor", () => {
+    // Epocas 1 y 2 de WISE 0855 en B6, vistas desde la 3 (MJD 61161,9).
+    const list = [candidate(1, 60801.2, 3), candidate(2, 60991.3, 21)];
+    expect(pickReferenceEpoch(list, 61161.9)).toBe(2);
+  });
+
+  it("entre las bien cubiertas elige la mas lejana en fecha, antes o despues", () => {
+    const list = [candidate(1, 60800, 20), candidate(2, 60990, 30), candidate(4, 61300, 30)];
+    expect(pickReferenceEpoch(list, 61160)).toBe(1);
+    expect(pickReferenceEpoch(list, 60850)).toBe(4);
+  });
+
+  it("la mitad justa alcanza y una exposicion menos no", () => {
+    expect(pickReferenceEpoch([candidate(1, 60800, 10), candidate(2, 61000, 20)], 61100)).toBe(1);
+    expect(pickReferenceEpoch([candidate(1, 60800, 9), candidate(2, 61000, 20)], 61100)).toBe(2);
+  });
+
+  it("a igual distancia gana la de mas exposiciones y despues la mas antigua", () => {
+    expect(pickReferenceEpoch([candidate(1, 60900, 15), candidate(3, 61100, 20)], 61000)).toBe(3);
+    expect(pickReferenceEpoch([candidate(1, 60900, 20), candidate(3, 61100, 20)], 61000)).toBe(1);
+  });
+
+  it("sin exposiciones en ninguna igual elige la mas lejana", () => {
+    expect(pickReferenceEpoch([candidate(1, 60800, 0), candidate(2, 61000, 0)], 61100)).toBe(1);
+  });
+
+  it("sin fecha actual gana la mejor cubierta, y sin candidatas no hay referencia", () => {
+    expect(pickReferenceEpoch([candidate(1, 60800, 12), candidate(2, 61000, 20)], null)).toBe(2);
+    expect(pickReferenceEpoch([], 61000)).toBeNull();
+  });
+});
+
+describe("defaultStretchForMode", () => {
+  it("lineal en diferencia y rojo/cian, asinh en los demas", () => {
+    expect(defaultStretchForMode("difference")).toBe("linear");
+    expect(defaultStretchForMode("redcyan")).toBe("linear");
+    for (const mode of ["blink", "sum", "hold", "journey"] as const) {
+      expect(defaultStretchForMode(mode), mode).toBe("asinh");
+    }
   });
 });
 

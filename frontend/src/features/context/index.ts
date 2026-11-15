@@ -1,6 +1,7 @@
-// Contexto de otras misiones (Etapa 3): componentes sueltos, listos para
-// montar en el visor. La pagina de prueba esta en /?dev=context
-// (context.devpage.tsx) y docs/contexto.md explica de donde salen los datos.
+// Contexto de otras misiones (Etapa 3). El visor los monta (features/viewer:
+// modo `journey` y capa de Gaia del panel Imagen). La pagina de prueba esta en
+// /?dev=context (context.devpage.tsx) y docs/contexto.md explica de donde
+// salen los datos. Los textos estan en src/i18n/locales/<idioma>/context.json.
 //
 //   MissionJourney  control que recorre 2MASS, WISE y las epocas de SPHEREx
 //                   en orden de fecha, con el anio a la vista
@@ -64,4 +65,3 @@ export type {
   SurveyLayer,
   SurveyName,
 } from "./schema";
-export { CONTEXT_NAMESPACE, type ContextTexts, useContextTexts } from "./texts";

@@ -281,31 +281,59 @@ describe("ViewerPage: modos", () => {
     choose("Diferencia");
 
     expect(new URLSearchParams(window.location.search).get("mode")).toBe("difference");
-    // Por defecto A es la ultima epoca y B la primera; compose.ts recibe B adelante.
-    expect(page().dataset).toMatchObject({ scene: "difference", epochs: "1,3" });
-    expect(screen.getByText("A 2026-04 · B 2025-05")).toBeTruthy();
+    // Por defecto A es la ultima epoca y B, entre las bien cubiertas, la mas lejana en
+    // fecha: la 2 (21 exposiciones en B6), no la 1 (3). compose.ts recibe B adelante.
+    expect(page().dataset).toMatchObject({ scene: "difference", epochs: "2,3" });
+    expect(screen.getByText("A 2026-04 · B 2025-10")).toBeTruthy();
+    // La referencia y el estirado automaticos no se escriben en la URL.
+    expect(new URLSearchParams(window.location.search).get("ref")).toBeNull();
+    expect(new URLSearchParams(window.location.search).get("stretch")).toBeNull();
+    // La diferencia abre en estirado lineal.
+    expect(
+      within(screen.getByRole("group", { name: "Estirado" })).getByRole<HTMLInputElement>("radio", {
+        name: "Lineal",
+      }).checked,
+    ).toBe(true);
     const image = composedImage(contexts, container);
-    // La epoca 3 es mas brillante que la 1: A menos B da positivo, mas claro que el gris medio.
+    // La epoca 3 es mas brillante que la 2: A menos B da positivo, mas claro que el gris medio.
     expect(pixelAt(image, ...VALID)[0]).toBeGreaterThan(128);
     expect(pixelAt(image, ...SATURATED)).toEqual([0, 0, 0]);
     expect(pixelAt(image, ...NO_DATA)).toEqual([0, 0, 0]);
 
-    // Otra referencia.
+    // Otra referencia: queda en la URL.
     const reference = screen.getByRole("group", { name: "Época de referencia (B)" });
     expect(
-      within(reference).getByRole<HTMLInputElement>("radio", { name: "Época 1, 2025-05" }).checked,
+      within(reference).getByRole<HTMLInputElement>("radio", { name: "Época 2, 2025-10" }).checked,
     ).toBe(true);
     // B no puede ser la misma epoca que A.
     expect(
       within(reference).getByRole<HTMLInputElement>("radio", { name: "Época 3, 2026-04" }).disabled,
     ).toBe(true);
-    fireEvent.click(within(reference).getByRole("radio", { name: "Época 2, 2025-10" }));
-    expect(page().dataset.epochs).toBe("2,3");
+    fireEvent.click(within(reference).getByRole("radio", { name: "Época 1, 2025-05" }));
+    expect(page().dataset.epochs).toBe("1,3");
+    expect(new URLSearchParams(window.location.search).get("ref")).toBe("1");
 
-    // Si A pasa a ser la primera, la resta cambia de signo.
+    // Si A pasa a ser la primera, la elegida ya no sirve de referencia: vuelve la
+    // automatica (la 3, la mas lejana) y la resta cambia de signo.
     choose(/^Época 1, .*cargada$/);
-    expect(page().dataset.epochs).toBe("2,1");
+    expect(page().dataset.epochs).toBe("3,1");
     expect(level(container)).toBeLessThan(128);
+
+    // Fuera de diferencia y rojo/cian vuelve el estirado por defecto, salvo que se elija uno.
+    choose("Parpadeo");
+    expect(
+      within(screen.getByRole("group", { name: "Estirado" })).getByRole<HTMLInputElement>("radio", {
+        name: "Arcoseno hiperbólico",
+      }).checked,
+    ).toBe(true);
+    choose("Logarítmico");
+    expect(new URLSearchParams(window.location.search).get("stretch")).toBe("log");
+    choose("Diferencia");
+    expect(
+      within(screen.getByRole("group", { name: "Estirado" })).getByRole<HTMLInputElement>("radio", {
+        name: "Logarítmico",
+      }).checked,
+    ).toBe(true);
   });
 
   it("rojo/cian: A en rojo y B en cian", async () => {
@@ -314,10 +342,11 @@ describe("ViewerPage: modos", () => {
 
     choose("Rojo/cian");
 
-    expect(page().dataset).toMatchObject({ scene: "redcyan", epochs: "3,1" });
+    // B por defecto es la epoca 2: bien cubierta y la mas lejana en fecha a la 3.
+    expect(page().dataset).toMatchObject({ scene: "redcyan", epochs: "3,2" });
     const image = composedImage(contexts, container);
     const [red, green, blue] = pixelAt(image, ...VALID);
-    // A (epoca 3) es mas brillante que B (epoca 1): gana el rojo.
+    // A (epoca 3) es mas brillante que B (epoca 2): gana el rojo.
     expect(red).toBeGreaterThan(green);
     expect(green).toBe(blue);
     expect(pixelAt(image, ...SATURATED)).toEqual([0, 0, 0]);
@@ -352,7 +381,8 @@ describe("ViewerPage: modos", () => {
 
     const button = screen.getByRole("button", { name: "Mantener para ver B" });
     fireEvent.pointerDown(button);
-    expect(page().dataset.epochs).toBe("1");
+    // B por defecto: la epoca 2, bien cubierta y la mas lejana en fecha a la 3.
+    expect(page().dataset.epochs).toBe("2");
     expect(button.getAttribute("aria-pressed")).toBe("true");
     fireEvent.pointerUp(button);
     expect(page().dataset.epochs).toBe("3");
@@ -365,7 +395,7 @@ describe("ViewerPage: modos", () => {
     const modeRadio = radio("Mantener apretado");
     const notCancelled = fireEvent.keyDown(modeRadio, { key: " ", code: "Space" });
     expect(notCancelled).toBe(false);
-    expect(page().dataset.epochs).toBe("1");
+    expect(page().dataset.epochs).toBe("2");
     fireEvent.keyUp(modeRadio, { key: " ", code: "Space" });
     expect(page().dataset.epochs).toBe("3");
 
@@ -382,7 +412,7 @@ describe("ViewerPage: modos", () => {
 
     // Si la ventana pierde el foco con la barra apretada, se suelta.
     fireEvent.keyDown(document.body, { key: " ", code: "Space" });
-    expect(page().dataset.epochs).toBe("1");
+    expect(page().dataset.epochs).toBe("2");
     fireEvent.blur(window);
     expect(page().dataset.epochs).toBe("3");
   });
@@ -399,7 +429,8 @@ describe("ViewerPage: modos", () => {
 
   it("avisa cuando alguna de las epocas comparadas es provisoria", async () => {
     const notice = "Alguna de las épocas comparadas es provisoria: todavía le faltan exposiciones.";
-    await openViewer(WISE, loadingMeta());
+    // La referencia automatica evita la epoca provisoria (pocas exposiciones): se la elige en la URL.
+    await openViewer(`${WISE}&ref=1`, loadingMeta());
     await shown("3");
     expect(radio("Época 1, 2025-05, provisoria")).toBeTruthy();
     // El parpadeo no compara.

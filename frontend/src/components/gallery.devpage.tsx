@@ -198,6 +198,8 @@ function viewerHref(target: FeaturedObject): string {
     band: target.band,
     mode: DEFAULT_MODE,
     epoch: null,
+    ref: null,
+    stretch: null,
     name: target.name,
     embed: false,
     lang: null,

@@ -158,7 +158,8 @@ describe("ViewerPage: modo embed", () => {
 
   it("respeta el modo de la URL y, en mantener apretado, suma su boton", async () => {
     openViewer(`${WISE.replace("mode=blink", "mode=difference")}&embed=1`);
-    await shown("1,3");
+    // B por defecto: la epoca 2, bien cubierta y la mas lejana en fecha a la 3.
+    await shown("2,3");
     expect(page().dataset.scene).toBe("difference");
     expect(screen.queryByRole("button", { name: "Mantener para ver B" })).toBeNull();
     cleanup();
@@ -169,7 +170,7 @@ describe("ViewerPage: modo embed", () => {
     await shown("3");
     const hold = screen.getByRole("button", { name: "Mantener para ver B" });
     fireEvent.pointerDown(hold);
-    expect(page().dataset.epochs).toBe("1");
+    expect(page().dataset.epochs).toBe("2");
     fireEvent.pointerUp(hold);
     expect(page().dataset.epochs).toBe("3");
   });
@@ -260,7 +261,14 @@ describe("ViewerPage: celular", () => {
       within(modes)
         .getAllByRole("radio")
         .map((item) => item.getAttribute("aria-label")),
-    ).toEqual(["Parpadeo", "Diferencia", "Suma", "Rojo/cian", "Mantener apretado"]);
+    ).toEqual([
+      "Parpadeo",
+      "Diferencia",
+      "Suma",
+      "Rojo/cian",
+      "Mantener apretado",
+      "Viaje entre misiones",
+    ]);
 
     // Las seis bandas en una fila: el nombre solo a la vista, el rango para quien escucha.
     const bands = screen.getByRole("group", { name: "Banda infrarroja" });
@@ -459,7 +467,8 @@ describe("ViewerPage: celular", () => {
 
   it("una comparacion con una epoca provisoria avisa donde se compara y cuenta en los avisos", async () => {
     const notice = "Alguna de las épocas comparadas es provisoria: todavía le faltan exposiciones.";
-    openViewer(WISE, loadingMeta());
+    // La referencia automatica evita la epoca provisoria: se la elige en la URL.
+    openViewer(`${WISE}&ref=1`, loadingMeta());
     await shown("3");
     const before = screen.getByRole("button", { name: /^Avisos de calidad: / });
     const count = Number(before.textContent);

@@ -276,3 +276,10 @@
   padding: var(--space-xs);
   overflow: hidden;
 }
+
+/* Celular, modo viaje: el boton de herramientas, que normalmente va en la linea de tiempo. */
+.journeyTools {
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: auto;
+}

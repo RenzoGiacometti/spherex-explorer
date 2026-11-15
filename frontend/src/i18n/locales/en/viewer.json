@@ -32,7 +32,8 @@
     "difference": "Difference",
     "sum": "Sum",
     "redcyan": "Red/cyan",
-    "hold": "Press and hold"
+    "hold": "Press and hold",
+    "journey": "Mission journey"
   },
   "comparison": {
     "group": "Comparison mode",
@@ -43,7 +44,8 @@
       "difference": "A minus B: the current epoch minus the reference.",
       "redcyan": "A in red and B in cyan. What did not change stays grey.",
       "sum": "Average of the epochs with an image: {{n}}.",
-      "hold": "A is shown. While the button or the space bar is held down, B is shown."
+      "hold": "A is shown. While the button or the space bar is held down, B is shown.",
+      "journey": "2MASS, WISE and the SPHEREx epochs, in date order. Step through them with the control below."
     },
     "holdButton": "Hold to see B",
     "issue": {

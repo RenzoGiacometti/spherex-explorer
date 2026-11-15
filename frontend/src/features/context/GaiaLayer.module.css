@@ -35,4 +35,14 @@
 .note {
   margin: 0;
   color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+/* Controles dentro de otro panel (el de Imagen del visor): una columna, como la capa de flags. */
+.inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
 }

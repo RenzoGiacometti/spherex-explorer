@@ -29,6 +29,11 @@
     "arrowYears": "{{years}} años",
     "magnitude": "Magnitud G límite",
     "epochNote": "Posiciones llevadas a {{year}}. La flecha muestra hacia dónde va cada fuente.",
-    "layer": "Fuentes de Gaia DR3 con su movimiento propio: {{count}}"
+    "layer": "Fuentes de Gaia DR3 con su movimiento propio: {{count}}",
+    "toggle": "Capa de Gaia"
+  },
+  "availability": {
+    "unavailable": "Por ahora solo hay contexto de otras misiones para algunos campos precalculados.",
+    "error": "No se pudo cargar el contexto de otras misiones de este campo."
   }
 }
