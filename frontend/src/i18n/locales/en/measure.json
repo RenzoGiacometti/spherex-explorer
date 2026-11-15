@@ -2,7 +2,7 @@
   "panel": {
     "title": "Measure motion",
     "count": "{{marked}} / {{total}}",
-    "toggle": "Mark with a click",
+    "toggle": "Measure",
     "hint": "Click the object in each epoch. The mark snaps to the center of the source.",
     "current": "On screen",
     "currentMarked": "{{date}} · marked",
@@ -12,7 +12,8 @@
     "clear": "Clear marks",
     "measuring": "Saturated source: measuring with the coverage layer…",
     "needTwo": "Mark the object in another epoch to measure how far it moved.",
-    "sameDate": "The marks share the same date: another epoch is needed."
+    "sameDate": "The marks share the same date: another epoch is needed.",
+    "off": "With the object marked in two or more epochs, its motion per year is worked out. Turning it on switches the viewer to blink mode."
   },
   "marks": {
     "title": "Marks",
@@ -47,6 +48,9 @@
     "note": "The catalog value comes from the expected positions at the same epochs, computed the same way."
   },
   "notice": {
+    "title": "Measurement notices",
+    "neighbor": "There is another source {{distance}} from the mark of {{date}}: closer than 12″ the two overlap and the measured position may be contaminated.",
+    "neighborMany": "There is another source within 12″ of {{n}} marks (the closest, {{distance}} away): the two overlap and the measured positions may be contaminated.",
     "wings": "Saturated source: the center comes from fitting the wings, not the core.",
     "coverage": "The coverage layer of a mark is missing: its position is provisional.",
     "season": "The marks are from opposite seasons, and two are not enough to separate the parallax. Mark a third epoch.",
@@ -67,12 +71,5 @@
     "summaryMarks": "Epochs marked: {{n}}.",
     "summaryMotion": "Proper motion: {{value}} ± {{sigma}} arcseconds per year.",
     "summaryPrediction": "The dashed line reaches the position predicted {{years}} years later."
-  },
-  "dev": {
-    "title": "Proper motion meter",
-    "empty": "This page needs a field in the URL. Test objects:",
-    "links": "Test objects",
-    "viewerLabel": "Field image. With marking on, a click measures the position of the object.",
-    "auto": "Mark the catalog positions"
   }
 }

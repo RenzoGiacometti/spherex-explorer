@@ -10,28 +10,34 @@
 //   wingsFit.ts        ajuste por las alas de una fuente saturada
 //   solver.ts          minimos cuadrados no lineales, robustos, para el ajuste
 //   snap.ts            del clic a la posicion: elige entre los dos
+//   neighbor.ts        fuente vecina que puede haber corrido una marca
 //   marks.ts           una marca: posicion en el cielo, fecha y error
 //   motion.ts          movimiento propio, prediccion y comparacion con el catalogo
 //   useMeasure.ts      estado: los clics y lo que se calcula con ellos
 //   MeasureLayer.tsx   lo que se dibuja sobre la imagen, y los clics
 //   MeasurePanel.tsx   panel con los resultados
-//   texts.ts           textos (measure.es.json, measure.en.json)
-//   measure.devpage.tsx  pagina de desarrollo, /?dev=measure
+//   measure.devpage.tsx  pagina de desarrollo, /?dev=measure (textos: measureDev.*.json)
 //
-// Para sumarlo al visor (features/viewer/ViewerPage.tsx):
+// Los textos estan en el namespace `measure` de i18next
+// (src/i18n/locales/<idioma>/measure.json).
+//
+// En el visor (features/viewer/ViewerPage.tsx) es la herramienta "Medir": el
+// conmutador del panel la prende y la apaga. Prendida, toma el clic sobre la
+// imagen con el id "measure" (features/viewer/imageClick.ts) y dibuja la capa:
 //
 //   const measure = useMeasure(view.current);
+//   useImageClickTool("measure", measuring ? (click) => measure.pick(click) : null);
 //   ...
 //   <ImageViewer ...>
 //     {(overlay) => (
 //       <>
 //         <ImageAnnotations overlay={overlay} controller={controller} />
-//         <MeasureLayer overlay={overlay} measure={measure} />
+//         {measuring ? <MeasureLayer overlay={overlay} measure={measure} clicks="external" /> : null}
 //       </>
 //     )}
 //   </ImageViewer>
 //   ...
-//   <MeasurePanel measure={measure} />   en la columna derecha
+//   <MeasurePanel measure={measure} collapsible />   en la columna derecha
 
 export type { CentroidOptions, CentroidResult, PixelPoint } from "./centroid";
 export { windowedCentroid } from "./centroid";
@@ -47,6 +53,8 @@ export type {
   SkyVector,
 } from "./motion";
 export { compareWithTrack, fitMotion, PREDICTION_YEARS } from "./motion";
+export type { Neighbor } from "./neighbor";
+export { findNeighbor, NEIGHBOR_RADIUS_ARCSEC } from "./neighbor";
 export type { SnapFailure, SnapMethod, SnapResult } from "./snap";
 export { snapToSource } from "./snap";
 export type { Measure, MeasureClick, MeasureFailure } from "./useMeasure";

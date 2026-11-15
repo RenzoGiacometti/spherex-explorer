@@ -8,7 +8,8 @@
 //            zona libre        la imagen se encuadra aca
 //            columna derecha   Metadatos y Avisos de calidad; arriba de ellos,
 //                              el espectro y la curva de luz cuando el panel de la
-//                              fuente esta abierto (la columna se ensancha)
+//                              fuente esta abierto (la columna se ensancha), y la
+//                              herramienta Medir (features/measure)
 //            muelle inferior   transporte, linea de tiempo y estado de la carga;
 //                              en el modo `journey`, el control del viaje entre misiones
 //
@@ -17,7 +18,9 @@
 //            inferior, modo, banda y linea de tiempo con el transporte. Lo
 //            demas va en el cajon de herramientas, que ocupa ese mismo lugar.
 //            El espectro se abre ahi mismo, en una hoja que sube sobre la parte
-//            de abajo de la imagen sin taparla entera.
+//            de abajo de la imagen sin taparla entera. La herramienta Medir
+//            va arriba de los controles: apagada es una tira con su
+//            conmutador; prendida, su panel, con alto acotado.
 //
 //   embed    `embed=1` en la URL: solo la imagen con sus anotaciones y una
 //            franja con el transporte y el enlace al visor completo.
@@ -29,6 +32,12 @@
 // por defecto pide el espectro de ese punto (useSpectrum.ts) y abre
 // SpectrumDock, con sus pestanas de espectro y curva de luz; si una herramienta
 // tomo el clic, va a ella. En `embed` no hay clic: ahi solo va la imagen.
+//
+// La herramienta Medir (features/measure) es una de esas: prendida toma el clic
+// con el id "measure" y cada clic marca la posicion del objeto en la epoca que
+// se ve; apagada, el clic vuelve a abrir el espectro. Mide sobre una epoca
+// sola, asi que prenderla lleva el visor al modo parpadeo (en pausa) y cambiar
+// de modo la apaga. Las marcas se conservan mientras el campo siga abierto.
 //
 // En el campo de una estrella variable del desafio (challengeVariables.ts) se
 // ofrece su curva de luz de entrada (LightcurveOffer.tsx): en la columna
@@ -44,6 +53,7 @@ import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components";
 import { contractGridShape } from "@/data/gridShape";
 import { MissionJourney } from "@/features/context";
+import { type Measure, MeasureLayer, MeasurePanel, useMeasure } from "@/features/measure";
 import { useFieldStore } from "@/state/fieldStore";
 import { useUrlState } from "@/state/urlState";
 import type { ImageSize } from "@/viewer/compose";
@@ -55,7 +65,12 @@ import { EmbedBar } from "./EmbedBar";
 import { GaiaOverlay } from "./GaiaOverlay";
 import { ImageAnnotations } from "./ImageAnnotations";
 import { ImagePanel } from "./ImagePanel";
-import { DEFAULT_IMAGE_CLICK_MODE, routeImageClick, useImageClickMode } from "./imageClick";
+import {
+  DEFAULT_IMAGE_CLICK_MODE,
+  routeImageClick,
+  useImageClickMode,
+  useImageClickTool,
+} from "./imageClick";
 import { LightcurveOffer } from "./LightcurveOffer";
 import { MetadataPanel } from "./MetadataPanel";
 import { ModePanel } from "./ModePanel";
@@ -72,11 +87,15 @@ import { useStageInsets } from "./useStageInsets";
 import { useViewerController } from "./useViewerController";
 import styles from "./ViewerPage.module.css";
 
+/** `id` con el que la herramienta Medir toma el clic sobre la imagen (`data-click`). */
+export const MEASURE_CLICK_TOOL = "measure";
+
 /** Como se arma la pantalla. */
 export type ViewerLayout = "desktop" | "phone" | "embed";
 
 export function ViewerPage() {
   const { t } = useTranslation("viewer");
+  const { t: tMeasure } = useTranslation("measure");
   const fov = useUrlState((state) => state.fov);
   const embed = useUrlState((state) => state.embed);
   const band = useUrlState((state) => state.band);
@@ -148,6 +167,41 @@ export function ViewerPage() {
     if (spectrumIdle) setSourceTab("spectrum");
   }, [spectrumIdle]);
 
+  // ---- Herramienta Medir ----------------------------------------------------
+
+  const rawMeasure = useMeasure(view.current);
+  const { active: measureActive, setActive: setMeasureActive, pick: pickMeasure } = rawMeasure;
+  const { mode, setMode, playing, setPlaying } = controller;
+  // Se mide sobre una epoca sola: el parpadeo. En `embed` no se ofrece.
+  const measuring = layout !== "embed" && measureActive && mode === "blink";
+  const toggleMeasure = useCallback(
+    (next: boolean) => {
+      if (next) {
+        if (mode !== "blink") setMode("blink");
+        // En pausa: el clic marca la epoca que se ve, y no tiene que cambiar sola.
+        if (playing) setPlaying(false);
+        // El clic deja de abrir el espectro: el panel de la fuente se cierra.
+        closeSpectrum();
+        setTools(null);
+      }
+      setMeasureActive(next);
+    },
+    [mode, setMode, playing, setPlaying, closeSpectrum, setMeasureActive],
+  );
+  // Otro modo combina epocas (o muestra otra mision): ahi no hay que marcar.
+  useEffect(() => {
+    if (measureActive && mode !== "blink") setMeasureActive(false);
+  }, [measureActive, mode, setMeasureActive]);
+  /** El medidor como lo ve el visor: prendido solo si se puede marcar, y con su conmutador. */
+  const measure = useMemo<Measure>(
+    () => ({ ...rawMeasure, active: measuring, setActive: toggleMeasure }),
+    [rawMeasure, measuring, toggleMeasure],
+  );
+  useImageClickTool(
+    MEASURE_CLICK_TOOL,
+    measuring ? (click: ImageClick) => pickMeasure({ x: click.x, y: click.y }) : null,
+  );
+
   // ---- Curva de luz de las variables del desafio ----------------------------
 
   const fieldReady = useFieldStore(
@@ -162,7 +216,8 @@ export function ViewerPage() {
     [urlName, urlRa, urlDec],
   );
   // Se ofrece con el campo ya abierto y mientras el panel de la fuente esta cerrado.
-  const offered = layout !== "embed" && fieldReady && !spectrumOpen ? variable : null;
+  // Midiendo tampoco: el clic es del medidor y el panel de la fuente esta cerrado.
+  const offered = layout !== "embed" && fieldReady && !spectrumOpen && !measuring ? variable : null;
 
   const openTools = useCallback(
     (section: ToolsSection) => {
@@ -233,6 +288,8 @@ export function ViewerPage() {
       data-flags={controller.flags.status}
       data-spectrum={spectrumOpen ? "open" : undefined}
       data-click={canPick ? clickMode : undefined}
+      data-measure={layout === "embed" ? undefined : measuring ? "on" : "off"}
+      data-measure-marks={measuring ? rawMeasure.marks.length : undefined}
     >
       {layout === "embed" ? null : (
         <div className={styles.top}>
@@ -275,6 +332,9 @@ export function ViewerPage() {
                 controller={controller}
                 spectrumMark={spectrumOpen ? spectrumMark : null}
               />
+              {measuring ? (
+                <MeasureLayer overlay={overlay} measure={measure} clicks="external" />
+              ) : null}
             </>
           )}
         </ImageViewer>
@@ -284,6 +344,7 @@ export function ViewerPage() {
         {canPick && clickMode === DEFAULT_IMAGE_CLICK_MODE
           ? ` ${t("page.viewerHelpSpectrum")}`
           : null}
+        {measuring ? ` ${tMeasure("panel.hint")}` : null}
       </p>
 
       <div ref={stageRef} className={styles.stage}>
@@ -302,6 +363,7 @@ export function ViewerPage() {
             onTabChange={setSourceTab}
             band={band}
           />
+          <MeasurePanel measure={measure} collapsible />
           <MetadataPanel currentEpoch={view.current} />
           <QualityPanel notices={notices} />
         </div>
@@ -320,6 +382,12 @@ export function ViewerPage() {
             className={styles.controls}
             data-covered={openSection === null && !spectrumOpen ? undefined : "true"}
           >
+            <MeasurePanel
+              measure={measure}
+              collapsible
+              variant="compact"
+              className={measuring ? styles.measureSheet : styles.measureStrip}
+            />
             <ModePanel controller={controller} variant="compact" />
             <BandPanel currentEpoch={view.current} variant="compact" />
             {journeyControl === null ? (

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import a11y from "@/components/a11y.module.css";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDecimal, formatInteger } from "@/lib/format";
@@ -7,7 +8,6 @@ import type { ViewerOverlay } from "@/viewer/ImageViewer";
 import { imageToScreen, type Point, screenToImage } from "@/viewer/view";
 import styles from "./MeasureLayer.module.css";
 import { PREDICTION_YEARS } from "./motion";
-import { useMeasureTexts } from "./texts";
 import type { Measure } from "./useMeasure";
 
 /** Radio del anillo de una marca y largo de las marcas de la epoca que se ve, en pixeles CSS. */
@@ -27,6 +27,13 @@ export interface MeasureLayerProps {
   /** Transformacion vigente del visor: llega de `children` de ImageViewer. */
   readonly overlay: ViewerOverlay;
   readonly measure: Measure;
+  /**
+   * Quien recibe los clics. `own` (por defecto): la capa los escucha en la raiz
+   * del visor. `external`: los entrega la pantalla que la monta, llamando a
+   * `measure.pick`; es el caso del visor, donde el clic tiene una sola regla
+   * (features/viewer/imageClick.ts) y la capa solo dibuja.
+   */
+  readonly clicks?: "own" | "external";
 }
 
 interface Press {
@@ -48,13 +55,13 @@ interface Press {
  * Todo va en blanco sobre un trazo de vacio, como el rastro: el acento queda
  * para la mira del objeto buscado (DESIGN.md, "Acento").
  *
- * Los clics se escuchan en la raiz del visor y no en un elemento propio: la
+ * Con `clicks="own"` los clics se escuchan en la raiz del visor y no en un elemento propio: la
  * capa de encima no recibe el puntero, y un elemento que lo recibiera le
  * sacaria al visor el arrastre. Asi, con la marca activada, arrastrar sigue
  * desplazando la imagen y un clic sin arrastre deja la marca.
  */
-export function MeasureLayer({ overlay, measure }: MeasureLayerProps) {
-  const t = useMeasureTexts();
+export function MeasureLayer({ overlay, measure, clicks = "own" }: MeasureLayerProps) {
+  const { t } = useTranslation("measure");
   const language = useLanguage();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const { transform, viewport } = overlay;
@@ -70,8 +77,21 @@ export function MeasureLayer({ overlay, measure }: MeasureLayerProps) {
     };
   }, [overlay, overlayRef]);
 
+  // La cruz avisa que un clic marca. Va sobre la raiz del visor: es ella la que fija el cursor.
   useEffect(() => {
     if (!active) return;
+    const root = svgRef.current?.closest<HTMLElement>("[tabindex]") ?? null;
+    if (root === null) return;
+    const previousCursor = root.style.cursor;
+    root.style.cursor = "crosshair";
+    return () => {
+      root.style.cursor = previousCursor;
+    };
+  }, [active]);
+
+  const ownClicks = clicks === "own";
+  useEffect(() => {
+    if (!active || !ownClicks) return;
     const svg = svgRef.current;
     const layer = svg?.parentElement ?? null;
     // La raiz del visor es el ancestro que recibe el foco (ImageViewer.tsx).
@@ -115,16 +135,12 @@ export function MeasureLayer({ overlay, measure }: MeasureLayerProps) {
     root.addEventListener("pointerdown", onDown);
     root.addEventListener("pointerup", onUp);
     root.addEventListener("pointercancel", onCancel);
-    // La cruz avisa que un clic marca. Va sobre la raiz: es ella la que fija el cursor.
-    const previousCursor = root.style.cursor;
-    root.style.cursor = "crosshair";
     return () => {
       root.removeEventListener("pointerdown", onDown);
       root.removeEventListener("pointerup", onUp);
       root.removeEventListener("pointercancel", onCancel);
-      root.style.cursor = previousCursor;
     };
-  }, [active, pick]);
+  }, [active, ownClicks, pick]);
 
   // ---- Trayectoria y prediccion ------------------------------------------------
 

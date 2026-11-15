@@ -2,7 +2,7 @@
   "panel": {
     "title": "Medir movimiento",
     "count": "{{marked}} / {{total}}",
-    "toggle": "Marcar con clic",
+    "toggle": "Medir",
     "hint": "Un clic sobre el objeto en cada época. La marca se ajusta sola al centro de la fuente.",
     "current": "En pantalla",
     "currentMarked": "{{date}} · marcada",
@@ -12,7 +12,8 @@
     "clear": "Borrar marcas",
     "measuring": "Fuente saturada: midiendo con la capa de cobertura…",
     "needTwo": "Hace falta marcar el objeto en otra época para medir cuánto se movió.",
-    "sameDate": "Las marcas son de la misma fecha: hace falta otra época."
+    "sameDate": "Las marcas son de la misma fecha: hace falta otra época.",
+    "off": "Con el objeto marcado en dos épocas o más se calcula cuánto se mueve por año. Al prenderlo, el visor pasa al modo parpadeo."
   },
   "marks": {
     "title": "Marcas",
@@ -47,6 +48,9 @@
     "note": "El valor de catálogo sale de las posiciones esperadas en las mismas épocas, con la misma cuenta."
   },
   "notice": {
+    "title": "Avisos de la medición",
+    "neighbor": "Hay otra fuente a {{distance}} de la marca del {{date}}: a menos de 12″ las dos se montan y la posición medida puede estar contaminada.",
+    "neighborMany": "Hay otra fuente a menos de 12″ de {{n}} marcas (la más cercana, a {{distance}}): las dos se montan y las posiciones medidas pueden estar contaminadas.",
     "wings": "Fuente saturada: el centro sale de ajustar las alas, no del núcleo.",
     "coverage": "Falta la capa de cobertura de alguna marca: su posición es provisoria.",
     "season": "Las marcas son de estaciones opuestas y con dos no se puede separar la paralaje. Hace falta una tercera época.",
@@ -67,12 +71,5 @@
     "summaryMarks": "Épocas marcadas: {{n}}.",
     "summaryMotion": "Movimiento propio: {{value}} ± {{sigma}} segundos de arco por año.",
     "summaryPrediction": "La línea punteada llega a la posición predicha {{years}} años después."
-  },
-  "dev": {
-    "title": "Medidor de movimiento propio",
-    "empty": "Esta página necesita un campo en la URL. Objetos de prueba:",
-    "links": "Objetos de prueba",
-    "viewerLabel": "Imagen del campo. Con la marca activada, un clic mide la posición del objeto.",
-    "auto": "Marcar las posiciones de catálogo"
   }
 }

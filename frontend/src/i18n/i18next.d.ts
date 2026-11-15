@@ -3,6 +3,7 @@
 
 import "i18next";
 import type galleryTexts from "../components/gallery.es.json";
+import type measureDevTexts from "../features/measure/measureDev.es.json";
 import type viewerDevTexts from "../viewer/viewerDev.es.json";
 import type { DEFAULT_NAMESPACE, resources } from "./resources";
 
@@ -14,6 +15,7 @@ import type { DEFAULT_NAMESPACE, resources } from "./resources";
  */
 interface DevPageTexts {
   gallery: typeof galleryTexts;
+  measureDev: typeof measureDevTexts;
   viewerDev: typeof viewerDevTexts;
 }
 

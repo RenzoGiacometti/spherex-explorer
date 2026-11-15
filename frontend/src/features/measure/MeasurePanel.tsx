@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button, DataGroup, DataRow, GlassPanel, QualityNotice, Toggle } from "@/components";
 import { useLanguage } from "@/i18n/useLanguage";
 import {
@@ -13,7 +14,6 @@ import {
 } from "@/lib/format";
 import styles from "./MeasurePanel.module.css";
 import type { Mark } from "./marks";
-import { type MeasureTextKey, useMeasureTexts } from "./texts";
 import type { Measure } from "./useMeasure";
 
 /** Hasta cuantos errores de diferencia se dice que la medicion coincide con el catalogo. */
@@ -22,6 +22,17 @@ export const AGREEMENT_SIGMAS = 2.5;
 export interface MeasurePanelProps {
   readonly measure: Measure;
   readonly className?: string | undefined;
+  /**
+   * En el visor el panel es la herramienta "Medir": apagada (`measure.active`
+   * en false) queda solo el conmutador con un renglon que dice para que sirve.
+   * Sin esto (la pagina de desarrollo) se ve siempre entero.
+   */
+  readonly collapsible?: boolean;
+  /**
+   * `compact` es el del celular: apagada, la herramienta es una tira con el
+   * conmutador solo, sin encabezado, como las demas de la zona del pulgar.
+   */
+  readonly variant?: "panel" | "compact";
 }
 
 /** Numero con signo explicito, para las componentes este y norte. */
@@ -29,7 +40,7 @@ function signed(value: number, text: string): string {
   return value > 0 && !text.startsWith("+") ? `+${text}` : text;
 }
 
-function markDetailKey(mark: Mark): MeasureTextKey {
+function markDetailKey(mark: Mark): "marks.centroid" | "marks.wingsPending" | "marks.wings" {
   if (mark.method === "centroid") return "marks.centroid";
   return mark.needsCoverage ? "marks.wingsPending" : "marks.wings";
 }
@@ -39,9 +50,19 @@ function markDetailKey(mark: Mark): MeasureTextKey {
  * con clic, las marcas hechas y, con dos o mas, el desplazamiento, el
  * movimiento propio con su error, la posicion predicha a cinco anios y la
  * comparacion con el catalogo. Todo valor va en mono, con su unidad.
+ *
+ * Los avisos que cambian como se lee el resultado van arriba, en un recuadro
+ * como el de los avisos destacados del espectro: que con dos marcas de
+ * estaciones opuestas no se separa la paralaje, y que una marca tiene otra
+ * fuente a menos de 12 segundos de arco (neighbor.ts).
  */
-export function MeasurePanel({ measure, className }: MeasurePanelProps) {
-  const t = useMeasureTexts();
+export function MeasurePanel({
+  measure,
+  className,
+  collapsible = false,
+  variant = "panel",
+}: MeasurePanelProps) {
+  const { t } = useTranslation("measure");
   const language = useLanguage();
   const { marks, fit, comparison, catalogName, failure } = measure;
 
@@ -58,22 +79,84 @@ export function MeasurePanel({ measure, className }: MeasurePanelProps) {
   const arcsec = (value: number, decimals = 2): string =>
     formatArcseconds(value, language, decimals);
 
+  const collapsed = collapsible && !measure.active;
+  const seasonNotice = fit?.seasonUnresolved === true;
+  /** Marcas con otra fuente cerca, de la mas cercana a la mas lejana. */
+  const crowded = marks
+    .filter((mark) => mark.neighborArcsec !== null)
+    .sort((a, b) => (a.neighborArcsec ?? 0) - (b.neighborArcsec ?? 0));
+  const closest = crowded[0];
+  const toggle = (
+    <Toggle label={t("panel.toggle")} checked={measure.active} onChange={measure.setActive} />
+  );
+  const aside =
+    measure.epochCount === 0
+      ? undefined
+      : t("panel.count", {
+          marked: formatInteger(marks.length),
+          total: formatInteger(measure.epochCount),
+        });
+
+  if (collapsed && variant === "compact") {
+    return (
+      <GlassPanel label={t("panel.title")} className={className}>
+        <div data-measure-tool="off">{toggle}</div>
+      </GlassPanel>
+    );
+  }
+  if (collapsed) {
+    return (
+      <GlassPanel
+        title={t("panel.title")}
+        icon="target"
+        aside={marks.length === 0 ? undefined : aside}
+        className={className}
+      >
+        <div data-measure-tool="off">{toggle}</div>
+        <p className={styles.hint}>{t("panel.off")}</p>
+      </GlassPanel>
+    );
+  }
+
   return (
-    <GlassPanel
-      title={t("panel.title")}
-      icon="target"
-      aside={
-        measure.epochCount === 0
-          ? undefined
-          : t("panel.count", {
-              marked: formatInteger(marks.length),
-              total: formatInteger(measure.epochCount),
-            })
-      }
-      className={className}
-    >
-      <Toggle label={t("panel.toggle")} checked={measure.active} onChange={measure.setActive} />
+    <GlassPanel title={t("panel.title")} icon="target" aside={aside} className={className}>
+      <div data-measure-tool={measure.active ? "on" : "off"}>{toggle}</div>
       <p className={styles.hint}>{t("panel.hint")}</p>
+
+      {/* Lo que cambia como se lee el resultado va arriba, en un recuadro: no al pie del panel. */}
+      {seasonNotice || closest !== undefined ? (
+        <ul
+          className={styles.prominent}
+          aria-label={t("notice.title")}
+          data-measure-notices="prominent"
+        >
+          {seasonNotice ? (
+            <QualityNotice as="li">
+              <span data-measure-notice="season">
+                {t(saturated ? "notice.seasonWings" : "notice.season")}
+              </span>
+            </QualityNotice>
+          ) : null}
+          {closest === undefined ? null : (
+            <QualityNotice as="li">
+              <span
+                data-measure-notice="neighbor"
+                data-neighbor-arcsec={(closest.neighborArcsec ?? 0).toFixed(1)}
+              >
+                {crowded.length === 1
+                  ? t("notice.neighbor", {
+                      distance: arcsec(closest.neighborArcsec ?? 0, 0),
+                      date: formatMjdDate(closest.mjd),
+                    })
+                  : t("notice.neighborMany", {
+                      n: formatInteger(crowded.length),
+                      distance: arcsec(closest.neighborArcsec ?? 0, 0),
+                    })}
+              </span>
+            </QualityNotice>
+          )}
+        </ul>
+      ) : null}
 
       <DataGroup>
         <DataRow label={t("panel.current")} value={currentText} />
@@ -245,11 +328,11 @@ export function MeasurePanel({ measure, className }: MeasurePanelProps) {
         </section>
       )}
 
-      {fit === null && !saturated ? null : (
+      {/* Los de estaciones opuestas y de fuente vecina van arriba, en el recuadro. */}
+      {(fit === null || fit.scatterFactor <= 1.05) &&
+      !saturated &&
+      fit?.model !== "seasonal" ? null : (
         <div className={styles.notices}>
-          {fit?.seasonUnresolved ? (
-            <QualityNotice>{t(saturated ? "notice.seasonWings" : "notice.season")}</QualityNotice>
-          ) : null}
           {fit !== null && fit.scatterFactor > 1.05 ? (
             <QualityNotice>
               {t("notice.scatter", { factor: formatDecimal(fit.scatterFactor, language, 1) })}

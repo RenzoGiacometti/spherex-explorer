@@ -13,11 +13,11 @@
 //
 // Como lo usa una herramienta, desde un componente:
 //
-//   useImageClickTool("proper-motion", active ? handleClick : null);
+//   useImageClickTool("measure", active ? handleClick : null);
 //
 // o fuera de React (devuelve la funcion que la quita):
 //
-//   const release = claimImageClick("tour", handleClick);
+//   const release = claimImageClick("guide", handleClick);
 //   ...
 //   release();
 //
@@ -39,7 +39,7 @@ export type ImageClickHandler = (click: ImageClick) => void;
 
 /** Una herramienta que tomo el clic. */
 export interface ImageClickClaim {
-  /** Nombre corto de la herramienta: "proper-motion", "tour". Sale en `data-click`. */
+  /** Nombre corto de la herramienta: "measure", "guide". Sale en `data-click`. */
   readonly id: string;
   readonly handler: ImageClickHandler;
 }

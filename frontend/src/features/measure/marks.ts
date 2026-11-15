@@ -6,6 +6,7 @@ import { pixelToSky } from "@/lib/wcs";
 import type { PlaneImage } from "@/viewer/planeImage";
 import type { PixelPoint } from "./centroid";
 import type { EpochPoint } from "./motion";
+import { findNeighbor, NEIGHBOR_RADIUS_ARCSEC } from "./neighbor";
 import { type SnapFailure, type SnapMethod, snapToSource } from "./snap";
 
 /**
@@ -79,6 +80,12 @@ export interface Mark extends EpochPoint {
   readonly saturatedPixels: number;
   /** Medida por las alas sin la capa de cobertura: mejora cuando la capa llega. */
   readonly needsCoverage: boolean;
+  /**
+   * Distancia a otra fuente que puede haber corrido la posicion, en segundos de
+   * arco (menos de `NEIGHBOR_RADIUS_ARCSEC`); null si no hay ninguna. Solo se
+   * busca en las marcas del centroide (neighbor.ts).
+   */
+  readonly neighborArcsec: number | null;
 }
 
 export interface MarkInput {
@@ -115,11 +122,16 @@ export function errorFloorArcsec(method: SnapMethod, coverageUsed: boolean): num
 /** Mide la posicion del objeto bajo un clic y arma la marca de esa epoca. */
 export function measureMark(input: MarkInput): MarkResult {
   const { image, grid, click } = input;
-  const snapped = snapToSource(image, click, {
-    oversample: gridOversample(grid),
-    coverage: input.coverage,
-  });
+  const oversample = gridOversample(grid);
+  const snapped = snapToSource(image, click, { oversample, coverage: input.coverage });
   if (!snapped.ok) return snapped;
+  const neighbor =
+    snapped.method === "centroid"
+      ? findNeighbor(image, snapped, {
+          radiusPx: NEIGHBOR_RADIUS_ARCSEC / grid.pixel_scale_arcsec,
+          oversample,
+        })
+      : null;
   const sky = pixelToSky(grid, snapped.x, snapped.y);
   const formalArcsec = snapped.sigmaPx * grid.pixel_scale_arcsec;
   return {
@@ -141,6 +153,7 @@ export function measureMark(input: MarkInput): MarkResult {
       snr: snapped.snr,
       saturatedPixels: snapped.saturatedPixels,
       needsCoverage: snapped.method === "wings" && !snapped.coverageUsed,
+      neighborArcsec: neighbor === null ? null : neighbor.distancePx * grid.pixel_scale_arcsec,
     },
   };
 }

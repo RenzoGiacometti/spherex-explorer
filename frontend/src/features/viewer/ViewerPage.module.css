@@ -240,6 +240,23 @@
   visibility: hidden;
 }
 
+/* Herramienta Medir apagada, en el celular: una tira con su conmutador, como las demas. */
+.measureStrip {
+  padding: var(--space-xxs) var(--space-sm);
+}
+
+/*
+ * Prendida, su panel va arriba de los controles con el alto acotado: la linea
+ * de tiempo sigue a mano para cambiar de epoca y la imagen no queda tapada. Lo
+ * que no entra se desplaza adentro.
+ */
+.measureSheet {
+  max-height: 30vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
 /*
  * Hoja del espectro en el celular: sale del lugar de los controles y sube
  * sobre la parte de abajo de la imagen, hasta algo mas de media pantalla, para

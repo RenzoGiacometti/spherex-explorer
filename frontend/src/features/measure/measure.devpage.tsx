@@ -23,8 +23,10 @@
 //   [data-measure="mark"]          data-epoch, data-method, data-x, data-y
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, GlassPanel, QuickLink, QuickLinkList } from "@/components";
 import type { DevPage } from "@/dev/devPages";
+import { registerDevTexts } from "@/dev/devTexts";
 import { BandPanel } from "@/features/viewer/BandPanel";
 import { ImageAnnotations } from "@/features/viewer/ImageAnnotations";
 import { ImagePanel } from "@/features/viewer/ImagePanel";
@@ -40,9 +42,17 @@ import { ImageViewer, type ViewerOverlay } from "@/viewer/ImageViewer";
 import { homeZoomForViewFov } from "@/viewer/view";
 import { MeasureLayer } from "./MeasureLayer";
 import { MeasurePanel } from "./MeasurePanel";
+import measureDevEn from "./measureDev.en.json";
+import measureDevEs from "./measureDev.es.json";
 import styles from "./measureDev.module.css";
-import { useMeasureTexts } from "./texts";
 import { useMeasure } from "./useMeasure";
+
+// Los textos de la pagina van al lado, no en src/i18n/resources.ts (src/dev/devTexts.ts).
+// Los dos idiomas tienen que tener las mismas claves: si a uno le falta una, no compila.
+registerDevTexts("measureDev", {
+  es: measureDevEs satisfies typeof measureDevEn,
+  en: measureDevEn satisfies typeof measureDevEs,
+});
 
 /** Objetos de prueba con movimiento propio alto (CLAUDE.md), centrados en su posicion de 2026. */
 const TEST_OBJECTS = [
@@ -59,7 +69,8 @@ const TEST_OBJECTS = [
 type AutoStatus = "idle" | "running" | "done";
 
 function MeasureDevPage() {
-  const t = useMeasureTexts();
+  const { t } = useTranslation("measureDev");
+  const { t: tMeasure } = useTranslation("measure");
   const [params] = useState(() => new URLSearchParams(window.location.search));
   const hasField = useUrlState((state) => state.ra !== null && state.dec !== null);
   const fov = useUrlState((state) => state.fov);
@@ -119,9 +130,9 @@ function MeasureDevPage() {
   if (!hasField) {
     return (
       <main className={styles.empty} data-dev-page="measure" data-phase="idle">
-        <GlassPanel title={t("dev.title")} icon="target">
-          <p className={styles.text}>{t("dev.empty")}</p>
-          <QuickLinkList label={t("dev.links")}>
+        <GlassPanel title={t("title")} icon="target">
+          <p className={styles.text}>{t("empty")}</p>
+          <QuickLinkList label={t("links")}>
             {TEST_OBJECTS.map((item) => (
               <QuickLink key={item.name} href={item.href}>
                 {item.name}
@@ -157,7 +168,7 @@ function MeasureDevPage() {
           imageSize={imageSize}
           homeZoom={homeZoomForViewFov(fov)}
           insets={insets}
-          ariaLabel={t("dev.viewerLabel")}
+          ariaLabel={t("viewerLabel")}
           ariaDescribedBy={helpId}
         >
           {(overlay: ViewerOverlay) => (
@@ -169,7 +180,7 @@ function MeasureDevPage() {
         </ImageViewer>
       </div>
       <p id={helpId} hidden>
-        {t("panel.hint")}
+        {tMeasure("panel.hint")}
       </p>
 
       <div ref={stageRef} className={page.stage}>
@@ -186,7 +197,7 @@ function MeasureDevPage() {
             setAuto("running");
           }}
         >
-          {t("dev.auto")}
+          {t("auto")}
         </Button>
       </div>
 

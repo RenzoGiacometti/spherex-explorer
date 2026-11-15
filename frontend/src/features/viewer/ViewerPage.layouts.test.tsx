@@ -288,7 +288,11 @@ describe("ViewerPage: celular", () => {
     // Lo que no es frecuente no esta hasta abrir el cajon.
     expect(drawer()).toBeNull();
     expect(screen.queryByRole("slider")).toBeNull();
-    expect(screen.queryByRole("switch")).toBeNull();
+    // El unico conmutador a la vista es el de la herramienta Medir, apagada; los de las capas estan en el cajon.
+    expect(screen.getAllByRole("switch").map((item) => item.closest("label")?.textContent)).toEqual(
+      ["Medir"],
+    );
+    expect((screen.getByRole("switch", { name: "Medir" }) as HTMLInputElement).checked).toBe(false);
     for (const name of ["Imagen", "Metadatos", "Avisos de calidad"]) {
       expect(screen.queryByRole("region", { name }), name).toBeNull();
     }
