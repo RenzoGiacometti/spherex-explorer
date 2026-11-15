@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>NAME Teegarden's Star</name>
+  <!-- Q209347 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 64ms [64] -->
+    <oid>1486570</oid>
+    <oname>NAME Teegarden's Star</oname>
+    <otype>LM*</otype>
+    <jpos>02:53:00.89 +16:52:52.6</jpos>
+    <jradeg>43.25371580517042</jradeg>
+    <jdedeg>16.8812867194825</jdedeg>
+    <refPos>2020yCat.1350....0G</refPos>
+    <errRAmas>0.0746</errRAmas><errDEmas>0.0770</errDEmas>
+    <pm>
+      <v>5122.573</v><e>0.121</e><q>A</q><r>2020yCat.1350....0G</r>
+      <pa>137.979</pa>
+      <pmRA>3429.083</pmRA><epmRA>0.088</epmRA>
+      <pmDE>-3805.541</pmDE><epmDE>0.083</epmDE>
+    </pm>
+    <plx><v>260.9884</v><e>0.0934</e><q>A</q><r>2020yCat.1350....0G</r></plx>
+    <Vel><v>63</v><e>5</e><q>C</q><r>2014AJ....147...20N</r></Vel>
+    <spType>dM6</spType><spNum>0.00029400.7C00.0000000000000000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,17:10:14z)==== -->
