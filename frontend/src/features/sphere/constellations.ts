@@ -11,7 +11,14 @@
 
 import limits from "./assets/constelaciones/limites.json";
 import names from "./assets/constelaciones/nombres.json";
-import { DEG, type SkyPosition, wrapDegrees } from "./skyMath";
+import {
+  angularSeparation,
+  DEG,
+  raDecToVector,
+  type SkyPosition,
+  vectorToRaDec,
+  wrapDegrees,
+} from "./skyMath";
 
 /** Renglon de la tabla: RA minima y maxima en horas, Dec minima en grados y abreviatura. */
 type Limit = readonly [raLow: number, raHigh: number, decLow: number, abbreviation: string];
@@ -124,4 +131,42 @@ export type BrightStar = readonly [name: string, ra: number, dec: number, magnit
 export async function loadBrightStars(): Promise<readonly BrightStar[]> {
   const module = await import("./assets/constelaciones/estrellas.json");
   return module.default as unknown as readonly BrightStar[];
+}
+
+// ---- Encuadre -----------------------------------------------------------------
+
+/** Circulo del cielo que contiene a una figura: centro y radio en grados. */
+export interface FigureFrame {
+  readonly center: SkyPosition;
+  readonly radius: number;
+}
+
+/**
+ * Circulo que encierra a una figura, para encuadrarla: el centro es el promedio
+ * de las direcciones de sus puntos (no de sus coordenadas, que fallaria en RA
+ * 0 y cerca de los polos) y el radio, la distancia al punto mas lejano.
+ */
+export function figureFrame(figure: ConstellationFigure): FigureFrame {
+  const points: SkyPosition[] = [];
+  for (const line of figure.lines) {
+    for (let index = 0; index + 1 < line.length; index += 2) {
+      points.push({ ra: line[index] as number, dec: line[index + 1] as number });
+    }
+  }
+  if (points.length === 0) {
+    return { center: { ra: figure.label[0], dec: figure.label[1] }, radius: 0 };
+  }
+  let x = 0;
+  let y = 0;
+  let z = 0;
+  for (const point of points) {
+    const direction = raDecToVector(point.ra, point.dec);
+    x += direction[0];
+    y += direction[1];
+    z += direction[2];
+  }
+  const center = vectorToRaDec([x, y, z]);
+  let radius = 0;
+  for (const point of points) radius = Math.max(radius, angularSeparation(center, point));
+  return { center, radius };
 }

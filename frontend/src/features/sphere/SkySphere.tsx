@@ -41,6 +41,10 @@ const LABEL_GAP = 4;
 const STAR_LABEL_OFFSET = 7;
 /** Aire entre el nombre de una estrella y lo demas: van apretados, pero sin tocarse. */
 const STAR_LABEL_GAP = 2;
+/** Un toque a estos pixeles del borde de un nombre todavia cuenta como sobre el nombre. */
+const LABEL_TAP_PAD = 6;
+/** Un toque a estos pixeles del punto de una estrella nombrada cuenta como sobre la estrella. */
+const STAR_TAP_REACH = 14;
 /** Cuantas estrellas se nombran: pocas con la vista abierta, mas al acercarse. */
 const STAR_LABELS_FAR = 50;
 const STAR_LABELS_NEAR = 200;
@@ -183,6 +187,11 @@ export interface SkySphereProps {
   readonly occluders?: (() => readonly SkyBox[]) | undefined;
   /** Clic o toque corto sobre el cielo, fuera de los marcadores: el punto que se toco. */
   readonly onSkyTap?: ((position: SkyPosition) => void) | undefined;
+  /**
+   * Clic o toque corto sobre un nombre que se esta mostrando (o sobre el punto
+   * de una estrella nombrada). Si esta, ese toque no llega a `onSkyTap`.
+   */
+  readonly onLabelTap?: ((label: SkyLabel) => void) | undefined;
   /** Despues de cada cuadro: centro y campo de vision. No conviene guardarlo en estado de React. */
   readonly onViewChange?: ((view: SkyView) => void) | undefined;
   readonly onStatusChange?: ((status: SkySphereStatus) => void) | undefined;
@@ -233,6 +242,8 @@ export function SkySphere(props: SkySphereProps) {
     const point = { x: 0, y: 0 };
     /** Tamano de cada nombre de constelacion: se mide una vez por texto, no en cada cuadro. */
     const labelSizes = new Map<HTMLElement, { text: string; width: number; height: number }>();
+    /** Nombres que se ven en este cuadro, con su caja y su punto: para saber cual se toco. */
+    let labelHits: { label: SkyLabel; box: SkyBox; x: number; y: number }[] = [];
     /** Lugar del nombre de cada marcador respecto de su punto; null si no se muestra. */
     const nameShapes = new Map<HTMLElement, { key: string; shape: NameShape | null }>();
 
@@ -337,6 +348,7 @@ export function SkySphere(props: SkySphereProps) {
         }
       }
 
+      const hits: typeof labelHits = [];
       const starLimit = starLabelLimit(scene.getView().fov);
       // Las constelaciones van primero en la lista y las estrellas despues, por brillo.
       for (const label of propsRef.current.labels ?? []) {
@@ -368,8 +380,12 @@ export function SkySphere(props: SkySphereProps) {
         const gap = star ? STAR_LABEL_GAP : LABEL_GAP;
         const covered = touchesAny(box, taken, gap) || touchesAny(box, covers, gap);
         setFlag(element, "covered", covered);
-        if (!covered) taken.push(box);
+        if (!covered) {
+          taken.push(box);
+          hits.push({ label, box, x, y });
+        }
       }
+      labelHits = hits;
       // Que mapa se esta viendo (4k, fundido u 8k), a la vista en el inspector.
       const detail = scene.getDetailState();
       if (stage !== null && stage.dataset.detail !== detail) stage.dataset.detail = detail;
@@ -418,7 +434,25 @@ export function SkySphere(props: SkySphereProps) {
       onDragChange: (dragging) => {
         stage.dataset.dragging = String(dragging);
       },
-      onTap: (x, y) => propsRef.current.onSkyTap?.(scene.unproject(x, y)),
+      onTap: (x, y) => {
+        const onLabelTap = propsRef.current.onLabelTap;
+        if (onLabelTap !== undefined) {
+          // Los nombres no reciben el puntero: se busca cual quedo bajo el toque.
+          const hit = labelHits.find(
+            ({ label, box, x: px, y: py }) =>
+              (x >= box.left - LABEL_TAP_PAD &&
+                x <= box.right + LABEL_TAP_PAD &&
+                y >= box.top - LABEL_TAP_PAD &&
+                y <= box.bottom + LABEL_TAP_PAD) ||
+              (label.kind === "star" && Math.hypot(x - px, y - py) <= STAR_TAP_REACH),
+          );
+          if (hit !== undefined) {
+            onLabelTap(hit.label);
+            return;
+          }
+        }
+        propsRef.current.onSkyTap?.(scene.unproject(x, y));
+      },
     });
     controls.setEnabled(propsRef.current.interactive ?? true);
     controlsRef.current = controls;

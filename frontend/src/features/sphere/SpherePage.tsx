@@ -32,6 +32,7 @@ import {
   type ConstellationFigure,
   constellationAt,
   constellationLabel,
+  figureFrame,
   loadBrightStars,
   loadConstellationFigures,
 } from "./constellations";
@@ -80,6 +81,12 @@ const WINDOW_FOV = 75;
  * menos de este radio en grados: la brujula del telefono no es mas precisa.
  */
 const MIN_LOCK_RADIUS = 5;
+
+/** Al encuadrar una constelacion, cuanto mas que su tamano abarca la vista. */
+const FRAME_MARGIN = 1.35;
+/** Limites del campo de vision al encuadrar una constelacion, en grados. */
+const FRAME_MIN_FOV = 12;
+const FRAME_MAX_FOV = 110;
 
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
@@ -531,6 +538,21 @@ export function SpherePage({
   }
 
   /** Clic o toque corto sobre el cielo: deja la mira ahi y abre la tarjeta del punto. */
+  /** Toque sobre un nombre del cielo. El de una constelacion vuela hasta encuadrarla. */
+  function handleLabelTap(label: SkyLabel): void {
+    if (openingRef.current || label.kind === "star") return;
+    const figure = figures?.find((candidate) => candidate.id === label.id);
+    const sphere = sphereRef.current;
+    if (figure === undefined || sphere === null) return;
+    const { center, radius } = figureFrame(figure);
+    // El campo de vision se mide sobre el lado largo de la ventana y la figura
+    // tiene que entrar en el corto, con aire alrededor.
+    const long = Math.max(window.innerWidth, window.innerHeight);
+    const short = Math.max(1, Math.min(window.innerWidth, window.innerHeight));
+    const fov = clamp(2 * radius * FRAME_MARGIN * (long / short), FRAME_MIN_FOV, FRAME_MAX_FOV);
+    void sphere.flyTo(center, { fov });
+  }
+
   function handleSkyTap(position: SkyPosition): void {
     if (openingRef.current) return;
     // Con los cuatro decimales de un centro de campo (docs/contrato-cubo.md, seccion 4.8).
@@ -767,6 +789,7 @@ export function SpherePage({
         pick={windowOn ? null : pick}
         occluders={coveredBoxes}
         onSkyTap={handleSkyTap}
+        onLabelTap={handleLabelTap}
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
       />

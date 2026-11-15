@@ -2,10 +2,13 @@
 
 import { describe, expect, it } from "vitest";
 import check from "./assets/constelaciones/comprobacion.json";
+import figuresData from "./assets/constelaciones/lineas.json";
 import {
   CONSTELLATION_NAMES,
+  type ConstellationFigure,
   constellationAt,
   constellationLabel,
+  figureFrame,
   precessToB1875,
 } from "./constellations";
 import { angularSeparation } from "./skyMath";
@@ -58,5 +61,44 @@ describe("nombres de las constelaciones", () => {
     expect(constellationLabel("UMa", "en")).toBe("Great Bear (Ursa Major)");
     expect(constellationLabel("Oct", "es")).toBe("Octante (Octans)");
     expect(constellationLabel("Ori", "en")).toBe("Orion");
+  });
+});
+
+describe("encuadre de una figura", () => {
+  const figures = figuresData as unknown as readonly ConstellationFigure[];
+  const byId = (id: string): ConstellationFigure => {
+    const figure = figures.find((candidate) => candidate.id === id);
+    if (figure === undefined) throw new Error(`falta la figura ${id}`);
+    return figure;
+  };
+
+  it("Orion queda centrado en su cinturon, con unos 12 grados de radio", () => {
+    const { center, radius } = figureFrame(byId("Ori"));
+    // Alnilam, la estrella del medio del cinturon.
+    expect(angularSeparation(center, { ra: 84.05, dec: -1.2 })).toBeLessThan(10);
+    expect(radius).toBeGreaterThan(8);
+    expect(radius).toBeLessThan(18);
+  });
+
+  it("la Cruz del Sur es chica", () => {
+    const { center, radius } = figureFrame(byId("Cru"));
+    expect(radius).toBeLessThan(5);
+    expect(center.dec).toBeLessThan(-55);
+  });
+
+  it("el circulo contiene todos los puntos de cada una de las 89 figuras", () => {
+    expect(figures).toHaveLength(89);
+    for (const figure of figures) {
+      const { center, radius } = figureFrame(figure);
+      expect(radius).toBeGreaterThan(0);
+      // La mas larga es Hidra, que cruza mas de cien grados de cielo.
+      expect(radius).toBeLessThan(75);
+      for (const line of figure.lines) {
+        for (let index = 0; index + 1 < line.length; index += 2) {
+          const point = { ra: line[index] as number, dec: line[index + 1] as number };
+          expect(angularSeparation(center, point)).toBeLessThanOrEqual(radius + 1e-9);
+        }
+      }
+    }
   });
 });
