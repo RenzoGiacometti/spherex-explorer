@@ -1,0 +1,15 @@
+{
+  "title": "Panel de espectro",
+  "intro": "Página de prueba de la Etapa 2. Muestra el panel con los espectros precalculados de los cinco objetos de prueba, sin el visor.",
+  "object": "Objeto",
+  "live": "Pedir al backend (/api/spectrum)",
+  "source": {
+    "fixture": "Datos precalculados guardados en el repositorio.",
+    "live": "Respuesta del backend en este momento."
+  },
+  "loading": "Cargando el espectro",
+  "error": "No se pudo cargar el espectro: {{reason}}",
+  "status": "Estado del documento",
+  "exposures": "Exposiciones medidas",
+  "points": "Puntos válidos"
+}

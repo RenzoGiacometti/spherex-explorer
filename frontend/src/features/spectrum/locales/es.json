@@ -1,0 +1,63 @@
+{
+  "panel": {
+    "title": "Espectro",
+    "summary": "{{points}} puntos · {{epochs}} épocas",
+    "unnamed": "Punto del cielo",
+    "source": {
+      "precomputed": "Precalculado",
+      "computed": "Medido ahora"
+    },
+    "saturatedTitle": "Fuente saturada: no hay un espectro confiable",
+    "saturatedBody": "La fuente es demasiado brillante para SPHEREx: su centro quedó saturado en {{n}} de {{total}} exposiciones y ninguna dejó una medición válida. No se muestra un espectro para no dar números falsos.",
+    "emptyTitle": "No hay mediciones válidas en este punto",
+    "emptyBody": "Ninguna de las {{n}} exposiciones dejó una medición limpia: había píxeles descartados dentro de la apertura.",
+    "footnote": "Fotometría de apertura sobre cada exposición: radio de {{radius}}, fondo en un anillo, sin corrección de apertura. Cada exposición ve el objeto en otra longitud de onda y en otra fecha."
+  },
+  "chart": {
+    "label": "Espectro de {{name}}: flujo en milijanskys según la longitud de onda, de 0,75 a 5 micrómetros. {{points}} puntos.",
+    "axisX": "Longitud de onda",
+    "axisY": "Flujo",
+    "hint": "Mover el cursor sobre el gráfico, o usar las flechas, para leer un valor.",
+    "readout": "λ {{wavelength}} · {{flux}} ± {{error}} mJy",
+    "readoutBand": "{{band}} · exposiciones: {{n}}",
+    "saturatedBand": "saturada",
+    "noDataBand": "sin datos",
+    "legendBinned": "Promedio por canal, con su error",
+    "legendExposure": "Cada exposición",
+    "showExposures": "Mostrar cada exposición"
+  },
+  "molecule": {
+    "h2o": "Agua",
+    "ch4": "Metano",
+    "co2": "Dióxido de carbono",
+    "co": "Monóxido de carbono"
+  },
+  "fingerprint": {
+    "title": "Huella química",
+    "hintTag": "Indicio",
+    "intro": "Compara el flujo dentro de cada banda con el de sus costados. Es un indicio, no una detección: no reemplaza un ajuste con modelos.",
+    "excluded": "No se evalúan las bandas que caen en {{bands}}: ahí la luz medida es sobre todo de otra fuente.",
+    "at": "en {{wavelength}}",
+    "depth": "Absorción del {{depth}}",
+    "level": {
+      "strong": "fuerte",
+      "moderate": "moderada",
+      "weak": "débil",
+      "none": "no detectada",
+      "unknown": "sin datos"
+    },
+    "barLabel": "{{molecule}}: {{level}}"
+  },
+  "listen": {
+    "play": "Escuchar",
+    "stop": "Detener",
+    "description": "Recorre el espectro de izquierda a derecha en {{seconds}} segundos: más flujo suena más agudo y los tramos sin datos quedan en silencio.",
+    "unsupported": "Este navegador no puede reproducir sonido."
+  },
+  "notice": {
+    "saturated": "Fuente saturada en {{bands}}: {{n}} de {{total}} exposiciones no se pudieron medir.",
+    "offset": "En {{bands}} la luz medida está corrida {{offset}} del objeto: hay otra fuente dentro de la apertura y esos puntos son sobre todo de ella.",
+    "masked": "{{n}} de {{total}} exposiciones se descartaron por píxeles defectuosos dentro de la apertura.",
+    "waveTable": "Estas exposiciones son de otra versión de procesamiento que la tabla de longitudes de onda: las longitudes de onda podrían estar corridas."
+  }
+}

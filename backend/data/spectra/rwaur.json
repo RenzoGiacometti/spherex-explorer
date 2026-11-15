@@ -1,0 +1,230 @@
+{
+ "version": 1,
+ "status": "partial",
+ "target": {
+  "name": "RW Aurigae",
+  "ra": 76.956585,
+  "dec": 30.401292,
+  "epoch": 2026.0,
+  "motion": {
+   "pm_ra": 7.23,
+   "pm_dec": -20.33,
+   "parallax": 15.42
+  },
+  "track": [
+   {
+    "epoch": 1,
+    "mjd": 60928.1904,
+    "ra": 76.956591,
+    "dec": 30.401293
+   },
+   {
+    "epoch": 2,
+    "mjd": 61102.2551,
+    "ra": 76.956582,
+    "dec": 30.40129
+   },
+   {
+    "epoch": 3,
+    "mjd": 61294.6305,
+    "ra": 76.956593,
+    "dec": 30.401288
+   }
+  ],
+  "catalog_name": "V* RW Aur"
+ },
+ "field": "09413d9ee9d96187",
+ "units": {
+  "wavelength": "um",
+  "flux": "mJy"
+ },
+ "aperture": {
+  "radius_px": 1.5,
+  "radius_arcsec": 9.23,
+  "annulus_in_px": 4.0,
+  "annulus_out_px": 8.0,
+  "correction": "none",
+  "psf_fwhm_arcsec": [
+   7.53,
+   7.53
+  ],
+  "enclosed_fraction_gaussian": [
+   0.984,
+   0.984
+  ]
+ },
+ "epochs": [
+  {
+   "epoch": 1,
+   "start": "2025-09-01",
+   "end": "2025-09-20",
+   "mjd_start": 60919.4203,
+   "mjd_end": 60938.2327,
+   "mjd_mean": 60928.1904,
+   "n_exposures": 112
+  },
+  {
+   "epoch": 2,
+   "start": "2026-02-20",
+   "end": "2026-03-12",
+   "mjd_start": 61091.7203,
+   "mjd_end": 61111.0028,
+   "mjd_mean": 61102.2551,
+   "n_exposures": 114
+  },
+  {
+   "epoch": 3,
+   "start": "2026-09-02",
+   "end": "2026-09-16",
+   "mjd_start": 61285.0978,
+   "mjd_end": 61299.8966,
+   "mjd_mean": 61294.6305,
+   "n_exposures": 109
+  }
+ ],
+ "detectors": [
+  {
+   "detector": 1,
+   "wave_min_um": 0.735,
+   "wave_max_um": 1.126,
+   "n_exposures": 56,
+   "n_points": 18,
+   "n_saturated": 37,
+   "n_masked": 1,
+   "n_edge": 0,
+   "offset_arcsec": {
+    "east": -0.96,
+    "north": -0.39,
+    "total": 1.03
+   }
+  },
+  {
+   "detector": 2,
+   "wave_min_um": 1.086,
+   "wave_max_um": 1.668,
+   "n_exposures": 55,
+   "n_points": 0,
+   "n_saturated": 53,
+   "n_masked": 1,
+   "n_edge": 1,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 3,
+   "wave_min_um": 1.616,
+   "wave_max_um": 2.439,
+   "n_exposures": 56,
+   "n_points": 0,
+   "n_saturated": 54,
+   "n_masked": 2,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 4,
+   "wave_min_um": 2.398,
+   "wave_max_um": 3.863,
+   "n_exposures": 56,
+   "n_points": 0,
+   "n_saturated": 56,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 5,
+   "wave_min_um": 3.798,
+   "wave_max_um": 4.443,
+   "n_exposures": 56,
+   "n_points": 0,
+   "n_saturated": 56,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 6,
+   "wave_min_um": 4.402,
+   "wave_max_um": 5.025,
+   "n_exposures": 56,
+   "n_points": 0,
+   "n_saturated": 56,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  }
+ ],
+ "points": [
+  {"wavelength_um": 0.7409, "bandwidth_um": 0.0171, "flux_mjy": 111.59, "error_mjy": 0.35982, "mjd": 61107.67627, "date": "2026-03-08", "epoch": 2, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W10_2B_0591_3"},
+  {"wavelength_um": 0.7469, "bandwidth_um": 0.0175, "flux_mjy": 68.742, "error_mjy": 0.28251, "mjd": 60920.0308, "date": "2025-09-02", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0233_2"},
+  {"wavelength_um": 0.7537, "bandwidth_um": 0.0177, "flux_mjy": 173.95, "error_mjy": 0.45076, "mjd": 61291.27582, "date": "2026-09-08", "epoch": 3, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W37_1A_0234_2"},
+  {"wavelength_um": 0.7583, "bandwidth_um": 0.0179, "flux_mjy": 120.74, "error_mjy": 0.3749, "mjd": 61107.67776, "date": "2026-03-08", "epoch": 2, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W10_2B_0591_4"},
+  {"wavelength_um": 0.7645, "bandwidth_um": 0.0181, "flux_mjy": 70.699, "error_mjy": 0.28486, "mjd": 60920.0323, "date": "2025-09-02", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0233_3"},
+  {"wavelength_um": 0.7712, "bandwidth_um": 0.0182, "flux_mjy": 187.82, "error_mjy": 0.47056, "mjd": 61291.27732, "date": "2026-09-08", "epoch": 3, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W37_1A_0234_3"},
+  {"wavelength_um": 0.7757, "bandwidth_um": 0.0186, "flux_mjy": 120.94, "error_mjy": 0.37777, "mjd": 61109.44008, "date": "2026-03-10", "epoch": 2, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W11_1A_0285_1"},
+  {"wavelength_um": 0.7821, "bandwidth_um": 0.0187, "flux_mjy": 85.603, "error_mjy": 0.32124, "mjd": 60920.97803, "date": "2025-09-02", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0446_1"},
+  {"wavelength_um": 0.8196, "bandwidth_um": 0.0206, "flux_mjy": 99.899, "error_mjy": 0.33356, "mjd": 60920.98102, "date": "2025-09-02", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0446_3"},
+  {"wavelength_um": 0.8391, "bandwidth_um": 0.0211, "flux_mjy": 68.383, "error_mjy": 0.29304, "mjd": 60920.98251, "date": "2025-09-02", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0446_4"},
+  {"wavelength_um": 0.8788, "bandwidth_um": 0.0219, "flux_mjy": 157.03, "error_mjy": 0.41436, "mjd": 61103.33176, "date": "2026-03-04", "epoch": 2, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W10_1A_0445_2"},
+  {"wavelength_um": 0.879, "bandwidth_um": 0.0223, "flux_mjy": 142.33, "error_mjy": 0.39085, "mjd": 60921.72604, "date": "2025-09-03", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0606_2"},
+  {"wavelength_um": 0.8995, "bandwidth_um": 0.0226, "flux_mjy": 150.38, "error_mjy": 0.41346, "mjd": 61103.33326, "date": "2026-03-04", "epoch": 2, "detector": 1, "flags": ["SOURCE"], "exposure": "2026W10_1A_0445_3"},
+  {"wavelength_um": 0.9431, "bandwidth_um": 0.0245, "flux_mjy": 148.0, "error_mjy": 0.39525, "mjd": 60922.0672, "date": "2025-09-04", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0677_1"},
+  {"wavelength_um": 0.9652, "bandwidth_um": 0.025, "flux_mjy": 156.17, "error_mjy": 0.40731, "mjd": 60922.06869, "date": "2025-09-04", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0677_2"},
+  {"wavelength_um": 0.9957, "bandwidth_um": 0.0263, "flux_mjy": 169.21, "error_mjy": 0.42723, "mjd": 60921.99767, "date": "2025-09-03", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0663_2"},
+  {"wavelength_um": 1.0683, "bandwidth_um": 0.0283, "flux_mjy": 145.2, "error_mjy": 0.4112, "mjd": 60919.42031, "date": "2025-09-01", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0095_1"},
+  {"wavelength_um": 1.094, "bandwidth_um": 0.0287, "flux_mjy": 153.73, "error_mjy": 0.42667, "mjd": 60919.42181, "date": "2025-09-01", "epoch": 1, "detector": 1, "flags": ["SOURCE"], "exposure": "2025W36_1A_0095_2"}
+ ],
+ "binned": [
+  {"wavelength_um": 0.7446, "wave_min_um": 0.7349, "wave_max_um": 0.7536, "flux_mjy": 85.083, "error_mjy": 0.2222, "n": 2, "detector": 1},
+  {"wavelength_um": 0.7622, "wave_min_um": 0.7536, "wave_max_um": 0.7728, "flux_mjy": 118.94, "error_mjy": 27.397, "n": 4, "detector": 1},
+  {"wavelength_um": 0.7794, "wave_min_um": 0.7728, "wave_max_um": 0.7924, "flux_mjy": 100.43, "error_mjy": 0.24472, "n": 2, "detector": 1},
+  {"wavelength_um": 0.8196, "wave_min_um": 0.8126, "wave_max_um": 0.8332, "flux_mjy": 99.899, "error_mjy": 0.33356, "n": 1, "detector": 1},
+  {"wavelength_um": 0.8391, "wave_min_um": 0.8332, "wave_max_um": 0.8544, "flux_mjy": 68.383, "error_mjy": 0.29304, "n": 1, "detector": 1},
+  {"wavelength_um": 0.8789, "wave_min_um": 0.8761, "wave_max_um": 0.8984, "flux_mjy": 149.25, "error_mjy": 0.28432, "n": 2, "detector": 1},
+  {"wavelength_um": 0.8995, "wave_min_um": 0.8984, "wave_max_um": 0.9213, "flux_mjy": 150.38, "error_mjy": 0.41346, "n": 1, "detector": 1},
+  {"wavelength_um": 0.9431, "wave_min_um": 0.9213, "wave_max_um": 0.9447, "flux_mjy": 148.0, "error_mjy": 0.39525, "n": 1, "detector": 1},
+  {"wavelength_um": 0.9652, "wave_min_um": 0.9447, "wave_max_um": 0.9687, "flux_mjy": 156.17, "error_mjy": 0.40731, "n": 1, "detector": 1},
+  {"wavelength_um": 0.9957, "wave_min_um": 0.9934, "wave_max_um": 1.0186, "flux_mjy": 169.21, "error_mjy": 0.42723, "n": 1, "detector": 1},
+  {"wavelength_um": 1.0683, "wave_min_um": 1.0445, "wave_max_um": 1.0711, "flux_mjy": 145.2, "error_mjy": 0.4112, "n": 1, "detector": 1},
+  {"wavelength_um": 1.094, "wave_min_um": 1.0711, "wave_max_um": 1.0983, "flux_mjy": 153.73, "error_mjy": 0.42667, "n": 1, "detector": 1}
+ ],
+ "warnings": [
+  {
+   "code": "saturated_source",
+   "ra": 76.95658,
+   "dec": 30.40129,
+   "epochs": [
+    1,
+    2,
+    3
+   ],
+   "detectors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "n_exposures": 312,
+   "n_total": 335
+  },
+  {
+   "code": "masked_exposures",
+   "n_exposures": 4,
+   "n_total": 335
+  }
+ ],
+ "provenance": {
+  "source": "SPHEREx / IRSA",
+  "n_exposures": 335,
+  "n_points": 18,
+  "n_unreadable": 0,
+  "processing": [
+   "l2b-v27"
+  ],
+  "wave_table": "l2b-v27",
+  "computed_at": "2026-11-15T16:46:47Z"
+ },
+ "source": "precomputed"
+}

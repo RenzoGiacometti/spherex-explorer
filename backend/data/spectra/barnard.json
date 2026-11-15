@@ -1,0 +1,183 @@
+{
+ "version": 1,
+ "status": "saturated",
+ "target": {
+  "name": "Barnard's Star",
+  "ra": 269.446287,
+  "dec": 4.768255,
+  "epoch": 2026.0,
+  "motion": {
+   "pm_ra": -801.551,
+   "pm_dec": 10362.394,
+   "parallax": 546.9759
+  },
+  "track": [
+   {
+    "epoch": 1,
+    "mjd": 60916.1944,
+    "ra": 269.446195,
+    "dec": 4.767368
+   },
+   {
+    "epoch": 2,
+    "mjd": 61119.4477,
+    "ra": 269.446363,
+    "dec": 4.768945
+   },
+   {
+    "epoch": 3,
+    "mjd": 61274.627,
+    "ra": 269.445982,
+    "dec": 4.770209
+   }
+  ],
+  "catalog_name": "NAME Barnard's star"
+ },
+ "field": "95d4d56e51048aa4",
+ "units": {
+  "wavelength": "um",
+  "flux": "mJy"
+ },
+ "aperture": {
+  "radius_px": 1.5,
+  "radius_arcsec": 9.23,
+  "annulus_in_px": 4.0,
+  "annulus_out_px": 8.0,
+  "correction": "none",
+  "psf_fwhm_arcsec": null,
+  "enclosed_fraction_gaussian": null
+ },
+ "epochs": [
+  {
+   "epoch": 1,
+   "start": "2025-08-15",
+   "end": "2025-10-01",
+   "mjd_start": 60902.8654,
+   "mjd_end": 60949.2666,
+   "mjd_mean": 60916.1944,
+   "n_exposures": 118
+  },
+  {
+   "epoch": 2,
+   "start": "2026-03-11",
+   "end": "2026-05-05",
+   "mjd_start": 61110.0921,
+   "mjd_end": 61165.0836,
+   "mjd_mean": 61119.4477,
+   "n_exposures": 121
+  },
+  {
+   "epoch": 3,
+   "start": "2026-08-16",
+   "end": "2026-09-22",
+   "mjd_start": 61268.6315,
+   "mjd_end": 61305.6287,
+   "mjd_mean": 61274.627,
+   "n_exposures": 119
+  }
+ ],
+ "detectors": [
+  {
+   "detector": 1,
+   "wave_min_um": 0.735,
+   "wave_max_um": 1.126,
+   "n_exposures": 60,
+   "n_points": 0,
+   "n_saturated": 60,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 2,
+   "wave_min_um": 1.086,
+   "wave_max_um": 1.668,
+   "n_exposures": 61,
+   "n_points": 0,
+   "n_saturated": 61,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 3,
+   "wave_min_um": 1.616,
+   "wave_max_um": 2.439,
+   "n_exposures": 59,
+   "n_points": 0,
+   "n_saturated": 59,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 4,
+   "wave_min_um": 2.398,
+   "wave_max_um": 3.863,
+   "n_exposures": 59,
+   "n_points": 0,
+   "n_saturated": 59,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 5,
+   "wave_min_um": 3.798,
+   "wave_max_um": 4.443,
+   "n_exposures": 61,
+   "n_points": 0,
+   "n_saturated": 61,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 6,
+   "wave_min_um": 4.402,
+   "wave_max_um": 5.025,
+   "n_exposures": 58,
+   "n_points": 0,
+   "n_saturated": 58,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  }
+ ],
+ "points": [],
+ "binned": [],
+ "warnings": [
+  {
+   "code": "saturated_source",
+   "ra": 269.44629,
+   "dec": 4.76826,
+   "epochs": [
+    1,
+    2,
+    3
+   ],
+   "detectors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "n_exposures": 358,
+   "n_total": 358
+  }
+ ],
+ "provenance": {
+  "source": "SPHEREx / IRSA",
+  "n_exposures": 358,
+  "n_points": 0,
+  "n_unreadable": 0,
+  "processing": [
+   "l2b-v27"
+  ],
+  "wave_table": "l2b-v27",
+  "computed_at": "2026-11-15T16:46:33Z"
+ },
+ "source": "precomputed"
+}
