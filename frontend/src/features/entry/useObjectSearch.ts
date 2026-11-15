@@ -10,7 +10,7 @@ import { errorCodeOf, type NameResolver, resolveQuery } from "@/data/nameResolve
 import { MINUS } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
 import { DEFAULT_BAND, DEFAULT_MODE } from "@/state/urlState";
-import { resolvableName, type ViewerUrlPatch } from "./featured";
+import { featuredBand, resolvableName, type ViewerUrlPatch } from "./featured";
 
 export type SearchStatus =
   | { readonly kind: "idle" }
@@ -110,7 +110,7 @@ export function useObjectSearch(resolver?: NameResolver): ObjectSearch {
               ra: resolved.field_center.ra,
               dec: resolved.field_center.dec,
               fov: DEFAULT_VIEW_FOV,
-              band: DEFAULT_BAND,
+              band: featuredBand(query) ?? DEFAULT_BAND,
               mode: DEFAULT_MODE,
               // Es otro campo: la epoca fijada del anterior no vale.
               epoch: null,

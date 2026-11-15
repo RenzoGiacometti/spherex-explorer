@@ -404,8 +404,8 @@ describe("SpherePage sin WebGL", () => {
       expect(urlState()).toMatchObject({
         dec: -7.2422,
         name: "WISE J085510.83-071442.5",
-        // Buscar abre en la banda por defecto; el destacado, en la 6.
-        band: 3,
+        // Un destacado buscado por nombre abre en su banda: WISE 0855 solo se detecta en la 6.
+        band: 6,
       });
     });
 

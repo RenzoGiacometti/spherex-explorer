@@ -148,3 +148,16 @@ export function resolvableName(text: string): string {
   const wanted = normalize(text);
   return FEATURED_OBJECTS.find((object) => normalize(object.label) === wanted)?.name ?? text;
 }
+
+/**
+ * Banda con la que conviene abrir lo buscado, si es un destacado (por su nombre
+ * visible o el de catalogo): WISE 0855 solo se detecta en la banda 6 y en la
+ * banda por defecto su campo parece vacio. `null` para cualquier otro texto.
+ */
+export function featuredBand(text: string): FeaturedObject["band"] | null {
+  const wanted = normalize(text);
+  const match = FEATURED_OBJECTS.find(
+    (object) => normalize(object.label) === wanted || normalize(object.name) === wanted,
+  );
+  return match?.band ?? null;
+}
