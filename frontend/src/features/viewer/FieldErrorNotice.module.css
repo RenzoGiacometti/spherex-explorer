@@ -1,0 +1,25 @@
+.alert {
+  width: min(100%, 420px);
+  pointer-events: auto;
+}
+
+.panel {
+  align-items: flex-start;
+}
+
+.message {
+  color: var(--color-text);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.wait {
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+  font-variant-numeric: tabular-nums;
+}
+
+.retry {
+  align-self: flex-start;
+}

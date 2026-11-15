@@ -1,0 +1,51 @@
+/*
+ * Ventana al cielo: anotaciones directas sobre la imagen (nivel 1), sin fondo.
+ * La capa no recibe el puntero.
+ */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Uso 1 del acento: la mira. 128 px en la ventana al cielo. */
+.reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-accent);
+}
+
+/* Debajo de la mira: el nombre de lo que hay ahi. */
+.caption {
+  position: absolute;
+  top: calc(50% + 64px + var(--space-sm));
+  right: var(--space-sm);
+  left: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Los nombres propios no van en mayusculas (DESIGN.md, "Principios"). */
+.name {
+  font: var(--type-title-font);
+  letter-spacing: var(--type-title-tracking);
+}
+
+.nearest {
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.distance {
+  color: var(--color-text);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}

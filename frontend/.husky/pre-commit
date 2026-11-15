@@ -10,6 +10,11 @@
 staged=$(git diff --cached --name-only --diff-filter=ACMR -- frontend)
 [ -n "$staged" ] || exit 0
 
+# Raiz del arbol de trabajo. Git se vuelve a llamar desde aca y no desde frontend/:
+# en un arbol de trabajo enlazado (git worktree) el hook recibe GIT_WORK_TREE=. ,
+# relativo, y despues del cd apuntaria a frontend/ en vez de a la raiz.
+root=$(pwd)
+
 cd frontend || exit 0
 
 biome=node_modules/.bin/biome
@@ -24,5 +29,5 @@ fi
 
 # Rutas relativas a frontend/, separadas por NUL para tolerar espacios.
 # Biome descarta las que su configuracion ignora (por ejemplo los datos de muestra).
-git diff --cached --name-only --diff-filter=ACMR -z --relative -- . |
+git -C "$root" diff --cached --name-only --diff-filter=ACMR -z --relative=frontend/ -- frontend |
   xargs -0 "$biome" check --no-errors-on-unmatched --files-ignore-unknown=true

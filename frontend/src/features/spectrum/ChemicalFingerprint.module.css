@@ -1,0 +1,117 @@
+/* Huella quimica (DESIGN.md, "Espectro"). Solo tokens. */
+
+.fingerprint {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* "Indicio": rotulo de contorno, sin acento ni color de estado. */
+.tag {
+  padding: 2px var(--space-xs);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Nombre y formula | barra | palabra; el detalle va debajo, en su renglon. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(48px, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-sm);
+  row-gap: 2px;
+  padding: var(--space-xs) 0;
+  border-top: 1px solid var(--color-divider);
+}
+
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-xs);
+  min-width: 0;
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.formula {
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+}
+
+.track {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-hairline);
+  overflow: hidden;
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-text);
+}
+
+.level,
+.levelMuted {
+  justify-self: end;
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+.level {
+  color: var(--color-text);
+}
+
+.levelMuted {
+  color: var(--color-text-dim);
+}
+
+.detail {
+  grid-column: 1 / -1;
+  color: var(--color-text-dim);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}

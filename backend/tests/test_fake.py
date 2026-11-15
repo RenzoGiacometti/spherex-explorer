@@ -1096,6 +1096,118 @@ def test_track(make_client: Factory, sample_fields: SampleFields) -> None:
     assert other.json()["positions"] == []
 
 
+def test_track_is_not_ready_before_listed(make_client: Factory, sample_fields: SampleFields) -> None:
+    """Contrato 4.9: antes de `listed` el campo no tiene epocas, y una lista vacia querria decir otra cosa."""
+    sample = sample_fields.a
+    client = make_client(seconds=100.0)
+    at = Clock(client)
+    url = f"/api/field/{sample.id}/track"
+    post_field(client, sample)
+    for moment in (1.0, 7.0, 11.0):  # en cola, listando y con la vista provisoria lista
+        at(moment)
+        for name in ("Estrella de Prueba", "Galaxia Fija", "otro", "10 20"):
+            response = client.get(url, params={"name": name})
+            assert (response.status_code, error_code(response)) == (409, "not_ready"), (moment, name)
+            assert response.json()["error"]["retryable"] is True
+    # El nombre se mira antes: uno vacio es un pedido invalido en cualquier momento.
+    response = client.get(url, params={"name": "  "})
+    assert (response.status_code, error_code(response)) == (422, "invalid_request")
+    assert client.get("/api/field/ffffffffffffffff/track", params={"name": "x"}).status_code == 404
+    # Desde `listed` hay epocas: la trayectoria guardada con la muestra.
+    at(17.0)
+    response = client.get(url, params={"name": "Estrella de Prueba"})
+    assert response.status_code == 200 and TrackResponse.model_validate(response.json()) == sample.track
+    assert client.get(url, params={"name": "Galaxia Fija"}).json() == {"name": "M 999", "positions": []}
+
+
+def test_plane_and_aux_say_which_revision_they_carry(make_client: Factory, sample_fields: SampleFields) -> None:
+    """Contrato 4.4 y 4.6: `X-Plane-Rev` en el plano y en sus capas auxiliares."""
+    sample = sample_fields.a
+    client = make_client(seconds=100.0)
+    at = Clock(client)
+    base = f"/api/field/{sample.id}"
+    post_field(client, sample, band=3)
+
+    at(21.0)  # primera revision provisoria del plano (1, 3)
+    for params in (None, {"rev": 1}, {"rev": 2}, {"rev": 9}):
+        assert client.get(f"{base}/plane/1/3", params=params).headers["x-plane-rev"] == "1", params
+    aux = client.get(f"{base}/aux/1/3")
+    assert (aux.headers["x-plane-rev"], aux.headers["cache-control"]) == ("1", "no-cache")
+    assert "Accept-Encoding" in aux.headers["vary"]
+
+    at(100.0)  # terminado: la definitiva es la 2
+    # Quien pide la provisoria recibe la vigente, y la cabecera le dice cual es.
+    replaced = client.get(f"{base}/plane/1/3", params={"rev": 1})
+    assert (replaced.headers["x-plane-rev"], replaced.headers["cache-control"]) == ("2", "no-cache")
+    current = client.get(f"{base}/plane/1/3", params={"rev": 2})
+    assert (current.headers["x-plane-rev"], current.headers["cache-control"]) == ("2", IMMUTABLE)
+    for headers in ({}, {"Accept-Encoding": "identity"}):
+        aux = client.get(f"{base}/aux/1/3", headers=headers)
+        assert (aux.headers["x-plane-rev"], aux.headers["cache-control"]) == ("2", "no-cache")
+    # Ni el cubo ni los errores llevan la cabecera.
+    assert "x-plane-rev" not in client.get(f"{base}/cube").headers
+    assert "x-plane-rev" not in client.get(f"{base}/plane/2/1").headers  # plano vacio: 404
+    # Desde otro origen, el frontend de desarrollo puede leerla.
+    exposed = client.get(f"{base}/plane/1/3", headers={"Origin": "http://localhost:5173"})
+    assert "x-plane-rev" in exposed.headers["access-control-expose-headers"].lower()
+
+
+def test_aux_is_not_gzipped_for_a_client_that_refuses_it(make_client: Factory, sample_fields: SampleFields) -> None:
+    sample = sample_fields.a
+    client = make_client(seconds=100.0)
+    post_field(client, sample, scenario="cached")
+    url = f"/api/field/{sample.id}/aux/1/3"
+    expected = 6 * sample.shape[0] * sample.shape[1]
+    for accept, compressed in (("gzip", True), ("br, gzip;q=0.5", True), ("gzip;q=0", False), ("identity", False)):
+        with client.stream("GET", url, headers={"Accept-Encoding": accept}) as response:
+            raw = b"".join(response.iter_raw())
+        assert (response.headers.get("content-encoding") == "gzip") is compressed, accept
+        assert (len(raw) == expected) is not compressed, accept
+
+
+def test_resolve_rounds_like_the_real_backend(sample_fields: SampleFields, tmp_path: Path) -> None:
+    """Contrato 4.8: movimiento propio, paralaje y velocidad radial a 3 decimales; nombres sin espacios de mas."""
+    (tmp_path / "precisa.xml").write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Target option="S">
+  <name>Estrella  Precisa</name>
+  <Resolver name="S=Simbad (CDS, via client/server)">
+    <otype>PM*</otype>
+    <jradeg>269.4520769586187</jradeg>
+    <jdedeg>4.69336496657667</jdedeg>
+    <pm><v>10393.3</v><pa>355.6</pa><pmRA>-801.55149</pmRA><pmDE>10362.39451</pmDE></pm>
+    <Vel><v>-110.11049</v></Vel>
+    <plx><v>546.9759</v></plx>
+    <oname>NAME  Estrella   precisa</oname>
+  </Resolver>
+</Target>
+</Sesame>
+""",
+        encoding="utf-8",
+    )
+    client = TestClient(create_fake_app(sample_fields.root, sesame_dir=tmp_path))
+    response = client.get("/api/resolve", params={"name": "  estrella   precisa "})
+    assert response.status_code == 200
+    assert response.json() == {
+        "query": "estrella precisa",
+        "name": "NAME Estrella precisa",
+        "source": "sesame",
+        "object_type": "PM*",
+        "j2000": {"ra": 269.452077, "dec": 4.693365},
+        "motion": {
+            "pm_ra": -801.551,
+            "pm_dec": 10362.395,
+            "parallax": 546.976,
+            "radial_velocity": -110.11,
+            "per_year_arcsec": 10.39,
+        },
+        "field_center": {"ra": 269.4463, "dec": 4.7683, "epoch": 2026.0},
+        "moved_arcsec": 270.4,
+    }
+    assert client.get("/api/health").json()["names"] == ["Estrella Precisa", "NAME Estrella precisa"]
+
+
 # ------------------------------------------------------------------- utilidades
 
 

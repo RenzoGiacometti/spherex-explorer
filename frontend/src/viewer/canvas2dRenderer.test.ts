@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createCanvas2dRenderer } from "./canvas2dRenderer";
 import { toCssHex } from "./colors";
-import { composeScene, type Scene } from "./compose";
+import { composeScene, hatchBand, type Scene } from "./compose";
 import { type PlaneImage, toPlaneImage } from "./planeImage";
 import { createRenderer, type Frame } from "./renderer";
 import { createFake2d, createFakeCanvasContexts, createFakeGl } from "./testSupport";
@@ -54,14 +54,39 @@ function setup() {
   if (renderer === null) throw new Error("no se creo el dibujo");
   const target = contexts.fake2d(canvas);
   if (target === undefined) throw new Error("no se pidio el contexto 2D");
-  /** Contexto del canvas aparte donde se arma la imagen. */
+  /** Contexto del canvas aparte donde se arma la imagen: el ultimo que se copio con pixeles propios. */
   const buffer = () => {
-    const source = target.drawImages.at(-1)?.source as HTMLCanvasElement;
-    const fake = contexts.fake2d(source);
-    if (fake === undefined) throw new Error("no se compuso ninguna imagen");
-    return { canvas: source, fake };
+    for (const drawn of [...target.drawImages].reverse()) {
+      const source = drawn.source as HTMLCanvasElement;
+      const fake = contexts.fake2d(source);
+      if (fake?.lastImageData) return { canvas: source, fake };
+    }
+    throw new Error("no se compuso ninguna imagen");
   };
-  return { canvas, renderer, target, buffer };
+  /** La capa de la trama: el canvas que se copio encima de la imagen, y como se armo. */
+  const hatchLayer = () => {
+    const drawn = target.drawImages.at(-1);
+    const layerCanvas = drawn?.source as HTMLCanvasElement;
+    const layer = contexts.fake2d(layerCanvas);
+    if (drawn === undefined || layer === undefined) throw new Error("no se dibujo la trama");
+    const tileCanvas = layer.patterns.at(-1)?.source as HTMLCanvasElement;
+    const maskCanvas = layer.drawImages.at(-1)?.source as HTMLCanvasElement;
+    const tile = contexts.fake2d(tileCanvas);
+    const mask = contexts.fake2d(maskCanvas);
+    if (tile === undefined || mask === undefined) throw new Error("la trama no tiene baldosa");
+    return { drawn, canvas: layerCanvas, layer, tileCanvas, tile, maskCanvas, mask };
+  };
+  return { canvas, renderer, target, buffer, hatchLayer };
+}
+
+/** Los cuatro bytes del pixel (x, y) de una imagen, con `y` desde arriba. */
+function bytesAt(
+  image: { width: number; data: Uint8ClampedArray },
+  x: number,
+  y: number,
+): number[] {
+  const offset = (y * image.width + x) * 4;
+  return Array.from(image.data.subarray(offset, offset + 4));
 }
 
 describe("createCanvas2dRenderer", () => {
@@ -126,6 +151,139 @@ describe("createCanvas2dRenderer", () => {
     const content = scene([plane(0)]);
     renderer.draw(frame(content));
     expect(target.fills).toEqual([toCssHex(content.noDataColor)]);
+  });
+
+  describe("trama del resaltado", () => {
+    const TEXT = [1, 1, 1, 1] as const;
+    const VOID = [0, 0, 0] as const;
+
+    /** Marca la columna 0 de la fila sur y la columna 4 de la fila norte. */
+    function hatchMask(): Uint8Array {
+      const mask = new Uint8Array(WIDTH * HEIGHT);
+      mask[0] = 1;
+      mask[(HEIGHT - 1) * WIDTH + 4] = 1;
+      return mask;
+    }
+
+    it("se copia encima de la imagen, del tamano del canvas y sin escalar", () => {
+      const { canvas, renderer, target, hatchLayer } = setup();
+      const highlight = { mask: hatchMask(), color: TEXT, alternate: VOID };
+      renderer.draw(frame(scene([plane(0)], { highlight }), 2));
+
+      expect(target.drawImages).toHaveLength(2);
+      const { drawn, canvas: layerCanvas } = hatchLayer();
+      expect([layerCanvas.width, layerCanvas.height]).toEqual([canvas.width, canvas.height]);
+      expect(drawn).toMatchObject({
+        left: 0,
+        top: 0,
+        width: canvas.width,
+        height: canvas.height,
+        // En pixeles fisicos: la trama no se amplia con la densidad.
+        transform: [1, 0, 0, 1, 0, 0],
+        composite: "source-over",
+      });
+    });
+
+    it("la imagen de abajo es la composicion sin resaltado", () => {
+      const { renderer, buffer } = setup();
+      const only = plane(0);
+      const highlight = { mask: hatchMask(), color: TEXT, alternate: VOID };
+      renderer.draw(frame(scene([only], { highlight })));
+      expect(Array.from(buffer().fake.lastImageData?.data ?? [])).toEqual(
+        Array.from(composeScene(scene([only]), { rowOrder: "north-first" })),
+      );
+    });
+
+    it("llena la capa con la baldosa de hatchBand y deja solo lo que cae sobre la mascara", () => {
+      const { renderer, hatchLayer } = setup();
+      const highlight = { mask: hatchMask(), color: TEXT, alternate: VOID };
+      renderer.draw(frame(scene([plane(0)], { highlight }), 2));
+      const { layer, tileCanvas, tile, maskCanvas, mask } = hatchLayer();
+
+      // Con densidad 2 cada franja mide 2 pixeles fisicos: la baldosa es de 4 x 4.
+      expect([tileCanvas.width, tileCanvas.height]).toEqual([4, 4]);
+      expect(layer.patterns.at(-1)?.repetition).toBe("repeat");
+      expect(layer.fills.at(-1)).toBe("pattern");
+      const tilePixels = tile.lastImageData;
+      if (!tilePixels) throw new Error("la baldosa no tiene pixeles");
+      for (let y = 0; y < 4; y += 1) {
+        for (let x = 0; x < 4; x += 1) {
+          const wanted = hatchBand(x, y, 2) === 0 ? [255, 255, 255, 255] : [0, 0, 0, 255];
+          expect(bytesAt(tilePixels, x, y), `baldosa (${x}, ${y})`).toEqual(wanted);
+        }
+      }
+
+      // La mascara, a tamano de imagen y con el norte arriba: opaca solo donde marca.
+      expect([maskCanvas.width, maskCanvas.height]).toEqual([WIDTH, HEIGHT]);
+      const maskPixels = mask.lastImageData;
+      if (!maskPixels) throw new Error("la mascara no tiene pixeles");
+      const opaque: string[] = [];
+      for (let y = 0; y < HEIGHT; y += 1) {
+        for (let x = 0; x < WIDTH; x += 1) {
+          if (bytesAt(maskPixels, x, y)[3] === 255) opaque.push(`${x},${y}`);
+          else expect(bytesAt(maskPixels, x, y)[3]).toBe(0);
+        }
+      }
+      // La fila sur del plano es la de abajo de la imagen.
+      expect(opaque).toEqual(["4,0", `0,${HEIGHT - 1}`]);
+
+      // Se amplia igual que la imagen, sin suavizado, y recorta lo que hay debajo.
+      expect(layer.drawImages).toHaveLength(1);
+      expect(layer.drawImages[0]).toMatchObject({
+        left: 100,
+        top: 0,
+        width: 500,
+        height: 300,
+        transform: [2, 0, 0, 2, 0, 0],
+        smoothing: false,
+        composite: "destination-in",
+      });
+    });
+
+    it("con densidad 1 la baldosa es un damero de 2 x 2", () => {
+      const { renderer, hatchLayer } = setup();
+      const highlight = { mask: hatchMask(), color: TEXT, alternate: [0, 0.2, 0.4] as const };
+      renderer.draw(frame(scene([plane(0)], { highlight })));
+      const { tileCanvas, tile } = hatchLayer();
+      expect([tileCanvas.width, tileCanvas.height]).toEqual([2, 2]);
+      const pixels = tile.lastImageData;
+      if (!pixels) throw new Error("la baldosa no tiene pixeles");
+      expect(bytesAt(pixels, 0, 0)).toEqual([255, 255, 255, 255]);
+      expect(bytesAt(pixels, 1, 0)).toEqual([0, 51, 102, 255]);
+      expect(bytesAt(pixels, 0, 1)).toEqual([0, 51, 102, 255]);
+      expect(bytesAt(pixels, 1, 1)).toEqual([255, 255, 255, 255]);
+    });
+
+    it("no vuelve a armar la mascara ni la baldosa si son las mismas", () => {
+      const { renderer, hatchLayer } = setup();
+      const only = plane(0);
+      const highlight = { mask: hatchMask(), color: TEXT, alternate: VOID };
+      renderer.draw(frame(scene([only], { highlight })));
+      // Otra vista: la trama se recorta de nuevo, con lo mismo.
+      renderer.draw(frame(scene([only], { highlight }), 1, 2));
+      const same = hatchLayer();
+      expect(same.mask.putCount).toBe(1);
+      expect(same.tile.putCount).toBe(1);
+      expect(same.layer.drawImages.at(-1)).toMatchObject({ left: -150, width: 1000 });
+
+      // Otra mascara (otra epoca) u otra densidad si.
+      renderer.draw(frame(scene([only], { highlight: { ...highlight, mask: hatchMask() } })));
+      expect(hatchLayer().mask.putCount).toBe(2);
+      expect(hatchLayer().tile.putCount).toBe(1);
+      renderer.draw(frame(scene([only], { highlight }), 2));
+      expect(hatchLayer().tile.putCount).toBe(2);
+    });
+
+    it("sin trama no hay segunda copia: ni con resaltado liso ni con uno transparente", () => {
+      const { renderer, target } = setup();
+      const mask = hatchMask();
+      renderer.draw(frame(scene([plane(0)], { highlight: { mask, color: [1, 1, 1, 0.5] } })));
+      expect(target.drawImages).toHaveLength(1);
+      renderer.draw(
+        frame(scene([plane(0)], { highlight: { mask, color: [1, 1, 1, 0], alternate: VOID } })),
+      );
+      expect(target.drawImages).toHaveLength(2);
+    });
   });
 
   it("no vuelve a componer si la escena es la misma", () => {

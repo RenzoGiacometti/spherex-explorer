@@ -1,0 +1,67 @@
+/*
+ * Cajon de herramientas del celular. Ocupa exactamente el lugar de los
+ * controles de abajo (los dos estan en la misma celda de la pantalla): no tapa
+ * la imagen y no la cambia de tamano al abrirse.
+ */
+.drawer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-height: 0;
+  pointer-events: auto;
+}
+
+/* Encabezado fijo: el titulo y el boton de cerrar quedan a mano mientras se desplaza lo de abajo. */
+.header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xxs) var(--space-xxs) var(--space-xxs) var(--glass-panel-padding);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* El titulo recibe el foco al abrir, sin anillo: no es un control. */
+.title:focus {
+  outline: none;
+}
+
+/* Los paneles, uno debajo del otro, en una zona que se desplaza. */
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  /* El anillo de foco de un control pegado al borde no queda cortado. */
+  padding: 2px;
+  margin: -2px;
+}
+
+.body > * {
+  flex-shrink: 0;
+}

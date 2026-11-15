@@ -240,6 +240,7 @@ Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantal
 - Si hips2fits no responde en 20 s, `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria. No es un error del campo. Los 20 s son el tope de todo el intercambio: un solo pedido, sin reintentos ni redirecciones.
 - El backend pide la imagen con el WCS exacto de la grilla (parámetro `wcs` de hips2fits), y `preview.hips` es `CDS/P/allWISE/W1` o `CDS/P/allWISE/W2`.
 - **[VERIFICAR]** Nada de esto se pudo comprobar contra el servicio: el 15 de noviembre de 2026 hips2fits respondió 404 con la página "Page unavailable" de CDS en los siete sondeos hechos entre las 10:11 y las 13:44 UTC, y su espejo no conectó. Los parámetros salen del código de astroquery y los identificadores de la lista del nodo HiPS de IRSA. Falta confirmar que acepta el pedido, que devuelve el WCS pedido y las unidades. Cuando vuelva: `uv run python scripts/probe_hips2fits.py --save tests/fixtures/preview` desde `backend/`.
+- Por eso la vista está **apagada por defecto**. A las 16:16 UTC del mismo día hips2fits seguía respondiendo 404. Sin `SPHEREX_PREVIEW_ENABLED=1` el backend no la pide: el campo nace con `preview.status = "unavailable"`, no se emite el evento `preview` y `/preview` responde `404`.
 
 ## 5. Documento de metadatos
 
@@ -497,7 +498,10 @@ El proceso no es el cuello de botella: leer y reproyectar una exposición lleva 
 | Campo: metadatos, planos, capas auxiliares y vista provisoria | `id` | Sin vencimiento |
 
 - Un campo en caché se sirve sin tocar IRSA. Abrirlo cuesta un `POST` (que ya trae los metadatos) y los planos de la banda actual: 3 o 4 pedidos de 152 kB. El resto llega con `/cube`. Objetivo: menos de 2 s desde el link hasta la primera imagen.
-- Los cinco objetos de prueba se precalculan con un script y se guardan en el repositorio, en `backend/data/fields/`. El backend busca primero ahí y después en su caché; el borrado por tope de disco no los toca. `/cube` se arma concatenando los planos al servirlo, así no se guarda dos veces.
+- Los cinco objetos de prueba se precalculan con un script y se guardan en el repositorio, en `backend/data/fields/`. El backend busca primero ahí y después en su caché; el borrado por tope de disco no los toca. `/cube` se arma concatenando los planos al servirlo, así no se guarda dos veces. El script es `backend/scripts/precompute.py`; guarda con cada campo la trayectoria de su objeto, y un `refresh` pedido por la API no toca un campo precalculado (se actualiza con `precompute.py --refresh`).
+- **Campo cercano** (`SPHEREX_NEARBY_FIELD_ARCSEC`, 60 en el despliegue público y 0 en desarrollo): si el centro pedido está a menos de esa distancia del de un campo ya armado del mismo escalón, `POST /api/field` responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido. No vale con `refresh`.
+- **Modo solo precalculados** (`SPHEREX_PRECOMPUTED_ONLY=1`): el backend no crea trabajos ni toca IRSA. `POST /api/field` de un campo que no está armado responde `404 not_found`, salvo que su centro esté a menos de 1 minuto de arco del de un campo armado del mismo escalón: en ese caso responde `200` con ese campo, cuyo `id` y `request` son los del campo armado y no los del pedido.
+- Tiempos medidos al precalcular contra IRSA el 15 de noviembre de 2026, con 10 descargas en paralelo: Barnard, 358 exposiciones en 148 s; Epsilon Indi B, 458 en 157 s; WISE 0855, 258 en 138 s (4 recortes fallidos, campo `partial`).
 - Un campo en caché no se actualiza solo. `refresh: true` vuelve a listar y, si aparecieron exposiciones, reconstruye los planos afectados y sube `rev`. Mientras tanto se sigue sirviendo la revisión anterior.
 
 ## 12. Notas para el frontend

@@ -17,6 +17,7 @@
     "view": "Vista",
     "renderer": "Dibujo",
     "highlight": "Resaltado",
+    "hatch": "Resaltado con la trama de la capa de flags",
     "annotations": "Contorno de saturación y posición del objeto",
     "blink": "Parpadear entre A y B",
     "zoomIn": "Acercar",
@@ -74,7 +75,9 @@
       "mode": "Modo",
       "stretch": "Estirado",
       "highlight": "Resaltado",
+      "hatch": "Trama",
       "scale": "Escala",
+      "ratio": "Densidad",
       "maxDiff": "Dif. máx.",
       "different": "Píxeles distintos"
     },

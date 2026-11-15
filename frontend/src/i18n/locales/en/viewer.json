@@ -1,14 +1,30 @@
 {
-  "placeholder": {
-    "heading": "Viewer",
-    "body": "The viewer is not built yet. This is the state read from the address."
+  "page": {
+    "back": "Back to the start page",
+    "field": "Field",
+    "viewerLabel": "Image of the field",
+    "viewerHelp": "Scroll or pinch to zoom, drag to pan and double-click to go back to the starting view. With the keyboard: arrow keys, plus, minus and zero.",
+    "annotationsLabel": "On the image"
   },
   "field": {
     "ra": "Right ascension",
-    "dec": "Declination",
-    "fov": "Field of view",
+    "dec": "Declination"
+  },
+  "panel": {
     "band": "Band",
-    "mode": "Mode"
+    "mode": "Mode",
+    "image": "Image",
+    "metadata": "Metadata",
+    "timeline": "Timeline",
+    "quality": "Quality notices",
+    "tools": "Tools",
+    "language": "Language",
+    "legend": "Key"
+  },
+  "band": {
+    "group": "Infrared band",
+    "unit": "µm",
+    "option": "{{band}}, {{min}} to {{max}}"
   },
   "mode": {
     "blink": "Blink",
@@ -16,5 +32,165 @@
     "sum": "Sum",
     "redcyan": "Red/cyan",
     "hold": "Press and hold"
+  },
+  "comparison": {
+    "group": "Comparison mode",
+    "reference": "Reference epoch (B)",
+    "referenceOption": "Epoch {{n}}, {{date}}",
+    "pair": "A {{a}} · B {{b}}",
+    "hint": {
+      "difference": "A minus B: the current epoch minus the reference.",
+      "redcyan": "A in red and B in cyan. What did not change stays grey.",
+      "sum": "Average of the epochs with an image: {{n}}.",
+      "hold": "A is shown. While the button or the space bar is held down, B is shown."
+    },
+    "holdButton": "Hold to see B",
+    "issue": {
+      "missing-current": "The current epoch has no image in this band.",
+      "missing-reference": "Another epoch with an image is needed to compare."
+    },
+    "provisional": "One of the compared epochs is provisional: some of its exposures are still missing.",
+    "referenceShort": "Epoch B"
+  },
+  "image": {
+    "contrast": "Contrast",
+    "stretch": "Stretch",
+    "stretchOption": {
+      "linear": "Linear",
+      "log": "Log",
+      "asinh": "Asinh"
+    },
+    "stretchName": {
+      "linear": "Linear",
+      "log": "Logarithmic",
+      "asinh": "Inverse hyperbolic sine"
+    },
+    "fov": "Field of view",
+    "fovOption": "{{n}} arcminutes",
+    "fovValue": "{{side}} × {{side}}"
+  },
+  "timeline": {
+    "track": "Epochs",
+    "position": "Epoch {{n}} of {{total}}",
+    "none": "No epochs yet",
+    "dateRange": "{{start}} to {{end}}",
+    "speed": "Speed",
+    "speedGroup": "Playback speed",
+    "speedCycle": "Playback speed: {{value}}. Change"
+  },
+  "metadata": {
+    "ra": "RA",
+    "dec": "Dec",
+    "epoch": "Epoch",
+    "band": "Band",
+    "pixelScale": "Pixel scale",
+    "field": "Field",
+    "epochs": "Epochs available",
+    "exposures": "Exposures in the plane",
+    "exposuresValue": "{{used}} of {{total}}",
+    "source": "Source",
+    "status": "Status",
+    "statusValue": {
+      "requesting": "Requesting",
+      "queued": "Queued",
+      "listing": "Finding exposures",
+      "downloading": "Loading",
+      "ready": "Complete",
+      "partial": "Incomplete",
+      "failed": "Failed"
+    }
+  },
+  "load": {
+    "requesting": "Requesting the field",
+    "queued": "Queued",
+    "queuePosition": "Position {{n}}",
+    "listing": "Finding exposures",
+    "downloading": "Loading data",
+    "finishing": "Finishing",
+    "cutouts": "{{done}} / {{total}} cutouts · {{percent}}",
+    "ready": "Field complete",
+    "readyDetail": "{{total}} cutouts",
+    "partial": "Field incomplete",
+    "partialDetail": "{{failed}} of {{total}} cutouts missing",
+    "interrupted": "Loading interrupted",
+    "notLoaded": "Field not loaded",
+    "downloadFailed": "Images that could not be downloaded: {{n}}.",
+    "retryDownloads": "Retry the download"
+  },
+  "stage": {
+    "waiting": "Waiting for the first image.",
+    "building": "New field: it is being built from IRSA images. The first image arrives in about a minute and the full field takes a few minutes.",
+    "empty": "This epoch has no data in {{band}}.",
+    "emptyBand": "No epoch has data in {{band}}.",
+    "pending": "The image of this epoch has not arrived yet.",
+    "provisional": "Provisional",
+    "exposures": "{{used}} / {{total}} exposures",
+    "preview": "Provisional view",
+    "previewNote": "This is not a SPHEREx image."
+  },
+  "annotations": {
+    "north": "N",
+    "east": "E",
+    "motion": "{{value}} / yr",
+    "saturated": {
+      "one": "Saturated source",
+      "other": "Saturated sources: {{n}}"
+    },
+    "summary": {
+      "band": "{{mode}}, band {{band}}.",
+      "target": "Reticle on {{name}}.",
+      "motion": "Proper motion: {{value}} per year.",
+      "trail": "Trail with its positions in the earlier epochs: {{n}}.",
+      "scale": "The scale bar measures {{value}}.",
+      "orientation": "North is up and east is to the left."
+    }
+  },
+  "flags": {
+    "toggle": "Flag layer",
+    "hint": "The hatch covers the pixels that the processing discards.",
+    "list": "Flags present",
+    "epochs": {
+      "one": "epoch {{epochs}}",
+      "other": "epochs {{epochs}}"
+    },
+    "pixels": "{{n}} px",
+    "hatched": "hatched",
+    "plain": "not hatched",
+    "loading": "Loading the flags.",
+    "none": "This image has no flagged pixels.",
+    "idle": "Flags are shown when a SPHEREx image is on screen.",
+    "error": "The flags could not be loaded.",
+    "retry": "Retry"
+  },
+  "quality": {
+    "none": "No notices for this field.",
+    "open": "Quality notices: {{n}}",
+    "saturated_source": {
+      "one": "There is a saturated source at {{ra}} {{dec}}: its centre has no valid measurement.",
+      "other": "There are {{n}} saturated sources in the field: their centres have no valid measurement."
+    },
+    "plane_empty": "No exposures: {{planes}}.",
+    "few_exposures": "With fewer than {{limit}} exposures there may be gaps and gradients: {{planes}}.",
+    "low_coverage": "Less than {{limit}} of the image has data: {{planes}}.",
+    "cutouts_failed": {
+      "one": "{{n}} cutout is missing after all the retries: {{planes}}.",
+      "other": "{{n}} cutouts are missing after all the retries: {{planes}}."
+    },
+    "stale_exposure_list": "The exposure list is a copy saved on {{date}}: the data archive did not respond.",
+    "full_download": "Whole files were downloaded because the download could not be cut short.",
+    "planes": {
+      "one": "epoch {{epochs}} ({{bands}})",
+      "other": "epochs {{epochs}} ({{bands}})"
+    }
+  },
+  "tools": {
+    "open": "Tools",
+    "close": "Close the tools"
+  },
+  "embed": {
+    "open": "Open in the full viewer"
+  },
+  "error": {
+    "title": "The field could not be loaded"
   }
 }

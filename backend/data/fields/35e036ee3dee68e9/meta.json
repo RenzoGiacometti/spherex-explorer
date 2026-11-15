@@ -1,0 +1,890 @@
+{
+  "id": "35e036ee3dee68e9",
+  "pipeline": "1",
+  "status": "ready",
+  "rev": 1,
+  "request": {
+    "ra": 331.0966,
+    "dec": -56.8006,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      331.0966,
+      -56.8006
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "detectors": [
+    {
+      "detector": 1,
+      "wave_min_um": 0.7455,
+      "wave_max_um": 1.1167,
+      "display": {
+        "vmin": -0.203786,
+        "vmax": 3.50267,
+        "median": 0.121268,
+        "sigma": 0.162527
+      }
+    },
+    {
+      "detector": 2,
+      "wave_min_um": 1.1033,
+      "wave_max_um": 1.6499,
+      "display": {
+        "vmin": -0.060739,
+        "vmax": 2.15126,
+        "median": 0.0558164,
+        "sigma": 0.0582777
+      }
+    },
+    {
+      "detector": 3,
+      "wave_min_um": 1.6301,
+      "wave_max_um": 2.4346,
+      "display": {
+        "vmin": -0.0548719,
+        "vmax": 1.90035,
+        "median": 0.0375957,
+        "sigma": 0.0462338
+      }
+    },
+    {
+      "detector": 4,
+      "wave_min_um": 2.4027,
+      "wave_max_um": 3.8473,
+      "display": {
+        "vmin": -0.0305465,
+        "vmax": 0.84554,
+        "median": 0.0150079,
+        "sigma": 0.0227772
+      }
+    },
+    {
+      "detector": 5,
+      "wave_min_um": 3.8113,
+      "wave_max_um": 4.43,
+      "display": {
+        "vmin": -0.0235245,
+        "vmax": 0.582362,
+        "median": 0.0114202,
+        "sigma": 0.0174724
+      }
+    },
+    {
+      "detector": 6,
+      "wave_min_um": 4.4115,
+      "wave_max_um": 5.0096,
+      "display": {
+        "vmin": -0.0248282,
+        "vmax": 0.420952,
+        "median": 0.00654229,
+        "sigma": 0.0156852
+      }
+    }
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "start": "2025-04-24",
+      "end": "2025-06-10",
+      "mjd_start": 60789.85552,
+      "mjd_end": 60836.18981,
+      "mjd_mean": 60804.92235,
+      "n_exposures": 118
+    },
+    {
+      "epoch": 2,
+      "start": "2025-09-28",
+      "end": "2025-11-12",
+      "mjd_start": 60946.96411,
+      "mjd_end": 60991.85757,
+      "mjd_mean": 60959.26489,
+      "n_exposures": 146
+    },
+    {
+      "epoch": 3,
+      "start": "2026-04-18",
+      "end": "2026-05-04",
+      "mjd_start": 61148.84479,
+      "mjd_end": 61164.11695,
+      "mjd_mean": 61155.1748,
+      "n_exposures": 74
+    },
+    {
+      "epoch": 4,
+      "start": "2026-09-22",
+      "end": "2026-10-02",
+      "mjd_start": 61305.22691,
+      "mjd_end": 61315.47808,
+      "mjd_mean": 61310.82847,
+      "n_exposures": 120
+    }
+  ],
+  "planes": [
+    {
+      "epoch": 1,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 3,
+      "n_used": 3,
+      "n_failed": 0,
+      "mjd_mean": 60791.9821,
+      "stats": {
+        "min": -0.40253,
+        "max": 16.4058,
+        "median": 0.285383,
+        "sigma": 0.279832,
+        "p01": -0.20834,
+        "p99": 3.39395,
+        "p997": 3.77601,
+        "valid_fraction": 0.9812,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 0
+    },
+    {
+      "epoch": 1,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 32,
+      "n_used": 32,
+      "n_failed": 0,
+      "mjd_mean": 60809.029,
+      "stats": {
+        "min": 0.000691819,
+        "max": 12.3528,
+        "median": 0.0642389,
+        "sigma": 0.0658649,
+        "p01": 0.00573275,
+        "p99": 1.51487,
+        "p997": 2.19777,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 152100
+    },
+    {
+      "epoch": 1,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 25,
+      "n_used": 25,
+      "n_failed": 0,
+      "mjd_mean": 60801.6294,
+      "stats": {
+        "min": -0.00828962,
+        "max": 10.0746,
+        "median": 0.0445293,
+        "sigma": 0.0536901,
+        "p01": -0.00294028,
+        "p99": 1.31545,
+        "p997": 2.00599,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 304200
+    },
+    {
+      "epoch": 1,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 4,
+      "n_used": 4,
+      "n_failed": 0,
+      "mjd_mean": 60791.5518,
+      "stats": {
+        "min": -4.56719,
+        "max": 7.25799,
+        "median": 0.0135019,
+        "sigma": 0.0211497,
+        "p01": -0.0127852,
+        "p99": 0.48799,
+        "p997": 0.749689,
+        "valid_fraction": 0.9993,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 456300
+    },
+    {
+      "epoch": 1,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 30,
+      "n_used": 30,
+      "n_failed": 0,
+      "mjd_mean": 60808.8356,
+      "stats": {
+        "min": -2.91267,
+        "max": 13.4981,
+        "median": 0.0100091,
+        "sigma": 0.0158722,
+        "p01": -0.0147074,
+        "p99": 0.334335,
+        "p997": 0.571139,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 608400
+    },
+    {
+      "epoch": 1,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 60801.8314,
+      "stats": {
+        "min": -3.47506,
+        "max": 6.20669,
+        "median": 0.00605238,
+        "sigma": 0.0143441,
+        "p01": -0.0211433,
+        "p99": 0.24141,
+        "p997": 0.427313,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 760500
+    },
+    {
+      "epoch": 2,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 60963.1197,
+      "stats": {
+        "min": -1.49641,
+        "max": 12.4463,
+        "median": 0.0655357,
+        "sigma": 0.10284,
+        "p01": -0.0575221,
+        "p99": 1.47104,
+        "p997": 2.10707,
+        "valid_fraction": 0.9887,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 912600
+    },
+    {
+      "epoch": 2,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 30,
+      "n_used": 30,
+      "n_failed": 0,
+      "mjd_mean": 60959.4372,
+      "stats": {
+        "min": -0.0113322,
+        "max": 11.4801,
+        "median": 0.0522619,
+        "sigma": 0.0563721,
+        "p01": -0.00296132,
+        "p99": 1.19816,
+        "p997": 2.0186,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1064700
+    },
+    {
+      "epoch": 2,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 60954.3429,
+      "stats": {
+        "min": -0.0111485,
+        "max": 9.29007,
+        "median": 0.0324352,
+        "sigma": 0.0401429,
+        "p01": -0.00445377,
+        "p99": 1.01489,
+        "p997": 1.60525,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1216800
+    },
+    {
+      "epoch": 2,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 60963.1783,
+      "stats": {
+        "min": -0.455346,
+        "max": 4.44065,
+        "median": 0.0160663,
+        "sigma": 0.0240849,
+        "p01": -0.00735082,
+        "p99": 0.554894,
+        "p997": 0.846835,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1368900
+    },
+    {
+      "epoch": 2,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 60960.4505,
+      "stats": {
+        "min": -0.042836,
+        "max": 15.8075,
+        "median": 0.0128712,
+        "sigma": 0.0186254,
+        "p01": -0.0103408,
+        "p99": 0.34324,
+        "p997": 0.591156,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1521000
+    },
+    {
+      "epoch": 2,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 22,
+      "n_used": 22,
+      "n_failed": 0,
+      "mjd_mean": 60954.5857,
+      "stats": {
+        "min": -0.0953792,
+        "max": 6.77962,
+        "median": 0.00623137,
+        "sigma": 0.01556,
+        "p01": -0.0187063,
+        "p99": 0.208004,
+        "p997": 0.429715,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1673100
+    },
+    {
+      "epoch": 3,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 19,
+      "n_used": 19,
+      "n_failed": 0,
+      "mjd_mean": 61152.0513,
+      "stats": {
+        "min": -0.162391,
+        "max": 12.4239,
+        "median": 0.0737437,
+        "sigma": 0.0964649,
+        "p01": -0.101574,
+        "p99": 1.63037,
+        "p997": 2.32726,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1825200
+    },
+    {
+      "epoch": 3,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 7,
+      "n_used": 7,
+      "n_failed": 0,
+      "mjd_mean": 61155.8776,
+      "stats": {
+        "min": -0.00876123,
+        "max": 14.1781,
+        "median": 0.0623811,
+        "sigma": 0.0647346,
+        "p01": 0.00348076,
+        "p99": 1.49183,
+        "p997": 2.21088,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 1977300
+    },
+    {
+      "epoch": 3,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 12,
+      "n_used": 12,
+      "n_failed": 0,
+      "mjd_mean": 61159.904,
+      "stats": {
+        "min": -0.0154715,
+        "max": 8.45767,
+        "median": 0.0426208,
+        "sigma": 0.05171,
+        "p01": -0.00375196,
+        "p99": 1.35794,
+        "p997": 2.04871,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2129400
+    },
+    {
+      "epoch": 3,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 19,
+      "n_used": 19,
+      "n_failed": 0,
+      "mjd_mean": 61152.0264,
+      "stats": {
+        "min": -0.0234244,
+        "max": 4.20864,
+        "median": 0.0155328,
+        "sigma": 0.0233097,
+        "p01": -0.00740834,
+        "p99": 0.567257,
+        "p997": 0.884666,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2281500
+    },
+    {
+      "epoch": 3,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 6,
+      "n_used": 6,
+      "n_failed": 0,
+      "mjd_mean": 61155.9752,
+      "stats": {
+        "min": -0.0969946,
+        "max": 15.4872,
+        "median": 0.011182,
+        "sigma": 0.0185893,
+        "p01": -0.0194206,
+        "p99": 0.339978,
+        "p997": 0.585289,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2433600
+    },
+    {
+      "epoch": 3,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 11,
+      "n_used": 11,
+      "n_failed": 0,
+      "mjd_mean": 61159.9652,
+      "stats": {
+        "min": -0.11899,
+        "max": 6.39192,
+        "median": 0.00802354,
+        "sigma": 0.0186538,
+        "p01": -0.0273438,
+        "p99": 0.246539,
+        "p997": 0.420077,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2585700
+    },
+    {
+      "epoch": 4,
+      "detector": 1,
+      "status": "empty",
+      "rev": 0,
+      "n_exposures": 0,
+      "n_used": 0,
+      "n_failed": 0,
+      "mjd_mean": null,
+      "stats": null,
+      "saturated": [],
+      "cube_offset": null
+    },
+    {
+      "epoch": 4,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61313.9986,
+      "stats": {
+        "min": -0.0130269,
+        "max": 14.0896,
+        "median": 0.0462878,
+        "sigma": 0.0474614,
+        "p01": -0.00139389,
+        "p99": 1.24222,
+        "p997": 1.97504,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2737800
+    },
+    {
+      "epoch": 4,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 36,
+      "n_used": 36,
+      "n_failed": 0,
+      "mjd_mean": 61308.715,
+      "stats": {
+        "min": -0.0102566,
+        "max": 7.73251,
+        "median": 0.0320258,
+        "sigma": 0.0400735,
+        "p01": -0.00413863,
+        "p99": 1.09652,
+        "p997": 1.66646,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 2889900
+    },
+    {
+      "epoch": 4,
+      "detector": 4,
+      "status": "empty",
+      "rev": 0,
+      "n_exposures": 0,
+      "n_used": 0,
+      "n_failed": 0,
+      "mjd_mean": null,
+      "stats": null,
+      "saturated": [],
+      "cube_offset": null
+    },
+    {
+      "epoch": 4,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61313.9986,
+      "stats": {
+        "min": -0.0765496,
+        "max": 15.9465,
+        "median": 0.0117575,
+        "sigma": 0.0171464,
+        "p01": -0.0102555,
+        "p99": 0.338658,
+        "p997": 0.579451,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 3042000
+    },
+    {
+      "epoch": 4,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 36,
+      "n_used": 36,
+      "n_failed": 0,
+      "mjd_mean": 61308.715,
+      "stats": {
+        "min": -0.218629,
+        "max": 6.24358,
+        "median": 0.00613567,
+        "sigma": 0.0144203,
+        "p01": -0.0174372,
+        "p99": 0.223347,
+        "p997": 0.401723,
+        "valid_fraction": 1.0,
+        "saturated_fraction": 0.0
+      },
+      "saturated": [],
+      "cube_offset": 3194100
+    }
+  ],
+  "flags": [
+    {
+      "bit": 0,
+      "name": "TRANSIENT",
+      "description": "Transient detected during SUR",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 1,
+      "name": "OVERFLOW",
+      "description": "Overflow detected during SUR",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 2,
+      "name": "SUR_ERROR",
+      "description": "Error in onboard processing",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 6,
+      "name": "NONFUNC",
+      "description": "Permanently unusable",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 7,
+      "name": "DICHROIC",
+      "description": "Low efficiency due to dichroic",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 9,
+      "name": "MISSING_DATA",
+      "description": "Onboard data lost",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 10,
+      "name": "HOT",
+      "description": "Hot pixel",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 11,
+      "name": "COLD",
+      "description": "Anomalously low signal",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 12,
+      "name": "FULLSAMPLE",
+      "description": "Pixel full sample history is available",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 14,
+      "name": "PHANMISS",
+      "description": "Phantom correction was not applied",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 15,
+      "name": "NONLINEAR",
+      "description": "Nonlinearity correction cannot be applied reliably",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 17,
+      "name": "PERSIST",
+      "description": "Persistent charge above threshold",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 19,
+      "name": "OUTLIER",
+      "description": "Pixel flagged by Detect Outliers",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 20,
+      "name": "CROSSTALK",
+      "description": "Pixel affected by crosstalk.",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 21,
+      "name": "SOURCE",
+      "description": "Pixel mapped to a known source",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 22,
+      "name": "GHOST",
+      "description": "Affected by a bright source inside the exposure",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 23,
+      "name": "GHOST_FPA",
+      "description": "Affected by a bright source on another detector",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 24,
+      "name": "GHOST_EXT",
+      "description": "Pixel affected by a bright source outside FOV",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 25,
+      "name": "STREAK",
+      "description": "Pixel affected by a streak",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 26,
+      "name": "BLOOM",
+      "description": "Pixel part of a bloom artifact",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 27,
+      "name": "SNOWBALL",
+      "description": "Pixel part of a snowball artifact",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 28,
+      "name": "HALO",
+      "description": "Pixel part of a transient halo",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 29,
+      "name": "SATELLITE_HALO",
+      "description": "Pixel part of a satellite streak halo",
+      "masked": true,
+      "saturation": false
+    }
+  ],
+  "progress": {
+    "phase": "done",
+    "queue_position": 0,
+    "cutouts_total": 458,
+    "cutouts_done": 458,
+    "cutouts_failed": 0,
+    "cutouts_cached": 0,
+    "planes_total": 24,
+    "planes_ready": 24,
+    "elapsed_s": 151.2
+  },
+  "warnings": [
+    {
+      "code": "plane_empty",
+      "epoch": 4,
+      "detector": 1
+    },
+    {
+      "code": "plane_empty",
+      "epoch": 4,
+      "detector": 4
+    },
+    {
+      "code": "few_exposures",
+      "epoch": 1,
+      "detector": 1,
+      "n": 3
+    },
+    {
+      "code": "few_exposures",
+      "epoch": 1,
+      "detector": 4,
+      "n": 4
+    }
+  ],
+  "preview": {
+    "status": "unavailable",
+    "survey": "WISE",
+    "band": "W1",
+    "wave_um": 3.4,
+    "hips": "CDS/P/allWISE/W1",
+    "display": null
+  },
+  "provenance": {
+    "source": "SPHEREx / IRSA",
+    "collections": [
+      "spherex_dr1",
+      "spherex_qr3"
+    ],
+    "listed_at": "2026-11-15T16:19:54Z",
+    "list_stale": false,
+    "download_mode": "truncated",
+    "built_at": "2026-11-15T16:22:02Z"
+  }
+}

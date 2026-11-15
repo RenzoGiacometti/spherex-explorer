@@ -1,0 +1,183 @@
+{
+ "version": 1,
+ "status": "saturated",
+ "target": {
+  "name": "R Draconis",
+  "ra": 248.167234,
+  "dec": 66.755024,
+  "epoch": 2026.0,
+  "motion": {
+   "pm_ra": -20.643,
+   "pm_dec": 6.149,
+   "parallax": 1.2509
+  },
+  "track": [
+   {
+    "epoch": 1,
+    "mjd": 60845.9032,
+    "ra": 248.167241,
+    "dec": 66.755023
+   },
+   {
+    "epoch": 2,
+    "mjd": 61006.0592,
+    "ra": 248.167234,
+    "dec": 66.755023
+   },
+   {
+    "epoch": 3,
+    "mjd": 61198.9219,
+    "ra": 248.167227,
+    "dec": 66.755025
+   }
+  ],
+  "catalog_name": "V* R Dra"
+ },
+ "field": "721817858ae5e0d2",
+ "units": {
+  "wavelength": "um",
+  "flux": "mJy"
+ },
+ "aperture": {
+  "radius_px": 1.5,
+  "radius_arcsec": 9.23,
+  "annulus_in_px": 4.0,
+  "annulus_out_px": 8.0,
+  "correction": "none",
+  "psf_fwhm_arcsec": null,
+  "enclosed_fraction_gaussian": null
+ },
+ "epochs": [
+  {
+   "epoch": 1,
+   "start": "2025-05-16",
+   "end": "2025-07-22",
+   "mjd_start": 60811.9565,
+   "mjd_end": 60878.6089,
+   "mjd_mean": 60845.9032,
+   "n_exposures": 153
+  },
+  {
+   "epoch": 2,
+   "start": "2025-10-17",
+   "end": "2026-01-13",
+   "mjd_start": 60965.6152,
+   "mjd_end": 61053.4153,
+   "mjd_mean": 61006.0592,
+   "n_exposures": 212
+  },
+  {
+   "epoch": 3,
+   "start": "2026-04-22",
+   "end": "2026-07-16",
+   "mjd_start": 61152.3317,
+   "mjd_end": 61237.8739,
+   "mjd_mean": 61198.9219,
+   "n_exposures": 174
+  }
+ ],
+ "detectors": [
+  {
+   "detector": 1,
+   "wave_min_um": 0.735,
+   "wave_max_um": 1.126,
+   "n_exposures": 91,
+   "n_points": 0,
+   "n_saturated": 91,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 2,
+   "wave_min_um": 1.086,
+   "wave_max_um": 1.668,
+   "n_exposures": 89,
+   "n_points": 0,
+   "n_saturated": 87,
+   "n_masked": 0,
+   "n_edge": 2,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 3,
+   "wave_min_um": 1.616,
+   "wave_max_um": 2.439,
+   "n_exposures": 91,
+   "n_points": 0,
+   "n_saturated": 91,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 4,
+   "wave_min_um": 2.398,
+   "wave_max_um": 3.863,
+   "n_exposures": 88,
+   "n_points": 0,
+   "n_saturated": 88,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 5,
+   "wave_min_um": 3.798,
+   "wave_max_um": 4.443,
+   "n_exposures": 89,
+   "n_points": 0,
+   "n_saturated": 87,
+   "n_masked": 0,
+   "n_edge": 2,
+   "offset_arcsec": null
+  },
+  {
+   "detector": 6,
+   "wave_min_um": 4.402,
+   "wave_max_um": 5.025,
+   "n_exposures": 91,
+   "n_points": 0,
+   "n_saturated": 91,
+   "n_masked": 0,
+   "n_edge": 0,
+   "offset_arcsec": null
+  }
+ ],
+ "points": [],
+ "binned": [],
+ "warnings": [
+  {
+   "code": "saturated_source",
+   "ra": 248.16723,
+   "dec": 66.75502,
+   "epochs": [
+    1,
+    2,
+    3
+   ],
+   "detectors": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "n_exposures": 535,
+   "n_total": 539
+  }
+ ],
+ "provenance": {
+  "source": "SPHEREx / IRSA",
+  "n_exposures": 539,
+  "n_points": 0,
+  "n_unreadable": 0,
+  "processing": [
+   "l2b-v27"
+  ],
+  "wave_table": "l2b-v27",
+  "computed_at": "2026-11-15T16:46:53Z"
+ },
+ "source": "precomputed"
+}

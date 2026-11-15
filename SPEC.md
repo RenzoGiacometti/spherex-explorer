@@ -168,7 +168,7 @@ Cada etapa termina en algo que se puede mostrar.
 | Estrellas brillantes saturadas (Barnard: hueco en el centro) | El núcleo se dibuja en blanco máximo con contorno y aviso, y se enmascara en diferencia y rojo/cian; las posiciones se miden ajustando las alas |
 | R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1; la fotometría sobre las alas queda como investigación |
 | El campo de 1° de la maqueta no es viable con recortes (4 GB por campo) | Campos de 5′, 10′ y 30′; para contexto amplio, el mapa de la Etapa 3 |
-| hips2fits de CDS sin responder (pasó el 15 de noviembre de 2026: 404 con la página "Page unavailable" en siete sondeos entre las 10:11 y las 13:44 UTC) | La vista provisoria de WISE es opcional: si falla, el campo carga igual. **[VERIFICAR]** La vista está implementada contra la documentación y no se pudo probar contra el servicio |
+| hips2fits de CDS sin responder (pasó el 15 de noviembre de 2026: 404 con la página "Page unavailable" en siete sondeos entre las 10:11 y las 13:44 UTC) | La vista provisoria de WISE es opcional: si falla, el campo carga igual. **[VERIFICAR]** La vista está implementada contra la documentación y no se pudo probar contra el servicio. Queda apagada detrás de `SPHEREX_PREVIEW_ENABLED` (a las 16:16 UTC seguía caído) |
 | Pocas épocas, movimiento subpíxel | Rojo/cian, diferencia y viaje entre misiones. La diferencia entre épocas ya muestra un dipolo claro en Barnard y en WISE 0855 |
 | CDS (Sesame, SIMBAD, VizieR) sin responder | Espejo de Sesame en CfA y caché de nombres resueltos |
 | CORS de servicios externos | Todo pasa por el backend |

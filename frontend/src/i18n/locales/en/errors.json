@@ -2,7 +2,7 @@
   "code": {
     "invalid_request": "The request is not valid. Check the coordinates and the field of view.",
     "not_resolved": "No object was found with that name.",
-    "not_found": "That field does not exist or is no longer available.",
+    "not_found": "That field is not available on this server.",
     "not_ready": "The data is not ready yet.",
     "no_coverage": "SPHEREx has not observed that part of the sky yet.",
     "queue_full": "Many requests are waiting.",

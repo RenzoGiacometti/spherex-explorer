@@ -1,0 +1,171 @@
+/*
+ * Barra superior: transparente, sin fondo propio (DESIGN.md, "Estructura").
+ * Lo que no es un control deja pasar el puntero al visor que esta debajo.
+ */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  min-width: 0;
+  pointer-events: none;
+}
+
+/*
+ * Los dos extremos van sobre vidrio: al acercar, la imagen pasa por debajo de
+ * la barra y el texto suelto dejaba de leerse sobre una zona clara. El resto
+ * de la barra sigue transparente.
+ */
+.start,
+.language {
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  pointer-events: auto;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .start,
+  .language {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+.start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+  padding: 5px var(--space-md) 5px 5px;
+}
+
+.language {
+  padding: 5px;
+}
+
+/* La marca: condensada, con tracking abierto, escrita como es (la x va en minuscula). */
+.brand {
+  flex-shrink: 0;
+  color: var(--color-text);
+  font: var(--type-button-cap-font);
+  font-size: 15px;
+  letter-spacing: 2.4px;
+  white-space: nowrap;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-sm);
+  min-width: 0;
+}
+
+/* title, a 18 px dentro de la barra (DESIGN.md: de 16 a 26 px segun contexto). */
+.object {
+  overflow: hidden;
+  font: var(--type-title-font);
+  font-size: 18px;
+  letter-spacing: var(--type-title-tracking);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coordinates {
+  display: flex;
+  gap: var(--space-sm);
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+  white-space: nowrap;
+}
+
+/*
+ * ---- Celular ---------------------------------------------------------------
+ *
+ * Una sola franja de vidrio a lo ancho, como en la maqueta: la salida, el
+ * objeto con sus coordenadas y el acceso a los avisos de calidad. Arriba solo
+ * van informacion y la salida (DESIGN.md, "Zona del pulgar").
+ */
+.phone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  padding: var(--space-xxs);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  pointer-events: auto;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .phone {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+/* El objeto arriba y las coordenadas debajo, centrados entre los dos botones. */
+.phone .identity {
+  flex: 1;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1px;
+}
+
+.phone .object {
+  max-width: 100%;
+  font-size: 16px;
+}
+
+.phone .coordinates {
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+/* Acceso a los avisos de calidad: el icono alert y la cantidad en mono. 44 px de alto. */
+.notices {
+  appearance: none;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xxs);
+  min-width: var(--button-icon-size);
+  height: var(--button-icon-size);
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.notices:hover {
+  border-color: var(--color-text);
+}
+
+.notices:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.noticesCount {
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+/* Ocupa el lugar del acceso a los avisos cuando no hay ninguno. */
+.spacer {
+  flex-shrink: 0;
+  width: var(--button-icon-size);
+}

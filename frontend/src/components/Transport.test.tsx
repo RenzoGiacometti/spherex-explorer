@@ -104,6 +104,24 @@ describe("Transport", () => {
     expect(actions.onPlayingChange).not.toHaveBeenCalled();
   });
 
+  it("playDisabled deshabilita solo el boton de reproducir", () => {
+    const actions = handlers();
+    render(<Transport playing={false} playDisabled {...actions} />);
+
+    const play = screen.getByRole("button", { name: "Reproducir" }) as HTMLButtonElement;
+    expect(play.disabled).toBe(true);
+    fireEvent.click(play);
+    expect(actions.onPlayingChange).not.toHaveBeenCalled();
+
+    for (const name of ["Época anterior", "Época siguiente"]) {
+      const button = screen.getByRole("button", { name }) as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+      fireEvent.click(button);
+    }
+    expect(actions.onPrevious).toHaveBeenCalledTimes(1);
+    expect(actions.onNext).toHaveBeenCalledTimes(1);
+  });
+
   it("los nombres salen de i18n y el del grupo se puede reemplazar", async () => {
     await setLanguage("en");
     const { rerender } = render(<Transport playing={false} {...handlers()} />);

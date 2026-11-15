@@ -40,6 +40,17 @@
   border-color: var(--color-text);
 }
 
+/*
+ * Y con el anillo de foco de DESIGN.md ("Foco y deshabilitado"): contorno
+ * blanco de 2 px separado 2 px, alrededor del campo entero. El borde solo, de
+ * 1 px, quedaba por debajo de esa regla. Con el foco en el boton de adentro el
+ * anillo es el del boton.
+ */
+.field:has(.input:focus-visible) {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
 .icon {
   color: var(--color-text-mute);
 }

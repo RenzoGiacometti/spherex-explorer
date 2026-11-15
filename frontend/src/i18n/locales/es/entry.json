@@ -1,6 +1,19 @@
 {
-  "placeholder": {
-    "body": "La entrada con el buscador todavía no está construida. Con coordenadas en la dirección se abre el visor.",
-    "example": "Ejemplo"
+  "kicker": "Misión <mission>SPHEREx</mission> de NASA · <range>{{from}} a {{to}}</range>",
+  "headline": "El cielo infrarrojo, en movimiento",
+  "lead": "Imágenes de SPHEREx de una misma zona del cielo a lo largo del tiempo, para encontrar objetos que se mueven o cambian de brillo.",
+  "search": {
+    "label": "Buscar por nombre o coordenadas",
+    "submit": "Buscar",
+    "example": "{{name}} · {{coordinates}}",
+    "resolving": "Buscando {{query}}…",
+    "advice": {
+      "not_resolved": "Se puede probar con otro nombre o con coordenadas.",
+      "upstream_unavailable": "La búsqueda por coordenadas sigue funcionando."
+    }
+  },
+  "featured": {
+    "title": "Destacados",
+    "nav": "Objetos destacados"
   }
 }

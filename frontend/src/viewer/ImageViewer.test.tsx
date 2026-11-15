@@ -779,3 +779,107 @@ describe("ImageViewer: volver a la vista de partida", () => {
     expect(overlayData().zoom).toBe(1);
   });
 });
+
+describe("ImageViewer: margenes tapados por los paneles", () => {
+  // Visor de 780 x 780 con 100 px tapados arriba, 280 abajo, 200 a la izquierda y
+  // 180 a la derecha: quedan libres 400 x 400, con centro en (400, 300).
+  const INSETS = { top: 100, right: 180, bottom: 280, left: 200 };
+
+  it("encuadra la imagen en lo que queda libre y sigue dibujando en todo el visor", () => {
+    const contexts = setup();
+    const ref = createRef<ImageViewerHandle>();
+    renderViewer({ insets: INSETS, ref });
+    const scale = 400 / SIDE;
+    const data = overlayData();
+    expect(data.scale).toBeCloseTo(scale, 12);
+    expect(data).toMatchObject({ zoom: 1, centerX: 97, centerY: 97 });
+    expect(data.screenX).toBeCloseTo(400, 9);
+    expect(data.screenY).toBeCloseTo(300, 9);
+
+    const overlay = ref.current?.getOverlay();
+    expect(overlay?.viewport).toEqual({ width: 780, height: 780 });
+    expect(overlay?.frame).toEqual({ left: 200, top: 100, width: 400, height: 400 });
+
+    // El canvas sigue siendo el visor entero; la imagen cae en la zona libre.
+    const canvas = canvasOf(root());
+    expect([canvas.width, canvas.height]).toEqual([780, 780]);
+    const drawn = contexts.fake2d(canvas)?.drawImages.at(-1);
+    expect(drawn?.left).toBeCloseTo(200, 9);
+    expect(drawn?.top).toBeCloseTo(100, 9);
+    expect(drawn?.width).toBeCloseTo(400, 9);
+    expect(drawn?.height).toBeCloseTo(400, 9);
+  });
+
+  it("sin margenes la zona de encuadre es el visor entero", () => {
+    setup();
+    const ref = createRef<ImageViewerHandle>();
+    renderViewer({ ref });
+    expect(ref.current?.getOverlay()?.frame).toEqual({ left: 0, top: 0, width: 780, height: 780 });
+  });
+
+  it("la rueda acerca alrededor del cursor tambien con margenes", () => {
+    setup();
+    renderViewer({ insets: INSETS, homeZoom: 2 });
+    const before = overlayData();
+    // Punto de la imagen bajo el cursor (350, 250) antes de girar la rueda.
+    const originX = before.screenX - 97 * before.scale;
+    const originY = before.screenY + 97 * before.scale;
+    const under = { x: (350 - originX) / before.scale, y: (originY - 250) / before.scale };
+
+    fireEvent.wheel(root(), { deltaY: -100, clientX: 350, clientY: 250 });
+
+    const after = overlayData();
+    expect(after.zoom).toBeCloseTo(2 * Math.exp(0.2), 10);
+    const nextOriginX = after.screenX - 97 * after.scale;
+    const nextOriginY = after.screenY + 97 * after.scale;
+    expect(nextOriginX + under.x * after.scale).toBeCloseTo(350, 8);
+    expect(nextOriginY - under.y * after.scale).toBeCloseTo(250, 8);
+  });
+
+  it("acercada, el borde de la imagen llega hasta el borde de la zona libre y no mas", () => {
+    setup();
+    const ref = createRef<ImageViewerHandle>();
+    renderViewer({ insets: INSETS, homeZoom: 2, ref });
+    const element = root();
+    stubPointerCapture();
+    // Arrastre largo hacia la derecha: la imagen se mueve hasta que su borde
+    // este (columna 0) queda en el borde izquierdo de la zona libre.
+    fireEvent(element, pointer("pointerdown", { x: 300, y: 300 }));
+    fireEvent(element, pointer("pointermove", { x: 2300, y: 300 }));
+    fireEvent(element, pointer("pointerup", { x: 2300, y: 300 }));
+
+    const overlay = ref.current?.getOverlay();
+    if (!overlay) throw new Error("el visor no tiene vista");
+    const left = imageToScreen(overlay.transform, -0.5, 0).x;
+    expect(left).toBeCloseTo(200, 9);
+  });
+
+  it("al cambiar los margenes vuelve a encuadrar sin perder el acercamiento", () => {
+    setup();
+    const ref = createRef<ImageViewerHandle>();
+    const { rerender } = renderViewer({ insets: INSETS, ref });
+    act(() => ref.current?.zoomBy(2));
+    expect(overlayData().zoom).toBe(2);
+
+    rerender(
+      <ImageViewer
+        scene={SCENE}
+        ariaLabel={LABEL}
+        insets={{ top: 0, right: 0, bottom: 390, left: 0 }}
+        ref={ref}
+      >
+        {probe}
+      </ImageViewer>,
+    );
+    expect(overlayData().zoom).toBe(2);
+    expect(ref.current?.getOverlay()?.frame).toEqual({ left: 0, top: 0, width: 780, height: 390 });
+  });
+
+  it("unos margenes que no dejan lugar no se aplican", () => {
+    setup();
+    const ref = createRef<ImageViewerHandle>();
+    renderViewer({ insets: { top: 400, right: 0, bottom: 400, left: 0 }, ref });
+    expect(ref.current?.getOverlay()?.frame).toEqual({ left: 0, top: 0, width: 780, height: 780 });
+    expect(overlayData()).toMatchObject({ scale: 4, screenX: 390, screenY: 390 });
+  });
+});

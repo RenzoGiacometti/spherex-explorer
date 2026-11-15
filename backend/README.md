@@ -2,7 +2,7 @@
 
 FastAPI + astropy. Arma el cubo del campo a partir de recortes de IRSA y lo sirve al frontend. El contrato con el frontend está en [`docs/contrato-cubo.md`](../docs/contrato-cubo.md) y manda sobre este código; el alcance, en [`SPEC.md`](../SPEC.md).
 
-Estado: núcleo de la Etapa 1. Además de los cimientos (configuración, modelos del contrato, geometría, estadísticas, almacén de campos en disco, modelo de error, lectura de coordenadas y servidor falso) están implementados y probados el acceso a IRSA, el pipeline, la resolución de nombres con Sesame y la propagación por movimiento propio. La vista provisoria de WISE está implementada pero sin verificar contra hips2fits, que estuvo caído. Faltan el gestor de trabajos y las rutas reales: tienen la firma y la documentación, y lanzan `NotImplementedError`.
+Estado: Etapa 1. Están implementados y probados el acceso a IRSA, el pipeline, la resolución de nombres, el gestor de trabajos, las rutas del contrato y el script de precálculo. Los cinco objetos de prueba están precalculados en `data/fields`. La vista provisoria de WISE está implementada pero apagada (`SPHEREX_PREVIEW_ENABLED`): hips2fits de CDS estuvo caído todo el 2026-11-15 y no se pudo verificar.
 
 ## Instalar
 
@@ -74,7 +74,7 @@ Si corre a la vez que el backend real, va en otro puerto; el frontend elige a cu
 
 ### Qué entrega el flujo de eventos
 
-Es lo que hace el servidor falso y lo que tiene que hacer el backend real. Estos puntos están fijados en el contrato (secciones 15 y 16); acá va el resumen. El servidor falso todavía no manda la cabecera `X-Plane-Rev` ni responde `409` en `/track` antes de `listed`, que son de la versión 1.2.
+Es lo que hace el servidor falso y lo que tiene que hacer el backend real. Estos puntos están fijados en el contrato (secciones 15 y 16); acá va el resumen.
 
 - En `listed` los planos sin exposiciones ya vienen `empty` y no tienen evento `plane`. Los demás vienen `pending`.
 - `flags` llega como lista vacía en `listed`: los bits salen del encabezado del primer archivo que se baja. Desde ese momento están en `GET .../meta`; ningún evento `plane` los lleva.
@@ -129,12 +129,40 @@ uv run python scripts/make_sample_fields.py
 ## Backend real
 
 ```powershell
-uv run uvicorn app.api.main:app --port 8000
+uv run uvicorn app.api.main:app --port 8000 --timeout-graceful-shutdown 5
 ```
 
-Por ahora solo responde `GET /api/health`.
+Implementa todos los endpoints del contrato. El frontend en desarrollo (`pnpm dev`) le llega por el proxy de `/api` de Vite; no tiene CORS.
 
-Tiene que correr con un solo proceso de uvicorn (sin `--workers`): el límite de 10 descargas hacia IRSA y la protección de la caché de recortes valen por proceso.
+- Un solo proceso de uvicorn (sin `--workers`): el límite de 10 descargas hacia IRSA, la cola y la protección de la caché de recortes valen por proceso.
+- `--timeout-graceful-shutdown` hace falta para poder detenerlo con un flujo de eventos abierto.
+
+### Campos precalculados
+
+```powershell
+uv run python scripts/precompute.py                 # los cinco objetos de prueba, de a uno
+uv run python scripts/precompute.py wise0855 --refresh
+```
+
+Alias: `barnard`, `epsindb`, `wise0855`, `rwaur`, `rdra`. Usa la red (IRSA y Sesame) y deja cada campo en `data/fields`, con la trayectoria del objeto. Código de salida: 0 todos `ready`, 2 alguno `partial` (`--refresh` lo completa), 1 alguno falló. No correrlo mientras el backend arma campos: cada proceso tendría su propio cupo de 10 descargas.
+
+Medido el 2026-11-15 contra IRSA: Barnard (358 exposiciones) en 148 s, Epsilon Indi B (458) en 157 s, WISE 0855 (258) en 138 s.
+
+### Despliegue público
+
+El `Dockerfile` de la raíz arma una imagen de un solo proceso: la API, el frontend compilado (`SPHEREX_STATIC_DIR`) y los campos precalculados, que salen sin tocar IRSA. Un campo que no está precalculado se arma contra IRSA igual que en desarrollo, con 2 trabajos activos y hasta 10 en cola (`SPHEREX_MAX_ACTIVE_JOBS`, `SPHEREX_MAX_QUEUED_JOBS`); la interfaz avisa que tarda unos minutos. Lo que se arma queda en la caché del contenedor y se pierde al redesplegar.
+
+- `SPHEREX_NEARBY_FIELD_ARCSEC=60`: un pedido a menos de 1 minuto de arco del centro de un campo ya armado abre ese campo en vez de armar otro casi igual.
+- `SPHEREX_PRECOMPUTED_ONLY=1` vuelve al modo que solo sirve lo ya armado: cualquier otro campo responde `404 not_found` y nunca se toca IRSA.
+- El frontend se compila con `VITE_WIDE_FIELD=0`: no ofrece el campo de 30′, que no se probó con datos reales.
+- `render.yaml` describe el servicio para Render (plan de 2 GB, una sola instancia).
+
+```powershell
+docker build -t spherex-explorer .
+docker run --rm -p 7860:7860 spherex-explorer
+```
+
+`data/sesame/` guarda las respuestas de Sesame de los cinco objetos; la imagen las copia a su caché para que los links con `name` abran aunque CDS no responda.
 
 ### Lo que el gestor de trabajos tiene que hacer con estas piezas
 
@@ -157,11 +185,16 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 | `SPHEREX_CUTOUT_CACHE_MAX_GB` | 10 | Tope de disco de la caché de recortes |
 | `SPHEREX_SESAME_URLS`, `SPHEREX_SESAME_TIMEOUT_S`, `SPHEREX_SESAME_TOTAL_TIMEOUT_S` | CDS y CfA, 10, 20 | Servidores de nombres, en orden, y sus plazos |
 | `SPHEREX_HIPS2FITS_URL`, `SPHEREX_PREVIEW_HIPS_W1`, `SPHEREX_PREVIEW_HIPS_W2` | hips2fits de CDS, `CDS/P/allWISE/W1` y `W2` | Servicio e imágenes de la vista provisoria |
+| `SPHEREX_PREVIEW_ENABLED` | 0 | Con 1, pide la vista provisoria de WISE. Apagada: el campo sale con `preview.status = "unavailable"` |
+| `SPHEREX_PRECOMPUTED_ONLY` | 0 | Con 1, solo sirve campos ya armados y no toca IRSA |
+| `SPHEREX_NEARBY_FIELD_ARCSEC` | 0 | Distancia al centro de un campo ya armado por debajo de la cual un pedido abre ese campo; 0 lo desactiva |
+| `SPHEREX_STATIC_DIR` | vacío | Carpeta del frontend compilado, servida en `/` |
 
 ## Datos en disco
 
 ```
 data/fields/     campos precalculados (se versionan)
+data/sesame/     respuestas de Sesame de los objetos precalculados (se versionan; las usa la imagen Docker)
 cache/           caché de ejecución (ignorada por git): fields/, cutouts/, sia/, sesame/
 ```
 
@@ -190,7 +223,9 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/pipeline/stats.py` | Estadísticas de un plano, escala de contraste, regiones saturadas | Hecho |
 | `app/jobs/store.py` | `FieldStore`: campo en disco | Hecho |
 | `app/api/errors.py` | `ApiError` y el cuerpo de error del contrato | Hecho |
-| `app/api/main.py` | Aplicación real | Solo `/api/health` |
+| `app/api/main.py` | Aplicación real: rutas y ciclo de vida | Hecho |
+| `app/api/backend.py` | `ApiBackend`: lo que hace cada endpoint, sin HTTP | Hecho |
+| `app/api/headers.py` | Cabeceras del contrato, compartidas con el servidor falso | Hecho |
 | `app/fake.py` | Servidor falso | Hecho |
 | `app/irsa/limits.py` | Límite global de conexiones hacia IRSA | Hecho |
 | `app/irsa/sia.py` | Lista de exposiciones por SIA2, con caché y copia vencida como respaldo | Hecho |
@@ -204,5 +239,7 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/resolve/sesame.py`, `motion.py` | Sesame (CDS y espejo de CfA), propagación y trayectoria | Hecho |
 | `app/resolve/service.py` | `resolve()` y `field_track()`: las respuestas de `/api/resolve` y `/track` | Hecho |
 | `app/preview/hips2fits.py` | Vista provisoria de WISE | Hecho, sin verificar contra el servicio |
-| `app/jobs/events.py` | Eventos SSE | Pendiente |
-| `app/jobs/manager.py` | Cola y planificación de trabajos | Pendiente |
+| `app/jobs/events.py` | Eventos SSE y bus por campo | Hecho |
+| `app/jobs/manager.py` | Cola y planificación de trabajos | Hecho |
+| `app/jobs/job.py`, `plan.py`, `document.py`, `deps.py` | Un trabajo, orden de descarga y reintentos, documento final, dependencias inyectables | Hecho |
+| `scripts/precompute.py` | Precálculo de los objetos de prueba en `data/fields` | Hecho |

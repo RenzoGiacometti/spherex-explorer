@@ -173,6 +173,14 @@ export interface DrawImageCall {
   /** Transformacion vigente al dibujar: [a, b, c, d, e, f]. */
   readonly transform: readonly number[];
   readonly smoothing: boolean;
+  /** `globalCompositeOperation` vigente al dibujar. */
+  readonly composite: string;
+}
+
+/** Trama creada con `createPattern`. */
+export interface FakePattern {
+  readonly source: unknown;
+  readonly repetition: string | null;
 }
 
 export interface Fake2d {
@@ -182,8 +190,10 @@ export interface Fake2d {
   lastImageData: FakeImageData | null;
   putCount: number;
   readonly drawImages: DrawImageCall[];
-  /** `fillStyle` de cada `fillRect`. */
+  /** `fillStyle` de cada `fillRect`; si era una trama, la palabra "pattern". */
   readonly fills: string[];
+  /** Tramas creadas con `createPattern`, en orden. */
+  readonly patterns: FakePattern[];
   clearCount: number;
   /** Pixeles que devuelve `getImageData`, fila por fila desde arriba. */
   pixels: Uint8ClampedArray | null;
@@ -198,12 +208,14 @@ export function createFake2d(): Fake2d {
     putCount: 0,
     drawImages: [],
     fills: [],
+    patterns: [],
     clearCount: 0,
     pixels: null,
   };
   const context = {
-    fillStyle: "",
+    fillStyle: "" as unknown,
     imageSmoothingEnabled: true,
+    globalCompositeOperation: "source-over",
     setTransform(a: number, b: number, c: number, d: number, e: number, f: number) {
       transform = [a, b, c, d, e, f];
     },
@@ -211,7 +223,12 @@ export function createFake2d(): Fake2d {
       fake.clearCount += 1;
     },
     fillRect() {
-      fake.fills.push(String(context.fillStyle));
+      fake.fills.push(typeof context.fillStyle === "string" ? context.fillStyle : "pattern");
+    },
+    createPattern(source: unknown, repetition: string | null): FakePattern {
+      const pattern = { source, repetition };
+      fake.patterns.push(pattern);
+      return pattern;
     },
     createImageData(width: number, height: number): FakeImageData {
       return { width, height, data: new Uint8ClampedArray(width * height * 4) };
@@ -232,6 +249,7 @@ export function createFake2d(): Fake2d {
         height,
         transform,
         smoothing: context.imageSmoothingEnabled,
+        composite: context.globalCompositeOperation,
       });
     },
   };
