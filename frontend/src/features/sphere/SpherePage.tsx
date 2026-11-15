@@ -53,6 +53,7 @@ import { ENTRY_SHORTCUTS, type EntryShortcut } from "./shortcuts";
 import { angularSeparation, clamp, type SkyPosition, wrapDegrees } from "./skyMath";
 import {
   lastRandomFieldId,
+  PRECOMPUTED_FIELDS,
   pickRandomField,
   rememberRandomField,
   SKY_TARGETS,
@@ -527,7 +528,7 @@ export function SpherePage({
   }
 
   function handleTargetClick(id: string, event: MouseEvent<HTMLAnchorElement>): void {
-    const target = SKY_TARGETS.find((candidate) => candidate.id === id);
+    const target = PRECOMPUTED_FIELDS.find((candidate) => candidate.id === id);
     if (target === undefined || !isPlainClick(event)) return;
     event.preventDefault();
     // El vuelo necesita la vista con el norte arriba: el sensor deja de mandar.
@@ -715,9 +716,11 @@ export function SpherePage({
     [embed, urlLanguage],
   );
 
+  // Un marcador en ambar por cada campo guardado, no solo los cinco destacados:
+  // asi se distingue de lejos donde hay un campo que abre al instante.
   const markers = useMemo<SkyMarker[]>(
     () => [
-      ...SKY_TARGETS.map((target) => ({
+      ...PRECOMPUTED_FIELDS.map((target) => ({
         id: target.id,
         label: target.label,
         ra: target.ra,
