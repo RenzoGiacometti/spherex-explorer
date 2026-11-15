@@ -1,6 +1,6 @@
 # Contrato del cubo del campo
 
-Versión 1, aprobada el 15 de noviembre de 2026. Define lo que el backend entrega y lo que el frontend puede asumir sobre `/api/field` y `/api/resolve` en la Etapa 1. Backend y frontend se construyen en paralelo contra este documento; cualquier cambio posterior se hace acá primero.
+Versión 1.1. La versión 1 se aprobó el 15 de noviembre de 2026; la 1.1 suma las precisiones de la sección 15, que salieron de construir los cimientos y no cambian ninguna decisión. Define lo que el backend entrega y lo que el frontend puede asumir sobre `/api/field` y `/api/resolve` en la Etapa 1. Backend y frontend se construyen en paralelo contra este documento; cualquier cambio posterior se hace acá primero.
 
 Las cifras salen de `spike/RESULTADOS.md` (Etapa 0 y fase A de la Etapa 1). Las decisiones tomadas al aprobarlo están en la sección 14.
 
@@ -27,7 +27,7 @@ Un campo ya calculado no necesita SSE: la respuesta de `POST` trae los metadatos
 
 - JSON en UTF-8, claves en `snake_case`. Ángulos en grados ICRS, escalas en segundos de arco, fechas como MJD (UTC) y como texto ISO `AAAA-MM-DD`, longitudes de onda en µm, brillo superficial en MJy/sr.
 - `epoch` va de 1 a N en orden temporal. `detector` va de 1 a 6 y es el detector de SPHEREx (`SPHEREx-D1` a `SPHEREx-D6`). La interfaz lo muestra como B1 a B6.
-- Una **época** es una pasada del relevamiento: exposiciones separadas por más de 60 días caen en épocas distintas. Hay 3 o 4 por campo y cada una abarca de 2 semanas a 3 meses.
+- Una **época** es una pasada del relevamiento: exposiciones separadas por más de 60 días caen en épocas distintas. Hay 3 o 4 por campo y cada una abarca de 1 día a 3 meses (la primera de WISE 0855 son 30 exposiciones en 0,8 días).
 - Un **plano** es el coadd de una época y un detector.
 - Coordenadas de píxel: enteros desde 0 en el centro del primer píxel. `x` crece hacia el oeste y `y` hacia el norte. La fila 0 es el borde sur y la columna 0 el borde este, así que la imagen se dibuja con el norte arriba y el este a la izquierda sin invertir nada.
 - Errores: código HTTP y cuerpo `{"error": {"code": "...", "message": "...", "retryable": true}}`. El mensaje es para el log; el texto que ve la persona lo arma el frontend a partir de `code`.
@@ -42,13 +42,15 @@ Un campo ya calculado no necesita SSE: la respuesta de `POST` trae los metadatos
 | `queue_full` | 429 | Cola de trabajos llena; trae `Retry-After` |
 | `upstream_unavailable` | 503 | IRSA o Sesame no responden y no hay copia en caché |
 
+Los errores que genera el framework (método no admitido, cuerpo que no es JSON) salen con el mismo cuerpo, como `invalid_request` y código 422. Una ruta que no existe sale como `not_found`.
+
 ## 3. Identidad y tamaño del campo
 
 El backend normaliza el pedido antes de buscarlo en caché:
 
 - `ra` se lleva a [0, 360) y se redondea, igual que `dec`, a 4 decimales (0,36").
 - `fov` se redondea hacia arriba al escalón admitido más cercano.
-- `id` son los primeros 16 caracteres hexadecimales del SHA-256 de `"{pipeline}|{ra:.4f}|{dec:+.4f}|{escalón}"`.
+- `id` son los primeros 16 caracteres hexadecimales del SHA-256 de `"{pipeline}|{ra:.4f}|{dec:+.4f}|{escalón}"`. `{escalón}` es el `fov` del escalón con 4 decimales: `0.1667` o `0.5000`. Ejemplo: `1|269.4463|+4.7683|0.1667`. Así el `id` se puede recalcular a partir de `pipeline` y `request` del documento de metadatos.
 
 El `id` depende solo de la geometría y de la versión del pipeline. No depende del nombre del objeto: dos objetos en el mismo campo comparten cubo, y un cambio en el pipeline invalida la caché sin borrar nada.
 
@@ -94,7 +96,7 @@ Respuesta `200` si el campo está terminado, `202` si no:
 }
 ```
 
-`meta` viene siempre. Si el trabajo recién entra en la cola, trae solo `id`, `status`, `request` y `progress`.
+`meta` viene siempre. Si el trabajo recién entra en la cola trae `id`, `pipeline`, `status`, `rev`, `request`, `progress`, `warnings` y `preview`; lo demás aparece con `listed` (sección 5).
 
 ### 4.2 `GET /api/field/{id}/events`
 
@@ -102,21 +104,26 @@ Flujo `text/event-stream`. Cada evento lleva `event`, `id` (entero creciente) y 
 
 | Evento | `data` | Cuándo |
 |---|---|---|
-| `state` | Documento de metadatos completo | Siempre el primero al conectar o reconectar |
+| `state` | Documento de metadatos completo | Siempre el primero al conectar o reconectar. Otra vez justo antes de `done`, con el documento terminado |
 | `queued` | `{"position": 2}` | Mientras espera turno, cada vez que cambia la posición |
 | `preview` | Objeto `preview` (sección 5) | Cuando la vista provisoria de WISE queda lista o se descarta |
-| `listed` | Documento de metadatos completo, con todos los planos en `pending` | Al terminar la consulta de exposiciones. Desde acá el frontend conoce épocas, detectores y grilla |
-| `progress` | Objeto `progress` (sección 5) | Como máximo 4 por segundo durante la descarga |
-| `plane` | `{"plane": {...}, "detector_display": {...}}` | Cada vez que hay una revisión nueva de un plano, provisional o definitiva |
+| `listed` | Documento de metadatos completo. Los planos van en `pending`, salvo los que no tienen exposiciones, que ya van en `empty` | Al terminar la consulta de exposiciones. Desde acá el frontend conoce épocas, detectores y grilla |
+| `progress` | Objeto `progress` (sección 5) | Como máximo 4 por segundo durante la descarga, y una vez en cada cambio de `phase` |
+| `plane` | `{"plane": {...}, "detector_display": {...}}` | Cada vez que hay una revisión nueva de un plano, provisional o definitiva. `detector_display` es `null` si el detector todavía no tiene ningún plano con datos |
 | `warning` | Un aviso (sección 5) | Al detectarlo |
 | `done` | `{"status": "ready", "rev": 1, "elapsed_s": 155.4}` | Fin del trabajo. `status` es `ready` o `partial` |
-| `error` | Objeto de error (sección 2) | El trabajo no puede continuar |
+| `error` | Cuerpo de error completo, `{"error": {...}}` (sección 2) | El trabajo no puede continuar |
 
 Reglas:
 
-- El servidor cierra el flujo después de `done` o `error`. Si el campo ya estaba terminado, manda `state`, `done` y cierra.
+- El servidor cierra el flujo después de `done` o `error`. Si el campo ya estaba terminado, manda `state`, `done` y cierra. El cliente también cierra de su lado al recibir cualquiera de los dos, para que el navegador no reconecte solo.
 - Cada 15 s sin eventos manda un comentario `: ping`.
 - No hay repetición de eventos perdidos. Al reconectar llega un `state` nuevo, que contiene todo lo anterior. Los eventos `plane` son idempotentes: el frontend compara `rev` y vuelve a pedir el plano solo si aumentó.
+- Todo `state` reemplaza el documento que tenga el cliente, también a mitad del flujo.
+- El `state` que sale justo antes de `done` es el único evento que trae `planes[].cube_offset`, la lista `flags` completa y `provenance.built_at`. `GET .../meta` devuelve lo mismo una vez terminado el trabajo.
+- `flags` llega como lista vacía en `listed`: los bits se leen del encabezado de los archivos, y la lista crece a medida que se bajan porque no todos declaran los mismos (sección 9). Mientras el campo carga, la lista al día está en `GET .../meta`.
+- Un plano que ya va `empty` en `listed` no tiene evento `plane`.
+- El evento `queued` se puede perder si el cliente conecta tarde. La posición está también en `progress.queue_position` del primer `state`.
 - El trabajo no depende de la conexión: si el navegador se va, sigue y queda en caché.
 - Quien no pueda usar SSE puede consultar `GET /api/field/{id}/meta` cada 2 s; trae lo mismo que `state`.
 
@@ -129,15 +136,23 @@ data: {"id":"f3a91c0e52d47b18","status":"queued","rev":0,"progress":{"phase":"qu
 
 event: listed
 id: 3
-data: {"id":"f3a91c0e52d47b18","status":"downloading","epochs":[...],"detectors":[...],"planes":[...], ...}
+data: {"id":"f3a91c0e52d47b18","status":"downloading","epochs":[...],"detectors":[...],"planes":[...],"flags":[], ...}
 
 event: progress
 id: 9
-data: {"phase":"downloading","cutouts_total":358,"cutouts_done":21,"cutouts_failed":0,"cutouts_cached":0,"planes_total":18,"planes_ready":0,"elapsed_s":11.8}
+data: {"phase":"downloading","queue_position":0,"cutouts_total":358,"cutouts_done":21,"cutouts_failed":0,"cutouts_cached":0,"planes_total":18,"planes_ready":0,"elapsed_s":11.8}
 
 event: plane
 id: 10
-data: {"plane":{"epoch":1,"detector":3,"status":"ready","rev":1, ...},"detector_display":{"detector":3,"vmin":-0.08,"vmax":9.8,"median":0.002,"sigma":0.041}}
+data: {"plane":{"epoch":1,"detector":3,"status":"building","rev":1,"n_exposures":20,"n_used":10, ...},"detector_display":{"detector":3,"vmin":-0.08,"vmax":9.8,"median":0.002,"sigma":0.041}}
+
+event: plane
+id: 31
+data: {"plane":{"epoch":1,"detector":3,"status":"ready","rev":2,"n_exposures":20,"n_used":20, ...},"detector_display":{"detector":3,"vmin":-0.07,"vmax":9.6,"median":0.002,"sigma":0.037}}
+
+event: state
+id: 411
+data: {"id":"f3a91c0e52d47b18","status":"ready","rev":1,"planes":[{"epoch":1,"detector":1,"status":"ready","rev":2,"cube_offset":0, ...}, ...],"flags":[...], ...}
 
 event: done
 id: 412
@@ -150,11 +165,11 @@ Documento de metadatos (sección 5) en su estado actual. `Cache-Control: no-cach
 
 ### 4.4 `GET /api/field/{id}/plane/{epoch}/{detector}`
 
-Un plano en binario (sección 6), en su revisión más reciente. Con `?rev=N` la respuesta lleva `Cache-Control: public, max-age=31536000, immutable`, porque una revisión no cambia nunca; si esa revisión ya fue reemplazada, devuelve la vigente. Devuelve `409 not_ready` si el plano está en `pending` y `404 not_found` si está en `empty`.
+Un plano en binario (sección 6), en su revisión más reciente. Con `?rev=N`, si N es la revisión vigente la respuesta lleva `Cache-Control: public, max-age=31536000, immutable`, porque una revisión no cambia nunca. Si N no es la vigente (ya fue reemplazada o todavía no existe), devuelve la vigente con `Cache-Control: no-cache`, igual que sin `rev`. Devuelve `409 not_ready` si el plano está en `pending` y `404 not_found` si está en `empty`.
 
 ### 4.5 `GET /api/field/{id}/cube`
 
-Todos los planos con datos, concatenados en el orden de `planes` (sección 6). Solo cuando el trabajo terminó; antes devuelve `409 not_ready`. Acepta `?rev=N` con la misma política de caché que un plano.
+Todos los planos con datos, concatenados en el orden de `planes` (sección 6). Solo cuando el trabajo terminó; antes devuelve `409 not_ready`. Acepta `?rev=N` con la misma política de caché que un plano; acá N es la `rev` del campo.
 
 ### 4.6 `GET /api/field/{id}/aux/{epoch}/{detector}`
 
@@ -182,7 +197,8 @@ Resuelve un nombre con Sesame, o interpreta el texto como coordenadas si lo son.
 ```
 
 - `j2000` es la posición de catálogo, en la época 2000,0.
-- `motion` es `null` si el catálogo no trae movimiento propio. `pm_ra` incluye el factor cos(dec); unidades mas/año, mas y km/s.
+- `motion` es `null` si el catálogo no trae movimiento propio. `pm_ra` incluye el factor cos(dec); unidades mas/año, mas y km/s. Dentro de `motion`, `parallax` y `radial_velocity` son `null` si el catálogo no los trae (Epsilon Indi B y WISE 0855 no tienen velocidad radial); un 0 es un 0 medido.
+- `source` es `"sesame"` o `"coordinates"`. `object_type` es `null` si el catálogo no lo informa.
 - `field_center` es donde hay que centrar el campo: la posición propagada a una época fija, 2026,0. Es fija a propósito: si dependiera de la fecha del día, el `id` del campo cambiaría con el tiempo y la caché no serviría. Sin movimiento propio coincide con `j2000`.
 - `moved_arcsec` es cuánto se apartó de la posición de catálogo. Para Barnard son 4,5′, más que medio campo.
 - Para coordenadas, `source` es `"coordinates"`, `name` es `null` y `motion` es `null`.
@@ -209,13 +225,13 @@ Vista provisoria: un recorte de WISE de la misma zona, para tener algo en pantal
 
 - Mismo formato que un plano (sección 6): Float32, la misma grilla y la misma forma que el cubo. `NaN` es sin datos.
 - Los valores están en las unidades del relevamiento de origen, no en MJy/sr. Sirven solo para mirar; no se comparan con los planos de SPHEREx ni entran en los modos de comparación.
-- Banda: W1 (3,4 µm), o W2 (4,6 µm) si el `band` pedido es 5 o 6.
+- Banda: W1 (3,4 µm), o W2 (4,6 µm) si el `band` pedido es 5 o 6. La vista queda con la banda del pedido que creó el trabajo y no cambia con `priority`. El frontend la rotula según `preview.band`, no según la banda que la persona está mirando.
 - Devuelve `409 not_ready` mientras `preview.status` es `pending` y `404 not_found` si es `unavailable`.
 - Si hips2fits no responde en 20 s, `preview.status` pasa a `unavailable` y el trabajo sigue sin vista provisoria. No es un error del campo.
 
 ## 5. Documento de metadatos
 
-Es el mismo objeto en `POST /api/field`, en `GET .../meta` y en los eventos `state` y `listed`. Antes de `listed` no trae `grid`, `detectors`, `epochs`, `planes` ni `flags`.
+Es el mismo objeto en `POST /api/field`, en `GET .../meta` y en los eventos `state` y `listed`. Antes de `listed` no trae `grid`, `detectors`, `epochs`, `planes`, `flags` ni `provenance`: esas claves faltan, no van en `null`.
 
 ```json
 {
@@ -243,7 +259,7 @@ Es el mismo objeto en `POST /api/field`, en `GET .../meta` y en los eventos `sta
       "mjd_start": 60902.86, "mjd_end": 60949.31, "mjd_mean": 60914.9, "n_exposures": 118 }
   ],
   "planes": [
-    { "epoch": 1, "detector": 1, "status": "ready", "rev": 1,
+    { "epoch": 1, "detector": 1, "status": "ready", "rev": 2,
       "n_exposures": 24, "n_used": 24, "n_failed": 0, "mjd_mean": 60923.9988,
       "stats": { "min": -0.31, "max": 187.4, "median": 0.004, "sigma": 0.098,
                  "p01": -0.19, "p99": 3.4, "p997": 14.6,
@@ -285,25 +301,30 @@ Es el mismo objeto en `POST /api/field`, en `GET .../meta` y en los eventos `sta
 | `grid.shape` | `[ny, nx]` |
 | `grid.crval`, `crpix`, `cdelt` | WCS de la grilla con las convenciones de FITS: `crpix` cuenta desde 1 y `cdelt[0]` es negativo |
 | `detectors[].wave_*` | Rango real del detector según IRSA. La interfaz muestra este, no uno fijo |
-| `detectors[].display` | Escala común a todas las épocas del detector, para que el parpadeo no cambie de brillo. Sale de los planos listos hasta ese momento y se actualiza con cada evento `plane` |
+| `detectors[].display` | Escala común a todas las épocas del detector, para que el parpadeo no cambie de brillo. Sale de los planos listos hasta ese momento y se actualiza con cada evento `plane`. `null` mientras el detector no tiene ningún plano con datos |
 | `epochs[]` | Una entrada por pasada, con sus fechas y cantidad de exposiciones |
 | `planes[]` | Una entrada por cada combinación de época y detector, ordenadas por época y después por detector. Siempre están todas, también las vacías |
-| `flags[]` | Bits de FLAGS leídos del encabezado de los archivos. `masked` dice si el pipeline descarta los píxeles con ese bit; `saturation`, si cuenta como saturación |
-| `progress` | Avance. `phase` es `queued`, `listing`, `downloading`, `finishing` o `done` |
-| `preview` | Vista provisoria de WISE (sección 4.10). `status` es `pending`, `ready` o `unavailable`. `display` trae su propia escala, calculada como la de un detector. Está presente desde el primer `state` |
-| `provenance.download_mode` | `truncated`, `full` o `mixed` (sección 9) |
+| `flags[]` | Bits de FLAGS leídos del encabezado de los archivos: la unión de los que declaran los archivos bajados, ordenada por `bit`. `masked` dice si el pipeline descarta los píxeles con ese bit; `saturation`, si cuenta como saturación |
+| `progress` | Avance. `phase` es `queued`, `listing`, `downloading`, `finishing` o `done`. Los nueve campos van siempre |
+| `progress.planes_total`, `planes_ready` | Cuentan todos los planos, también los `empty`. Un plano cuenta como listo cuando tiene su revisión definitiva o está vacío |
+| `progress.cutouts_*` | `cutouts_done` cuenta los recortes bajados o leídos de la caché, sin los fallidos; `cutouts_cached`, cuántos de esos salieron de la caché. El avance de la barra es `(cutouts_done + cutouts_failed) / cutouts_total` |
+| `preview` | Vista provisoria de WISE (sección 4.10). `status` es `pending`, `ready` o `unavailable`. `display` trae su propia escala, calculada como la de un detector, y es `null` hasta que la vista está lista. Está presente desde el primer `state` |
+| `provenance.download_mode` | `truncated`, `full` o `mixed` (sección 9). `null` hasta que se baja el primer archivo |
+| `provenance.built_at` | Cuándo terminó el trabajo. `null` hasta entonces |
 | `provenance.list_stale` | `true` si IRSA no respondió y se usó una lista de exposiciones guardada |
+
+Si el trabajo falla, `status` pasa a `failed` y `progress.phase` queda en la fase en la que estaba. Los planos ya construidos se siguen sirviendo; `/cube` y lo que no se llegó a construir responden `409 not_ready` con `retryable: false`. Un `POST /api/field` posterior lo vuelve a intentar.
 
 ### Plano
 
 | Campo | Significado |
 |---|---|
 | `status` | `pending`: sin construir. `building`: provisional, con parte de sus exposiciones (sección 8). `ready`: completo. `partial`: definitivo, pero faltaron recortes. `empty`: sin exposiciones o sin ninguna usable; no tiene binario |
-| `rev` | Revisión del plano. El binario de una revisión no cambia |
-| `n_exposures`, `n_used`, `n_failed` | Exposiciones que cubren el campo, las que entraron al coadd y las que no se pudieron bajar |
-| `mjd_mean` | Fecha media de las exposiciones usadas |
-| `stats` | Sobre los píxeles finitos. `sigma` es 1,4826 × MAD. `valid_fraction` y `saturated_fraction` son fracciones del total de píxeles |
-| `saturated[]` | Regiones saturadas de al menos 4 píxeles: centro, radio equivalente y cantidad de píxeles |
+| `rev` | Revisión del plano. Vale 0 mientras no tiene binario (`pending` o `empty`) y sube de a 1 con cada revisión publicada. El binario de una revisión no cambia. Si la revisión es provisoria o definitiva lo dice `status`, nunca el número (sección 8) |
+| `n_exposures`, `n_used`, `n_failed` | Exposiciones que cubren el campo, las que entraron al coadd y las que no se pudieron bajar. Van siempre |
+| `mjd_mean` | Fecha media de las exposiciones usadas. `null` en `pending` y `empty` |
+| `stats` | Sobre los píxeles finitos. `sigma` es 1,4826 × MAD. `valid_fraction` y `saturated_fraction` son fracciones del total de píxeles. `null` en `pending` y `empty` |
+| `saturated[]` | Regiones saturadas de al menos 4 píxeles: centro, radio equivalente y cantidad de píxeles. Lista vacía si no hay |
 | `cube_offset` | Posición en bytes del plano dentro de `/cube`. `null` mientras el trabajo no termina y en planos `empty` |
 
 `detector_display` se calcula así: con todos los píxeles finitos de los planos listos del detector, `median` y `sigma` robustos, `vmin = median − 2 sigma` y `vmax = max(p99,7; median + 10 sigma)`. El control de contraste se mueve entre esos dos valores.
@@ -318,7 +339,7 @@ Cada aviso es un objeto con `code` y parámetros. El frontend arma la frase en e
 | `plane_empty` | `epoch`, `detector` | Esa época no tiene exposiciones en ese detector |
 | `few_exposures` | `epoch`, `detector`, `n` | El plano se armó con menos de 5 exposiciones; puede tener huecos y gradientes |
 | `low_coverage` | `epoch`, `detector`, `valid_fraction` | Menos del 90 % del plano tiene datos |
-| `cutouts_failed` | `n`, `planes` | Faltan recortes después de todos los reintentos |
+| `cutouts_failed` | `n`, `planes` | Faltan recortes después de todos los reintentos. `planes` es la lista de planos afectados, cada uno como `{"epoch": 2, "detector": 3}` |
 | `stale_exposure_list` | `listed_at` | La lista de exposiciones es una copia guardada |
 | `full_download` | `reason` | Se bajaron archivos completos porque no se pudo cortar la descarga |
 
@@ -401,6 +422,8 @@ Cada plano se emite al menos dos veces:
 
 Hace falta el provisional porque un plano completo espera a su recorte más lento: con 20 recortes por plano casi siempre hay alguno que recibe varios 503, y el percentil 90 del tiempo por recorte fue de 14,5 s contra una mediana de 2,9 s. La segunda pasada por recortes fallidos produce otra revisión. El frontend se queda siempre con la `rev` más alta.
 
+Lo normal es que la provisoria sea la `rev` 1 del plano y la definitiva la 2; una segunda pasada que recupera recortes publica la 3. Un plano con una sola exposición no tiene provisoria y su definitiva es la 1. Por eso el número no dice nada: provisorio es `status: "building"`.
+
 Obligaciones del visor con lo provisorio:
 
 - Un plano en `building` se distingue a la vista de uno definitivo: rótulo sobre la imagen con la cantidad de exposiciones (`n_used` de `n_exposures`) y marca propia en la línea de tiempo.
@@ -426,6 +449,7 @@ Dependen de la carga de IRSA: entre el 17 % y el 46 % de los recortes recibe al 
 - **Lectura por HDU con camino alternativo:** el backend lee la respuesta de a un HDU y corta la conexión cuando ya tiene IMAGE, FLAGS, VARIANCE y ZODI, identificados por `EXTNAME` y no por posición. Con el orden actual eso ocurre antes de EPSF (0,4 MB en vez de 4,3 MB). Si IRSA cambia el orden, la misma regla sigue leyendo hasta juntar las cuatro, aunque tenga que atravesar EPSF. Si el flujo termina sin las cuatro o un encabezado no se puede interpretar, reintenta bajando la respuesta completa y abriéndola con astropy. `provenance.download_mode` y el aviso `full_download` dicen qué pasó.
 - **Reintentos:** hasta 6 por recorte, respetando `Retry-After`, y una segunda pasada al final por los que falten.
 - **Proceso:** resta de ZODI y de la mediana residual, máscara con los flags de `flags[].masked`, reproyección bilineal a la grilla, coadd por época y detector ponderado por inversa de la varianza.
+- **Bits de FLAGS por nombre:** cada archivo declara su tabla de bits en el encabezado de FLAGS (`MSKNnnnn`) y no todos declaran los mismos: en 2242 recortes guardados hay tres tablas distintas (SNOWBALL falta en 87 y SATELLITE_HALO aparece en 6). El número de bit de cada nombre sí coincide en todos. El backend busca cada flag por nombre en cada archivo y arma `flags[]` con la unión; si alguna vez un mismo bit trae dos nombres, lo trata como error de ese recorte.
 - **Planos vacíos:** una época puede no tener exposiciones en un detector (Epsilon Indi B, época 4, D1 y D4). El plano existe en `planes[]` con `status: "empty"`.
 
 ## 10. Cola y límite hacia IRSA
@@ -482,3 +506,22 @@ No son parte del contrato, pero evitan errores conocidos:
 8. **Campos precalculados** en el repositorio.
 9. **Planos provisorios visibles como tales**, con aviso en los modos de comparación (sección 8).
 10. **Vista provisoria de WISE** mientras carga un campo nuevo (sección 4.10).
+
+## 15. Precisiones de la versión 1.1
+
+Al construir los modelos de los dos lados y el servidor falso aparecieron puntos que la versión 1 dejaba abiertos o decía de dos maneras. Quedaron fijados así, sin tocar las decisiones de la sección 14:
+
+1. **Metadatos en cola** (4.1 y 5): desde el primer momento van `id`, `pipeline`, `status`, `rev`, `request`, `progress`, `warnings` y `preview`. Lo que todavía no existe falta; no va en `null`.
+2. **`listed`** (4.2): los planos sin exposiciones ya llegan `empty` y no tienen evento `plane`. `flags` llega vacío.
+3. **`state` final** (4.2): justo antes de `done` sale un `state` con el documento terminado, el único evento con `cube_offset`, `flags` completo y `provenance.built_at`.
+4. **Evento `error`** (4.2): lleva el cuerpo completo `{"error": {...}}`.
+5. **Caché por revisión** (4.4 y 4.5): `immutable` solo si `?rev=N` es la revisión vigente; si no, la vigente con `no-cache`.
+6. **`motion`** (4.8): `parallax` y `radial_velocity` pueden ser `null`.
+7. **Banda de la vista provisoria** (4.10): la del pedido que creó el trabajo; se rotula con `preview.band`.
+8. **`progress`** (5): los planos vacíos cuentan en `planes_total` y `planes_ready`; el avance es `(cutouts_done + cutouts_failed) / cutouts_total`. También quedó definido el estado después de una falla.
+9. **Revisiones de un plano** (5 y 8): 0 sin binario, y sube de a 1 con cada publicación. Provisorio es `status: "building"`.
+10. **Texto del escalón en el `id`** (3): el `fov` con 4 decimales.
+11. **`cutouts_failed.planes`** (5): lista de `{epoch, detector}`.
+12. **Duración de una época** (2): de 1 día a 3 meses.
+13. **Valores `null`** (5): `detectors[].display`, `preview.display`, `provenance.download_mode`, `provenance.built_at`, y `mjd_mean` y `stats` de un plano sin datos.
+14. **Tabla de flags por archivo** (9): los archivos no declaran todos los mismos bits; se leen por nombre y `flags[]` es la unión.
