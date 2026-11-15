@@ -14,7 +14,7 @@
   color: var(--color-text);
 }
 
-/* Fundido a negro al abrir un campo. Tapa el cielo, no la interfaz. */
+/* Fundido a negro al abrir un lugar sin imagen. Tapa el cielo, no la interfaz. */
 .fade {
   position: absolute;
   inset: 0;
@@ -45,7 +45,7 @@
   pointer-events: auto;
 }
 
-/* A la derecha de la barra: "Acerca de" y el idioma. */
+/* A la derecha de la barra: la capa de constelaciones, "Acerca de" y el idioma. */
 .topActions {
   display: flex;
   align-items: center;
@@ -241,6 +241,60 @@
   margin-top: 1px;
 }
 
+/*
+ * Tarjeta del punto elegido: vidrio, como el aviso. Coordenadas en mono, la
+ * constelacion, si el campo ya esta guardado o hay que armarlo, y el boton.
+ */
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--glass-panel-padding);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  color: var(--glass-panel-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pick {
+    background-color: var(--color-glass-solid);
+  }
+}
+
+.pickHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.pickTitle {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.pickCoordinates {
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.pickNote {
+  color: var(--color-text-mute);
+}
+
+.pickOpen {
+  align-self: flex-start;
+  margin-top: var(--space-xs);
+}
+
 /* Credito de la imagen del cielo: NASA pide que se la nombre como fuente. */
 .credit {
   align-self: flex-end;
@@ -341,4 +395,19 @@
     max-width: 100%;
     text-align: center;
   }
+}
+
+/*
+ * Al acercarse a un campo que tiene imagen, la interfaz de abajo se retira con
+ * el cielo (`--sphere-chrome`, de 1 a 0) y queda la imagen sola: el buscador no
+ * la tapa. Retirada del todo, tampoco recibe el puntero ni el foco.
+ */
+.bottom,
+.readout {
+  opacity: var(--sphere-chrome, 1);
+}
+
+.page[data-chrome="hidden"] .bottom,
+.page[data-chrome="hidden"] .readout {
+  visibility: hidden;
 }

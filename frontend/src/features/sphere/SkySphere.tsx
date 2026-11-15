@@ -5,10 +5,10 @@ import skyTextureUrl from "./assets/cielo-nasa-svs-4k.jpg";
 // El mismo mapa en 8k. Importarlo solo trae su URL: la imagen se pide al acercarse.
 import skyDetailTextureUrl from "./assets/cielo-nasa-svs-8k.jpg";
 import { SKY_PATCHES } from "./patches";
-import { type FlyOptions, SkyScene, type SkyView } from "./SkyScene";
+import { type FlyOptions, type PatchFlyOptions, SkyScene, type SkyView } from "./SkyScene";
 import styles from "./SkySphere.module.css";
 import { attachSkyControls, type SkyControls } from "./skyControls";
-import type { Pointing, SkyPosition } from "./skyMath";
+import type { Quat, SkyPosition } from "./skyMath";
 
 export interface SkyMarker extends SkyPosition {
   readonly id: string;
@@ -20,6 +20,12 @@ export interface SkyMarker extends SkyPosition {
   readonly openLabel?: string | undefined;
   /** `probe` es la marca de comprobacion de la pagina de prueba: blanca y sin interaccion. */
   readonly kind?: "target" | "probe";
+}
+
+/** Texto sobre el cielo, sin interaccion: el nombre de una constelacion. */
+export interface SkyLabel extends SkyPosition {
+  readonly id: string;
+  readonly text: string;
 }
 
 /**
@@ -37,13 +43,13 @@ export interface SkySphereHandle {
    * la vista. Da true cuando la imagen ya se ve, y false si no hay esfera, no
    * existe el parche o el vuelo se interrumpio.
    */
-  flyToPatch(id: string, options?: Omit<FlyOptions, "fov">): Promise<boolean>;
+  flyToPatch(id: string, options?: PatchFlyOptions): Promise<boolean>;
   /** Oscurece el cielo, de 0 a 1, sin tocar los parches. */
   setSkyDim(amount: number): void;
   getView(): SkyView | null;
   setView(view: Partial<SkyView>): void;
-  /** Orientacion que marca el sensor del telefono, o null para volver al arrastre. */
-  setFreeOrientation(pointing: Pointing | null): void;
+  /** Orientacion de la camara que marca el sensor del telefono, o null para volver al arrastre. */
+  setFreeOrientation(orientation: Quat | null): void;
 }
 
 export interface SkySphereProps {
@@ -65,6 +71,17 @@ export interface SkySphereProps {
   readonly unlabelledMarkerId?: string | null | undefined;
   /** En false los gestos no mueven la vista (ventana al cielo). */
   readonly interactive?: boolean | undefined;
+  /**
+   * Lineas sobre el cielo (figuras de las constelaciones): cada una, una lista
+   * plana RA, Dec, RA, Dec... en grados. Van en el gris `text-dim`.
+   */
+  readonly lines?: readonly (readonly number[])[] | null | undefined;
+  /** Textos sobre el cielo, cada uno centrado en su posicion. */
+  readonly labels?: readonly SkyLabel[] | undefined;
+  /** Punto elegido: la esfera le deja una mira encima. */
+  readonly pick?: SkyPosition | null | undefined;
+  /** Clic o toque corto sobre el cielo, fuera de los marcadores: el punto que se toco. */
+  readonly onSkyTap?: ((position: SkyPosition) => void) | undefined;
   /** Despues de cada cuadro: centro y campo de vision. No conviene guardarlo en estado de React. */
   readonly onViewChange?: ((view: SkyView) => void) | undefined;
   readonly onStatusChange?: ((status: SkySphereStatus) => void) | undefined;
@@ -86,6 +103,9 @@ export function SkySphere(props: SkySphereProps) {
     onMarkerClick,
     unlabelledMarkerId,
     interactive = true,
+    lines,
+    labels,
+    pick,
     className,
   } = props;
 
@@ -93,6 +113,8 @@ export function SkySphere(props: SkySphereProps) {
   const sceneRef = useRef<SkyScene | null>(null);
   const controlsRef = useRef<SkyControls | null>(null);
   const elementsRef = useRef(new Map<string, HTMLElement>());
+  const pickRef = useRef<HTMLSpanElement>(null);
+  const labelElementsRef = useRef(new Map<string, HTMLElement>());
   // Lo ultimo que llego por props, para leerlo desde la escena sin volver a crearla.
   const propsRef = useRef(props);
   propsRef.current = props;
@@ -117,6 +139,26 @@ export function SkySphere(props: SkySphereProps) {
           if (element.hidden) element.hidden = false;
         } else if (!element.hidden) {
           element.hidden = true;
+        }
+      }
+      for (const label of propsRef.current.labels ?? []) {
+        const element = labelElementsRef.current.get(label.id);
+        if (element === undefined) continue;
+        if (scene.project(label, point)) {
+          element.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px) translate(-50%, -50%)`;
+          if (element.hidden) element.hidden = false;
+        } else if (!element.hidden) {
+          element.hidden = true;
+        }
+      }
+      const pickElement = pickRef.current;
+      const picked = propsRef.current.pick ?? null;
+      if (pickElement !== null) {
+        if (picked !== null && scene.project(picked, point)) {
+          pickElement.style.transform = `translate(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px)`;
+          if (pickElement.hidden) pickElement.hidden = false;
+        } else if (!pickElement.hidden) {
+          pickElement.hidden = true;
         }
       }
       // Que mapa se esta viendo (4k, fundido u 8k), a la vista en el inspector.
@@ -160,6 +202,7 @@ export function SkySphere(props: SkySphereProps) {
       onDragChange: (dragging) => {
         stage.dataset.dragging = String(dragging);
       },
+      onTap: (x, y) => propsRef.current.onSkyTap?.(scene.unproject(x, y)),
     });
     controls.setEnabled(propsRef.current.interactive ?? true);
     controlsRef.current = controls;
@@ -184,11 +227,20 @@ export function SkySphere(props: SkySphereProps) {
     controlsRef.current?.setEnabled(interactive);
   }, [interactive]);
 
-  // Marcadores nuevos: hay que ubicarlos aunque la vista no se haya movido.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee `markers`, corre cuando cambian
+  // Lineas de las constelaciones, en el gris del sistema de diseno: el color sale
+  // del token, no esta escrito aca.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (stage === null) return;
+    const color = getComputedStyle(stage).getPropertyValue("--color-text-dim").trim();
+    sceneRef.current?.setLines(lines ?? null, color === "" ? undefined : color);
+  }, [lines]);
+
+  // Marcadores, nombres o punto elegido nuevos: hay que ubicarlos aunque la vista no se haya movido.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto no lee esos valores, corre cuando cambian
   useEffect(() => {
     sceneRef.current?.invalidate();
-  }, [markers]);
+  }, [markers, labels, pick]);
 
   useImperativeHandle(
     ref,
@@ -200,7 +252,7 @@ export function SkySphere(props: SkySphereProps) {
       setSkyDim: (amount) => sceneRef.current?.setSkyDim(amount),
       getView: () => sceneRef.current?.getView() ?? null,
       setView: (view) => sceneRef.current?.setView(view),
-      setFreeOrientation: (pointing) => sceneRef.current?.setFreeOrientation(pointing),
+      setFreeOrientation: (orientation) => sceneRef.current?.setFreeOrientation(orientation),
     }),
     [],
   );
@@ -221,6 +273,22 @@ export function SkySphere(props: SkySphereProps) {
       data-status={status}
       data-interactive={interactive}
     >
+      {/* Nombres sobre el cielo: debajo de los marcadores y sin recibir el puntero. */}
+      <div className={styles.labels} aria-hidden="true">
+        {(labels ?? []).map((item) => (
+          <span
+            key={item.id}
+            ref={(element) => {
+              if (element === null) labelElementsRef.current.delete(item.id);
+              else labelElementsRef.current.set(item.id, element);
+            }}
+            className={styles.label}
+            hidden
+          >
+            {item.text}
+          </span>
+        ))}
+      </div>
       {/* Sin esfera no hay donde ubicar los marcadores: quien la usa ofrece los links de otra forma. */}
       <nav className={styles.markers} aria-label={markersLabel} hidden={status === "no-webgl"}>
         {markers.map((marker) =>
@@ -257,6 +325,26 @@ export function SkySphere(props: SkySphereProps) {
           ),
         )}
       </nav>
+      {/* Mira del punto elegido (DESIGN.md, `reticle`): no recibe el puntero. */}
+      <span ref={pickRef} className={styles.pick} aria-hidden="true" hidden>
+        <svg
+          width={40}
+          height={40}
+          viewBox="0 0 40 40"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="20" cy="20" r="10" />
+          <path d="M20 3v9" />
+          <path d="M20 28v9" />
+          <path d="M3 20h9" />
+          <path d="M28 20h9" />
+        </svg>
+      </span>
     </div>
   );
 }

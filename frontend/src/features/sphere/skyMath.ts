@@ -22,6 +22,10 @@
 // 3. Horizonte local. Altitud y azimut (desde el norte hacia el este) pasan a
 //    ecuatoriales con la latitud y el tiempo sidereo local.
 //
+// La orientacion de la camara en la ventana al cielo va como un cuaternion
+// (seccion "Cuaterniones"): una orientacion completa, sin un "arriba" de
+// referencia que deje de servir en los polos o en el cenit.
+//
 // Todos los angulos de las funciones publicas van en grados.
 
 export const DEG = Math.PI / 180;
@@ -210,6 +214,100 @@ export function altAzToRaDec(
   return vectorToRaDec(horizonToScene(horizon, horizonBasis(observer, date)));
 }
 
+// ---- Cuaterniones --------------------------------------------------------
+
+/**
+ * Cuaternion unitario [x, y, z, w]: una orientacion completa (hacia donde se
+ * mira y cuanto esta girada la vista), sin ejes privilegiados.
+ */
+export type Quat = readonly [number, number, number, number];
+
+export const QUAT_IDENTITY: Quat = [0, 0, 0, 1];
+
+/** Giro de `degrees` alrededor de un eje de coordenadas (0 = x, 1 = y, 2 = z), a derechas. */
+export function axisQuat(axis: 0 | 1 | 2, degrees: number): Quat {
+  const half = (degrees * DEG) / 2;
+  const sine = Math.sin(half);
+  return [axis === 0 ? sine : 0, axis === 1 ? sine : 0, axis === 2 ? sine : 0, Math.cos(half)];
+}
+
+/** Producto `a * b`: el giro que aplica primero `b` y despues `a`. */
+export function quatMultiply(a: Quat, b: Quat): Quat {
+  const [ax, ay, az, aw] = a;
+  const [bx, by, bz, bw] = b;
+  return [
+    aw * bx + ax * bw + ay * bz - az * by,
+    aw * by - ax * bz + ay * bw + az * bx,
+    aw * bz + ax * by - ay * bx + az * bw,
+    aw * bw - ax * bx - ay * by - az * bz,
+  ];
+}
+
+export function quatNormalize(q: Quat): Quat {
+  const length = Math.hypot(q[0], q[1], q[2], q[3]);
+  if (length === 0) return QUAT_IDENTITY;
+  return [q[0] / length, q[1] / length, q[2] / length, q[3] / length];
+}
+
+/** Gira un vector con un cuaternion unitario. */
+export function quatRotate(q: Quat, vector: Vec3): Vec3 {
+  const [x, y, z, w] = q;
+  const [vx, vy, vz] = vector;
+  // v' = v + w t + u x t, con t = 2 (u x v) y u la parte vectorial.
+  const tx = 2 * (y * vz - z * vy);
+  const ty = 2 * (z * vx - x * vz);
+  const tz = 2 * (x * vy - y * vx);
+  return [
+    vx + w * tx + (y * tz - z * ty),
+    vy + w * ty + (z * tx - x * tz),
+    vz + w * tz + (x * ty - y * tx),
+  ];
+}
+
+function quatDot(a: Quat, b: Quat): number {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+}
+
+/** Angulo, en grados, del giro que lleva de una orientacion a la otra (de 0 a 180). */
+export function quatAngle(a: Quat, b: Quat): number {
+  // `q` y `-q` son la misma orientacion: por eso el valor absoluto.
+  return (2 * Math.acos(Math.min(1, Math.abs(quatDot(a, b))))) / DEG;
+}
+
+/**
+ * Orientacion intermedia entre dos, por el giro mas corto y a velocidad
+ * angular constante: `t = 0` da `from` y `t = 1` da `to`.
+ */
+export function quatSlerp(from: Quat, to: Quat, t: number): Quat {
+  let cosine = quatDot(from, to);
+  // Por el camino corto: si hace falta se usa `-to`, que es la misma orientacion.
+  const sign = cosine < 0 ? -1 : 1;
+  cosine *= sign;
+  let a = 1 - t;
+  let b = t;
+  if (cosine < 0.9999) {
+    const angle = Math.acos(cosine);
+    const sine = Math.sin(angle);
+    a = Math.sin((1 - t) * angle) / sine;
+    b = Math.sin(t * angle) / sine;
+  }
+  b *= sign;
+  return quatNormalize([
+    a * from[0] + b * to[0],
+    a * from[1] + b * to[1],
+    a * from[2] + b * to[2],
+    a * from[3] + b * to[3],
+  ]);
+}
+
+/**
+ * Hacia donde mira y donde queda el arriba de una camara con esa orientacion.
+ * La camara (three.js) mira hacia su -z y tiene el arriba en su +y.
+ */
+export function quatPointing(q: Quat): Pointing {
+  return { forward: quatRotate(q, [0, 0, -1]), up: quatRotate(q, [0, 1, 0]) };
+}
+
 // ---- Orientacion del telefono --------------------------------------------
 
 /**
@@ -270,7 +368,70 @@ export function deviceToHorizon(angles: DeviceAngles, screenAngle = 0): Pointing
   };
 }
 
-/** Orientacion del telefono como direcciones de la escena, lista para la camara. */
+/**
+ * Orientacion de la camara, en el marco del horizonte (este, norte, cenit),
+ * para un telefono con esos angulos: el giro que lleva los ejes de la camara
+ * (x a la derecha de lo que se dibuja, y hacia arriba, -z hacia donde mira) a
+ * ese marco.
+ *
+ * Los tres angulos se componen en un solo paso, R = Rz(alpha) Rx(beta)
+ * Ry(gamma) (W3C, "DeviceOrientation Event Specification", seccion 4.1). Por
+ * separado tienen saltos (alpha da la vuelta en 360, beta en 180, y con el
+ * telefono de canto alpha y gamma dejan de estar definidos), pero el giro
+ * compuesto es continuo. La pantalla girada es un giro mas, alrededor del eje
+ * z del telefono, en sentido contrario a `screenAngle`.
+ */
+export function deviceToHorizonQuaternion(angles: DeviceAngles, screenAngle = 0): Quat {
+  return quatMultiply(
+    quatMultiply(
+      quatMultiply(axisQuat(2, angles.alpha), axisQuat(0, angles.beta)),
+      axisQuat(1, angles.gamma),
+    ),
+    axisQuat(2, -screenAngle),
+  );
+}
+
+/**
+ * Giro del marco del horizonte (este, norte, cenit) al de la escena, para un
+ * lugar y un instante. Del horizonte al ecuatorial: Rz(90) lleva el este al
+ * eje y, Ry(90 - latitud) inclina el cenit desde el polo, y Rz(tiempo sidereo
+ * local) lo lleva a su ascension recta. Del ecuatorial a la escena: Rx(-90).
+ */
+export function horizonToSceneQuaternion(observer: Observer, date: Date): Quat {
+  const lst = localSiderealDeg(date, observer.longitude);
+  return quatMultiply(
+    quatMultiply(
+      quatMultiply(axisQuat(0, -90), axisQuat(2, lst)),
+      axisQuat(1, 90 - observer.latitude),
+    ),
+    axisQuat(2, 90),
+  );
+}
+
+/**
+ * Orientacion de la camara en la escena para un telefono, un lugar y un
+ * instante: la del telefono compuesta con la del horizonte local. Se le asigna
+ * tal cual a la camara, sin pasar por ascension recta y declinacion.
+ */
+export function deviceToSceneQuaternion(
+  angles: DeviceAngles,
+  screenAngle: number,
+  observer: Observer,
+  date: Date,
+): Quat {
+  return quatNormalize(
+    quatMultiply(
+      horizonToSceneQuaternion(observer, date),
+      deviceToHorizonQuaternion(angles, screenAngle),
+    ),
+  );
+}
+
+/**
+ * Orientacion del telefono como direcciones de la escena. Es la misma cuenta
+ * que `deviceToSceneQuaternion`, escrita con matrices: los tests comparan una
+ * con la otra.
+ */
 export function deviceToScene(
   angles: DeviceAngles,
   screenAngle: number,

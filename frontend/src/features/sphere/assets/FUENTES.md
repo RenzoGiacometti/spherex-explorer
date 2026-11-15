@@ -115,3 +115,41 @@ Comprobado el 15 de noviembre de 2026 de dos maneras:
 
 - Sobre los PNG, proyectando posiciones de catálogo con la TAN de cada campo. En Barnard's Star, 28 estrellas de Gaia DR3 más brillantes que G = 14,5 (`backend/data/context/269.4463_+4.7683_0.1667/gaia.json`, llevadas de 2016,0 a 2026,2 con su movimiento propio) caen cada una sobre una estrella de la imagen. En M 51, el núcleo de NGC 5195 (RA 202,4983°, Dec +47,2661°) cae sobre la compañera, arriba y a la izquierda del centro (columna 74, fila 14 de 195).
 - En pantalla, con `/?dev=sphere&check=1`: los anillos blancos de tres de esas estrellas de Gaia y el de NGC 5195 son marcadores, que la escena ubica por sus coordenadas sin pasar por la imagen. Acercando a Barnard's Star y a M 51 (`&random=0.81` y "Lugar al azar"), cada anillo queda sobre su objeto.
+
+# Constelaciones
+
+Datos en `constelaciones/`, generados con `generar_constelaciones.py` (en esta carpeta). Ninguno se baja al usar la aplicación: van dentro del código de la esfera.
+
+## `limites.json`: a qué constelación pertenece un punto
+
+La tabla de Nancy Roman (1987), "Identification of a constellation from a position", PASP 99, 695, que es el catálogo VI/42 del CDS: 357 renglones con ascensión recta mínima y máxima (horas), declinación mínima (grados) y abreviatura de la IAU, en el equinoccio B1875 y ordenados de norte a sur. `../constellations.ts` lleva el punto a B1875 y toma el primer renglón que lo contiene.
+
+- **Archivo de origen:** `astropy/coordinates/data/constellation_data_roman87.dat`, de astropy 8.0.2, cuyo encabezado dice "This data file is from Roman et al. 1987: https://cdsarc.cds.unistra.fr/viz-bin/Cat?VI/42". Se tomó de ahí porque el 15 de noviembre de 2026 el servidor del CDS no respondía (tiempo de conexión agotado), así que no se comparó renglón por renglón con el original.
+- **Licencia:** astropy se distribuye con la licencia BSD de 3 cláusulas (`License-Expression: BSD-3-Clause` en los metadatos del paquete); el texto está en `constelaciones/LICENCIA-astropy.rst`. Los límites en sí los definió la IAU en 1930.
+- **Comprobación:** `constelaciones/comprobacion.json` tiene 674 puntos (600 al azar en todo el cielo, 60 a menos de 6° de los polos y los 14 centros de los campos precalculados) con la constelación que da `astropy.coordinates.get_constellation` (astropy 8.0.2). `../constellations.test.ts` exige que `constellationAt` dé lo mismo en todos. Ese archivo solo lo usa el test.
+
+## `nombres.json`: nombres en latín, español e inglés
+
+- **Origen:** d3-celestial, de Olaf Frohn, https://github.com/ofrohn/d3-celestial, archivo `data/constellations.json` de la rama `master` (commit `7e720a3de062059d4c5400a379146a601d9010e0`, del 5 de julio de 2022), bajado el 15 de noviembre de 2026. Según su `readme.md`, los datos salen de la página de constelaciones de la IAU, con la posición de los nombres y algunas líneas modificadas por el autor, y los nombres en otros idiomas, de Wikipedia.
+- **Licencia:** BSD de 3 cláusulas, "Copyright (c) 2015, Olaf Frohn" (archivo `LICENSE` del repositorio, leído el 15 de noviembre de 2026). La licencia pide conservar el aviso de copyright y sus condiciones al redistribuir: van completos en `constelaciones/LICENCIA-d3-celestial.txt`.
+- **Correcciones propias**, todas en `NAME_FIXES` del script: Octans es "Octante" (la fuente dice "Bastón"), Lepus es "Liebre" (decía "Conejo"), Canis Major y Minor son "Can Mayor" y "Can Menor", Coma Berenices es "Cabellera de Berenice"; en inglés, Ursa Major y Minor son "Great Bear" y "Little Bear" (decía "Big Dipper" y "Little Dipper", que son una parte de cada una), Crux es "Southern Cross" y Puppis, "Stern", como en la lista de la IAU. Las dos mitades de Serpens llevan el nombre "Serpens". El resto de los nombres va como está en la fuente: son traducciones del significado ("Carnero", "Ram") y no se revisaron uno por uno.
+
+## `lineas.json`: las figuras
+
+Las líneas de las 88 constelaciones (89 figuras, porque Serpens son dos; 893 puntos) y la posición de cada nombre. Es la capa "Constelaciones" de la esfera: se pide recién al prenderla (`?const=1` en la URL) y se dibuja con líneas de un píxel en el gris `text-dim` de DESIGN.md.
+
+- **Origen y licencia:** d3-celestial, el mismo repositorio y commit que los nombres, archivos `data/constellations.lines.json` (figuras) y `data/constellations.json` (posición de los nombres). BSD de 3 cláusulas; el texto va en `constelaciones/LICENCIA-d3-celestial.txt`.
+- **Coordenadas:** la fuente escribe la ascensión recta como longitud de −180° a 180°; el script la pasa a grados de 0 a 360 (ICRS/J2000) y redondea a 0,001°.
+- **Comprobación:** en la página de prueba (`/?dev=sphere&const=1&view=84,0,60`), la figura de Orión pasa por Betelgeuse, Rigel y las tres estrellas del cinturón del mapa de fondo.
+
+## Regenerar
+
+Con los tres archivos de origen en una carpeta (`constellation_data_roman87.dat`, `constellations.json` y `constellations.lines.json`), desde la raíz del repositorio:
+
+```
+uv run --no-project python frontend/src/features/sphere/assets/generar_constelaciones.py <carpeta>
+cd frontend
+pnpm exec biome format --write src/features/sphere/assets/constelaciones
+```
+
+El segundo paso deja los JSON con el formato que exige el control previo al commit.
