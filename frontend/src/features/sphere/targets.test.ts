@@ -77,6 +77,7 @@ describe("campos precalculados", () => {
       "M 33",
       "M 81",
       "M 101",
+      "M 104",
     ]);
     expect(new Set(PRECOMPUTED_FIELDS.map((field) => field.id)).size).toBe(
       PRECOMPUTED_FIELDS.length,

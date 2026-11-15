@@ -142,6 +142,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - M 33: banda 2 (senal sobre ruido de 93, un 13 % mas que la 3).
  * - M 81: banda 5 (senal sobre ruido de 239); el nucleo satura en las bandas 1 a 4.
  * - M 101: banda 3, la de mejor senal (136); no satura en ninguna.
+ * - M 104: banda 5 (senal sobre ruido de 188); el nucleo satura en las bandas 1 a 4.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -272,6 +273,15 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     dec: 54.3488,
     band: 3,
     aliases: ["Messier 101", "Pinwheel Galaxy", "Galaxia del Molinete"],
+  },
+  {
+    id: "m-104",
+    label: "M 104",
+    name: "M 104",
+    ra: 189.9976,
+    dec: -11.6231,
+    band: 5,
+    aliases: ["Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
   },
 ];
 

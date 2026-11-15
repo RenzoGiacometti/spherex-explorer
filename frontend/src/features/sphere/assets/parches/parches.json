@@ -178,5 +178,15 @@
     "height_deg": 0.166563,
     "band": 3,
     "epoch": 1
+  },
+  "m-104": {
+    "file": "m-104.png",
+    "field": "6a4900bbafa7fc5e",
+    "ra": 189.9976,
+    "dec": -11.6231,
+    "width_deg": 0.166563,
+    "height_deg": 0.166563,
+    "band": 5,
+    "epoch": 3
   }
 }

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "key": "189.9976_-11.6231_0.1667",
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      189.9976,
+      -11.6231
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "layers": [
+    {
+      "key": "dss1",
+      "survey": "DSS",
+      "generation": "DSS1",
+      "band": "R",
+      "wave_um": 0.65,
+      "file": "dss1.f32",
+      "mjd": 34885.0,
+      "date": "1954-05-23",
+      "year": 1954.389,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.7005,
+      "display": {
+        "vmin": -1216.03,
+        "vmax": 9767.26,
+        "median": 0.0,
+        "sigma": 608.014
+      },
+      "valid_fraction": 1.0,
+      "plate": "E1063",
+      "plate_survey": "POSSI-E",
+      "telescope": "Palomar Schmidt",
+      "emulsion": "103aE",
+      "filter": "plexi",
+      "exposure_min": 45.0,
+      "copyright": "STScI/AURA",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=poss1_red&r=189.997600&d=-11.623100&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": null
+    },
+    {
+      "key": "dss2_red",
+      "survey": "DSS",
+      "generation": "DSS2",
+      "band": "R",
+      "wave_um": 0.65,
+      "file": "dss2_red.f32",
+      "mjd": 49075.0,
+      "date": "1993-03-29",
+      "year": 1993.239,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.0083,
+      "display": {
+        "vmin": -2317.85,
+        "vmax": 12147.0,
+        "median": 0.0,
+        "sigma": 1158.92
+      },
+      "valid_fraction": 1.0,
+      "plate": "OR15439",
+      "plate_survey": "SERC-ER",
+      "telescope": "UK Schmidt - Doubl",
+      "emulsion": "IIIaF",
+      "filter": "OG590",
+      "exposure_min": 65.0,
+      "copyright": "AAO/ROE",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=189.997600&d=-11.623100&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": null
+    }
+  ],
+  "generated_at": "2026-11-15T23:29:00Z"
+}
