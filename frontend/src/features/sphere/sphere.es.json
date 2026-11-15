@@ -1,0 +1,45 @@
+{
+  "stage": {
+    "label": "Esfera celeste. Se gira arrastrando o con las flechas del teclado, y se acerca con las teclas más y menos."
+  },
+  "hint": "Arrastrar para girar el cielo",
+  "center": "Centro",
+  "search": {
+    "label": "Buscar por nombre o coordenadas",
+    "submit": "Buscar",
+    "example": "{{name}} · {{coordinates}}",
+    "resolving": "Buscando {{query}}…",
+    "advice": {
+      "not_resolved": "Se puede probar con otro nombre o con coordenadas.",
+      "upstream_unavailable": "La búsqueda por coordenadas sigue funcionando."
+    }
+  },
+  "random": "Lugar al azar",
+  "markers": {
+    "nav": "Objetos destacados",
+    "open": "Abrir {{name}} en el visor"
+  },
+  "opening": "Abriendo {{name}}…",
+  "status": {
+    "noWebgl": "Este navegador no pudo dibujar la esfera. El buscador y los objetos destacados siguen funcionando.",
+    "textureError": "No se pudo cargar la imagen del cielo. Los marcadores y el buscador siguen funcionando."
+  },
+  "window": {
+    "enter": "Ventana al cielo",
+    "exit": "Salir de la ventana al cielo",
+    "starting": "Esperando los sensores del teléfono…",
+    "open": "Abrir {{name}} en el visor",
+    "openHere": "Abrir este lugar en el visor",
+    "nearest": "Más cercano: {{name}}",
+    "dragMode": "La esfera sigue girando al arrastrar.",
+    "unavailable": {
+      "insecure": "La ventana al cielo necesita una conexión segura (HTTPS).",
+      "noOrientation": "Este dispositivo no informa hacia dónde apunta.",
+      "orientationDenied": "Falta el permiso para usar el sensor de orientación.",
+      "noLocation": "Este navegador no informa la ubicación, que hace falta para saber qué parte del cielo está arriba.",
+      "locationDenied": "Falta el permiso de ubicación, que hace falta para saber qué parte del cielo está arriba.",
+      "locationFailed": "No se pudo obtener la ubicación."
+    }
+  },
+  "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC"
+}

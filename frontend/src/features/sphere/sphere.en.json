@@ -1,0 +1,45 @@
+{
+  "stage": {
+    "label": "Celestial sphere. Drag or use the arrow keys to rotate it, and the plus and minus keys to zoom."
+  },
+  "hint": "Drag to rotate the sky",
+  "center": "Center",
+  "search": {
+    "label": "Search by name or coordinates",
+    "submit": "Search",
+    "example": "{{name}} · {{coordinates}}",
+    "resolving": "Searching for {{query}}…",
+    "advice": {
+      "not_resolved": "Try another name or the coordinates.",
+      "upstream_unavailable": "Searching by coordinates still works."
+    }
+  },
+  "random": "Random place",
+  "markers": {
+    "nav": "Featured objects",
+    "open": "Open {{name}} in the viewer"
+  },
+  "opening": "Opening {{name}}…",
+  "status": {
+    "noWebgl": "This browser could not draw the sphere. Search and the featured objects still work.",
+    "textureError": "The sky image could not be loaded. The markers and search still work."
+  },
+  "window": {
+    "enter": "Sky window",
+    "exit": "Leave the sky window",
+    "starting": "Waiting for the phone sensors…",
+    "open": "Open {{name}} in the viewer",
+    "openHere": "Open this place in the viewer",
+    "nearest": "Nearest: {{name}}",
+    "dragMode": "The sphere still rotates by dragging.",
+    "unavailable": {
+      "insecure": "The sky window needs a secure connection (HTTPS).",
+      "noOrientation": "This device does not report where it is pointing.",
+      "orientationDenied": "Permission to use the orientation sensor is missing.",
+      "noLocation": "This browser does not report the location, which is needed to know which part of the sky is overhead.",
+      "locationDenied": "Location permission is missing; it is needed to know which part of the sky is overhead.",
+      "locationFailed": "The location could not be obtained."
+    }
+  },
+  "credit": "Sky: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC"
+}
