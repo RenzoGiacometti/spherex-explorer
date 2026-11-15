@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+.cache/
+spike/cache/
+spike/out/
+.env
+.DS_Store
+.ruff_cache/
+.pytest_cache/
+backend/cache/
+frontend/test-results/
+frontend/playwright-report/
