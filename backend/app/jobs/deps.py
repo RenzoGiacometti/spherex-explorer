@@ -16,7 +16,7 @@ from app.config import Settings
 from app.contract import utc_timestamp
 from app.domain import CutoutFile, Exposure, ExposureList, Grid, PreviewImage, ReprojectedExposure
 from app.irsa.cutouts import discard_cutout, fetch_cutout, prune_cutout_cache
-from app.irsa.sia import list_exposures
+from app.irsa.sia import list_exposures_parallel
 from app.pipeline.exposure import load_exposure
 from app.preview.hips2fits import fetch_preview
 
@@ -30,7 +30,7 @@ def wait_on(condition: threading.Condition, timeout: float | None) -> None:
 class JobDeps:
     """Funciones que usa un trabajo, con la firma de las reales.
 
-    - `list_exposures(ra, dec, settings, refresh)`: `app.irsa.sia.list_exposures`.
+    - `list_exposures(ra, dec, settings, refresh)`: `app.irsa.sia.list_exposures_parallel`.
       Toma por su cuenta el cupo de consultas SIA2.
     - `fetch_cutout(exposure, ra, dec, side_deg, settings)`:
       `app.irsa.cutouts.fetch_cutout`. Un intento; toma por su cuenta el cupo
@@ -49,7 +49,7 @@ class JobDeps:
       `provenance.built_at`.
     """
 
-    list_exposures: Callable[[float, float, Settings, bool], ExposureList] = list_exposures
+    list_exposures: Callable[[float, float, Settings, bool], ExposureList] = list_exposures_parallel
     fetch_cutout: Callable[[Exposure, float, float, float, Settings], CutoutFile] = fetch_cutout
     discard_cutout: Callable[[Path, Settings], bool] = discard_cutout
     prune_cutout_cache: Callable[[Settings], object] = prune_cutout_cache

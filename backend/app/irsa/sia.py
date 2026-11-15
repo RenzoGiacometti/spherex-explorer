@@ -35,8 +35,10 @@ import re
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import requests
 import urllib3
@@ -323,6 +325,34 @@ def _list_collection(collection: str, ra: float, dec: float, settings: Settings,
     return _Listing(exposures=exposures, queried_at=queried_at)
 
 
+def _merge_listings(listings: list[Any], settings: Settings) -> ExposureList:
+    """Une las listas de cada coleccion en la lista del campo."""
+    exposures = deduplicate([item for listing in listings for item in listing.exposures], settings.collections)
+    oldest = min((listing.queried_at for listing in listings), default=time.time())
+    return ExposureList(
+        exposures=exposures,
+        listed_at=time.strftime(_TIME_FORMAT, time.gmtime(oldest)),
+        stale=any(listing.stale for listing in listings),
+    )
+
+
+def list_exposures_parallel(ra: float, dec: float, settings: Settings, refresh: bool = False) -> ExposureList:
+    """Como `list_exposures`, pero consulta las colecciones a la vez. Es la que usa el gestor de trabajos.
+
+    Cada coleccion va en su hilo y dentro de `limiter.sia_slot()`. El 2026-11-15 SIA2
+    tardaba 22 s por coleccion: una detras de la otra, la primera imagen de un campo
+    nuevo esperaba 46 s solo por la lista. Si una coleccion falla, la otra igual
+    termina su consulta (y queda en cache) antes de que salga el error.
+    """
+    collections = settings.collections
+    if len(collections) < 2:
+        return list_exposures(ra, dec, settings, refresh)
+    # `map` conserva el orden de las colecciones y vuelve a lanzar la primera excepcion.
+    with ThreadPoolExecutor(max_workers=len(collections), thread_name_prefix="spherex-sia") as pool:
+        listings = list(pool.map(lambda name: _list_collection(name, ra, dec, settings, refresh), collections))
+    return _merge_listings(listings, settings)
+
+
 def list_exposures(ra: float, dec: float, settings: Settings, refresh: bool = False) -> ExposureList:
     """Exposiciones de nivel 2 de las colecciones de `settings.collections` que cubren el punto.
 
@@ -343,18 +373,13 @@ def list_exposures(ra: float, dec: float, settings: Settings, refresh: bool = Fa
 
     Precisiones:
 
-    - Las colecciones se consultan una detras de la otra. Cada una tiene su
-      propia copia: puede salir una de IRSA y otra de la cache.
+    - Las colecciones se consultan una detras de la otra (`list_exposures_parallel`
+      las consulta a la vez). Cada una tiene su propia copia: puede salir una de
+      IRSA y otra de la cache.
     - `listed_at` es la fecha de la consulta mas vieja de las que forman la lista.
     - `stale=True` vale tambien si se pidio `refresh`, IRSA no respondio y se uso
       una copia que todavia estaba vigente.
     - Bloqueante: hay que llamarla desde un hilo, no desde el bucle de asyncio.
     """
     listings = [_list_collection(collection, ra, dec, settings, refresh) for collection in settings.collections]
-    exposures = deduplicate([item for listing in listings for item in listing.exposures], settings.collections)
-    oldest = min((listing.queried_at for listing in listings), default=time.time())
-    return ExposureList(
-        exposures=exposures,
-        listed_at=time.strftime(_TIME_FORMAT, time.gmtime(oldest)),
-        stale=any(listing.stale for listing in listings),
-    )
+    return _merge_listings(listings, settings)
