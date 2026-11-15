@@ -13,7 +13,8 @@ Cada exposicion bien medida es un punto. Las que no se pueden medir (fuente
 saturada, pixeles descartados en la apertura, borde del recorte) no entran como
 puntos: se cuentan por detector y, si es saturacion, generan un aviso. Si no
 queda ningun punto por saturacion, `status` es `saturated` y `points` va vacio:
-un aviso en lugar de un espectro invalido.
+un aviso en lugar de un espectro invalido. `partial` es un espectro al que le
+faltan detectores, o parte de ellos, por saturacion.
 
 Documento (claves en snake_case, como el contrato del cubo):
 
@@ -85,6 +86,10 @@ CHANNELS_PER_DETECTOR = 17
 NATIVE_PIXEL_ARCSEC = 6.15
 # 1 MJy = 1e9 mJy: brillo superficial [MJy/sr] x angulo solido [sr] -> mJy.
 MJY_PER_MEGAJY = 1.0e9
+# Aviso `saturated_source`: un detector entra si al menos esta fraccion de sus exposiciones, y no
+# menos de esta cantidad, tiene saturacion en la apertura.
+SATURATED_MIN_FRACTION = 0.1
+SATURATED_MIN_EXPOSURES = 3
 # Aviso `offset_source`: la mediana del corrimiento del centroide en un detector supera este
 # valor (medio pixel nativo), con al menos esta cantidad de exposiciones donde se pudo medir.
 OFFSET_WARNING_ARCSEC = 3.0
@@ -460,10 +465,18 @@ def build_document(
 
     detectors = _detector_summary(usable, tables)
     warnings: list[dict[str, Any]] = []
+    # Un detector cuenta como saturado si le pasa a una parte apreciable de sus exposiciones. Una
+    # exposicion suelta con un pixel desbordado cerca (un rayo cosmico) no es una fuente saturada:
+    # esa va con las descartadas por pixeles defectuosos.
+    saturated_detectors = {
+        item["detector"]
+        for item in detectors
+        if item["n_saturated"] >= max(SATURATED_MIN_EXPOSURES, SATURATED_MIN_FRACTION * item["n_exposures"])
+    }
     saturated = [
         (result, epoch)
         for result, epoch in zip(usable, numbers, strict=True)
-        if result.measurement.status == "saturated"
+        if result.measurement.status == "saturated" and result.detector in saturated_detectors
     ]
     if saturated:
         warnings.append(
@@ -472,7 +485,7 @@ def build_document(
                 "ra": _round(target.ra, 5),
                 "dec": _round(target.dec, 5),
                 "epochs": sorted({epoch for _, epoch in saturated}),
-                "detectors": sorted({result.detector for result, _ in saturated}),
+                "detectors": sorted(saturated_detectors),
                 "n_exposures": len(saturated),
                 "n_total": len(usable),
             }
@@ -488,7 +501,12 @@ def build_document(
                 "offset_arcsec": max(item["offset_arcsec"]["total"] for item in shifted),
             }
         )
-    n_masked = sum(1 for result in usable if result.measurement.status == "masked")
+    n_masked = sum(
+        1
+        for result in usable
+        if result.measurement.status == "masked"
+        or (result.measurement.status == "saturated" and result.detector not in saturated_detectors)
+    )
     if n_masked:
         warnings.append({"code": "masked_exposures", "n_exposures": n_masked, "n_total": len(usable)})
     versions = sorted({result.processing for result in usable if result.processing})

@@ -7,6 +7,9 @@ la Etapa 0 en spike/cache; no baja nada) y escribe:
     backend/data/spectra/index.json     indice para `app/spectrum/precomputed.py`
     frontend/src/features/spectrum/fixtures/<slug>.json   copia para la pagina de prueba
 
+La copia del frontend se pasa por el formateador del proyecto (Biome), que
+revisa todos los JSON de frontend/src; hace falta haber corrido `pnpm install`.
+
 La posicion de cada objeto sale de la respuesta de Sesame guardada en
 tests/fixtures/sesame (posicion J2000, movimiento propio y paralaje) y se
 propaga a la fecha de cada exposicion: Barnard y WISE 0855 se mueven mas de un
@@ -21,7 +24,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -42,7 +47,8 @@ from app.spectrum.precomputed import INDEX_FILENAME, spectra_dir  # noqa: E402
 from app.spectrum.service import SpectrumTarget, compute_spectrum  # noqa: E402
 
 SESAME_FIXTURES = BACKEND_DIR / "tests" / "fixtures" / "sesame"
-FRONTEND_FIXTURES = BACKEND_DIR.parent / "frontend" / "src" / "features" / "spectrum" / "fixtures"
+FRONTEND_DIR = BACKEND_DIR.parent / "frontend"
+FRONTEND_FIXTURES = FRONTEND_DIR / "src" / "features" / "spectrum" / "fixtures"
 
 
 @dataclass(frozen=True)
@@ -72,6 +78,24 @@ def dump(document: dict[str, Any]) -> str:
         lines = ",\n".join("  " + json.dumps(row, ensure_ascii=False, separators=(", ", ": ")) for row in rows)
         text = text.replace(f'"@@{key}"', "[\n" + lines + "\n ]" if rows else "[]")
     return text + "\n"
+
+
+def format_frontend_copies() -> bool:
+    """Pasa las copias del frontend por Biome, como pide `pnpm lint`. Devuelve False si no pudo."""
+    binary = FRONTEND_DIR / "node_modules" / ".bin" / ("biome.cmd" if os.name == "nt" else "biome")
+    if not binary.is_file():
+        return False
+    try:
+        result = subprocess.run(
+            [str(binary), "format", "--write", str(FRONTEND_FIXTURES.relative_to(FRONTEND_DIR))],
+            cwd=FRONTEND_DIR,
+            capture_output=True,
+            timeout=120,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
 
 
 def main() -> int:
@@ -134,6 +158,11 @@ def main() -> int:
         for entry in entries:
             shutil.copyfile(output / entry["file"], FRONTEND_FIXTURES / entry["file"])
         print(f"Copiados a {FRONTEND_FIXTURES}")
+        if not format_frontend_copies():
+            print(
+                "Aviso: no se pudo correr Biome sobre las copias. Desde frontend/: "
+                "pnpm exec biome format --write src/features/spectrum/fixtures"
+            )
     return 1 if failed else 0
 
 

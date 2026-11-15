@@ -1,6 +1,6 @@
 {
  "version": 1,
- "status": "partial",
+ "status": "ok",
  "target": {
   "name": "WISE 0855-0714",
   "ra": 133.759825,
@@ -505,19 +505,6 @@
  ],
  "warnings": [
   {
-   "code": "saturated_source",
-   "ra": 133.75982,
-   "dec": -7.24224,
-   "epochs": [
-    2
-   ],
-   "detectors": [
-    5
-   ],
-   "n_exposures": 1,
-   "n_total": 258
-  },
-  {
    "code": "offset_source",
    "detectors": [
     1,
@@ -529,7 +516,7 @@
   },
   {
    "code": "masked_exposures",
-   "n_exposures": 33,
+   "n_exposures": 34,
    "n_total": 258
   }
  ],
@@ -542,7 +529,7 @@
    "l2b-v27"
   ],
   "wave_table": "l2b-v27",
-  "computed_at": "2026-11-15T16:33:16Z"
+  "computed_at": "2026-11-15T16:46:42Z"
  },
  "source": "precomputed"
 }

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "status": "partial",
+ "status": "ok",
  "target": {
   "name": "Epsilon Indi B",
   "ra": 331.096574,
@@ -659,23 +659,8 @@
  ],
  "warnings": [
   {
-   "code": "saturated_source",
-   "ra": 331.09657,
-   "dec": -56.80063,
-   "epochs": [
-    1,
-    4
-   ],
-   "detectors": [
-    5,
-    6
-   ],
-   "n_exposures": 3,
-   "n_total": 457
-  },
-  {
    "code": "masked_exposures",
-   "n_exposures": 90,
+   "n_exposures": 93,
    "n_total": 457
   }
  ],
@@ -688,7 +673,7 @@
    "l2b-v27"
   ],
   "wave_table": "l2b-v27",
-  "computed_at": "2026-11-15T16:33:12Z"
+  "computed_at": "2026-11-15T16:46:39Z"
  },
  "source": "precomputed"
 }
