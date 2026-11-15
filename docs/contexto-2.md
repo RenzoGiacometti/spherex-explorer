@@ -184,7 +184,7 @@ Página de prueba: `/?dev=cortina`, con las dos vistas. Vale la pena mirar M 51 
 
 ## 5. Para integrar
 
-Nada de esto está montado. Lo que falta, todo en archivos que esta tanda no tocó:
+**Actualización:** todo lo de esta sección ya está montado en `etapa-1` (rutas en `app/api/main.py`, `live.fetch_preview` en `JobDeps`, `"DSS"` en `MISSIONS`, textos en `src/i18n/locales/`, contrato 4.10 y `SPEC.md` 3.2). Queda la lista original como registro de lo que se integró:
 
 | Dónde | Qué |
 |---|---|
