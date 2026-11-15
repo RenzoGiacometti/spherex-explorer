@@ -1,0 +1,46 @@
+/* Barra del modo embed: una franja de vidrio al pie, con lo minimo para reproducir. */
+.bar {
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-md);
+  min-width: 0;
+}
+
+.position {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-sm);
+  min-width: 0;
+}
+
+.positionLabel {
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+.positionDate {
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+  white-space: nowrap;
+}
+
+/* En la barra el boton de mantener no ocupa todo el ancho, como en el panel. */
+.hold {
+  width: auto;
+}
+
+.open {
+  margin-left: auto;
+}

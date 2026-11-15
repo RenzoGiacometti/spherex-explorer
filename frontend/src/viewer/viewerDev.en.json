@@ -17,6 +17,7 @@
     "view": "View",
     "renderer": "Renderer",
     "highlight": "Highlight",
+    "hatch": "Highlight with the flag layer hatch",
     "annotations": "Saturation outline and object position",
     "blink": "Blink between A and B",
     "zoomIn": "Zoom in",
@@ -74,7 +75,9 @@
       "mode": "Mode",
       "stretch": "Stretch",
       "highlight": "Highlight",
+      "hatch": "Hatch",
       "scale": "Scale",
+      "ratio": "Pixel ratio",
       "maxDiff": "Max diff.",
       "different": "Different pixels"
     },

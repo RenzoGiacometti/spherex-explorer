@@ -352,6 +352,66 @@ describe("dibujo", () => {
     expect(uniform(fake, "u_highlightColor")).toEqual([0, 0, 0, 0]);
   });
 
+  it("sin trama, el ancho de franja va en 0: el resaltado es un color liso", () => {
+    const { fake, renderer } = setup();
+    const mask = new Uint8Array(WIDTH * HEIGHT);
+    renderer.draw(frame(scene([plane(0)])));
+    expect(uniform(fake, "u_hatchStripe")).toEqual([0]);
+    renderer.draw(frame(scene([plane(0)], { highlight: { mask, color: [1, 1, 1, 0.5] } })));
+    expect(uniform(fake, "u_hatchStripe")).toEqual([0]);
+    renderer.draw(
+      frame(scene([plane(0)], { highlight: { mask, color: [1, 1, 1, 0.5], alternate: null } })),
+    );
+    expect(uniform(fake, "u_hatchStripe")).toEqual([0]);
+  });
+
+  it("con trama pasa los dos colores, el ancho de franja y el alto del canvas", () => {
+    const { fake, renderer } = setup();
+    const only = plane(0);
+    const mask = new Uint8Array(WIDTH * HEIGHT).fill(1);
+    const highlight = { mask, color: [1, 1, 1, 1] as const, alternate: [0, 0.25, 0.5] as const };
+
+    renderer.draw(frame(scene([only], { highlight })));
+    expect(uploads(fake).filter((upload) => upload.data === mask)).toHaveLength(1);
+    expect(uniform(fake, "u_highlightColor")).toEqual([1, 1, 1, 1]);
+    expect(uniform(fake, "u_hatchAlternate")).toEqual([0, 0.25, 0.5]);
+    // 1 px CSS: con densidad 1, un pixel fisico.
+    expect(uniform(fake, "u_hatchStripe")).toEqual([1]);
+    expect(uniform(fake, "u_bufferHeight")).toEqual([VIEWPORT.height]);
+
+    // Con el doble de densidad la franja mide 2 pixeles fisicos y el canvas el doble.
+    renderer.draw(frame(scene([only], { highlight }), 2));
+    expect(uniform(fake, "u_hatchStripe")).toEqual([2]);
+    expect(uniform(fake, "u_bufferHeight")).toEqual([2 * VIEWPORT.height]);
+
+    // Al apagar la trama vuelve el color liso.
+    renderer.draw(frame(scene([only], { highlight: { mask, color: [1, 1, 1, 0.5] } }), 2));
+    expect(uniform(fake, "u_hatchStripe")).toEqual([0]);
+  });
+
+  it("una trama transparente no es un resaltado: no se sube ni se dibuja", () => {
+    const { fake, renderer } = setup();
+    const mask = new Uint8Array(WIDTH * HEIGHT).fill(1);
+    renderer.draw(
+      frame(scene([plane(0)], { highlight: { mask, color: [1, 1, 1, 0], alternate: [0, 0, 0] } })),
+    );
+    expect(uploads(fake).filter((upload) => upload.data === mask)).toEqual([]);
+    expect(uniform(fake, "u_highlightColor")).toEqual([0, 0, 0, 0]);
+    expect(uniform(fake, "u_hatchStripe")).toEqual([0]);
+  });
+
+  it("el shader cuenta la trama en pixeles fisicos desde la esquina superior izquierda", () => {
+    const { fake } = setup();
+    const fragment = fake
+      .callsTo("shaderSource")
+      .map((call) => String(call.args[1]))
+      .find((source) => source.includes("u_hatchStripe"));
+    // La misma cuenta que hatchBand: (x + y desde arriba) / franja, y su paridad.
+    expect(fragment).toContain("((pixel.x + u_bufferHeight - 1 - pixel.y) / u_hatchStripe) % 2");
+    expect(fragment).toContain("ivec2 pixel = ivec2(gl_FragCoord.xy);");
+    expect(fragment).toContain("band == 0 ? u_highlightColor.rgb : u_hatchAlternate");
+  });
+
   it("sin escena deja el canvas transparente y no dibuja", () => {
     const { fake, renderer } = setup();
     renderer.draw(frame(null));

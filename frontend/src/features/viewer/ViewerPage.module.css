@@ -1,0 +1,237 @@
+/*
+ * Pantalla del visor. DESIGN.md, "Estructura": la imagen define el espacio, el
+ * recorte toma toda la altura disponible y los paneles se anclan a los bordes.
+ *
+ * El visor (`.viewer`) ocupa la ventana entera, por debajo de todo. Encima va
+ * una grilla como la de la maqueta de escritorio:
+ *
+ *   top    top    top
+ *   left   stage  right
+ *   dock   dock   dock
+ *
+ * `stage` es la celda que queda libre: ViewerPage la mide y el visor encuadra
+ * la imagen ahi, asi ningun panel tapa un borde de la imagen. Al acercar, la
+ * imagen sigue por debajo de los paneles hasta los bordes de la ventana.
+ *
+ * ViewerPage elige el armado y lo deja en `data-layout`: `desktop` es el de
+ * arriba; `phone` y `embed` estan al final de este archivo.
+ */
+.page {
+  --viewer-column-left: 300px;
+  --viewer-column-right: 320px;
+
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    "top top top"
+    "left stage right"
+    "dock dock dock";
+  grid-template-rows: 64px minmax(0, 1fr) auto;
+  grid-template-columns: var(--viewer-column-left) minmax(0, 1fr) var(--viewer-column-right);
+  gap: var(--space-md);
+  height: 100%;
+  min-height: 0;
+  padding: 0 var(--space-lg) var(--space-lg);
+  overflow: hidden;
+  background-color: var(--color-void);
+}
+
+.viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/*
+ * Las celdas van encima del visor y no reciben el puntero: lo que no es un
+ * panel deja pasar el arrastre y la rueda a la imagen. Cada panel lo vuelve a
+ * activar.
+ */
+.top,
+.left,
+.stage,
+.right,
+.dock {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.top {
+  grid-area: top;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left,
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  /* Si los paneles no entran en el alto de la ventana, la columna se desplaza. */
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.left {
+  grid-area: left;
+}
+
+.right {
+  grid-area: right;
+}
+
+.left > *,
+.right > *,
+.dock > * {
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.stage {
+  grid-area: stage;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+
+.dock {
+  grid-area: dock;
+}
+
+/* Entre el celular y el escritorio: las columnas se angostan para dejarle lugar a la imagen. */
+@media (max-width: 1179px) {
+  .page {
+    --viewer-column-left: 264px;
+    --viewer-column-right: 264px;
+
+    gap: var(--space-sm);
+    padding: 0 var(--space-sm) var(--space-sm);
+  }
+}
+
+/*
+ * Ventana angosta, entre el celular y el escritorio (de 600 a 899 px): una
+ * sola columna que se desplaza. La imagen va arriba, a lo ancho; despues la
+ * linea de tiempo y los paneles. Por debajo de 600 px manda el armado `phone`.
+ */
+@media (max-width: 899px) {
+  .page {
+    grid-template-areas:
+      "top"
+      "stage"
+      "dock"
+      "left"
+      "right";
+    grid-template-rows: 64px min(100vw, 55vh) auto auto auto;
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  /* El visor deja de ocupar la ventana: comparte la celda con lo que se lee encima. */
+  .viewer {
+    position: relative;
+    inset: auto;
+    grid-area: stage;
+    margin: 0 calc(-1 * var(--space-sm));
+  }
+
+  .left,
+  .right {
+    overflow-y: visible;
+  }
+}
+
+/*
+ * ---- Celular (`data-layout="phone"`, menos de 600 px) ----------------------
+ *
+ * DESIGN.md, "Responsive Behavior": columna unica, paneles a 12 px del borde y
+ * todo control frecuente en el 45 % inferior de la pantalla.
+ *
+ *   top     salida, objeto y avisos: solo informacion y la salida
+ *   stage   la imagen
+ *   thumb   modo, banda y linea de tiempo con el transporte
+ *
+ * El visor vuelve a ocupar la pantalla entera, por debajo: acercada, la imagen
+ * pasa por detras del vidrio. Si la pantalla es tan baja que no entra todo, la
+ * pagina se desplaza en vez de cortar los controles.
+ */
+.page[data-layout="phone"] {
+  grid-template-areas:
+    "top"
+    "stage"
+    "thumb";
+  grid-template-rows: auto minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-xs);
+  height: auto;
+  min-height: 100%;
+  padding: var(--space-sm);
+  overflow: visible;
+}
+
+.page[data-layout="phone"] .viewer,
+.page[data-layout="embed"] .viewer {
+  position: absolute;
+  inset: 0;
+  grid-area: auto;
+  margin: 0;
+}
+
+.page[data-layout="phone"] .stage,
+.page[data-layout="embed"] .stage {
+  padding: 0;
+}
+
+.thumb {
+  position: relative;
+  z-index: 1;
+  grid-area: thumb;
+  min-width: 0;
+  pointer-events: none;
+}
+
+/* Los controles frecuentes, apilados: abajo de todo, la linea de tiempo. */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.controls > * {
+  pointer-events: auto;
+}
+
+/*
+ * Con el cajon de herramientas abierto siguen ocupando su lugar, para que la
+ * imagen no cambie de tamano, pero no se ven ni reciben el foco.
+ */
+.controls[data-covered="true"] {
+  visibility: hidden;
+}
+
+/*
+ * ---- Embed (`data-layout="embed"`, `embed=1` en la URL) --------------------
+ *
+ * Solo la imagen, a todo el marco, y una franja al pie con lo minimo para
+ * reproducir. Vale para cualquier ancho: lo decide la URL, no la ventana.
+ */
+.page[data-layout="embed"] {
+  grid-template-areas:
+    "stage"
+    "dock";
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-xs);
+  height: 100%;
+  min-height: 0;
+  padding: var(--space-xs);
+  overflow: hidden;
+}

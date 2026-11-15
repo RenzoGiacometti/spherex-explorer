@@ -1,14 +1,30 @@
 {
-  "placeholder": {
-    "heading": "Visor",
-    "body": "El visor todavía no está construido. Este es el estado leído de la dirección."
+  "page": {
+    "back": "Volver a la entrada",
+    "field": "Campo",
+    "viewerLabel": "Imagen del campo",
+    "viewerHelp": "Rueda o pellizco para acercar, arrastre para desplazar y doble clic para volver a la vista de partida. Con el teclado: flechas, más, menos y cero.",
+    "annotationsLabel": "Sobre la imagen"
   },
   "field": {
     "ra": "Ascensión recta",
-    "dec": "Declinación",
-    "fov": "Campo de visión",
+    "dec": "Declinación"
+  },
+  "panel": {
     "band": "Banda",
-    "mode": "Modo"
+    "mode": "Modo",
+    "image": "Imagen",
+    "metadata": "Metadatos",
+    "timeline": "Línea de tiempo",
+    "quality": "Avisos de calidad",
+    "tools": "Herramientas",
+    "language": "Idioma",
+    "legend": "Referencias"
+  },
+  "band": {
+    "group": "Banda infrarroja",
+    "unit": "µm",
+    "option": "{{band}}, de {{min}} a {{max}}"
   },
   "mode": {
     "blink": "Parpadeo",
@@ -16,5 +32,164 @@
     "sum": "Suma",
     "redcyan": "Rojo/cian",
     "hold": "Mantener apretado"
+  },
+  "comparison": {
+    "group": "Modo de comparación",
+    "reference": "Época de referencia (B)",
+    "referenceOption": "Época {{n}}, {{date}}",
+    "pair": "A {{a}} · B {{b}}",
+    "hint": {
+      "difference": "A menos B: la época actual menos la de referencia.",
+      "redcyan": "A en rojo y B en cian. Lo que no cambió queda gris.",
+      "sum": "Promedio de las épocas con imagen: {{n}}.",
+      "hold": "Se ve A. Mientras se mantiene apretado el botón o la barra espaciadora, se ve B."
+    },
+    "holdButton": "Mantener para ver B",
+    "issue": {
+      "missing-current": "La época actual no tiene imagen en esta banda.",
+      "missing-reference": "Hace falta otra época con imagen para comparar."
+    },
+    "provisional": "Alguna de las épocas comparadas es provisoria: todavía le faltan exposiciones.",
+    "referenceShort": "Época B"
+  },
+  "image": {
+    "contrast": "Contraste",
+    "stretch": "Estirado",
+    "stretchOption": {
+      "linear": "Lineal",
+      "log": "Log",
+      "asinh": "Asinh"
+    },
+    "stretchName": {
+      "linear": "Lineal",
+      "log": "Logarítmico",
+      "asinh": "Arcoseno hiperbólico"
+    },
+    "fov": "Campo de visión",
+    "fovOption": "{{n}} minutos de arco",
+    "fovValue": "{{side}} × {{side}}"
+  },
+  "timeline": {
+    "track": "Épocas",
+    "position": "Época {{n}} de {{total}}",
+    "none": "Todavía no hay épocas",
+    "dateRange": "{{start}} a {{end}}",
+    "speed": "Velocidad",
+    "speedGroup": "Velocidad de reproducción",
+    "speedCycle": "Velocidad de reproducción: {{value}}. Cambiar"
+  },
+  "metadata": {
+    "ra": "AR",
+    "dec": "Dec",
+    "epoch": "Época",
+    "band": "Banda",
+    "pixelScale": "Escala de píxel",
+    "field": "Campo",
+    "epochs": "Épocas disponibles",
+    "exposures": "Exposiciones del plano",
+    "exposuresValue": "{{used}} de {{total}}",
+    "source": "Fuente",
+    "status": "Estado",
+    "statusValue": {
+      "requesting": "Pidiendo",
+      "queued": "En cola",
+      "listing": "Buscando exposiciones",
+      "downloading": "Cargando",
+      "ready": "Completo",
+      "partial": "Incompleto",
+      "failed": "Falló"
+    }
+  },
+  "load": {
+    "requesting": "Pidiendo el campo",
+    "queued": "En cola",
+    "queuePosition": "Posición {{n}}",
+    "listing": "Buscando exposiciones",
+    "downloading": "Cargando datos",
+    "finishing": "Terminando",
+    "cutouts": "{{done}} / {{total}} recortes · {{percent}}",
+    "ready": "Campo completo",
+    "readyDetail": "{{total}} recortes",
+    "partial": "Campo incompleto",
+    "partialDetail": "faltaron {{failed}} de {{total}} recortes",
+    "interrupted": "Carga interrumpida",
+    "notLoaded": "Campo sin cargar",
+    "downloadFailed": "Imágenes que no se pudieron bajar: {{n}}.",
+    "retryDownloads": "Reintentar la descarga"
+  },
+  "stage": {
+    "waiting": "Esperando la primera imagen.",
+    "empty": "Esta época no tiene datos en {{band}}.",
+    "emptyBand": "Ninguna época tiene datos en {{band}}.",
+    "pending": "La imagen de esta época todavía no llegó.",
+    "provisional": "Provisorio",
+    "exposures": "{{used}} / {{total}} exposiciones",
+    "preview": "Vista provisoria",
+    "previewNote": "No es una imagen de SPHEREx."
+  },
+  "annotations": {
+    "north": "N",
+    "east": "E",
+    "motion": "{{value}} / año",
+    "saturated": {
+      "one": "Fuente saturada",
+      "other": "Fuentes saturadas: {{n}}"
+    },
+    "summary": {
+      "band": "{{mode}}, banda {{band}}.",
+      "target": "Mira sobre {{name}}.",
+      "motion": "Movimiento propio: {{value}} por año.",
+      "trail": "Rastro con sus posiciones en las épocas anteriores: {{n}}.",
+      "scale": "La barra de escala mide {{value}}.",
+      "orientation": "Norte arriba y este a la izquierda."
+    }
+  },
+  "flags": {
+    "toggle": "Capa de flags",
+    "hint": "La trama cubre los píxeles que el procesamiento descarta.",
+    "list": "Flags presentes",
+    "epochs": {
+      "one": "época {{epochs}}",
+      "other": "épocas {{epochs}}"
+    },
+    "pixels": "{{n}} px",
+    "hatched": "con trama",
+    "plain": "sin trama",
+    "loading": "Cargando los flags.",
+    "none": "Esta imagen no tiene píxeles marcados.",
+    "idle": "Los flags se ven cuando hay una imagen de SPHEREx en pantalla.",
+    "error": "No se pudieron cargar los flags.",
+    "retry": "Reintentar"
+  },
+  "quality": {
+    "none": "Sin avisos para este campo.",
+    "open": "Avisos de calidad: {{n}}",
+    "saturated_source": {
+      "one": "Hay una fuente saturada en {{ra}} {{dec}}: su centro no tiene medición válida.",
+      "other": "Hay {{n}} fuentes saturadas en el campo: su centro no tiene medición válida."
+    },
+    "plane_empty": "Sin exposiciones: {{planes}}.",
+    "few_exposures": "Con menos de {{limit}} exposiciones puede haber huecos y gradientes: {{planes}}.",
+    "low_coverage": "Menos del {{limit}} de la imagen tiene datos: {{planes}}.",
+    "cutouts_failed": {
+      "one": "Faltó {{n}} recorte después de todos los reintentos: {{planes}}.",
+      "other": "Faltaron {{n}} recortes después de todos los reintentos: {{planes}}."
+    },
+    "stale_exposure_list": "La lista de exposiciones es una copia guardada el {{date}}: el archivo de datos no respondió.",
+    "full_download": "Se bajaron archivos completos porque no se pudo cortar la descarga.",
+    "planes": {
+      "one": "época {{epochs}} ({{bands}})",
+      "other": "épocas {{epochs}} ({{bands}})"
+    }
+  },
+  "tools": {
+    "open": "Herramientas",
+    "close": "Cerrar las herramientas"
+  },
+  "embed": {
+    "open": "Abrir en el visor completo"
+  },
+  "error": {
+    "title": "No se pudo cargar el campo"
   }
 }

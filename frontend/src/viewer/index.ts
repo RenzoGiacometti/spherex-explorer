@@ -24,13 +24,22 @@ export {
 export type { ComposeOptions, ImageSize, Scene, SceneHighlight, SceneMode } from "./compose";
 export {
   composeScene,
+  HATCH_STRIPE_CSS_PX,
+  hatchBand,
+  hatchStripe,
   MAX_SCENE_PLANES,
   SCENE_MODES,
   sameScene,
   sceneError,
+  sceneHatch,
   sceneSize,
 } from "./compose";
-export type { ImageViewerHandle, ImageViewerProps, ViewerOverlay } from "./ImageViewer";
+export type {
+  ImageViewerHandle,
+  ImageViewerProps,
+  ViewerInsets,
+  ViewerOverlay,
+} from "./ImageViewer";
 export { ImageViewer } from "./ImageViewer";
 export type { MaskValue, PlaneImage } from "./planeImage";
 export { MASK_NO_DATA, MASK_SATURATED, MASK_VALID, toPlaneImage } from "./planeImage";

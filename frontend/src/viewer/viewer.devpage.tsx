@@ -22,8 +22,8 @@
 //                         data-webgl-glsl, data-webgl-gpu, data-max-diff-webgl2,
 //                         data-max-diff-canvas2d
 //   [data-check]          data-renderer, data-sample, data-mode, data-stretch,
-//                         data-highlight, data-scale, data-max-diff,
-//                         data-different, data-pixels
+//                         data-highlight, data-hatch, data-scale, data-ratio,
+//                         data-max-diff, data-different, data-pixels
 //
 // El estado inicial se puede fijar en la URL, para sacar capturas:
 //
@@ -35,6 +35,8 @@
 //   home       1 (cubo entero) | 2 (vista de 5 minutos)
 //   renderer   webgl2 | canvas2d
 //   highlight  none | noData | saturated
+//   hatch      1 dibuja el resaltado como la capa de flags: trama diagonal de
+//              1 px que alterna `--color-text` y `--color-void`
 //   marks      0 oculta el contorno de saturacion y la posicion del objeto
 //   ui         0 oculta los paneles
 //   lang       es | en
@@ -61,7 +63,16 @@ import {
   readCssColor,
   toRgb,
 } from "./colors";
-import { composeScene, type ImageSize, SCENE_MODES, type Scene, type SceneMode } from "./compose";
+import {
+  composeScene,
+  hatchBand,
+  hatchStripe,
+  type ImageSize,
+  SCENE_MODES,
+  type Scene,
+  type SceneMode,
+  sceneHatch,
+} from "./compose";
 import { ImageViewer, type ImageViewerHandle, type ViewerOverlay } from "./ImageViewer";
 import { MASK_NO_DATA, MASK_SATURATED, type PlaneImage, toPlaneImage } from "./planeImage";
 import type { RendererInfo, RendererKind, SceneRenderer } from "./renderer";
@@ -73,6 +84,7 @@ import {
   MIN_CONTRAST,
   STRETCH_KINDS,
   type StretchKind,
+  toByte,
 } from "./stretch";
 import { homeView, imageToScreen, KEY_ZOOM_STEP, type Point, viewTransform } from "./view";
 import viewerDevEn from "./viewerDev.en.json";
@@ -213,18 +225,29 @@ interface Settings {
   readonly stretch: StretchKind;
   readonly contrast: number;
   readonly highlight: HighlightKind;
+  /** El resaltado se dibuja como trama diagonal, igual que la capa de flags. */
+  readonly hatch: boolean;
 }
 
 interface Colors {
   readonly noData: Rgb;
   readonly highlight: Rgba;
+  /** Los dos colores de la trama: `--color-text` y `--color-void`. */
+  readonly hatch: Rgba;
+  readonly hatchAlternate: Rgb;
 }
 
-/** Colores de tokens.css: el vacio y, para el resaltado, el blanco al 32 % de hairline-strong. */
+/**
+ * Colores de tokens.css: el vacio; para el resaltado liso, el blanco al 32 % de
+ * hairline-strong; y para la trama, el texto y el vacio.
+ */
 function readColors(): Colors {
+  const noData = toRgb(readCssColor(NO_DATA_COLOR_VARIABLE) ?? NO_COLOR);
   return {
-    noData: toRgb(readCssColor(NO_DATA_COLOR_VARIABLE) ?? NO_COLOR),
+    noData,
     highlight: readCssColor("--color-hairline-strong") ?? NO_COLOR,
+    hatch: readCssColor("--color-text") ?? NO_COLOR,
+    hatchAlternate: noData,
   };
 }
 
@@ -269,7 +292,8 @@ function buildScene(sample: LoadedSample, settings: Settings, colors: Colors): S
               shown,
               settings.highlight === "noData" ? MASK_NO_DATA : MASK_SATURATED,
             ),
-            color: colors.highlight,
+            color: settings.hatch ? colors.hatch : colors.highlight,
+            alternate: settings.hatch ? colors.hatchAlternate : null,
           },
   };
 }
@@ -282,8 +306,12 @@ interface CheckResult {
   readonly mode: SceneMode;
   readonly stretch: StretchKind;
   readonly highlight: boolean;
-  /** Pixeles de pantalla por pixel de imagen al dibujar. */
+  /** El resaltado es la trama diagonal de la capa de flags. */
+  readonly hatch: boolean;
+  /** Pixeles CSS por pixel de imagen al dibujar. */
   readonly scale: number;
+  /** Pixeles fisicos por pixel CSS (`devicePixelRatio`) al dibujar. */
+  readonly ratio: number;
   /** Mayor diferencia en un canal, de 0 a 255. -1 si no se pudo leer. */
   readonly maxDiff: number;
   /** Pixeles con alguna diferencia. */
@@ -300,32 +328,60 @@ interface Checks {
 /** Contraste con el que se hacen las comparaciones. */
 const CHECK_CONTRAST = DEFAULT_CONTRAST;
 
-/** Dibuja una escena y la compara con la referencia, pixel por pixel. */
-function compare(renderer: SceneRenderer, scene: Scene, image: ImageSize, scale: number) {
+/**
+ * Dibuja una escena y la compara con la referencia, pixel por pixel. La
+ * referencia es `composeScene` y, donde el resaltado es una trama, el color que
+ * `hatchBand` le da a ese pixel fisico.
+ */
+function compare(
+  renderer: SceneRenderer,
+  scene: Scene,
+  image: ImageSize,
+  scale: number,
+  ratio: number,
+) {
   const viewport = { width: image.width * scale, height: image.height * scale };
   renderer.draw({
     scene,
     transform: viewTransform(homeView(image), image, viewport),
     viewport,
-    pixelRatio: 1,
+    pixelRatio: ratio,
   });
   const snapshot = renderer.readPixels();
   const reference = composeScene(scene);
-  if (snapshot === null || snapshot.width !== viewport.width) {
+  if (snapshot === null || snapshot.width !== viewport.width * ratio) {
     return { maxDiff: -1, different: 0, pixels: 0 };
   }
+  const hatch = sceneHatch(scene);
+  const stripe = hatchStripe(ratio);
+  const hatchColors =
+    hatch === null
+      ? null
+      : ([hatch.color, hatch.alternate] as const).map((color) => [
+          toByte(color[0]),
+          toByte(color[1]),
+          toByte(color[2]),
+          255,
+        ]);
+  /** Pixeles fisicos por pixel de imagen. */
+  const side = scale * ratio;
   let maxDiff = 0;
   let different = 0;
+  // Las filas vienen desde abajo, como en readPixels: la fila 0 es el sur.
   for (let y = 0; y < snapshot.height; y += 1) {
-    const row = Math.floor(y / scale);
+    const row = Math.floor(y / side);
     for (let x = 0; x < snapshot.width; x += 1) {
       const drawn = (y * snapshot.width + x) * 4;
-      const expected = (row * image.width + Math.floor(x / scale)) * 4;
+      const pixel = row * image.width + Math.floor(x / side);
+      const expected = pixel * 4;
+      const hatched =
+        hatch !== null && hatchColors !== null && hatch.mask[pixel] !== 0
+          ? hatchColors[hatchBand(x, snapshot.height - 1 - y, stripe)]
+          : undefined;
       let worst = 0;
       for (let channel = 0; channel < 4; channel += 1) {
-        const diff = Math.abs(
-          (snapshot.data[drawn + channel] as number) - (reference[expected + channel] as number),
-        );
+        const wanted = hatched ? hatched[channel] : reference[expected + channel];
+        const diff = Math.abs((snapshot.data[drawn + channel] as number) - (wanted as number));
         if (diff > worst) worst = diff;
       }
       if (worst > 0) different += 1;
@@ -338,7 +394,9 @@ function compare(renderer: SceneRenderer, scene: Scene, image: ImageSize, scale:
 /**
  * Compara los dos caminos de dibujo con la referencia, sobre un canvas aparte
  * del tamano de la imagen: cada modo con cada estirado, cada modo con
- * resaltado, y un plano ampliado 3 veces para comprobar el encuadre.
+ * resaltado liso y con la trama de la capa de flags, y un plano ampliado 3
+ * veces, sin y con trama, para comprobar el encuadre. La trama se prueba
+ * ademas con el doble de densidad de pixeles, donde cada franja mide 2.
  */
 function runChecks(samples: readonly LoadedSample[], colors: Colors): Checks {
   const results: CheckResult[] = [];
@@ -361,6 +419,8 @@ function runChecks(samples: readonly LoadedSample[], colors: Colors): Checks {
       stretch: StretchKind,
       highlight: boolean,
       scale: number,
+      hatch = false,
+      ratio = 1,
     ): void => {
       const scene = buildScene(
         sample,
@@ -371,6 +431,7 @@ function runChecks(samples: readonly LoadedSample[], colors: Colors): Checks {
           stretch,
           contrast: CHECK_CONTRAST,
           highlight: highlight ? "noData" : "none",
+          hatch,
         },
         colors,
       );
@@ -380,8 +441,10 @@ function runChecks(samples: readonly LoadedSample[], colors: Colors): Checks {
         mode,
         stretch,
         highlight,
+        hatch,
         scale,
-        ...compare(renderer, scene, sample.image, scale),
+        ratio,
+        ...compare(renderer, scene, sample.image, scale, ratio),
       });
     };
 
@@ -389,8 +452,11 @@ function runChecks(samples: readonly LoadedSample[], colors: Colors): Checks {
       for (const mode of SCENE_MODES) {
         for (const stretch of STRETCH_KINDS) check(sample, mode, stretch, false, 1);
         check(sample, mode, "asinh", true, 1);
+        check(sample, mode, "asinh", true, 1, true);
       }
       check(sample, "single", "asinh", false, 3);
+      check(sample, "single", "asinh", true, 3, true);
+      check(sample, "single", "asinh", true, 2, true, 2);
     }
 
     renderer.dispose();
@@ -440,6 +506,7 @@ function readInitialState(search: string): InitialState {
       stretch: pick(params.get("stretch"), STRETCH_KINDS, DEFAULT_STRETCH),
       contrast: readNumber(params.get("contrast"), DEFAULT_CONTRAST, MIN_CONTRAST, MAX_CONTRAST),
       highlight: pick(params.get("highlight"), HIGHLIGHTS, "none"),
+      hatch: params.get("hatch") === "1",
     },
     homeZoom: params.get("home") === "2" ? 2 : 1,
     renderer: pick(params.get("renderer"), RENDERERS, "webgl2"),
@@ -512,6 +579,7 @@ function ViewerDevPage() {
   const contrastId = useId();
   const marksId = useId();
   const blinkId = useId();
+  const hatchId = useId();
 
   useEffect(() => {
     let cancelled = false;
@@ -715,6 +783,16 @@ function ViewerDevPage() {
 
           <div className={`${styles.check} type-body-sm`}>
             <input
+              id={hatchId}
+              type="checkbox"
+              checked={settings.hatch}
+              disabled={settings.highlight === "none"}
+              onChange={(event) => update({ hatch: event.target.checked })}
+            />
+            <label htmlFor={hatchId}>{t("controls.hatch")}</label>
+          </div>
+          <div className={`${styles.check} type-body-sm`}>
+            <input
               id={marksId}
               type="checkbox"
               checked={marks}
@@ -804,7 +882,9 @@ function ViewerDevPage() {
                         <th scope="col">{t("checks.column.mode")}</th>
                         <th scope="col">{t("checks.column.stretch")}</th>
                         <th scope="col">{t("checks.column.highlight")}</th>
+                        <th scope="col">{t("checks.column.hatch")}</th>
                         <th scope="col">{t("checks.column.scale")}</th>
+                        <th scope="col">{t("checks.column.ratio")}</th>
                         <th scope="col">{t("checks.column.maxDiff")}</th>
                         <th scope="col">{t("checks.column.different")}</th>
                       </tr>
@@ -812,14 +892,16 @@ function ViewerDevPage() {
                     <tbody>
                       {checks.results.map((result) => (
                         <tr
-                          key={`${result.renderer}-${result.sample}-${result.mode}-${result.stretch}-${result.highlight}-${result.scale}`}
+                          key={`${result.renderer}-${result.sample}-${result.mode}-${result.stretch}-${result.highlight}-${result.hatch}-${result.scale}-${result.ratio}`}
                           data-check=""
                           data-renderer={result.renderer}
                           data-sample={result.sample}
                           data-mode={result.mode}
                           data-stretch={result.stretch}
                           data-highlight={String(result.highlight)}
+                          data-hatch={String(result.hatch)}
                           data-scale={result.scale}
+                          data-ratio={result.ratio}
                           data-max-diff={result.maxDiff}
                           data-different={result.different}
                           data-pixels={result.pixels}
@@ -829,7 +911,9 @@ function ViewerDevPage() {
                           <td>{result.mode}</td>
                           <td>{result.stretch}</td>
                           <td>{result.highlight ? t("checks.yes") : t("checks.no")}</td>
+                          <td>{result.hatch ? t("checks.yes") : t("checks.no")}</td>
                           <td>{formatInteger(result.scale)}</td>
+                          <td>{formatInteger(result.ratio)}</td>
                           <td>{formatInteger(result.maxDiff)}</td>
                           <td>{formatInteger(result.different)}</td>
                         </tr>

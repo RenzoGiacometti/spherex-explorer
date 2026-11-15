@@ -16,6 +16,12 @@ export interface TransportProps {
    */
   readonly playSize?: Extract<IconButtonSize, "md" | "lg" | "xl"> | undefined;
   readonly disabled?: boolean;
+  /**
+   * Deshabilita solo el boton de reproducir, cuando no hay nada que recorrer
+   * (un modo que no parpadea, una sola epoca con imagen). Anterior y siguiente
+   * siguen andando.
+   */
+  readonly playDisabled?: boolean;
   /** Nombre accesible del grupo. Por defecto sale de i18n. */
   readonly label?: string | undefined;
   readonly className?: string | undefined;
@@ -32,6 +38,7 @@ export function Transport({
   onNext,
   playSize,
   disabled = false,
+  playDisabled = false,
   label,
   className,
 }: TransportProps) {
@@ -56,7 +63,7 @@ export function Transport({
         size={playSize ?? "md"}
         // Sin tamano pedido, la hoja de estilos lo agranda en celular.
         className={playSize === undefined ? styles.playAuto : undefined}
-        disabled={disabled}
+        disabled={disabled || playDisabled}
         onClick={() => onPlayingChange(!playing)}
       />
       <IconButton icon="next" label={t("transport.next")} disabled={disabled} onClick={onNext} />

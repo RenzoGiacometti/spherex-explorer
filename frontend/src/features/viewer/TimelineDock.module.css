@@ -1,0 +1,128 @@
+/* Muelle inferior: un panel de vidrio a lo ancho, como en la maqueta de escritorio. */
+.dock {
+  gap: var(--space-xs);
+  padding: var(--glass-panel-padding) 20px var(--space-sm);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-md);
+}
+
+.position {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-sm);
+  min-width: 0;
+}
+
+.positionLabel {
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+.positionDate {
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+  white-space: nowrap;
+}
+
+/* Las referencias quedan pegadas a la velocidad, a la derecha. */
+.legend {
+  margin-left: auto;
+}
+
+.speed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speedLabel {
+  color: var(--color-text-dim);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* El estado de la carga va debajo, separado por una linea fina. */
+.status {
+  padding-top: 10px;
+  border-top: 1px solid var(--color-divider);
+}
+
+/*
+ * ---- Celular ---------------------------------------------------------------
+ *
+ * La epoca, la pista a todo el ancho y, debajo, el transporte: herramientas a
+ * la izquierda, reproducir (56 px) al centro y velocidad a la derecha. Mas
+ * apretado que el panel comun, para que todo entre en el 45 % inferior.
+ */
+.phone {
+  gap: var(--space-xxs);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.phoneTransport {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xxs);
+  min-width: 0;
+}
+
+/* Velocidad: un boton de 44 px que muestra la actual y pasa a la siguiente. */
+.speedButton {
+  appearance: none;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-icon-size);
+  height: var(--button-icon-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-xs);
+  background-color: transparent;
+  color: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  cursor: pointer;
+}
+
+.speedButton:hover {
+  border-color: var(--color-text);
+}
+
+.speedButton:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.phone .status {
+  padding-top: 6px;
+}

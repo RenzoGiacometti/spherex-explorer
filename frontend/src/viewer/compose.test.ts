@@ -4,7 +4,17 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { FRONTEND_DIR } from "@/test/sourceFiles";
 import type { Rgb, Rgba } from "./colors";
-import { composeScene, type Scene, type SceneMode, sameScene, sceneSize } from "./compose";
+import {
+  composeScene,
+  HATCH_STRIPE_CSS_PX,
+  hatchBand,
+  hatchStripe,
+  type Scene,
+  type SceneMode,
+  sameScene,
+  sceneHatch,
+  sceneSize,
+} from "./compose";
 import { MASK_NO_DATA, MASK_SATURATED, type PlaneImage, toPlaneImage } from "./planeImage";
 import { contrastCuts, STRETCH_KINDS, stretchUnit, toByte } from "./stretch";
 
@@ -319,6 +329,147 @@ describe("sameScene", () => {
       sameScene(one, scene("single", [plane], { highlight: { mask: new Uint8Array(2), color } })),
     ).toBe(false);
     expect(sameScene(one, scene("single", [plane], { highlight: null }))).toBe(false);
+  });
+
+  it("compara tambien el segundo color de la trama", () => {
+    const mask = new Uint8Array(2);
+    const color: Rgba = [1, 1, 1, 1];
+    const hatched = scene("single", [plane], { highlight: { mask, color, alternate: [0, 0, 0] } });
+    expect(
+      sameScene(
+        hatched,
+        scene("single", [plane], { highlight: { mask, color, alternate: [0, 0, 0] } }),
+      ),
+    ).toBe(true);
+    // Con trama y sin trama no dibujan lo mismo, aunque la mascara y el color coincidan.
+    expect(sameScene(hatched, scene("single", [plane], { highlight: { mask, color } }))).toBe(
+      false,
+    );
+    expect(
+      sameScene(scene("single", [plane], { highlight: { mask, color, alternate: null } }), hatched),
+    ).toBe(false);
+    expect(
+      sameScene(
+        hatched,
+        scene("single", [plane], { highlight: { mask, color, alternate: [0, 0, 0.5] } }),
+      ),
+    ).toBe(false);
+    // Sin `alternate` y con `alternate` en null es lo mismo.
+    expect(
+      sameScene(
+        scene("single", [plane], { highlight: { mask, color } }),
+        scene("single", [plane], { highlight: { mask, color, alternate: null } }),
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("trama del resaltado", () => {
+  const mask = new Uint8Array([1, 0]);
+  const plane = row(5, 5);
+
+  it("mide 1 px CSS: en una pantalla comun, un pixel fisico por franja", () => {
+    // DESIGN.md, "Capa de flags": trama diagonal de 1px.
+    expect(HATCH_STRIPE_CSS_PX).toBe(1);
+    expect(hatchStripe(1)).toBe(1);
+    expect(hatchStripe(2)).toBe(2);
+    expect(hatchStripe(3)).toBe(3);
+    // Densidades con fraccion: la franja es un numero entero de pixeles fisicos.
+    expect(hatchStripe(1.25)).toBe(1);
+    expect(hatchStripe(1.5)).toBe(2);
+    expect(hatchStripe(2.625)).toBe(3);
+  });
+
+  it("nunca mide menos de un pixel fisico", () => {
+    for (const ratio of [0.5, 0.2, 0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(hatchStripe(ratio), String(ratio)).toBe(1);
+    }
+  });
+
+  it("alterna los dos colores en diagonales que suben hacia la derecha", () => {
+    // Con franjas de 1: un damero, que es lo que da una diagonal de 1 px.
+    expect([0, 1, 2, 3].map((x) => hatchBand(x, 0, 1))).toEqual([0, 1, 0, 1]);
+    expect([0, 1, 2, 3].map((x) => hatchBand(x, 1, 1))).toEqual([1, 0, 1, 0]);
+    // Un paso a la derecha y uno hacia arriba (la y de pantalla baja) queda en la misma franja.
+    for (const stripe of [1, 2, 3]) {
+      for (let x = 0; x < 12; x += 1) {
+        for (let y = 1; y < 12; y += 1) {
+          expect(hatchBand(x + 1, y - 1, stripe)).toBe(hatchBand(x, y, stripe));
+        }
+      }
+    }
+    // Con franjas de 2: dos pixeles de cada color a lo largo de una fila.
+    expect([0, 1, 2, 3, 4, 5, 6, 7].map((x) => hatchBand(x, 0, 2))).toEqual([
+      0, 0, 1, 1, 0, 0, 1, 1,
+    ]);
+  });
+
+  it("se repite cada dos franjas en los dos ejes: sirve como baldosa", () => {
+    for (const stripe of [1, 2, 3]) {
+      const period = 2 * stripe;
+      for (let x = 0; x < period; x += 1) {
+        for (let y = 0; y < period; y += 1) {
+          expect(hatchBand(x + period, y, stripe)).toBe(hatchBand(x, y, stripe));
+          expect(hatchBand(x, y + period, stripe)).toBe(hatchBand(x, y, stripe));
+        }
+      }
+    }
+  });
+
+  it("un pixel de imagen de 2 px fisicos o mas siempre muestra los dos colores", () => {
+    // Por eso la trama va en pixeles de pantalla: un pixel marcado suelto se
+    // distingue sobre cielo oscuro y sobre una estrella.
+    for (const side of [2, 3, 4, 7]) {
+      for (let left = 0; left < 4; left += 1) {
+        for (let top = 0; top < 4; top += 1) {
+          const bands = new Set<number>();
+          for (let x = left; x < left + side; x += 1) {
+            for (let y = top; y < top + side; y += 1) bands.add(hatchBand(x, y, 1));
+          }
+          expect(bands.size, `lado ${side} en (${left}, ${top})`).toBe(2);
+        }
+      }
+    }
+  });
+
+  it("sceneHatch la reconoce por el segundo color", () => {
+    const hatch = { mask, color: [1, 1, 1, 1] as Rgba, alternate: [0, 0, 0] as Rgb };
+    expect(sceneHatch(scene("single", [plane], { highlight: hatch }))).toBe(hatch);
+    expect(sceneHatch(scene("single", [plane]))).toBeNull();
+    expect(sceneHatch(scene("single", [plane], { highlight: null }))).toBeNull();
+    expect(
+      sceneHatch(scene("single", [plane], { highlight: { mask, color: [1, 1, 1, 1] } })),
+    ).toBeNull();
+    expect(
+      sceneHatch(
+        scene("single", [plane], { highlight: { mask, color: [1, 1, 1, 1], alternate: null } }),
+      ),
+    ).toBeNull();
+    // Transparente: no hay resaltado, tampoco trama.
+    expect(
+      sceneHatch(scene("single", [plane], { highlight: { ...hatch, color: [1, 1, 1, 0] } })),
+    ).toBeNull();
+  });
+
+  it("no entra en la composicion de referencia: va en pixeles de pantalla", () => {
+    const hatch = { mask, color: [1, 1, 1, 1] as Rgba, alternate: [0, 0, 0] as Rgb };
+    for (const mode of ["single", "sum"] as const) {
+      const planes = mode === "single" ? [plane] : [plane, plane];
+      expect(Array.from(composeScene(scene(mode, planes, { highlight: hatch })))).toEqual(
+        Array.from(composeScene(scene(mode, planes))),
+      );
+    }
+    // El mismo resaltado, liso, si se compone.
+    const flat = composeScene(
+      scene("single", [plane], { highlight: { mask, color: hatch.color } }),
+    );
+    expect(pixel(flat, 0)).toEqual(WHITE);
+    expect(pixel(flat, 1)).toEqual(gray(0.5));
+  });
+
+  it("la mascara tiene que tener el tamano de la imagen, igual que la del resaltado liso", () => {
+    const short = { mask: new Uint8Array(1), color: [1, 1, 1, 1] as Rgba, alternate: EMPTY };
+    expect(() => sceneSize(scene("single", [plane], { highlight: short }))).toThrow(RangeError);
   });
 });
 

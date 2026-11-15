@@ -1,0 +1,101 @@
+/* Capa de flags dentro del panel Imagen: el conmutador y la lista de flags presentes. */
+.flags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* Sin nada que decir no ocupa lugar ni suma separacion. */
+.body:empty {
+  display: none;
+}
+
+.note {
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.failure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Un flag: muestra, nombre y cantidad en un renglon; la descripcion debajo,
+ * alineada con el nombre.
+ */
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px var(--space-xs);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.item:last-child {
+  border-bottom: 0;
+}
+
+/* El nombre es un identificador del archivo de datos: va en mono, como todo dato. */
+.name {
+  overflow-wrap: anywhere;
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+}
+
+.pixels {
+  color: var(--color-text);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+  white-space: nowrap;
+}
+
+.description {
+  grid-column: 2 / -1;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+/* Muestra de 12 px: la misma trama de la imagen, o el cuadro vacio si el flag no se cubre. */
+.swatch {
+  display: block;
+  flex-shrink: 0;
+}
+
+.swatchFill {
+  fill: var(--color-void);
+}
+
+.swatchLines {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.4;
+}
+
+.swatchBorder {
+  fill: none;
+  stroke: var(--color-hairline-strong);
+  stroke-width: 1;
+}

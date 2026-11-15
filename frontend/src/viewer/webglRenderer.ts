@@ -17,7 +17,7 @@
 // varias veces por segundo) solo cambia que textura se usa: no se sube ni se
 // recrea nada.
 
-import { SCENE_MODES, type Scene, sceneError, sceneSize } from "./compose";
+import { hatchStripe, SCENE_MODES, type Scene, sceneError, sceneHatch, sceneSize } from "./compose";
 import type { PlaneImage } from "./planeImage";
 import type {
   Frame,
@@ -104,6 +104,12 @@ uniform vec2 u_cuts;
 uniform vec3 u_noData;
 // Color del resaltado; con alfa 0 no hay resaltado.
 uniform vec4 u_highlightColor;
+// Trama del resaltado: ancho de cada franja en pixeles fisicos (0 es un color
+// liso) y el segundo color.
+uniform int u_hatchStripe;
+uniform vec3 u_hatchAlternate;
+// Alto del canvas en pixeles fisicos, para contar las filas desde arriba.
+uniform int u_bufferHeight;
 
 in vec2 v_position;
 out vec4 outColor;
@@ -183,7 +189,15 @@ void main() {
   }
 
   if (u_highlightColor.a > 0.0 && maskAt(u_highlight, texel) != 0) {
-    color = mix(color, u_highlightColor.rgb, u_highlightColor.a);
+    if (u_hatchStripe > 0) {
+      // La misma cuenta que hatchBand (compose.ts): pixeles fisicos desde la
+      // esquina superior izquierda del canvas. gl_FragCoord cuenta desde abajo.
+      ivec2 pixel = ivec2(gl_FragCoord.xy);
+      int band = ((pixel.x + u_bufferHeight - 1 - pixel.y) / u_hatchStripe) % 2;
+      color = band == 0 ? u_highlightColor.rgb : u_hatchAlternate;
+    } else {
+      color = mix(color, u_highlightColor.rgb, u_highlightColor.a);
+    }
   }
   // El redondeo a 8 bits se hace aca, igual que en la referencia. Si se deja a
   // la placa, la conversion admite tolerancia y un pixel de cada treinta sale
@@ -213,6 +227,9 @@ const UNIFORM_NAMES = [
   "u_cuts",
   "u_noData",
   "u_highlightColor",
+  "u_hatchStripe",
+  "u_hatchAlternate",
+  "u_bufferHeight",
 ] as const;
 
 type UniformName = (typeof UNIFORM_NAMES)[number];
@@ -446,6 +463,19 @@ export function createWebglRenderer(
     } else {
       gl.uniform4f(uniforms.u_highlightColor, 0, 0, 0, 0);
     }
+    const hatch = sceneHatch(scene);
+    if (hatch === null) {
+      gl.uniform1i(uniforms.u_hatchStripe, 0);
+      gl.uniform3f(uniforms.u_hatchAlternate, 0, 0, 0);
+    } else {
+      // Pixeles fisicos por pixel CSS con los que quedo el canvas, no la
+      // densidad pedida: el canvas tiene un lado maximo (`backingStoreSize`).
+      const width = frame.viewport.width > 0 ? frame.viewport.width : 1;
+      gl.uniform1i(uniforms.u_hatchStripe, hatchStripe(gl.drawingBufferWidth / width));
+      const [r, g, b] = hatch.alternate;
+      gl.uniform3f(uniforms.u_hatchAlternate, r, g, b);
+    }
+    gl.uniform1i(uniforms.u_bufferHeight, gl.drawingBufferHeight);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     gl.bindVertexArray(null);

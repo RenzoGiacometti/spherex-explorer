@@ -1,0 +1,105 @@
+/*
+ * Anotaciones sobre la imagen (DESIGN.md, nivel 1: "anotacion directa sobre la
+ * imagen, sin fondo"). Todo lo claro va montado sobre un trazo de vacio de
+ * 3 px, igual que el contorno de saturacion: asi se lee sobre cielo oscuro y
+ * sobre el blanco de una estrella. No es una sombra: es un borde.
+ */
+.layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+}
+
+/* Trazo de vacio que va debajo de cada linea. */
+.halo {
+  fill: none;
+  stroke: var(--color-void);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* La linea clara de 1 px. */
+.line {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* reticle: la mira en el acento, con el grosor de los iconos. */
+.reticle {
+  fill: none;
+  stroke: var(--reticle-text);
+  stroke-width: var(--effect-icon-stroke);
+  stroke-linecap: round;
+}
+
+.reticleHalo {
+  fill: none;
+  stroke: var(--reticle-bg);
+  stroke-width: 3.5px;
+  stroke-linecap: round;
+}
+
+/* Texto sobre la imagen: el relleno claro encima de un borde de vacio. */
+.labelCap,
+.dataText,
+.dataMute {
+  stroke: var(--color-void);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
+.labelCap {
+  fill: var(--color-text);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.dataText {
+  fill: var(--color-text);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+.dataMute {
+  fill: var(--color-text-mute);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+/* Rotulo de la imagen: centrado sobre el borde superior de lo que se ve de la imagen. */
+.tag {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: max-content;
+  transform: translateX(-50%);
+}
+
+/*
+ * Aviso de fuente saturada, abajo a la derecha de la imagen. Es un aviso de
+ * calidad (icono alert y frase) y va sobre vidrio, como los del panel.
+ */
+.saturated {
+  position: absolute;
+  padding: var(--space-xxs) var(--space-sm) var(--space-xxs) var(--space-xs);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-glass);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .saturated {
+    background-color: var(--color-glass-solid);
+  }
+}

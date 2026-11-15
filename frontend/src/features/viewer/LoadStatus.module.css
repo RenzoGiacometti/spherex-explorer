@@ -1,0 +1,43 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+/* Mismo alto que la barra de progreso: al terminar la carga nada cambia de tamano. */
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xxs) var(--space-xs);
+  min-width: 0;
+}
+
+.label {
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+  white-space: nowrap;
+}
+
+.separator {
+  color: var(--color-text-dim);
+  font: var(--type-data-sm-font);
+}
+
+.detail {
+  color: var(--color-text-mute);
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-md);
+}

@@ -27,6 +27,7 @@ import {
   type Point,
   panByScreen,
   pinchView,
+  type ScreenRect,
   type ViewportSize,
   type ViewState,
   type ViewTransform,
@@ -37,12 +38,29 @@ import {
   zoomAtCenter,
 } from "./view";
 
+/**
+ * Margenes del visor, en pixeles CSS, que quedan tapados por lo que flota
+ * encima (la barra superior, las columnas de paneles, la linea de tiempo).
+ */
+export interface ViewerInsets {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+
 /** Lo que hace falta para dibujar encima de la imagen. */
 export interface ViewerOverlay {
   /** Transformacion vigente de pixel de imagen a pixel CSS del visor (view.ts). */
   readonly transform: ViewTransform;
   /** Tamano del visor en pixeles CSS. */
   readonly viewport: ViewportSize;
+  /**
+   * Zona del visor donde se encuadra la imagen, en pixeles CSS: el visor entero
+   * o, con `insets`, lo que queda libre entre los paneles. Sirve para ubicar lo
+   * que va pegado a un borde (la escala, la rosa, el rotulo de la imagen).
+   */
+  readonly frame: ScreenRect;
   /** Tamano de la imagen en pixeles. */
   readonly image: ImageSize;
   /** Centro y acercamiento vigentes. */
@@ -73,6 +91,13 @@ export interface ImageViewerProps {
    * cubo entero y 2 es la vista de 5'. Al cambiarlo la vista vuelve a la de partida.
    */
   readonly homeZoom?: number | undefined;
+  /**
+   * Margenes tapados por lo que flota encima del visor. La imagen se encuadra y
+   * se acota dentro de lo que queda libre, asi ningun borde queda debajo de un
+   * panel sin poder traerlo a la vista; el dibujo sigue llegando a los bordes
+   * del visor. Si no dejan lugar, no se aplican.
+   */
+  readonly insets?: ViewerInsets | undefined;
   /** Nombre accesible del visor. */
   readonly ariaLabel: string;
   /** Rol del visor. Por defecto `application`: las flechas y otras teclas las maneja el visor. */
@@ -116,6 +141,18 @@ interface PointerStart extends Tap {
   moved: boolean;
 }
 
+/** Lo que necesitan las cuentas de view.ts: la vista, la imagen y el tamano de la zona de encuadre. */
+interface ViewFrame {
+  readonly view: ViewState;
+  readonly image: ImageSize;
+  readonly viewport: ViewportSize;
+}
+
+/** Un margen en pixeles: nunca negativo, y 0 si no es un numero. */
+function insetSize(value: number | undefined): number {
+  return value !== undefined && value > 0 && Number.isFinite(value) ? value : 0;
+}
+
 function currentPixelRatio(): number {
   return typeof window !== "undefined" && window.devicePixelRatio > 0 ? window.devicePixelRatio : 1;
 }
@@ -133,6 +170,7 @@ export function ImageViewer({
   scene,
   imageSize,
   homeZoom = MIN_ZOOM,
+  insets,
   ariaLabel,
   role = "application",
   ariaDescribedBy,
@@ -173,6 +211,17 @@ export function ImageViewer({
   const viewportWidth = viewport?.width ?? 0;
   const viewportHeight = viewport?.height ?? 0;
 
+  // Zona de encuadre: el visor menos los margenes tapados. Si no dejan lugar, el visor entero.
+  const insetLeft = insetSize(insets?.left);
+  const insetTop = insetSize(insets?.top);
+  const freeWidth = viewportWidth - insetLeft - insetSize(insets?.right);
+  const freeHeight = viewportHeight - insetTop - insetSize(insets?.bottom);
+  const hasFrame = freeWidth > 0 && freeHeight > 0;
+  const frameLeft = hasFrame ? insetLeft : 0;
+  const frameTop = hasFrame ? insetTop : 0;
+  const frameWidth = hasFrame ? freeWidth : viewportWidth;
+  const frameHeight = hasFrame ? freeHeight : viewportHeight;
+
   // Otra imagen u otra vista de partida: se vuelve a encuadrar. Quedarse un
   // momento sin imagen (un cambio de banda mientras carga) no mueve la vista.
   const hasImage = imageWidth > 0 && imageHeight > 0;
@@ -188,15 +237,33 @@ export function ImageViewer({
       return null;
     }
     const image = { width: imageWidth, height: imageHeight };
-    const size = { width: viewportWidth, height: viewportHeight };
+    const size = { width: frameWidth, height: frameHeight };
     const current = clampView(view ?? homeView(image, homeZoom), image, size);
+    const framed = viewTransform(current, image, size);
     return {
-      transform: viewTransform(current, image, size),
-      viewport: size,
+      // La cuenta se hace dentro de la zona de encuadre y se corre a su lugar en el visor.
+      transform: {
+        scale: framed.scale,
+        originX: framed.originX + frameLeft,
+        originY: framed.originY + frameTop,
+      },
+      viewport: { width: viewportWidth, height: viewportHeight },
+      frame: { left: frameLeft, top: frameTop, width: frameWidth, height: frameHeight },
       image,
       view: current,
     };
-  }, [view, homeZoom, imageWidth, imageHeight, viewportWidth, viewportHeight]);
+  }, [
+    view,
+    homeZoom,
+    imageWidth,
+    imageHeight,
+    viewportWidth,
+    viewportHeight,
+    frameLeft,
+    frameTop,
+    frameWidth,
+    frameHeight,
+  ]);
 
   // Lo ultimo que se mostro, para los gestos y para `getOverlay`.
   const overlayRef = useRef(overlay);
@@ -204,15 +271,26 @@ export function ImageViewer({
     overlayRef.current = overlay;
   }, [overlay]);
 
-  /** Cambia la vista a partir de la vigente. Sin imagen o sin tamano no hace nada. */
-  function updateView(change: (current: ViewerOverlay, home: ViewState) => ViewState): void {
+  /**
+   * Cambia la vista a partir de la vigente. Sin imagen o sin tamano no hace
+   * nada. `viewport` es la zona de encuadre: los puntos de pantalla se le pasan
+   * con `framePoint`.
+   */
+  function updateView(change: (current: ViewFrame, home: ViewState) => ViewState): void {
     setView((previous) => {
       const live = overlayRef.current;
       if (live === null) return previous;
+      const viewport = { width: live.frame.width, height: live.frame.height };
       const home = homeView(live.image, homeZoom);
-      const current = clampView(previous ?? home, live.image, live.viewport);
-      return change({ ...live, view: current }, home);
+      const current = clampView(previous ?? home, live.image, viewport);
+      return change({ view: current, image: live.image, viewport }, home);
     });
+  }
+
+  /** Un punto del visor medido desde la esquina de la zona de encuadre. */
+  function framePoint(point: Point): Point {
+    const frame = overlayRef.current?.frame;
+    return frame ? { x: point.x - frame.left, y: point.y - frame.top } : point;
   }
 
   useImperativeHandle(
@@ -223,12 +301,13 @@ export function ImageViewer({
         setView((previous) => {
           const live = overlayRef.current;
           if (live === null) return previous;
+          const viewport = { width: live.frame.width, height: live.frame.height };
           const current = clampView(
             previous ?? homeView(live.image, homeZoom),
             live.image,
-            live.viewport,
+            viewport,
           );
-          return zoomAtCenter(current, live.image, live.viewport, factor);
+          return zoomAtCenter(current, live.image, viewport, factor);
         });
       },
       getOverlay: () => overlayRef.current,
@@ -332,14 +411,14 @@ export function ImageViewer({
   }
 
   // La rueda se registra a mano: tiene que poder cancelar el desplazamiento de la pagina.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: updateView y localPoint solo leen refs
+  // biome-ignore lint/correctness/useExhaustiveDependencies: updateView, localPoint y framePoint solo leen refs
   useEffect(() => {
     const root = rootRef.current;
     if (root === null) return;
     const onWheel = (event: WheelEvent): void => {
       if (overlayRef.current === null) return;
       event.preventDefault();
-      const anchor = localPoint(event);
+      const anchor = framePoint(localPoint(event));
       const factor = wheelZoomFactor(event);
       updateView((current) =>
         zoomAround(current.view, current.image, current.viewport, factor, anchor),
@@ -402,8 +481,11 @@ export function ImageViewer({
     if (pointers.size === 2) {
       const other = [...pointers.entries()].find(([id]) => id !== event.pointerId)?.[1];
       if (other === undefined) return;
+      const fixed = framePoint(other);
+      const from = framePoint(before);
+      const to = framePoint(after);
       updateView((current) =>
-        pinchView(current.view, current.image, current.viewport, [before, other], [after, other]),
+        pinchView(current.view, current.image, current.viewport, [from, fixed], [to, fixed]),
       );
     }
   }

@@ -46,12 +46,59 @@ export type SceneMode = (typeof SCENE_MODES)[number];
 /** Maximo de planos por escena (un campo tiene 3 o 4 epocas). */
 export const MAX_SCENE_PLANES = 4;
 
-/** Capa de resaltado: una mascara que se dibuja encima con un color. */
+/**
+ * Capa de resaltado: una mascara que se dibuja encima con un color o, con
+ * `alternate`, con una trama diagonal de dos colores.
+ */
 export interface SceneHighlight {
   /** Un byte por pixel, en el mismo orden que el plano: distinto de 0 resalta. */
   readonly mask: Uint8Array;
   /** Color del resaltado. El alfa dice cuanto tapa lo que hay debajo. */
   readonly color: Rgba;
+  /**
+   * Segundo color. Si viene, el resaltado no es un color liso sino una trama
+   * diagonal que alterna `color` y `alternate`, los dos opacos (del alfa de
+   * `color` solo importa que sea mayor que 0). Es la capa de flags de
+   * DESIGN.md ("Sobre la imagen"): con `{colors.text}` y `{colors.void}` se
+   * distingue sobre cielo oscuro y sobre una estrella.
+   *
+   * La trama se mide en pixeles de pantalla, no de imagen (`hatchBand`): un
+   * pixel marcado suelto muestra los dos colores con cualquier acercamiento.
+   * Por eso no entra en `composeScene`, que trabaja en la grilla del plano.
+   */
+  readonly alternate?: Rgb | null | undefined;
+}
+
+/** Ancho de cada franja de la trama, en pixeles CSS (DESIGN.md: trama diagonal de 1 px). */
+export const HATCH_STRIPE_CSS_PX = 1;
+
+/**
+ * Ancho de una franja de la trama en pixeles fisicos del canvas, para una
+ * densidad (pixeles fisicos por pixel CSS). Nunca menos de 1.
+ */
+export function hatchStripe(pixelRatio: number): number {
+  const ratio = pixelRatio > 0 && Number.isFinite(pixelRatio) ? pixelRatio : 1;
+  return Math.max(1, Math.round(ratio * HATCH_STRIPE_CSS_PX));
+}
+
+/**
+ * Franja de la trama que le toca a un pixel fisico del canvas: 0 lleva `color`
+ * y 1 lleva `alternate`. `x` crece a la derecha e `y` hacia abajo, desde la
+ * esquina superior izquierda del canvas. Las franjas suben hacia la derecha.
+ *
+ * Es la definicion de la trama: el shader de webglRenderer.ts y el dibujo de
+ * canvas2dRenderer.ts hacen esta misma cuenta, y la pagina de desarrollo los
+ * compara con ella.
+ */
+export function hatchBand(x: number, y: number, stripe: number): 0 | 1 {
+  return Math.floor((x + y) / stripe) % 2 === 0 ? 0 : 1;
+}
+
+/** Dice si el resaltado de la escena es una trama: tiene `alternate` y no es transparente. */
+export function sceneHatch(scene: Scene): (SceneHighlight & { readonly alternate: Rgb }) | null {
+  const highlight = scene.highlight ?? null;
+  if (highlight === null || !highlight.alternate || !(highlight.color[3] > 0)) return null;
+  return highlight as SceneHighlight & { readonly alternate: Rgb };
 }
 
 export interface Scene {
@@ -161,6 +208,13 @@ export function sameScene(a: Scene | null, b: Scene | null): boolean {
   const first = a.highlight ?? null;
   const second = b.highlight ?? null;
   if (first === null || second === null) return first === second;
+  const firstAlternate = first.alternate ?? null;
+  const secondAlternate = second.alternate ?? null;
+  if (firstAlternate === null || secondAlternate === null) {
+    if (firstAlternate !== secondAlternate) return false;
+  } else if (!sameColor(firstAlternate, secondAlternate)) {
+    return false;
+  }
   return first.mask === second.mask && sameColor(first.color, second.color);
 }
 
@@ -176,6 +230,10 @@ export interface ComposeOptions {
 /**
  * Composicion de referencia: los RGBA de la escena, cuatro bytes por pixel,
  * con la misma grilla que los planos. La opacidad es siempre 255.
+ *
+ * Un resaltado con trama (`highlight.alternate`) no se compone aca: va en
+ * pixeles de pantalla y lo dibuja cada camino encima de esta imagen, segun
+ * `hatchBand`.
  */
 export function composeScene(scene: Scene, options: ComposeOptions = {}): Uint8ClampedArray {
   const { width, height } = sceneSize(scene);
@@ -191,7 +249,8 @@ export function composeScene(scene: Scene, options: ComposeOptions = {}): Uint8C
   const halfRange = differenceHalfRange(scene.cuts);
   const [emptyRed, emptyGreen, emptyBlue] = scene.noDataColor;
 
-  const highlight = scene.highlight ?? null;
+  // La trama no se mezcla con la imagen: ver el comentario de la funcion.
+  const highlight = sceneHatch(scene) === null ? (scene.highlight ?? null) : null;
   const highlightAlpha = highlight === null ? 0 : highlight.color[3];
   const highlightMask = highlight === null || highlightAlpha <= 0 ? null : highlight.mask;
   const [highlightRed, highlightGreen, highlightBlue] =

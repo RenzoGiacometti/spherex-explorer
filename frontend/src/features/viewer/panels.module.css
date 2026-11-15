@@ -1,0 +1,54 @@
+/* Piezas chicas que comparten los paneles del visor. */
+
+/* Renglon que explica el modo elegido. */
+.hint {
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+/* El boton de mantener apretado ocupa el ancho del panel: es un blanco grande. */
+.holdButton {
+  width: 100%;
+  /* Mantener el dedo apoyado no selecciona el texto ni desplaza la pagina. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/*
+ * ---- Celular ---------------------------------------------------------------
+ *
+ * Tira de la zona del pulgar: un panel sin encabezado, con el relleno justo,
+ * como la de bandas de la maqueta.
+ */
+.strip {
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
+}
+
+/* Un aviso dentro de la tira lleva su propio aire: el panel casi no tiene relleno. */
+.stripNotice {
+  padding: var(--space-xxs) var(--space-xs);
+}
+
+/* Un selector con su rotulo a la izquierda, en un solo renglon. */
+.inlineControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.inlineLabel {
+  flex-shrink: 0;
+  padding-left: var(--space-xs);
+  color: var(--color-text-mute);
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.inlineOptions {
+  flex: 1;
+}

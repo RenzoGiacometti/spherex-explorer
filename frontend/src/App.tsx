@@ -3,6 +3,7 @@ import { DevPageHost } from "@/dev/DevPageHost";
 import { EntryPage } from "@/features/entry";
 import { ViewerPage } from "@/features/viewer";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
+import { useFieldUrlSync } from "@/state/fieldUrlSync";
 import { useUrlState } from "@/state/urlState";
 
 /**
@@ -12,6 +13,10 @@ import { useUrlState } from "@/state/urlState";
 export function App() {
   const showViewer = useUrlState((state) => state.ra !== null && state.dec !== null);
   const urlLanguage = useUrlState((state) => state.lang);
+
+  // El campo sigue a la URL: un link con coordenadas lo abre, otra banda lo
+  // reordena y volver a la entrada lo cierra. Se une una sola vez, aca.
+  useFieldUrlSync();
 
   // El idioma sigue a la URL: `lang` manda y, si falta, decide el navegador.
   useEffect(() => {
