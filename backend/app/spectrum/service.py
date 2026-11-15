@@ -193,13 +193,23 @@ def _pixel_area_sr(wcs: WCS, x: float, y: float) -> float:
     return abs(ax * by - ay * bx) * _DEG2_TO_SR
 
 
-def measure_cutout(
-    cutout: CachedCutout,
-    target: SpectrumTarget,
-    tables: WaveTables,
-    config: ApertureConfig,
-) -> ExposureResult:
-    """Mide el objeto en un recorte. Lanza `OSError`, `KeyError` o `ValueError` si el archivo no sirve."""
+@dataclass(frozen=True)
+class LoadedCutout:
+    """Un recorte ya leido del disco: se puede medir en varias posiciones sin volver a abrirlo."""
+
+    cutout: CachedCutout
+    header: fits.Header
+    image: Any  # IMAGE - ZODI
+    variance: Any
+    flags: Any
+    flag_bits: dict[str, int]
+    detector: int
+    mjd: float
+    wcs: WCS
+
+
+def load_cutout(cutout: CachedCutout) -> LoadedCutout:
+    """Lee un recorte. Lanza `OSError`, `KeyError` o `ValueError` si el archivo no sirve."""
     with fits.open(cutout.path, memmap=False) as hdul:
         header = hdul["IMAGE"].header
         image = np.asarray(hdul["IMAGE"].data, dtype=np.float64)
@@ -224,14 +234,36 @@ def measure_cutout(
         raise ValueError(f"{cutout.path.name}: RADESYS={radesys!r}; solo se admite ICRS")
     # Solo las tarjetas del WCS primario: ver `wcs_cards` en app/pipeline/exposure.py.
     wcs = WCS(wcs_cards(header))
+    return LoadedCutout(
+        cutout=cutout,
+        header=header,
+        image=image - zodi,
+        variance=variance,
+        flags=flags,
+        flag_bits=flag_bits,
+        detector=detector,
+        mjd=mjd,
+        wcs=wcs,
+    )
+
+
+def measure_loaded(
+    loaded: LoadedCutout,
+    target: SpectrumTarget,
+    tables: WaveTables,
+    config: ApertureConfig,
+) -> ExposureResult:
+    """Mide el objeto en un recorte ya leido."""
+    cutout, header, wcs, flag_bits = loaded.cutout, loaded.header, loaded.wcs, loaded.flag_bits
+    detector, mjd = loaded.detector, loaded.mjd
     ra, dec = target.position_at(mjd)
     x_pix, y_pix = wcs.all_world2pix([ra], [dec], 0)
     x, y = float(x_pix[0]), float(y_pix[0])
 
     measurement = measure_aperture(
-        image - zodi,
-        variance,
-        flags,
+        loaded.image,
+        loaded.variance,
+        loaded.flags,
         x,
         y,
         masked_bits=flag_mask(flag_bits, MASKED_FLAGS),
@@ -267,6 +299,16 @@ def measure_cutout(
         processing=processing_version(cutout.path.name),
         offset_arcsec=offset,
     )
+
+
+def measure_cutout(
+    cutout: CachedCutout,
+    target: SpectrumTarget,
+    tables: WaveTables,
+    config: ApertureConfig,
+) -> ExposureResult:
+    """Mide el objeto en un recorte. Lanza `OSError`, `KeyError` o `ValueError` si el archivo no sirve."""
+    return measure_loaded(load_cutout(cutout), target, tables, config)
 
 
 def _collect(
@@ -590,6 +632,65 @@ def compute_spectrum(
     return build_document(
         collected.results, target, tables, config, field_id=field_id, n_unreadable=len(collected.failures)
     )
+
+
+def compute_spectra(
+    jobs: Sequence[tuple[SpectrumTarget, Sequence[CachedCutout]]],
+    *,
+    config: ApertureConfig | None = None,
+    tables: WaveTables | None = None,
+    field_id: str | None = None,
+) -> list[dict[str, Any] | None]:
+    """Espectros de varios objetos, abriendo cada recorte una sola vez.
+
+    Cada trabajo es un objeto con los recortes que lo cubren (uno por
+    exposicion). El resultado es el mismo que llamar a `compute_spectrum` con
+    cada uno, en el mismo orden; `None` donde no se pudo leer ningun recorte.
+    Sirve para medir todas las fuentes de un campo: un espectro suelto abre
+    cientos de recortes, y aca se comparten.
+    """
+    config = ApertureConfig() if config is None else config
+    try:
+        tables = load_wave_tables() if tables is None else tables
+    except WaveTableError as exc:
+        raise SpectrumError(str(exc)) from exc
+    wanted: dict[Path, tuple[CachedCutout, list[int]]] = {}
+    for index, (_target, cutouts) in enumerate(jobs):
+        for cutout in cutouts:
+            wanted.setdefault(cutout.path, (cutout, []))[1].append(index)
+    errors = (OSError, KeyError, ValueError, TypeError, IndexError, fits.VerifyError)
+
+    def one(item: tuple[CachedCutout, list[int]]) -> list[tuple[int, ExposureResult | _Failure]]:
+        cutout, indices = item
+        try:
+            loaded = load_cutout(cutout)
+        except errors as exc:
+            failure = _Failure(cutout.exposure, f"{type(exc).__name__}: {exc}"[:200])
+            return [(index, failure) for index in indices]
+        outcomes: list[tuple[int, ExposureResult | _Failure]] = []
+        for index in indices:
+            try:
+                outcomes.append((index, measure_loaded(loaded, jobs[index][0], tables, config)))
+            except errors as exc:
+                outcomes.append((index, _Failure(cutout.exposure, f"{type(exc).__name__}: {exc}"[:200])))
+        return outcomes
+
+    collected = [_Collected() for _ in jobs]
+    # Por orden de exposicion, como `covering_cutouts`: el documento no depende del orden de lectura.
+    items = sorted(wanted.values(), key=lambda item: item[0].exposure)
+    with ThreadPoolExecutor(max_workers=READ_WORKERS) as pool:
+        for outcomes in pool.map(one, items):
+            for index, outcome in outcomes:
+                if isinstance(outcome, _Failure):
+                    collected[index].failures.append(outcome)
+                else:
+                    collected[index].results.append(outcome)
+    return [
+        build_document(group.results, target, tables, config, field_id=field_id, n_unreadable=len(group.failures))
+        if group.results
+        else None
+        for group, (target, _cutouts) in zip(collected, jobs, strict=True)
+    ]
 
 
 def cutout_paths(cutouts: Sequence[CachedCutout]) -> list[Path]:

@@ -1,13 +1,21 @@
-"""De un pedido `GET /api/spectrum` al documento: precalculado, o medido sobre los recortes en cache.
+"""De un pedido `GET /api/spectrum` al documento: guardado, o medido sobre los recortes en cache.
 
 Orden:
 
-1. Si el punto cae sobre uno de los objetos precalculados, se devuelve ese
-   documento (`source: "precomputed"`). No hace falta tener los recortes.
-2. Si no, se buscan en la cache los recortes que cubren el punto. Con `field`,
+1. Con `field` de un campo que tiene espectros guardados (`saved.py`: los campos
+   precalculados), el clic se ajusta a la fuente guardada mas cercana y responde
+   su documento con el aviso `snapped_source`. Si no hay ninguna dentro del
+   radio, responde el documento `no_source` (HTTP 200, sin puntos, con la fuente
+   mas cercana). En esos campos nunca se mide: la respuesta es la misma con o
+   sin recortes en disco.
+2. Si el punto cae sobre uno de los objetos precalculados (`precomputed.py`), se
+   devuelve ese documento (`source: "precomputed"`), tambien con `snapped_source`.
+3. En modo `SPHEREX_PRECOMPUTED_ONLY` se termina aca: `not_found`, como
+   `/api/field` en ese modo. Nunca se mide sobre recortes.
+4. Si no, se buscan en la cache los recortes que cubren el punto. Con `field`,
    solo los de ese campo (los centrados donde dice su `request`); sin `field`,
-   cualquiera que lo cubra.
-3. Se mide (`service.compute_spectrum`) y el resultado queda en memoria mientras
+   cualquiera que lo cubra. Es el camino de los campos armados en vivo.
+5. Se mide (`service.compute_spectrum`) y el resultado queda en memoria mientras
    no cambien los recortes: un espectro lleva de 4 a 11 s (de 258 a 539
    exposiciones).
 
@@ -27,7 +35,8 @@ from app.domain import ResolvedTarget
 from app.jobs.store import FieldStore, StoreError
 from app.spectrum.cutouts import CachedCutout, covering_cutouts, cutout_dirs, list_cutouts
 from app.spectrum.photometry import ApertureConfig
-from app.spectrum.precomputed import find_precomputed, spectra_dir
+from app.spectrum.precomputed import find_precomputed_match, spectra_dir
+from app.spectrum.saved import saved_spectrum, with_snapped_warning
 from app.spectrum.service import SpectrumError, SpectrumTarget, compute_spectrum
 
 # El anillo de fondo llega a 8 px del objeto: el recorte tiene que dejar ese aire.
@@ -87,9 +96,18 @@ def spectrum_for(
         raise invalid_request(f"dec={dec!r} fuera de rango: se admite de -90 a 90 grados")
     ra %= 360.0
 
-    precomputed = find_precomputed(spectra_dir(settings), ra, dec)
+    if field is not None:
+        saved = saved_spectrum(spectra_dir(settings), field, ra, dec, epoch)
+        if saved is not None:
+            return saved
+
+    precomputed = find_precomputed_match(spectra_dir(settings), ra, dec)
     if precomputed is not None:
-        return precomputed
+        return with_snapped_warning(*precomputed)
+
+    if settings.precomputed_only:
+        # Solo lo guardado, sin medir: como `/api/field` en este modo (app/jobs/manager.py).
+        raise not_found("este servidor solo sirve los espectros guardados y en ese punto no hay ninguno")
 
     center = None if field is None else _field_center(field, settings)
     cutouts = covering_cutouts(list_cutouts(cutout_dirs(settings)), ra, dec, margin_px=CUTOUT_MARGIN_PX, center=center)

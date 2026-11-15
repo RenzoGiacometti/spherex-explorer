@@ -81,8 +81,11 @@ def load_index(directory: Path) -> list[PrecomputedEntry]:
     return entries
 
 
-def find_precomputed(directory: Path, ra: float, dec: float) -> dict[str, Any] | None:
-    """Documento precalculado del objeto que esta en `(ra, dec)`, o `None` si ahi no hay ninguno."""
+def find_precomputed_match(directory: Path, ra: float, dec: float) -> tuple[dict[str, Any], float, float, float] | None:
+    """Documento del objeto que esta en `(ra, dec)`, la posicion suya mas cercana al punto y la distancia.
+
+    Devuelve `(documento, ra, dec, segundos de arco)`, o `None` si ahi no hay ninguno.
+    """
     best: tuple[float, PrecomputedEntry] | None = None
     for entry in load_index(directory):
         distance = entry.distance_arcsec(ra, dec)
@@ -94,4 +97,13 @@ def find_precomputed(directory: Path, ra: float, dec: float) -> dict[str, Any] |
         document = json.loads(best[1].path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    return document if isinstance(document, dict) else None
+    if not isinstance(document, dict):
+        return None
+    position = min(best[1].positions, key=lambda item: separation_deg(ra, dec, *item))
+    return document, position[0], position[1], best[0]
+
+
+def find_precomputed(directory: Path, ra: float, dec: float) -> dict[str, Any] | None:
+    """Documento precalculado del objeto que esta en `(ra, dec)`, o `None` si ahi no hay ninguno."""
+    match = find_precomputed_match(directory, ra, dec)
+    return None if match is None else match[0]
