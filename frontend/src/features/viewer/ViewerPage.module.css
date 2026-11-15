@@ -272,13 +272,15 @@
 /*
  * En los modos que comparan con una epoca de referencia (diferencia, rojo/cian,
  * mantener apretado) los controles suman la epoca de referencia y el boton de
- * mantener. La imagen conserva el alto que tenia en el parpadeo, que ViewerPage
- * deja en `--viewer-stage-lock`; lo que crece es la zona de controles, que se
- * desplaza. La hoja del espectro y el cajon siguen saliendo de `thumb`, que no
- * recorta.
+ * mantener. La imagen queda del alto que tiene en el parpadeo: a la zona de
+ * controles se le reserva lo que ocuparia ahi, que ViewerPage deja en
+ * `--viewer-plain-controls`, y lo que no entra se desplaza adentro. El resto
+ * se reparte como en el parpadeo (el minimo de la imagen es el mismo de
+ * arriba), asi que la imagen sigue a la ventana cuando cambia de alto. La hoja
+ * del espectro y el cajon siguen saliendo de `thumb`, que no recorta.
  */
 .page[data-layout="phone"][data-stage-lock] {
-  grid-template-rows: auto var(--viewer-stage-lock) minmax(0, 1fr);
+  grid-template-rows: auto minmax(180px, 1fr) minmax(0, var(--viewer-plain-controls));
   height: 100%;
 }
 

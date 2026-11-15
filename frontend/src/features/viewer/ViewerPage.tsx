@@ -24,9 +24,9 @@
 //            demas va en el cajon de herramientas, que ocupa ese mismo lugar.
 //            El espectro se abre ahi mismo, en una hoja que sube sobre la parte
 //            de abajo de la imagen sin taparla entera. En los modos que comparan
-//            con una epoca de referencia la imagen conserva el alto que tenia
-//            en el parpadeo: lo que crece es la zona de controles, que se
-//            desplaza. La herramienta Medir
+//            con una epoca de referencia la imagen tiene el alto del parpadeo,
+//            se haya pasado por el o no: lo que crece es la zona de controles,
+//            que se desplaza (usePlainControlsHeight.ts). La herramienta Medir
 //            va arriba de los controles: apagada es una tira con su
 //            conmutador; prendida, su panel, con alto acotado.
 //
@@ -63,7 +63,6 @@ import {
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -103,6 +102,7 @@ import { TimelineDock } from "./TimelineDock";
 import { ToolsDrawer, type ToolsSection } from "./ToolsDrawer";
 import { TopBar } from "./TopBar";
 import { PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { usePlainControlsHeight } from "./usePlainControlsHeight";
 import { useQualityNotices } from "./useQualityNotices";
 import { useSourceUrl } from "./useSourceUrl";
 import { useSpectrum } from "./useSpectrum";
@@ -253,19 +253,13 @@ export function ViewerPage() {
   // ---- Celular: la imagen no se achica en los modos que comparan -------------
 
   // La epoca de referencia y el boton de mantener suman alto a los controles. La zona de la imagen
-  // conserva el alto que tenia en el parpadeo (o la suma, que tiene los mismos controles) y son
-  // los controles los que se desplazan (ViewerPage.module.css, `data-stage-lock`).
-  const stageCellRef = useRef<HTMLDivElement | null>(null);
-  const [plainStageHeight, setPlainStageHeight] = useState<number | null>(null);
+  // queda como en el parpadeo: a los controles se les reserva el alto que tendrian ahi y son ellos
+  // los que se desplazan (ViewerPage.module.css, `data-stage-lock`). Ese alto sale de lo que hay
+  // en pantalla, no de haber pasado por el parpadeo: un link abierto directamente en uno de estos
+  // modos muestra la imagen del mismo tamano.
+  const controlsRef = useRef<HTMLDivElement | null>(null);
   const pairMode = mode === "difference" || mode === "redcyan" || mode === "hold";
-  const plainMode = (mode === "blink" || mode === "sum") && !measuring;
-  // Mide despues de cada dibujo: el alto cambia con la ventana y con lo que haya en los controles.
-  useLayoutEffect(() => {
-    if (layout !== "phone" || !plainMode) return;
-    const height = stageCellRef.current?.offsetHeight ?? 0;
-    if (height > 0) setPlainStageHeight(height);
-  });
-  const stageLock = layout === "phone" && pairMode ? plainStageHeight : null;
+  const plainControls = usePlainControlsHeight(controlsRef, layout === "phone" && pairMode);
 
   const openTools = useCallback(
     (section: ToolsSection) => {
@@ -377,11 +371,11 @@ export function ViewerPage() {
       data-click={canPick ? clickMode : undefined}
       data-measure={layout === "embed" ? undefined : measuring ? "on" : "off"}
       data-measure-marks={measuring ? rawMeasure.marks.length : undefined}
-      data-stage-lock={stageLock === null ? undefined : ""}
+      data-stage-lock={plainControls === null ? undefined : ""}
       style={
-        stageLock === null
+        plainControls === null
           ? undefined
-          : ({ "--viewer-stage-lock": `${stageLock}px` } as CSSProperties)
+          : ({ "--viewer-plain-controls": `${plainControls}px` } as CSSProperties)
       }
     >
       {layout === "embed" ? null : (
@@ -443,7 +437,7 @@ export function ViewerPage() {
         {measuring ? ` ${tMeasure("panel.hint")}` : null}
       </p>
 
-      <div ref={stageCellRef} className={styles.stage}>
+      <div className={styles.stage}>
         {/* La zona donde se encuadra la imagen. El pie de la placa va debajo y le saca lugar. */}
         <div ref={stageRef} className={styles.frame}>
           {curtainOn ? <CurtainStage controller={controller} /> : null}
@@ -478,6 +472,7 @@ export function ViewerPage() {
         <div className={styles.thumb}>
           {/* Siguen en su lugar, sin verse, debajo del cajon: su alto es el del cajon. */}
           <div
+            ref={controlsRef}
             className={styles.controls}
             data-covered={openSection === null && !spectrumOpen ? undefined : "true"}
           >
