@@ -8,12 +8,16 @@ entorno `SPHEREX_<NOMBRE_EN_MAYUSCULAS>`; por ejemplo `SPHEREX_CACHE_DIR` o
 
 from __future__ import annotations
 
+import logging
 import os
+import tempfile
 from collections.abc import Mapping
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, replace
 from functools import lru_cache
 from pathlib import Path
 from typing import get_type_hints
+
+logger = logging.getLogger(__name__)
 
 ENV_PREFIX = "SPHEREX_"
 
@@ -184,6 +188,11 @@ class Settings:
         """Nombres resueltos con Sesame."""
         return self.cache_dir / "sesame"
 
+    @property
+    def sesame_seed_dir(self) -> Path:
+        """Respuestas de Sesame de los objetos precalculados, versionadas. Solo lectura."""
+        return self.data_dir / "sesame"
+
     # ------------------------------------------------------------------- entorno
 
     @classmethod
@@ -222,7 +231,26 @@ def _parse(name: str, kind: object, raw: str) -> object:
     return raw
 
 
+def with_writable_cache(settings: Settings) -> Settings:
+    """La misma configuracion, con una cache en la que se pueda escribir.
+
+    Si `cache_dir` no se puede crear o escribir (por ejemplo un disco montado con otro
+    dueno que el usuario del proceso), la cache pasa a una carpeta temporal: el backend
+    sigue armando campos, aunque lo armado no sobreviva a un reinicio.
+    """
+    probe = settings.cache_dir / f".escritura-{os.getpid()}"
+    try:
+        settings.cache_dir.mkdir(parents=True, exist_ok=True)
+        probe.write_bytes(b"")
+        probe.unlink()
+    except OSError as exc:
+        fallback = Path(tempfile.gettempdir()) / "spherex-cache"
+        logger.warning("no se puede escribir en %s (%s): la cache va a %s", settings.cache_dir, exc, fallback)
+        return replace(settings, cache_dir=fallback)
+    return settings
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Configuracion del proceso, leida del entorno una sola vez."""
-    return Settings.from_env()
+    return with_writable_cache(Settings.from_env())

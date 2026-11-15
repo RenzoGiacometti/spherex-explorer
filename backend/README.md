@@ -164,7 +164,9 @@ docker build -t spherex-explorer .
 docker run --rm -p 7860:7860 spherex-explorer
 ```
 
-`data/sesame/` guarda las respuestas de Sesame de los cinco objetos; la imagen las copia a su caché para que los links con `name` abran aunque CDS no responda.
+`data/sesame/` guarda las respuestas de Sesame de los objetos precalculados. El backend las lee de ahí cuando el nombre no está en su caché, así que los links con `name` abren aunque CDS no responda; no vencen.
+
+En Render la caché (`/app/cache`: recortes y campos armados en vivo) va en un disco persistente (`render.yaml`), para que lo armado sobreviva a un redeploy. Si el proceso no puede escribir en `SPHEREX_CACHE_DIR`, usa una carpeta temporal y lo deja en el log.
 
 ### Lo que el gestor de trabajos tiene que hacer con estas piezas
 
@@ -196,7 +198,7 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 
 ```
 data/fields/     campos precalculados (se versionan)
-data/sesame/     respuestas de Sesame de los objetos precalculados (se versionan; las usa la imagen Docker)
+data/sesame/     respuestas de Sesame de los objetos precalculados (se versionan; se leen si el nombre no está en la caché)
 cache/           caché de ejecución (ignorada por git): fields/, cutouts/, sia/, sesame/
 ```
 

@@ -36,11 +36,11 @@ RUN .venv/bin/python -m compileall -q app
 COPY backend/data ./data
 COPY --from=frontend /src/frontend/dist /app/static
 
-# Nombres ya resueltos de los objetos precalculados: los links con `name` abren
-# aunque Sesame (CDS) no responda. En /app/cache van tambien los recortes bajados y los
-# campos que se arman en vivo: es lo unico que el usuario del backend puede escribir.
-COPY backend/data/sesame /app/cache/sesame
-RUN chown -R spherex:spherex /app/cache && chmod -R u+rwX /app/cache
+# En /app/cache van los recortes bajados y los campos que se arman en vivo: es lo unico que
+# el usuario del backend puede escribir. En Render ahi se monta el disco persistente
+# (render.yaml). Los nombres ya resueltos de los objetos precalculados se leen de
+# data/sesame, asi que los links con `name` abren aunque Sesame (CDS) no responda.
+RUN mkdir -p /app/cache && chown -R spherex:spherex /app/cache && chmod -R u+rwX /app/cache
 
 # SPHEREX_PRECOMPUTED_ONLY=1 (por ejemplo desde el panel de Render) vuelve al modo que solo
 # sirve lo precalculado y nunca toca IRSA.

@@ -265,6 +265,8 @@ def make_settings(
     tmp_path: Path, *urls: str, timeout: float = 2.0, days: float = 30.0, total: float = 20.0
 ) -> Settings:
     return Settings(
+        # Carpeta de datos vacia: los nombres guardados con el repositorio no cuentan en estos tests.
+        data_dir=tmp_path / "data",
         cache_dir=tmp_path / "cache",
         sesame_urls=urls,
         sesame_timeout_s=timeout,

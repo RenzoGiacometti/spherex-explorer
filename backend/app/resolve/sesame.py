@@ -291,6 +291,11 @@ def resolve_name(name: str, settings: Settings) -> ResolvedTarget:
     cached = _read_cache(path, text)
     if cached is not None and cached[1] <= settings.resolve_cache_days:
         return cached[0]
+    # Nombres de los objetos precalculados, guardados con el repositorio: no vencen ni
+    # dependen de la cache (que en el despliegue puede ser un disco aparte).
+    seeded = _read_cache(settings.sesame_seed_dir / path.name, text)
+    if seeded is not None:
+        return seeded[0]
 
     total = transport.Deadline(settings.sesame_total_timeout_s)
     servers = settings.sesame_urls

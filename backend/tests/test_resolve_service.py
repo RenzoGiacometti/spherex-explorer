@@ -39,7 +39,8 @@ SAVED = {
 @pytest.fixture
 def settings(tmp_path: Path) -> Settings:
     """Configuracion sin servidores de Sesame y con los nombres guardados ya en la cache."""
-    result = Settings(cache_dir=tmp_path / "cache", sesame_urls=())
+    # Carpeta de datos vacia: los nombres guardados con el repositorio no cuentan en estos tests.
+    result = Settings(data_dir=tmp_path / "data", cache_dir=tmp_path / "cache", sesame_urls=())
     for query, source in SAVED.items():
         target = cache_path(query, result)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -171,7 +172,7 @@ def test_coordinates_do_not_query_sesame(tmp_path: Path, text: str, ra: float, d
 
 
 def test_the_field_epoch_comes_from_the_settings(tmp_path: Path, settings: Settings) -> None:
-    later = Settings(cache_dir=settings.cache_dir, sesame_urls=(), field_epoch=2027.0)
+    later = Settings(data_dir=settings.data_dir, cache_dir=settings.cache_dir, sesame_urls=(), field_epoch=2027.0)
     response = service.resolve("Barnard's Star", later)
     assert response.field_center.epoch == 2027.0
     assert response.moved_arcsec == pytest.approx(270.4 + 10.39, abs=0.2)

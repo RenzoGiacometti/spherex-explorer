@@ -11,6 +11,14 @@ services:
     region: oregon
     numInstances: 1
     healthCheckPath: /api/health
+    # Disco persistente para la cache: los campos que arman los visitantes y los recortes
+    # bajados sobreviven a un redeploy. Con disco, Render detiene la instancia vieja antes de
+    # arrancar la nueva (un corte breve en cada deploy). Si el usuario del contenedor (uid 1000)
+    # no pudiera escribir en el disco, el backend usa una carpeta temporal y lo deja en el log.
+    disk:
+      name: spherex-cache
+      mountPath: /app/cache
+      sizeGB: 5
     envVars:
       - key: PORT
         value: "7860"
