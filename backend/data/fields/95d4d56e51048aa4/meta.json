@@ -1,0 +1,886 @@
+{
+  "id": "95d4d56e51048aa4",
+  "pipeline": "1",
+  "status": "ready",
+  "rev": 1,
+  "request": {
+    "ra": 269.4463,
+    "dec": 4.7683,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      269.4463,
+      4.7683
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "detectors": [
+    {
+      "detector": 1,
+      "wave_min_um": 0.7455,
+      "wave_max_um": 1.1167,
+      "display": {
+        "vmin": -0.0845371,
+        "vmax": 8.6496,
+        "median": 0.0500406,
+        "sigma": 0.0672888
+      }
+    },
+    {
+      "detector": 2,
+      "wave_min_um": 1.1033,
+      "wave_max_um": 1.6499,
+      "display": {
+        "vmin": -0.0925263,
+        "vmax": 11.4776,
+        "median": 0.0779435,
+        "sigma": 0.0852349
+      }
+    },
+    {
+      "detector": 3,
+      "wave_min_um": 1.6301,
+      "wave_max_um": 2.4346,
+      "display": {
+        "vmin": -0.0806115,
+        "vmax": 9.68635,
+        "median": 0.0603685,
+        "sigma": 0.07049
+      }
+    },
+    {
+      "detector": 4,
+      "wave_min_um": 2.4027,
+      "wave_max_um": 3.8473,
+      "display": {
+        "vmin": -0.0466207,
+        "vmax": 5.52338,
+        "median": 0.0310218,
+        "sigma": 0.0388212
+      }
+    },
+    {
+      "detector": 5,
+      "wave_min_um": 3.8113,
+      "wave_max_um": 4.43,
+      "display": {
+        "vmin": -0.033936,
+        "vmax": 7.43196,
+        "median": 0.0181139,
+        "sigma": 0.0260249
+      }
+    },
+    {
+      "detector": 6,
+      "wave_min_um": 4.4115,
+      "wave_max_um": 5.0096,
+      "display": {
+        "vmin": -0.0322028,
+        "vmax": 5.753,
+        "median": 0.0137264,
+        "sigma": 0.0229646
+      }
+    }
+  ],
+  "epochs": [
+    {
+      "epoch": 1,
+      "start": "2025-08-15",
+      "end": "2025-10-01",
+      "mjd_start": 60902.86472,
+      "mjd_end": 60949.26591,
+      "mjd_mean": 60916.19371,
+      "n_exposures": 118
+    },
+    {
+      "epoch": 2,
+      "start": "2026-03-11",
+      "end": "2026-05-05",
+      "mjd_start": 61110.0914,
+      "mjd_end": 61165.08297,
+      "mjd_mean": 61119.44705,
+      "n_exposures": 121
+    },
+    {
+      "epoch": 3,
+      "start": "2026-08-16",
+      "end": "2026-09-22",
+      "mjd_start": 61268.63081,
+      "mjd_end": 61305.62802,
+      "mjd_mean": 61274.62637,
+      "n_exposures": 119
+    }
+  ],
+  "planes": [
+    {
+      "epoch": 1,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 60923.9988,
+      "stats": {
+        "min": -0.086061,
+        "max": 41.5955,
+        "median": 0.0474092,
+        "sigma": 0.0644908,
+        "p01": -0.0195573,
+        "p99": 3.3152,
+        "p997": 8.88146,
+        "valid_fraction": 0.9965,
+        "saturated_fraction": 0.0035
+      },
+      "saturated": [
+        {
+          "x": 97.5,
+          "y": 96.02,
+          "radius_px": 6.51,
+          "n_pixels": 133
+        }
+      ],
+      "cube_offset": 0
+    },
+    {
+      "epoch": 1,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 60913.7356,
+      "stats": {
+        "min": -0.0160984,
+        "max": 49.1547,
+        "median": 0.0781505,
+        "sigma": 0.0829994,
+        "p01": -0.00393037,
+        "p99": 4.46322,
+        "p997": 11.4787,
+        "valid_fraction": 0.9966,
+        "saturated_fraction": 0.0034
+      },
+      "saturated": [
+        {
+          "x": 97.38,
+          "y": 95.82,
+          "radius_px": 6.43,
+          "n_pixels": 130
+        }
+      ],
+      "cube_offset": 152100
+    },
+    {
+      "epoch": 1,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 60908.0067,
+      "stats": {
+        "min": -0.0231715,
+        "max": 42.1618,
+        "median": 0.0608108,
+        "sigma": 0.0705343,
+        "p01": -0.0079477,
+        "p99": 4.40819,
+        "p997": 9.75865,
+        "valid_fraction": 0.996,
+        "saturated_fraction": 0.004
+      },
+      "saturated": [
+        {
+          "x": 97.58,
+          "y": 95.34,
+          "radius_px": 6.93,
+          "n_pixels": 151
+        }
+      ],
+      "cube_offset": 304200
+    },
+    {
+      "epoch": 1,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 23,
+      "n_used": 23,
+      "n_failed": 0,
+      "mjd_mean": 60924.2618,
+      "stats": {
+        "min": -0.334341,
+        "max": 42.5382,
+        "median": 0.0313228,
+        "sigma": 0.0388289,
+        "p01": -0.00892342,
+        "p99": 2.56999,
+        "p997": 5.52202,
+        "valid_fraction": 0.9938,
+        "saturated_fraction": 0.006
+      },
+      "saturated": [
+        {
+          "x": 97.68,
+          "y": 96.18,
+          "radius_px": 8.54,
+          "n_pixels": 229
+        }
+      ],
+      "cube_offset": 456300
+    },
+    {
+      "epoch": 1,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 60913.7356,
+      "stats": {
+        "min": -0.095527,
+        "max": 158.498,
+        "median": 0.0185052,
+        "sigma": 0.0257977,
+        "p01": -0.0119453,
+        "p99": 2.03247,
+        "p997": 6.98189,
+        "valid_fraction": 0.9983,
+        "saturated_fraction": 0.0016
+      },
+      "saturated": [
+        {
+          "x": 97.65,
+          "y": 95.98,
+          "radius_px": 4.44,
+          "n_pixels": 62
+        }
+      ],
+      "cube_offset": 608400
+    },
+    {
+      "epoch": 1,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 17,
+      "n_used": 17,
+      "n_failed": 0,
+      "mjd_mean": 60908.1332,
+      "stats": {
+        "min": -3.55321,
+        "max": 194.733,
+        "median": 0.0135287,
+        "sigma": 0.0232822,
+        "p01": -0.0197847,
+        "p99": 1.58623,
+        "p997": 6.32803,
+        "valid_fraction": 0.9991,
+        "saturated_fraction": 0.0008
+      },
+      "saturated": [
+        {
+          "x": 97.38,
+          "y": 95.5,
+          "radius_px": 3.19,
+          "n_pixels": 32
+        }
+      ],
+      "cube_offset": 760500
+    },
+    {
+      "epoch": 2,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 61110.4703,
+      "stats": {
+        "min": -0.132937,
+        "max": 40.296,
+        "median": 0.0481451,
+        "sigma": 0.0719375,
+        "p01": -0.0570612,
+        "p99": 3.32582,
+        "p997": 8.54686,
+        "valid_fraction": 0.996,
+        "saturated_fraction": 0.0033
+      },
+      "saturated": [
+        {
+          "x": 96.91,
+          "y": 97.88,
+          "radius_px": 6.36,
+          "n_pixels": 127
+        }
+      ],
+      "cube_offset": 912600
+    },
+    {
+      "epoch": 2,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 61116.1538,
+      "stats": {
+        "min": -0.0196552,
+        "max": 54.7069,
+        "median": 0.0717657,
+        "sigma": 0.0811578,
+        "p01": -0.00733804,
+        "p99": 4.27066,
+        "p997": 11.498,
+        "valid_fraction": 0.9962,
+        "saturated_fraction": 0.0037
+      },
+      "saturated": [
+        {
+          "x": 96.77,
+          "y": 97.77,
+          "radius_px": 6.72,
+          "n_pixels": 142
+        }
+      ],
+      "cube_offset": 1064700
+    },
+    {
+      "epoch": 2,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61128.6266,
+      "stats": {
+        "min": -0.0220875,
+        "max": 44.6984,
+        "median": 0.0594099,
+        "sigma": 0.0697785,
+        "p01": -0.00861462,
+        "p99": 4.21821,
+        "p997": 9.4886,
+        "valid_fraction": 0.9966,
+        "saturated_fraction": 0.0034
+      },
+      "saturated": [
+        {
+          "x": 97.07,
+          "y": 97.85,
+          "radius_px": 6.38,
+          "n_pixels": 128
+        }
+      ],
+      "cube_offset": 1216800
+    },
+    {
+      "epoch": 2,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 61110.4703,
+      "stats": {
+        "min": -0.0274832,
+        "max": 85.1582,
+        "median": 0.0307091,
+        "sigma": 0.039215,
+        "p01": -0.00981554,
+        "p99": 2.61991,
+        "p997": 6.35319,
+        "valid_fraction": 0.9939,
+        "saturated_fraction": 0.006
+      },
+      "saturated": [
+        {
+          "x": 96.92,
+          "y": 97.94,
+          "radius_px": 8.5,
+          "n_pixels": 227
+        }
+      ],
+      "cube_offset": 1368900
+    },
+    {
+      "epoch": 2,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 19,
+      "n_used": 19,
+      "n_failed": 0,
+      "mjd_mean": 61116.3851,
+      "stats": {
+        "min": -0.0595839,
+        "max": 154.952,
+        "median": 0.0188381,
+        "sigma": 0.0266371,
+        "p01": -0.0136584,
+        "p99": 2.09842,
+        "p997": 7.62067,
+        "valid_fraction": 0.9985,
+        "saturated_fraction": 0.0015
+      },
+      "saturated": [
+        {
+          "x": 96.65,
+          "y": 97.54,
+          "radius_px": 4.26,
+          "n_pixels": 57
+        }
+      ],
+      "cube_offset": 1521000
+    },
+    {
+      "epoch": 2,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61128.6266,
+      "stats": {
+        "min": -0.0635794,
+        "max": 206.765,
+        "median": 0.0141173,
+        "sigma": 0.0230949,
+        "p01": -0.019098,
+        "p99": 1.58411,
+        "p997": 5.79096,
+        "valid_fraction": 0.999,
+        "saturated_fraction": 0.0009
+      },
+      "saturated": [
+        {
+          "x": 97.0,
+          "y": 97.74,
+          "radius_px": 3.29,
+          "n_pixels": 34
+        }
+      ],
+      "cube_offset": 1673100
+    },
+    {
+      "epoch": 3,
+      "detector": 1,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 61278.3281,
+      "stats": {
+        "min": -0.0729226,
+        "max": 37.917,
+        "median": 0.0541881,
+        "sigma": 0.0657086,
+        "p01": -0.0163676,
+        "p99": 3.32701,
+        "p997": 8.63989,
+        "valid_fraction": 0.9963,
+        "saturated_fraction": 0.0034
+      },
+      "saturated": [
+        {
+          "x": 97.3,
+          "y": 99.0,
+          "radius_px": 6.41,
+          "n_pixels": 129
+        }
+      ],
+      "cube_offset": 1825200
+    },
+    {
+      "epoch": 3,
+      "detector": 2,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 25,
+      "n_used": 25,
+      "n_failed": 0,
+      "mjd_mean": 61274.8498,
+      "stats": {
+        "min": -0.0159913,
+        "max": 49.3884,
+        "median": 0.0844056,
+        "sigma": 0.0915637,
+        "p01": -0.00471754,
+        "p99": 4.68928,
+        "p997": 11.45,
+        "valid_fraction": 0.9957,
+        "saturated_fraction": 0.0043
+      },
+      "saturated": [
+        {
+          "x": 97.19,
+          "y": 98.82,
+          "radius_px": 7.25,
+          "n_pixels": 165
+        }
+      ],
+      "cube_offset": 1977300
+    },
+    {
+      "epoch": 3,
+      "detector": 3,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 17,
+      "n_used": 17,
+      "n_failed": 0,
+      "mjd_mean": 61270.2818,
+      "stats": {
+        "min": -0.0281512,
+        "max": 44.2027,
+        "median": 0.0607415,
+        "sigma": 0.0709586,
+        "p01": -0.00803524,
+        "p99": 4.43258,
+        "p997": 9.53162,
+        "valid_fraction": 0.9953,
+        "saturated_fraction": 0.0047
+      },
+      "saturated": [
+        {
+          "x": 97.26,
+          "y": 98.74,
+          "radius_px": 7.53,
+          "n_pixels": 178
+        }
+      ],
+      "cube_offset": 2129400
+    },
+    {
+      "epoch": 3,
+      "detector": 4,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 18,
+      "n_used": 18,
+      "n_failed": 0,
+      "mjd_mean": 61278.3281,
+      "stats": {
+        "min": -0.0195867,
+        "max": 26.6162,
+        "median": 0.0310676,
+        "sigma": 0.0384699,
+        "p01": -0.0082128,
+        "p99": 2.39784,
+        "p997": 5.04167,
+        "valid_fraction": 0.9932,
+        "saturated_fraction": 0.0065
+      },
+      "saturated": [
+        {
+          "x": 97.6,
+          "y": 99.16,
+          "radius_px": 8.85,
+          "n_pixels": 246
+        }
+      ],
+      "cube_offset": 2281500
+    },
+    {
+      "epoch": 3,
+      "detector": 5,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 24,
+      "n_used": 24,
+      "n_failed": 0,
+      "mjd_mean": 61274.9959,
+      "stats": {
+        "min": -0.168641,
+        "max": 160.134,
+        "median": 0.0169567,
+        "sigma": 0.0254822,
+        "p01": -0.0127642,
+        "p99": 2.00628,
+        "p997": 7.51985,
+        "valid_fraction": 0.9985,
+        "saturated_fraction": 0.0015
+      },
+      "saturated": [
+        {
+          "x": 97.41,
+          "y": 99.16,
+          "radius_px": 4.22,
+          "n_pixels": 56
+        }
+      ],
+      "cube_offset": 2433600
+    },
+    {
+      "epoch": 3,
+      "detector": 6,
+      "status": "ready",
+      "rev": 2,
+      "n_exposures": 17,
+      "n_used": 17,
+      "n_failed": 0,
+      "mjd_mean": 61270.2818,
+      "stats": {
+        "min": -0.113741,
+        "max": 182.828,
+        "median": 0.0135466,
+        "sigma": 0.0225301,
+        "p01": -0.01945,
+        "p99": 1.58928,
+        "p997": 5.37324,
+        "valid_fraction": 0.9989,
+        "saturated_fraction": 0.001
+      },
+      "saturated": [
+        {
+          "x": 97.58,
+          "y": 99.21,
+          "radius_px": 3.48,
+          "n_pixels": 38
+        }
+      ],
+      "cube_offset": 2585700
+    }
+  ],
+  "flags": [
+    {
+      "bit": 0,
+      "name": "TRANSIENT",
+      "description": "Transient detected during SUR",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 1,
+      "name": "OVERFLOW",
+      "description": "Overflow detected during SUR",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 2,
+      "name": "SUR_ERROR",
+      "description": "Error in onboard processing",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 6,
+      "name": "NONFUNC",
+      "description": "Permanently unusable",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 7,
+      "name": "DICHROIC",
+      "description": "Low efficiency due to dichroic",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 9,
+      "name": "MISSING_DATA",
+      "description": "Onboard data lost",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 10,
+      "name": "HOT",
+      "description": "Hot pixel",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 11,
+      "name": "COLD",
+      "description": "Anomalously low signal",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 12,
+      "name": "FULLSAMPLE",
+      "description": "Pixel full sample history is available",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 14,
+      "name": "PHANMISS",
+      "description": "Phantom correction was not applied",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 15,
+      "name": "NONLINEAR",
+      "description": "Nonlinearity correction cannot be applied reliably",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 17,
+      "name": "PERSIST",
+      "description": "Persistent charge above threshold",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 19,
+      "name": "OUTLIER",
+      "description": "Pixel flagged by Detect Outliers",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 20,
+      "name": "CROSSTALK",
+      "description": "Pixel affected by crosstalk.",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 21,
+      "name": "SOURCE",
+      "description": "Pixel mapped to a known source",
+      "masked": false,
+      "saturation": false
+    },
+    {
+      "bit": 22,
+      "name": "GHOST",
+      "description": "Affected by a bright source inside the exposure",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 23,
+      "name": "GHOST_FPA",
+      "description": "Affected by a bright source on another detector",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 24,
+      "name": "GHOST_EXT",
+      "description": "Pixel affected by a bright source outside FOV",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 25,
+      "name": "STREAK",
+      "description": "Pixel affected by a streak",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 26,
+      "name": "BLOOM",
+      "description": "Pixel part of a bloom artifact",
+      "masked": true,
+      "saturation": true
+    },
+    {
+      "bit": 27,
+      "name": "SNOWBALL",
+      "description": "Pixel part of a snowball artifact",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 28,
+      "name": "HALO",
+      "description": "Pixel part of a transient halo",
+      "masked": true,
+      "saturation": false
+    },
+    {
+      "bit": 29,
+      "name": "SATELLITE_HALO",
+      "description": "Pixel part of a satellite streak halo",
+      "masked": true,
+      "saturation": false
+    }
+  ],
+  "progress": {
+    "phase": "done",
+    "queue_position": 0,
+    "cutouts_total": 358,
+    "cutouts_done": 358,
+    "cutouts_failed": 0,
+    "cutouts_cached": 0,
+    "planes_total": 18,
+    "planes_ready": 18,
+    "elapsed_s": 142.9
+  },
+  "warnings": [
+    {
+      "code": "saturated_source",
+      "ra": 269.44607,
+      "dec": 4.76876,
+      "radius_arcsec": 27.2,
+      "epochs": [
+        1,
+        2,
+        3
+      ],
+      "detectors": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "preview": {
+    "status": "unavailable",
+    "survey": "WISE",
+    "band": "W1",
+    "wave_um": 3.4,
+    "hips": "CDS/P/allWISE/W1",
+    "display": null
+  },
+  "provenance": {
+    "source": "SPHEREx / IRSA",
+    "collections": [
+      "spherex_dr1",
+      "spherex_qr3"
+    ],
+    "listed_at": "2026-11-15T16:17:25Z",
+    "list_stale": false,
+    "download_mode": "truncated",
+    "built_at": "2026-11-15T16:19:25Z"
+  }
+}
