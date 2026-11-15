@@ -1,0 +1,66 @@
+{
+  "title": "Object card",
+  "hint": "A click on a source in the image shows what is known about it.",
+  "noCatalog": "There is no Gaia data for this field yet.",
+  "source": {
+    "name": "Gaia DR3",
+    "offset": "{{distance}} from the click"
+  },
+  "cells": {
+    "distance": "Distance",
+    "lightYears": "light-years",
+    "motion": "Motion",
+    "perYear": "per year",
+    "unknown": "not measured"
+  },
+  "distance": {
+    "measured": "It is about {{lightYears}} light-years away.",
+    "rough": "It is roughly {{lightYears}} light-years away: its parallax is very small and the measurement has a wide margin.",
+    "far": "It is too far to measure its distance: more than {{lightYears}} light-years away.",
+    "none": "Gaia could not measure its distance."
+  },
+  "light": {
+    "measured": "This light left about {{years}} years ago.",
+    "rough": "This light left about {{years}} years ago, give or take.",
+    "far": "This light left more than {{years}} years ago."
+  },
+  "motion": {
+    "moving": "It moves {{rate}} per year toward the {{direction}}. At that pace it takes about {{years}} years to cross the width of the full Moon.",
+    "still": "Gaia finds no motion across the sky.",
+    "none": "Gaia could not measure its motion.",
+    "velocity": "At that distance it is about {{speed}} km/s across the sky."
+  },
+  "direction": {
+    "n": "north",
+    "ne": "northeast",
+    "e": "east",
+    "se": "southeast",
+    "s": "south",
+    "sw": "southwest",
+    "w": "west",
+    "nw": "northwest"
+  },
+  "brightness": {
+    "nakedEye": "In visible light its magnitude is {{magnitude}}: it can be seen with the naked eye under a dark sky.",
+    "binoculars": "In visible light its magnitude is {{magnitude}}: it can be seen with binoculars.",
+    "smallTelescope": "In visible light its magnitude is {{magnitude}}: it takes an amateur telescope.",
+    "largeTelescope": "In visible light its magnitude is {{magnitude}}: only large telescopes reach it."
+  },
+  "rows": {
+    "parallax": "Parallax",
+    "properMotion": "Proper motion (east, north)",
+    "magnitude": "G magnitude",
+    "units": {
+      "mas": "{{value}} mas",
+      "masPerYear": "{{east}}, {{north}} mas/yr"
+    }
+  },
+  "empty": {
+    "title": "Gaia has no source at this point",
+    "radius": "There is none within {{radius}} of this point.",
+    "nearby": "The nearest one is {{distance}} away, at magnitude {{magnitude}}. If the click was meant for that star, the button shows it.",
+    "showNearest": "Show the nearest source",
+    "why": "Gaia measures visible light. A very cold object hardly emits there, even if it shines in the infrared: that is why it can show up in WISE and SPHEREx and be missing from Gaia. That is the case of WISE 0855, the coldest brown dwarf known.",
+    "other": "It can also be a distant galaxy, part of a nebula or an image defect."
+  }
+}

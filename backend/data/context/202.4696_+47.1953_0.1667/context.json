@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "key": "202.4696_+47.1953_0.1667",
+  "field_id": "d1182d95a5142a4d",
+  "pipeline": "1",
+  "object": {
+    "alias": "m-51",
+    "query": "M 51",
+    "name": "M 51"
+  },
+  "request": {
+    "ra": 202.4696,
+    "dec": 47.1953,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      202.4696,
+      47.1953
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "surveys": [
+    {
+      "key": "twomass_ks",
+      "survey": "2MASS",
+      "band": "Ks",
+      "wave_um": 2.159,
+      "file": "twomass_ks.f32",
+      "mjd": 50960.2027,
+      "date": "1998-05-27",
+      "year": 1998.4,
+      "mjd_start": 50960.19445,
+      "mjd_end": 50960.20429,
+      "date_start": "1998-05-27",
+      "date_end": "1998-05-27",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.0,
+      "display": {
+        "vmin": -0.840318,
+        "vmax": 16.0502,
+        "median": -0.033072,
+        "sigma": 0.403623
+      },
+      "valid_fraction": 1.0,
+      "collection": "twomass_allsky",
+      "images": [
+        {
+          "obs_id": "allsky_980527n_s024_0232",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s024/image/ki0240232.fits.gz",
+          "mjd": 50960.2027,
+          "date": "1998-05-27",
+          "coverage": 0.6097
+        },
+        {
+          "obs_id": "allsky_980527n_s023_0033",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s023/image/ki0230033.fits.gz",
+          "mjd": 50960.19445,
+          "date": "1998-05-27",
+          "coverage": 0.2663
+        },
+        {
+          "obs_id": "allsky_980527n_s023_0044",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s023/image/ki0230044.fits.gz",
+          "mjd": 50960.19464,
+          "date": "1998-05-27",
+          "coverage": 0.2468
+        },
+        {
+          "obs_id": "allsky_980527n_s024_0244",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s024/image/ki0240244.fits.gz",
+          "mjd": 50960.20291,
+          "date": "1998-05-27",
+          "coverage": 0.1633
+        },
+        {
+          "obs_id": "allsky_980527n_s025_0033",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s025/image/ki0250033.fits.gz",
+          "mjd": 50960.2041,
+          "date": "1998-05-27",
+          "coverage": 0.0233
+        },
+        {
+          "obs_id": "allsky_980527n_s025_0044",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/980527n/s025/image/ki0250044.fits.gz",
+          "mjd": 50960.20429,
+          "date": "1998-05-27",
+          "coverage": 0.0214
+        }
+      ],
+      "target": null
+    },
+    {
+      "key": "wise_w2",
+      "survey": "WISE",
+      "band": "W2",
+      "wave_um": 4.618,
+      "file": "wise_w2.f32",
+      "mjd": 55359.92881,
+      "date": "2010-06-12",
+      "year": 2010.446,
+      "mjd_start": 55356.02616,
+      "mjd_end": 55549.83069,
+      "date_start": "2010-06-09",
+      "date_end": "2010-12-19",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.375,
+      "display": {
+        "vmin": -0.163149,
+        "vmax": 5.39082,
+        "median": 0.0,
+        "sigma": 0.0815745
+      },
+      "valid_fraction": 1.0,
+      "collection": "wise_allwise",
+      "images": [
+        {
+          "obs_id": "2029p469_ac51",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/20/2029/2029p469_ac51/2029p469_ac51-w2-int-3.fits",
+          "mjd": 55359.92881,
+          "date": "2010-06-12",
+          "coverage": 1.0
+        }
+      ],
+      "target": null
+    }
+  ],
+  "gaia": {
+    "file": "gaia.json",
+    "catalog": "gaia_dr3_source",
+    "ref_epoch": 2016.0,
+    "n_sources": 779,
+    "radius_arcsec": 430.0,
+    "g_mag_min": 13.27,
+    "g_mag_max": 21.86
+  },
+  "generated_at": "2026-11-15T17:32:34Z"
+}

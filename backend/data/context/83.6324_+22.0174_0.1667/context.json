@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "key": "83.6324_+22.0174_0.1667",
+  "field_id": "12856d74fb2832ab",
+  "pipeline": "1",
+  "object": {
+    "alias": "m-1",
+    "query": "M 1",
+    "name": "M 1"
+  },
+  "request": {
+    "ra": 83.6324,
+    "dec": 22.0174,
+    "fov": 0.1667
+  },
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      83.6324,
+      22.0174
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "surveys": [
+    {
+      "key": "twomass_ks",
+      "survey": "2MASS",
+      "band": "Ks",
+      "wave_um": 2.159,
+      "file": "twomass_ks.f32",
+      "mjd": 50739.38375,
+      "date": "1997-10-18",
+      "year": 1997.796,
+      "mjd_start": 50739.37733,
+      "mjd_end": 50739.38697,
+      "date_start": "1997-10-18",
+      "date_end": "1997-10-18",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.0,
+      "display": {
+        "vmin": -0.713986,
+        "vmax": 15.9721,
+        "median": -8.24918e-05,
+        "sigma": 0.356952
+      },
+      "valid_fraction": 1.0,
+      "collection": "twomass_allsky",
+      "images": [
+        {
+          "obs_id": "allsky_971018n_s081_0185",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/971018n/s081/image/ki0810185.fits.gz",
+          "mjd": 50739.38375,
+          "date": "1997-10-18",
+          "coverage": 0.8337
+        },
+        {
+          "obs_id": "allsky_971018n_s082_0091",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/971018n/s082/image/ki0820091.fits.gz",
+          "mjd": 50739.38697,
+          "date": "1997-10-18",
+          "coverage": 0.2123
+        },
+        {
+          "obs_id": "allsky_971018n_s080_0091",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/971018n/s080/image/ki0800091.fits.gz",
+          "mjd": 50739.37733,
+          "date": "1997-10-18",
+          "coverage": 0.1945
+        }
+      ],
+      "target": null
+    },
+    {
+      "key": "wise_w2",
+      "survey": "WISE",
+      "band": "W2",
+      "wave_um": 4.618,
+      "file": "wise_w2.f32",
+      "mjd": 55265.58252,
+      "date": "2010-03-10",
+      "year": 2010.188,
+      "mjd_start": 55263.1342,
+      "mjd_end": 55457.64984,
+      "date_start": "2010-03-08",
+      "date_end": "2010-09-18",
+      "unit": "MJy/sr",
+      "native_pixel_scale_arcsec": 1.375,
+      "display": {
+        "vmin": -0.104018,
+        "vmax": 20.491,
+        "median": 0.0,
+        "sigma": 0.052009
+      },
+      "valid_fraction": 1.0,
+      "collection": "wise_allwise",
+      "images": [
+        {
+          "obs_id": "0830p227_ac51",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/08/0830/0830p227_ac51/0830p227_ac51-w2-int-3.fits",
+          "mjd": 55265.58252,
+          "date": "2010-03-10",
+          "coverage": 1.0
+        },
+        {
+          "obs_id": "0839p212_ac51",
+          "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/08/0839/0839p212_ac51/0839p212_ac51-w2-int-3.fits",
+          "mjd": 55455.07036,
+          "date": "2010-09-16",
+          "coverage": 0.3018
+        }
+      ],
+      "target": null
+    }
+  ],
+  "gaia": {
+    "file": "gaia.json",
+    "catalog": "gaia_dr3_source",
+    "ref_epoch": 2016.0,
+    "n_sources": 1001,
+    "radius_arcsec": 430.0,
+    "g_mag_min": 11.05,
+    "g_mag_max": 21.87
+  },
+  "generated_at": "2026-11-15T17:58:29Z"
+}

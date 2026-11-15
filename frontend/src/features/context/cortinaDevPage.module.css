@@ -1,0 +1,65 @@
+/* Pagina de prueba de la cortina: la imagen a la izquierda y los paneles a la derecha. */
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: var(--space-lg);
+  align-items: start;
+  min-height: 100vh;
+  padding: var(--space-lg);
+  background-color: var(--color-void);
+  color: var(--color-text);
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+/* El recorte cuadrado toma la altura disponible, dejando lugar para el credito de la placa. */
+.image {
+  width: min(100%, calc(100vh - 2 * var(--space-lg) - var(--space-xl)));
+}
+
+.frame {
+  position: relative;
+}
+
+.tag {
+  position: absolute;
+  top: var(--space-sm);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.status {
+  max-width: 48ch;
+  margin: var(--space-huge) 0;
+  color: var(--color-text-mute);
+}
+
+.panels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+@media (max-width: 899px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .image {
+    width: 100%;
+  }
+}

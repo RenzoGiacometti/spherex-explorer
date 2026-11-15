@@ -1,0 +1,9 @@
+{
+  "label": "Curtain between {{left}} and {{right}}",
+  "value": "{{percent}} {{left}}, the rest {{right}}",
+  "image": "{{name}}, {{detail}}",
+  "visible": "Visible light",
+  "infrared": "Infrared",
+  "credit": "Digitized Sky Survey, plate {{plate}} ({{survey}}). © {{owner}}",
+  "unreliableDate": "plate date not available"
+}

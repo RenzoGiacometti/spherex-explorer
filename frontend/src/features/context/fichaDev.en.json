@@ -1,0 +1,19 @@
+{
+  "title": "Object card",
+  "field": {
+    "label": "Field",
+    "custom": "Centre from the URL",
+    "layer": "Image",
+    "live": "This field is not precomputed: the WISE image and the Gaia sources were requested live from IRSA."
+  },
+  "image": {
+    "label": "Image of the field. A click picks the nearest Gaia source.",
+    "click": "Chosen point",
+    "gaia": "Gaia sources"
+  },
+  "status": {
+    "loading": "Loading the context",
+    "error": "The context could not be loaded. It needs the test backend: from backend/, uv run uvicorn app.context.devapp2:app --port 8000",
+    "unavailable": "IRSA did not answer in time: the context of this field is not available for now."
+  }
+}

@@ -1,0 +1,88 @@
+.card,
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-mute);
+}
+
+/* Identificador de la fuente: etiqueta y numero de catalogo, que se puede copiar. */
+.source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xxs) var(--space-xs);
+  margin: 0;
+  color: var(--color-text-mute);
+}
+
+.sourceId {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Cifras destacadas: dos celdas del mismo ancho, con la unidad debajo. */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xs);
+}
+
+.cellLabel {
+  color: var(--color-text-mute);
+}
+
+.cellUnit {
+  color: var(--color-text-dim);
+}
+
+/* Las frases en lenguaje llano: texto corrido, una por renglon. */
+.sentences {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sentence {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.emptyTitle {
+  margin: 0;
+}
+
+/* Aviso de que hay otra fuente cerca, con el boton para verla. */
+.nearby {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-divider);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-mute);
+}

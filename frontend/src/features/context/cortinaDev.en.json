@@ -1,0 +1,30 @@
+{
+  "title": "Visible light and infrared",
+  "field": "Field",
+  "view": {
+    "label": "View",
+    "curtain": "Curtain",
+    "journey": "Journey"
+  },
+  "sides": {
+    "optical": "Visible side",
+    "infrared": "Infrared side",
+    "spherex": "SPHEREx"
+  },
+  "image": {
+    "title": "Image",
+    "band": "SPHEREx band",
+    "contrast": "Contrast",
+    "target": "Expected position of the object"
+  },
+  "notes": {
+    "outside": "On that date the object was outside this field: it moved here later.",
+    "noOptical": "This field has no saved Digitized Sky Survey plates.",
+    "noSpherex": "This server does not have the SPHEREx field of this object.",
+    "skipped": "Plate {{plate}} is left out of the journey: the date in its header cannot be trusted."
+  },
+  "status": {
+    "loading": "Loading the context",
+    "error": "The context could not be loaded. It needs the test backend: from backend/, uv run uvicorn app.context.devapp2:app --port 8000"
+  }
+}
