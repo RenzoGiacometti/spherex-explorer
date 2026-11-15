@@ -1,0 +1,158 @@
+/*
+ * Esfera celeste: llena a su contenedor. El canvas va al fondo y los
+ * marcadores encima, ubicados por la escena en cada cuadro.
+ */
+
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--color-void);
+  /* Los gestos son de la esfera: el navegador no desplaza ni acerca la pagina. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  outline: none;
+}
+
+.stage[data-dragging="true"] {
+  cursor: grabbing;
+}
+
+.stage[data-interactive="false"] {
+  cursor: default;
+}
+
+/*
+ * Foco de teclado: contorno blanco de 2 px dibujado hacia adentro, porque un
+ * contorno del contenedor queda fuera de la ventana (DESIGN.md, "Foco").
+ */
+.stage:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 2px solid var(--color-text);
+  pointer-events: none;
+}
+
+/* El cielo aparece de a poco cuando termina de cargar la textura. */
+.canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 700ms ease-out;
+}
+
+.stage[data-status="ready"] .canvas {
+  opacity: 1;
+}
+
+.markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/*
+ * Marcador de destacado (DESIGN.md): anillo ambar de 12 px con el nombre en
+ * mono. El elemento es un objetivo de 44 px centrado en el punto del cielo; la
+ * escena lo mueve con `transform`.
+ */
+.marker {
+  position: absolute;
+  top: -22px;
+  left: -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* `display: flex` le gana al atributo: hay que repetirlo. */
+.marker[hidden] {
+  display: none;
+}
+
+.marker:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -6px;
+}
+
+/* Uso 1 del acento: los marcadores de objetos destacados en el cielo. */
+.ring {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: transform 160ms ease-out;
+}
+
+.marker:hover .ring,
+.marker:focus-visible .ring {
+  transform: scale(1.5);
+}
+
+.name {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 16px);
+  transform: translateY(-50%);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease-out;
+}
+
+.marker:hover .name,
+.marker:focus-visible .name {
+  opacity: 1;
+}
+
+/* Sin cursor no hay "pasar por encima": en pantallas tactiles el nombre va siempre. */
+@media (hover: none) {
+  .name {
+    opacity: 1;
+  }
+}
+
+/* Marca de comprobacion de la pagina de prueba: blanca, mas grande y sin interaccion. */
+.marker[data-kind="probe"] {
+  pointer-events: none;
+  color: var(--color-text-mute);
+}
+
+.marker[data-kind="probe"] .ring {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--color-text);
+}
+
+.marker[data-kind="probe"] .name {
+  left: calc(50% + 18px);
+  font: var(--type-data-sm-font);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas,
+  .ring,
+  .name {
+    transition: none;
+  }
+}
