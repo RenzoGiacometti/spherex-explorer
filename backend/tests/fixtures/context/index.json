@@ -1,0 +1,42 @@
+{
+  "note": "Respuestas reales de IRSA, bajadas el 2026-11-15. Recortes de 0,06 grados del campo de Barnard, centrados 117 segundos de arco al norte del centro del campo, donde hay cinco estrellas brillantes y aisladas.",
+  "field": { "ra": 269.4463, "dec": 4.7683, "fov": 0.1667 },
+  "gaia": {
+    "file": "gaia_barnard_bright.tbl",
+    "url": "https://irsa.ipac.caltech.edu/cgi-bin/Gator/nph-query?catalog=gaia_dr3_source&spatial=cone&objstr=269.446300+%2B4.800800&radius=170.0&radunits=arcsec&outfmt=1&selcols=source_id,ra,dec,ref_epoch,pmra,pmdec,parallax,phot_g_mean_mag&constraints=phot_g_mean_mag%3C16.5"
+  },
+  "cutouts": [
+    {
+      "file": "twomass_ks_barnard.fits",
+      "url": "https://irsa.ipac.caltech.edu/ibe/data/twomass/allsky/allsky/000528n/s101/image/ki1010220.fits.gz?center=269.4463,4.8008deg&size=0.06deg&gzip=false",
+      "survey": "2MASS",
+      "band": "Ks",
+      "pixel_scale_arcsec": 1.0,
+      "zero_flux_jy": 666.7,
+      "date": "2000-05-28",
+      "year": 2000.405,
+      "g_max": 15.0,
+      "min_stars": 5,
+      "max_offset_px": 0.5,
+      "bright_g_max": 14.5,
+      "bright_min_stars": 3,
+      "bright_max_offset_px": 0.15
+    },
+    {
+      "file": "wise_w2_barnard.fits",
+      "url": "https://irsa.ipac.caltech.edu/ibe/data/wise/allwise/p3am_cdd/26/2688/2688p045_ac51/2688p045_ac51-w2-int-3.fits?center=269.4463,4.8008deg&size=0.06deg&gzip=false",
+      "survey": "WISE",
+      "band": "W2",
+      "pixel_scale_arcsec": 1.375,
+      "zero_flux_jy": 171.787,
+      "date": "2010-09-14",
+      "year": 2010.702,
+      "g_max": 15.0,
+      "min_stars": 5,
+      "max_offset_px": 0.5,
+      "bright_g_max": 14.5,
+      "bright_min_stars": 3,
+      "bright_max_offset_px": 0.15
+    }
+  ]
+}
