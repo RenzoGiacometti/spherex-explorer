@@ -35,12 +35,15 @@ export interface LightcurveChartProps {
   readonly name: string;
   /** Dibuja tambien cada exposicion. */
   readonly showExposures?: boolean;
+  /** Grafico mas bajo, para la hoja del celular: entra entero sin desplazar. */
+  readonly compact?: boolean | undefined;
 }
 
 const MARGIN = { top: 14, right: 12, bottom: 44, left: 52 } as const;
 const DEFAULT_WIDTH = 640;
 const WIDE_HEIGHT = 300;
 const NARROW_HEIGHT = 250;
+const COMPACT_HEIGHT = 216;
 const NARROW_WIDTH = 520;
 /** Un tramo necesita este ancho para llevar tambien la fecha de fin. */
 const TWO_LABELS_PX = 190;
@@ -84,6 +87,7 @@ export function LightcurveChart({
   epochs,
   name,
   showExposures = true,
+  compact = false,
 }: LightcurveChartProps) {
   const { t } = useTranslation("lightcurve");
   const language = useLanguage();
@@ -91,7 +95,7 @@ export function LightcurveChart({
   const clipId = `lightcurve-clip-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const [active, setActive] = useState<number | null>(null);
 
-  const height = width < NARROW_WIDTH ? NARROW_HEIGHT : WIDE_HEIGHT;
+  const height = compact ? COMPACT_HEIGHT : width < NARROW_WIDTH ? NARROW_HEIGHT : WIDE_HEIGHT;
   const plot = {
     left: MARGIN.left,
     right: width - MARGIN.right,

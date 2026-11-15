@@ -38,10 +38,17 @@
 
 /*
  * Con el espectro abierto la columna derecha se ensancha para que entre el
- * grafico; la imagen se vuelve a encuadrar en lo que queda libre.
+ * grafico; la imagen se vuelve a encuadrar en lo que queda libre. La columna
+ * baja ademas hasta el borde de la ventana, al costado del muelle: con eso el
+ * grafico entra entero, sin desplazar, en una ventana de 768 px de alto.
  */
 .page[data-spectrum="open"] {
   --viewer-column-right: clamp(380px, 36vw, 560px);
+
+  grid-template-areas:
+    "top top top"
+    "left stage right"
+    "dock dock right";
 }
 
 .viewer {
@@ -258,7 +265,34 @@
 }
 
 .controls > * {
+  flex-shrink: 0;
   pointer-events: auto;
+}
+
+/*
+ * En los modos que comparan con una epoca de referencia (diferencia, rojo/cian,
+ * mantener apretado) los controles suman la epoca de referencia y el boton de
+ * mantener. La imagen conserva el alto que tenia en el parpadeo, que ViewerPage
+ * deja en `--viewer-stage-lock`; lo que crece es la zona de controles, que se
+ * desplaza. La hoja del espectro y el cajon siguen saliendo de `thumb`, que no
+ * recorta.
+ */
+.page[data-layout="phone"][data-stage-lock] {
+  grid-template-rows: auto var(--viewer-stage-lock) minmax(0, 1fr);
+  height: 100%;
+}
+
+.page[data-layout="phone"][data-stage-lock] .thumb {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page[data-layout="phone"][data-stage-lock] .controls {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 /*
@@ -290,15 +324,15 @@
 /*
  * Hoja del espectro en el celular: sale del lugar de los controles y sube
  * sobre la parte de abajo de la imagen, hasta algo mas de media pantalla, para
- * que el grafico entre. El resto de la imagen sigue a la vista; lo que no entra
- * se desplaza adentro.
+ * que el grafico entre entero. El resto de la imagen sigue a la vista; lo que
+ * no entra se desplaza adentro.
  */
 .sheet {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: max(100%, 56vh);
+  height: max(100%, 62vh);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;

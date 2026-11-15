@@ -110,6 +110,8 @@
     "queued": "Queued",
     "queuePosition": "Position {{n}}",
     "listing": "Finding exposures",
+    "listingSlow": "Data archive is slow",
+    "listingAttempt": "Attempt {{n}}",
     "downloading": "Loading data",
     "finishing": "Finishing",
     "cutouts": "{{done}} / {{total}} cutouts · {{percent}}",
@@ -126,6 +128,7 @@
   "stage": {
     "waiting": "Waiting for the first image.",
     "building": "New field: it is being built from IRSA images. The first image arrives in about a minute and the full field takes a few minutes.",
+    "slowArchive": "The data archive (IRSA) is responding slowly. SkyBlink keeps trying: this can take a few minutes.",
     "empty": "This epoch has no data in {{band}}.",
     "emptyBand": "No epoch has data in {{band}}.",
     "pending": "The image of this epoch has not arrived yet.",
@@ -166,7 +169,32 @@
     "none": "This image has no flagged pixels.",
     "idle": "Flags are shown when a SPHEREx image is on screen.",
     "error": "The flags could not be loaded.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "description": {
+      "TRANSIENT": "Transient detected during SUR",
+      "OVERFLOW": "Overflow detected during SUR",
+      "SUR_ERROR": "Error in onboard processing",
+      "NONFUNC": "Permanently unusable",
+      "DICHROIC": "Low efficiency due to dichroic",
+      "MISSING_DATA": "Onboard data lost",
+      "HOT": "Hot pixel",
+      "COLD": "Anomalously low signal",
+      "FULLSAMPLE": "Pixel full sample history is available",
+      "PHANMISS": "Phantom correction was not applied",
+      "NONLINEAR": "Nonlinearity correction cannot be applied reliably",
+      "PERSIST": "Persistent charge above threshold",
+      "OUTLIER": "Pixel flagged by Detect Outliers",
+      "CROSSTALK": "Pixel affected by crosstalk.",
+      "SOURCE": "Pixel mapped to a known source",
+      "GHOST": "Affected by a bright source inside the exposure",
+      "GHOST_FPA": "Affected by a bright source on another detector",
+      "GHOST_EXT": "Pixel affected by a bright source outside FOV",
+      "STREAK": "Pixel affected by a streak",
+      "BLOOM": "Pixel part of a bloom artifact",
+      "SNOWBALL": "Pixel part of a snowball artifact",
+      "HALO": "Pixel part of a transient halo",
+      "SATELLITE_HALO": "Pixel part of a satellite streak halo"
+    }
   },
   "quality": {
     "none": "No notices for this field.",
@@ -208,7 +236,10 @@
     "open": "Open in the full viewer"
   },
   "error": {
-    "title": "The field could not be loaded"
+    "title": "The field could not be loaded",
+    "nearest": "The nearest saved field is {{name}}, {{distance}} away. Saved fields open without waiting for the data archive.",
+    "openNearest": "Open {{name}}",
+    "openTour": "Open the guided tour"
   },
   "disabled": {
     "context": {

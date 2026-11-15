@@ -5,6 +5,8 @@ import type { Epoch, Plane, PlaneStatus } from "@/api/types";
 import type { BandPlane } from "@/data/selectors";
 import { type PlaneImage, toPlaneImage } from "@/viewer/planeImage";
 import {
+  contrastFromPercent,
+  contrastToPercent,
   defaultStretchForMode,
   deriveView,
   pickReferenceEpoch,
@@ -346,5 +348,29 @@ describe("stepEpoch", () => {
     expect(stepEpoch(list, null, 1)).toBe(1);
     expect(stepEpoch(list, null, -1)).toBe(3);
     expect(stepEpoch([], 1, 1)).toBeNull();
+  });
+});
+
+describe("contraste en la URL", () => {
+  it("el porcentaje de la URL es la posicion del control, de 0 a 1", () => {
+    expect(contrastFromPercent(0)).toBe(0);
+    expect(contrastFromPercent(50)).toBe(0.5);
+    expect(contrastFromPercent(100)).toBe(1);
+    expect(contrastFromPercent(73)).toBeCloseTo(0.73, 12);
+  });
+
+  it("lo que pasa de los extremos queda en el extremo", () => {
+    expect(contrastFromPercent(-5)).toBe(0);
+    expect(contrastFromPercent(140)).toBe(1);
+    expect(contrastToPercent(-0.2)).toBe(0);
+    expect(contrastToPercent(1.2)).toBe(100);
+  });
+
+  it("ida y vuelta: cada paso del control vuelve al mismo porcentaje", () => {
+    for (let percent = 0; percent <= 100; percent += 1) {
+      expect(contrastToPercent(contrastFromPercent(percent)), String(percent)).toBe(percent);
+    }
+    expect(contrastToPercent(0.5)).toBe(50);
+    expect(contrastToPercent(0.734)).toBe(73);
   });
 });

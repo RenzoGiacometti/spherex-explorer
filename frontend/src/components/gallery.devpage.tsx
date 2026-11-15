@@ -39,6 +39,7 @@ import {
   type Band,
   DEFAULT_BAND,
   DEFAULT_MODE,
+  DEFAULT_URL_STATE,
   serializeUrlState,
   useUrlState,
   VIEW_MODES,
@@ -192,17 +193,13 @@ function toTimeline(epochs: ReadonlyArray<{ mjd: number; status: EpochStatus }>)
 
 function viewerHref(target: FeaturedObject): string {
   return `/${serializeUrlState({
+    ...DEFAULT_URL_STATE,
     ra: target.ra,
     dec: target.dec,
     fov: DEFAULT_VIEW_FOV,
     band: target.band,
     mode: DEFAULT_MODE,
-    epoch: null,
-    ref: null,
-    stretch: null,
     name: target.name,
-    embed: false,
-    lang: null,
   })}`;
 }
 

@@ -186,20 +186,21 @@ describe("ViewerPage: capa de flags", () => {
         name: "OVERFLOW",
         hatched: "true",
         pixels: "con trama 1 px",
-        description: "Overflow detected during SUR",
+        // La interfaz esta en espanol: la descripcion sale de la tabla del idioma, no del encabezado.
+        description: "Desborde detectado durante la lectura en rampa (SUR)",
       },
-      { name: "HOT", hatched: "true", pixels: "con trama 1 px", description: "Hot pixel" },
+      { name: "HOT", hatched: "true", pixels: "con trama 1 px", description: "Píxel caliente" },
       {
         name: "SOURCE",
         hatched: "false",
         pixels: "sin trama 1 px",
-        description: "Pixel mapped to a known source",
+        description: "Píxel asociado a una fuente conocida",
       },
       {
         name: "BLOOM",
         hatched: "true",
         pixels: "con trama 1 px",
-        description: "Pixel part of a bloom artifact",
+        description: "Píxel que forma parte de un desborde de carga (blooming)",
       },
     ]);
     // De que epoca son y que significa la trama.

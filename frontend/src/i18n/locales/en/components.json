@@ -21,6 +21,8 @@
     "next": "Next epoch"
   },
   "notices": {
-    "repeated": "{{n}} times"
+    "repeated": "{{n}} times",
+    "more": "More",
+    "less": "Less"
   }
 }

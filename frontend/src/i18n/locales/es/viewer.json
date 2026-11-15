@@ -110,6 +110,8 @@
     "queued": "En cola",
     "queuePosition": "Posición {{n}}",
     "listing": "Buscando exposiciones",
+    "listingSlow": "Archivo de datos lento",
+    "listingAttempt": "Intento {{n}}",
     "downloading": "Cargando datos",
     "finishing": "Terminando",
     "cutouts": "{{done}} / {{total}} recortes · {{percent}}",
@@ -126,6 +128,7 @@
   "stage": {
     "waiting": "Esperando la primera imagen.",
     "building": "Campo nuevo: se está armando con imágenes de IRSA. La primera imagen llega en cerca de un minuto y el campo completo tarda unos minutos.",
+    "slowArchive": "El archivo de datos (IRSA) está respondiendo lento. SkyBlink sigue intentando: puede tardar unos minutos.",
     "empty": "Esta época no tiene datos en {{band}}.",
     "emptyBand": "Ninguna época tiene datos en {{band}}.",
     "pending": "La imagen de esta época todavía no llegó.",
@@ -166,7 +169,32 @@
     "none": "Esta imagen no tiene píxeles marcados.",
     "idle": "Los flags se ven cuando hay una imagen de SPHEREx en pantalla.",
     "error": "No se pudieron cargar los flags.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "description": {
+      "TRANSIENT": "Transitorio detectado durante la lectura en rampa (SUR)",
+      "OVERFLOW": "Desborde detectado durante la lectura en rampa (SUR)",
+      "SUR_ERROR": "Error en el procesamiento a bordo",
+      "NONFUNC": "Píxel inutilizable de forma permanente",
+      "DICHROIC": "Baja eficiencia por el dicroico",
+      "MISSING_DATA": "Datos perdidos a bordo",
+      "HOT": "Píxel caliente",
+      "COLD": "Señal anormalmente baja",
+      "FULLSAMPLE": "Está disponible el historial completo de muestras del píxel",
+      "PHANMISS": "No se aplicó la corrección de píxeles fantasma (phantom)",
+      "NONLINEAR": "La corrección de no linealidad no se puede aplicar de forma confiable",
+      "PERSIST": "Carga persistente por encima del umbral",
+      "OUTLIER": "Píxel marcado por la detección de valores atípicos (Detect Outliers)",
+      "CROSSTALK": "Píxel afectado por diafonía (crosstalk)",
+      "SOURCE": "Píxel asociado a una fuente conocida",
+      "GHOST": "Afectado por una fuente brillante dentro de la exposición",
+      "GHOST_FPA": "Afectado por una fuente brillante en otro detector",
+      "GHOST_EXT": "Píxel afectado por una fuente brillante fuera del campo de visión",
+      "STREAK": "Píxel afectado por una traza",
+      "BLOOM": "Píxel que forma parte de un desborde de carga (blooming)",
+      "SNOWBALL": "Píxel que forma parte de un artefacto de bola de nieve (snowball)",
+      "HALO": "Píxel que forma parte del halo de un transitorio",
+      "SATELLITE_HALO": "Píxel que forma parte del halo de la traza de un satélite"
+    }
   },
   "quality": {
     "none": "Sin avisos para este campo.",
@@ -208,7 +236,10 @@
     "open": "Abrir en el visor completo"
   },
   "error": {
-    "title": "No se pudo cargar el campo"
+    "title": "No se pudo cargar el campo",
+    "nearest": "El campo guardado más cercano es {{name}}, a {{distance}}. Los campos guardados abren sin esperar al archivo de datos.",
+    "openNearest": "Abrir {{name}}",
+    "openTour": "Abrir el recorrido guiado"
   },
   "disabled": {
     "context": {

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { arrowYearsForStep, type FrameLayout, GaiaLayer } from "@/features/context";
 import type { ViewerOverlay } from "@/viewer/ImageViewer";
-import { imageToScreen } from "@/viewer/view";
+import { imageScreenRect, imageToScreen } from "@/viewer/view";
 import type { GaiaControl } from "./useViewerController";
 
 export interface GaiaOverlayProps {
@@ -19,7 +19,7 @@ export interface GaiaOverlayProps {
  * anotaciones, y no recibe el puntero.
  */
 export function GaiaOverlay({ overlay, gaia, shown }: GaiaOverlayProps) {
-  const { transform, viewport } = overlay;
+  const { transform, viewport, image } = overlay;
   // `GaiaLayer` se ubica con lo mismo que le da `FrameCanvas`: aca, la transformacion del visor.
   const layout = useMemo<FrameLayout>(
     () => ({
@@ -30,6 +30,9 @@ export function GaiaOverlay({ overlay, gaia, shown }: GaiaOverlayProps) {
     }),
     [transform, viewport.width, viewport.height],
   );
+  // La capa ocupa el visor entero: el dibujo se recorta al rectangulo de la imagen, para que una
+  // flecha larga no siga por encima de los paneles ni del fondo.
+  const clip = useMemo(() => imageScreenRect(transform, image), [transform, image]);
 
   if (!shown || !gaia.on || gaia.catalog === null || gaia.grid === null) return null;
   return (
@@ -40,6 +43,7 @@ export function GaiaOverlay({ overlay, gaia, shown }: GaiaOverlayProps) {
       year={gaia.year}
       arrowYears={arrowYearsForStep(gaia.arrowStep)}
       maxGMag={gaia.maxGMag}
+      clip={clip}
     />
   );
 }

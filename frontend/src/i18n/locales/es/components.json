@@ -21,6 +21,8 @@
     "next": "Época siguiente"
   },
   "notices": {
-    "repeated": "{{n}} veces"
+    "repeated": "{{n}} veces",
+    "more": "Ver más",
+    "less": "Ver menos"
   }
 }

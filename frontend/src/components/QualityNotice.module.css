@@ -28,6 +28,43 @@
   min-width: 0;
 }
 
+/* Aviso plegado: un solo renglon, cortado con puntos suspensivos. */
+.clamped {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Boton que despliega el aviso: texto subrayado, del alto del renglon. El
+ * relleno, compensado con margen negativo, le da un blanco tactil de 44 px sin
+ * mover lo de alrededor.
+ */
+.more {
+  appearance: none;
+  flex-shrink: 0;
+  margin: -12px calc(-1 * var(--space-xs)) -12px 0;
+  padding: 12px var(--space-xs);
+  border: 0;
+  background-color: transparent;
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.more:hover {
+  color: var(--color-text);
+}
+
+.more:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -8px;
+}
+
 .count {
   flex-shrink: 0;
   color: var(--color-text-mute);

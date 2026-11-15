@@ -811,7 +811,12 @@ describe("ViewerPage: errores", () => {
 
     const alert = await screen.findByRole("alert");
     expect(within(alert).getByText("SPHEREx todavía no observó esa zona del cielo.")).toBeTruthy();
-    expect(within(alert).queryByRole("button")).toBeNull();
+    expect(within(alert).queryByRole("button", { name: "Reintentar" })).toBeNull();
+    // Lo que si ofrece son las salidas: el campo guardado mas cercano, con su
+    // distancia, y el recorrido guiado (que aca no, porque es el de este campo).
+    expect(within(alert).getByText(/campo guardado más cercano es Wolf 359, a 33,4°/)).toBeTruthy();
+    expect(within(alert).getByRole("button", { name: "Abrir Wolf 359" })).toBeTruthy();
+    expect(within(alert).queryByRole("button", { name: "Abrir el recorrido guiado" })).toBeNull();
     // Los controles siguen a mano para elegir otro campo de vision o volver.
     expect(radio("10 minutos de arco").checked).toBe(true);
     expect(screen.getByRole("link", { name: "Volver a la entrada" })).toBeTruthy();

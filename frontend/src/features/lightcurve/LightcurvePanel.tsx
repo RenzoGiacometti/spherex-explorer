@@ -34,6 +34,13 @@ import {
   seriesOf,
 } from "./types";
 
+/** Rango de una banda (detector, 1 a 6), en micrometros. */
+export interface BandRange {
+  readonly detector: number;
+  readonly wave_min_um: number;
+  readonly wave_max_um: number;
+}
+
 export interface LightcurvePanelProps {
   /** Documento de GET /api/lightcurve, ya validado con `parseLightcurve`. */
   readonly lightcurve: LightcurveDocument;
@@ -43,6 +50,19 @@ export interface LightcurvePanelProps {
   readonly initialBand?: number | undefined;
   /** Con esto el panel lleva su boton de cerrar, junto al nombre. */
   readonly onClose?: (() => void) | undefined;
+  /**
+   * Rango de cada banda como lo muestra el panel Banda del visor: el del
+   * documento del campo (`meta.detectors`). Con esto el selector de banda dice
+   * los mismos rangos que ese panel; sin esto, los de las series del documento
+   * de la curva, que salen de las exposiciones medidas y difieren en el borde.
+   */
+  readonly bandRanges?: readonly BandRange[] | undefined;
+  /**
+   * Armado apretado, para la hoja del celular: sin el encabezado del panel (ahi
+   * lo dicen las pestanas), con el relleno comun y el grafico mas bajo, para
+   * que entre entero sin desplazar.
+   */
+  readonly dense?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -172,6 +192,8 @@ export function LightcurvePanel({
   name,
   initialBand,
   onClose,
+  bandRanges,
+  dense = false,
   className,
 }: LightcurvePanelProps) {
   const { t } = useTranslation("lightcurve");
@@ -235,10 +257,11 @@ export function LightcurvePanel({
 
   return (
     <GlassPanel
-      title={t("panel.title")}
+      title={dense ? undefined : t("panel.title")}
+      label={t("panel.title")}
       icon="blink"
       aside={summaryText(lightcurve, t)}
-      padding="roomy"
+      padding={dense ? "compact" : "roomy"}
       className={className}
     >
       <div className={styles.top}>
@@ -253,7 +276,10 @@ export function LightcurvePanel({
         )}
       </div>
 
-      {/* Variacion relativa y "sin curva": antes de todo lo demas, para que se lean primero. */}
+      {/*
+       * Variacion relativa y "sin curva": antes de todo lo demas, para que se lean primero. Cada uno
+       * en un renglon, que se despliega: asi no empujan el grafico fuera de la vista.
+       */}
       {wingsNote === null && noCurve === null ? null : (
         <ul
           className={styles.prominent}
@@ -261,31 +287,47 @@ export function LightcurvePanel({
           data-lightcurve-curve={noCurve === null ? "wings" : "none"}
         >
           {wingsNote === null ? null : (
-            <QualityNotice as="li">
+            <QualityNotice as="li" collapsible>
               <span className={styles.tag}>{t("relative.tag")}</span> {wingsNote}
             </QualityNotice>
           )}
           {noCurve === null ? null : (
-            <QualityNotice as="li">
+            <QualityNotice as="li" collapsible={curve !== null}>
               <span className={styles.tag}>{noCurve.lead}</span> {noCurve.reason}
             </QualityNotice>
           )}
         </ul>
       )}
 
+      {curve === null ? null : (
+        <>
+          <LightcurveChart
+            series={curve}
+            epochs={lightcurve.epochs}
+            name={title}
+            showExposures={showExposures}
+            compact={dense}
+          />
+          {apertureNote === null ? null : <p className={styles.note}>{apertureNote}</p>}
+        </>
+      )}
+
+      {/* La banda y la forma de medir van debajo del grafico: asi el grafico entra entero al abrir. */}
       {detectors.length === 0 ? null : (
         <SegmentedControl
           label={t("panel.band")}
           showLabel
           options={detectors.map((detector) => {
             const preferred = seriesOf(lightcurve, detector)[0];
+            // Una sola fuente para el rango: la del panel Banda, si la dieron.
+            const range = bandRanges?.find((item) => item.detector === detector) ?? preferred;
             return {
               value: detector,
               label: formatBand(detector),
               detail:
-                preferred === undefined
+                range === undefined
                   ? undefined
-                  : formatWaveRange(preferred.wave_min_um, preferred.wave_max_um, language),
+                  : formatWaveRange(range.wave_min_um, range.wave_max_um, language),
               noData: preferred === undefined || preferred.status !== "ok",
             };
           })}
@@ -315,13 +357,6 @@ export function LightcurvePanel({
 
       {curve === null ? null : (
         <>
-          {apertureNote === null ? null : <p className={styles.note}>{apertureNote}</p>}
-          <LightcurveChart
-            series={curve}
-            epochs={lightcurve.epochs}
-            name={title}
-            showExposures={showExposures}
-          />
           <div className={styles.legend}>
             <span className={styles.legendItem}>
               <span className={styles.swatchBinned} aria-hidden="true" />

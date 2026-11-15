@@ -129,6 +129,15 @@
   list-style: none;
 }
 
+/* Aviso sin grafico: el titulo en blanco pleno y la explicacion, mas tenue, a continuacion. */
+.noticeLead {
+  color: var(--color-text);
+}
+
+.noticeBody {
+  color: var(--color-text-mute);
+}
+
 .notices {
   display: flex;
   flex-direction: column;

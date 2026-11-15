@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   DEFAULT_URL_STATE,
+  fovOverMaximum,
   hasField,
   normalizeUrlState,
   parseUrlState,
@@ -29,6 +30,13 @@ describe("parseUrlState", () => {
       ref: null,
       stretch: null,
       name: null,
+      contrast: 50,
+      flags: false,
+      gaia: false,
+      sobj: false,
+      sra: null,
+      sdec: null,
+      tab: "spectrum",
       embed: false,
       lang: null,
     });
@@ -45,7 +53,7 @@ describe("parseUrlState", () => {
 
   it("lee todos los parametros", () => {
     const parsed = parseUrlState(
-      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&ref=1&stretch=log&name=Barnard%27s+Star&embed=1&lang=en",
+      "?ra=269.4463&dec=4.7683&fov=0.5&band=1&mode=difference&epoch=2&ref=1&stretch=log&name=Barnard%27s+Star&contrast=70&flags=1&gaia=1&sobj=1&tab=lightcurve&embed=1&lang=en",
     );
     expect(parsed).toEqual({
       ra: 269.4463,
@@ -57,6 +65,13 @@ describe("parseUrlState", () => {
       ref: 1,
       stretch: "log",
       name: "Barnard's Star",
+      contrast: 70,
+      flags: true,
+      gaia: true,
+      sobj: true,
+      sra: null,
+      sdec: null,
+      tab: "lightcurve",
       embed: true,
       lang: "en",
     });
@@ -132,6 +147,39 @@ describe("parseUrlState", () => {
       for (const value of ["1", "0", "-0.5", "abc", ""]) {
         expect(parseUrlState(`?fov=${value}`).fov, value).toBe(0.1667);
       }
+    });
+  });
+
+  describe("fov sin el campo amplio", () => {
+    const base = { wideField: false };
+
+    it("lleva a 10 minutos cualquier vista mayor", () => {
+      expect(parseUrlState("?fov=0.5", base).fov).toBe(0.1667);
+      expect(parseUrlState("?fov=0.3", base).fov).toBe(0.1667);
+      expect(parseUrlState("?fov=0.17", base).fov).toBe(0.1667);
+      expect(parseUrlState("?fov=2", base).fov).toBe(0.1667);
+    });
+
+    it("deja las vistas de 5 y 10 minutos como estan", () => {
+      expect(parseUrlState("?fov=0.0833", base).fov).toBe(0.0833);
+      expect(parseUrlState("?fov=0.1667", base).fov).toBe(0.1667);
+      expect(parseUrlState("?fov=0.16667", base).fov).toBe(0.1667);
+    });
+
+    it("avisa que la URL hay que corregirla solo si pedia mas de 10 minutos", () => {
+      expect(fovOverMaximum("?fov=0.5", base)).toBe(true);
+      expect(fovOverMaximum("?fov=0.3", base)).toBe(true);
+      expect(fovOverMaximum("?fov=2", base)).toBe(true);
+      expect(fovOverMaximum("?fov=0.1667", base)).toBe(false);
+      expect(fovOverMaximum("?fov=0.16667", base)).toBe(false);
+      expect(fovOverMaximum("?fov=0.0833", base)).toBe(false);
+      expect(fovOverMaximum("?fov=nada", base)).toBe(false);
+      expect(fovOverMaximum("", base)).toBe(false);
+    });
+
+    it("con el campo amplio todo sigue igual", () => {
+      expect(parseUrlState("?fov=0.5", { wideField: true }).fov).toBe(0.5);
+      expect(fovOverMaximum("?fov=0.5", { wideField: true })).toBe(false);
     });
   });
 
@@ -214,6 +262,70 @@ describe("parseUrlState", () => {
       expect(parseUrlState("?name=").name).toBeNull();
       expect(parseUrlState("?name=%20%20").name).toBeNull();
       expect(parseUrlState(`?name=${"x".repeat(121)}`).name).toBeNull();
+    });
+  });
+
+  describe("contrast", () => {
+    it("acepta porcentajes enteros de 0 a 100", () => {
+      for (const value of [0, 1, 49, 50, 73, 100]) {
+        expect(parseUrlState(`?contrast=${value}`).contrast, String(value)).toBe(value);
+      }
+    });
+
+    it("queda en 50 si falta o es invalido", () => {
+      for (const value of ["101", "-1", "50.5", "5e1", "abc", "", "1000"]) {
+        expect(parseUrlState(`?contrast=${value}`).contrast, value).toBe(50);
+      }
+      expect(parseUrlState("").contrast).toBe(50);
+    });
+  });
+
+  describe("flags y gaia", () => {
+    it("se prenden con 1 o true", () => {
+      expect(parseUrlState("?flags=1").flags).toBe(true);
+      expect(parseUrlState("?gaia=true").gaia).toBe(true);
+      expect(parseUrlState("?flags=1").gaia).toBe(false);
+    });
+
+    it("quedan apagadas con cualquier otra cosa", () => {
+      for (const value of ["0", "false", "yes", ""]) {
+        expect(parseUrlState(`?flags=${value}`).flags, value).toBe(false);
+        expect(parseUrlState(`?gaia=${value}`).gaia, value).toBe(false);
+      }
+    });
+  });
+
+  describe("punto elegido", () => {
+    it("lee las coordenadas del punto y las redondea a 5 decimales", () => {
+      const parsed = parseUrlState("?sra=133.7601234&sdec=-7.2431567");
+      expect(parsed.sra).toBe(133.76012);
+      expect(parsed.sdec).toBe(-7.24316);
+      expect(parsed.sobj).toBe(false);
+      expect(parsed.tab).toBe("spectrum");
+    });
+
+    it("las coordenadas valen solo de a dos y con una declinacion posible", () => {
+      for (const search of ["?sra=10", "?sdec=10", "?sra=10&sdec=91", "?sra=abc&sdec=1"]) {
+        const parsed = parseUrlState(search);
+        expect(parsed.sra, search).toBeNull();
+        expect(parsed.sdec, search).toBeNull();
+      }
+      expect(parseUrlState("?sra=-0.5&sdec=0").sra).toBe(359.5);
+    });
+
+    it("el objeto con nombre necesita el nombre, y le gana a las coordenadas", () => {
+      expect(parseUrlState("?sobj=1").sobj).toBe(false);
+      const parsed = parseUrlState("?name=x&sobj=1&sra=10&sdec=20");
+      expect(parsed.sobj).toBe(true);
+      expect(parsed.sra).toBeNull();
+      expect(parsed.sdec).toBeNull();
+    });
+
+    it("la pestana solo vale con un punto elegido", () => {
+      expect(parseUrlState("?tab=lightcurve").tab).toBe("spectrum");
+      expect(parseUrlState("?sra=10&sdec=20&tab=lightcurve").tab).toBe("lightcurve");
+      expect(parseUrlState("?name=x&sobj=1&tab=lightcurve").tab).toBe("lightcurve");
+      expect(parseUrlState("?sra=10&sdec=20&tab=otra").tab).toBe("spectrum");
     });
   });
 
@@ -303,6 +415,30 @@ describe("serializeUrlState", () => {
     );
     expect(serializeUrlState({ ...base, stretch: "linear" })).toBe(
       "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=difference&stretch=linear",
+    );
+  });
+
+  it("escribe el contraste, las capas y el punto elegido solo si no valen lo de partida", () => {
+    const base = state({ ra: 133.7598, dec: -7.2422, band: 6, name: "x" });
+    const prefix = "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=x";
+    expect(serializeUrlState({ ...base, contrast: 50, tab: "lightcurve" })).toBe(prefix);
+    expect(serializeUrlState({ ...base, contrast: 70, flags: true, gaia: true })).toBe(
+      `${prefix}&contrast=70&flags=1&gaia=1`,
+    );
+    expect(serializeUrlState({ ...base, contrast: 0 })).toBe(`${prefix}&contrast=0`);
+    expect(serializeUrlState({ ...base, sra: 133.7601234, sdec: -7.2431567 })).toBe(
+      `${prefix}&sra=133.76012&sdec=-7.24316`,
+    );
+    expect(serializeUrlState({ ...base, sra: 133.76012, sdec: -7.24316, tab: "lightcurve" })).toBe(
+      `${prefix}&sra=133.76012&sdec=-7.24316&tab=lightcurve`,
+    );
+    // El objeto con nombre le gana a las coordenadas.
+    expect(serializeUrlState({ ...base, sobj: true, sra: 1, sdec: 2, tab: "lightcurve" })).toBe(
+      `${prefix}&sobj=1&tab=lightcurve`,
+    );
+    // Sin nombre no hay objeto que elegir.
+    expect(serializeUrlState({ ...base, name: null, sobj: true })).toBe(
+      "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink",
     );
   });
 
@@ -405,6 +541,45 @@ describe("useUrlState", () => {
     // Volver a los valores automaticos los saca de la URL.
     useUrlState.getState().update({ ref: null, stretch: null });
     expect(window.location.search).toBe(`${SPEC_EXAMPLE}&epoch=3`);
+  });
+
+  it("update escribe el contraste, las capas y el punto elegido reemplazando la entrada", () => {
+    setLocation(`${SPEC_EXAMPLE}&name=x`);
+    const before = window.history.length;
+
+    useUrlState.getState().update({ contrast: 70, flags: true, gaia: true });
+    useUrlState.getState().update({ sra: 133.76012, sdec: -7.24316, tab: "lightcurve" });
+
+    expect(window.history.length).toBe(before);
+    expect(window.location.search).toBe(
+      `${SPEC_EXAMPLE}&name=x&contrast=70&flags=1&gaia=1&sra=133.76012&sdec=-7.24316&tab=lightcurve`,
+    );
+    // Cerrar el panel y volver a lo de partida los saca de la URL.
+    useUrlState
+      .getState()
+      .update({ contrast: 50, flags: false, gaia: false, sra: null, sdec: null, tab: "spectrum" });
+    expect(window.location.search).toBe(`${SPEC_EXAMPLE}&name=x`);
+  });
+
+  it("otro campo no hereda el punto elegido; el contraste y las capas si", () => {
+    setLocation(
+      `${SPEC_EXAMPLE}&contrast=70&flags=1&gaia=1&sra=133.76012&sdec=-7.24316&tab=lightcurve`,
+    );
+
+    // Una correccion del centro en la misma entrada conserva el punto.
+    useUrlState.getState().update({ ra: 133.7599, dec: -7.2422 });
+    expect(useUrlState.getState().sra).toBe(133.76012);
+    expect(useUrlState.getState().tab).toBe("lightcurve");
+
+    useUrlState.getState().update({ ra: 269.4463, dec: 4.7683 }, { history: "push" });
+    expect(window.location.search).toBe(
+      "?ra=269.4463&dec=4.7683&fov=0.1667&band=6&mode=blink&contrast=70&flags=1&gaia=1",
+    );
+    // Salvo que el mismo cambio lo traiga (un link armado a mano).
+    useUrlState
+      .getState()
+      .update({ ra: 133.7598, dec: -7.2422, sra: 133.76, sdec: -7.24 }, { history: "push" });
+    expect(useUrlState.getState().sra).toBe(133.76);
   });
 
   it("otro campo no hereda la epoca de referencia; el estirado si", () => {

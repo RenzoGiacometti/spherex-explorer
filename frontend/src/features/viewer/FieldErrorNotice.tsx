@@ -1,10 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, GlassPanel } from "@/components";
 import type { FieldError } from "@/data/fieldState";
-import { formatInteger } from "@/lib/format";
+import { featuredUrlPatch, PRECOMPUTED_OBJECTS } from "@/features/entry/featured";
+import { startTour } from "@/features/guide/guideStore";
+import { isOnTourField, TOUR_START } from "@/features/guide/tour";
+import type { Language } from "@/i18n/languages";
+import { useLanguage } from "@/i18n/useLanguage";
+import { formatArcminutes, formatDegrees, formatInteger } from "@/lib/format";
 import { useFieldStore } from "@/state/fieldStore";
+import { useUrlState } from "@/state/urlState";
 import styles from "./FieldErrorNotice.module.css";
+import { nearestField } from "./nearestField";
+
+/** Distancia al campo guardado: en grados con un decimal, o en minutos de arco si es menos de un grado. */
+function formatDistance(distanceDeg: number, language: Language): string {
+  return distanceDeg >= 1
+    ? formatDegrees(distanceDeg, language, 1)
+    : formatArcminutes(distanceDeg, language, 0);
+}
 
 /** Segundos de espera que le quedan a un error al mostrarlo; 0 si no pide esperar. */
 function initialWait(error: FieldError): number {
@@ -45,6 +59,21 @@ function ErrorPanel({ error }: ErrorPanelProps) {
   const { t: tErrors } = useTranslation("errors");
   const retry = useFieldStore((state) => state.retry);
   const waitS = useWait(error);
+  const language = useLanguage();
+  const ra = useUrlState((state) => state.ra);
+  const dec = useUrlState((state) => state.dec);
+  const embed = useUrlState((state) => state.embed);
+  const update = useUrlState((state) => state.update);
+
+  // Salidas que no dependen de este campo: el campo guardado mas cercano (los
+  // guardados abren sin pasar por el archivo de datos) y el recorrido guiado.
+  const nearest = useMemo(
+    () => (ra === null || dec === null ? null : nearestField({ ra, dec }, PRECOMPUTED_OBJECTS)),
+    [ra, dec],
+  );
+  // El recorrido abre el campo de su objeto: si es el que fallo, no es una salida.
+  // En la vista incrustada tampoco se ofrece, como en la entrada.
+  const tourOffered = TOUR_START !== null && !embed && !isOnTourField(ra, dec);
 
   return (
     <div role="alert" className={styles.alert}>
@@ -64,6 +93,28 @@ function ErrorPanel({ error }: ErrorPanelProps) {
             {tErrors("retry")}
           </Button>
         ) : null}
+        {nearest === null && !tourOffered ? null : (
+          <div className={styles.exits}>
+            {nearest === null ? null : (
+              <p className={styles.wait}>
+                {t("error.nearest", {
+                  name: nearest.field.label,
+                  distance: formatDistance(nearest.distanceDeg, language),
+                })}
+              </p>
+            )}
+            <div className={styles.actions}>
+              {nearest === null ? null : (
+                <Button
+                  onClick={() => update(featuredUrlPatch(nearest.field), { history: "push" })}
+                >
+                  {t("error.openNearest", { name: nearest.field.label })}
+                </Button>
+              )}
+              {tourOffered ? <Button onClick={startTour}>{t("error.openTour")}</Button> : null}
+            </div>
+          </div>
+        )}
       </GlassPanel>
     </div>
   );
@@ -74,6 +125,9 @@ function ErrorPanel({ error }: ErrorPanelProps) {
  * backend. La frase sale del namespace `errors` a partir del codigo. Si tiene
  * sentido reintentar hay un boton; con la cola llena (`queue_full`) el boton
  * espera lo que pidio el backend en `Retry-After`.
+ *
+ * Debajo ofrece dos salidas, como botones secundarios: abrir el campo guardado
+ * mas cercano (con su nombre y a que distancia esta) y abrir el recorrido guiado.
  */
 export function FieldErrorNotice() {
   const error = useFieldStore((state) => state.error);

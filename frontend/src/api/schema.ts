@@ -214,7 +214,8 @@ export const progressPhaseSchema = z.enum([
 
 /**
  * Avance. El backend manda siempre todos los contadores, en cero mientras no
- * aplican, asi que al salir de aca son numeros y no hay ausencias que manejar.
+ * aplican, asi que al salir de aca son numeros y no hay ausencias que manejar
+ * (salvo los dos del reintento del listado, que son opcionales).
  *
  * Los ejemplos de la seccion 4.2 omiten algunos (`queue_position` en el evento
  * `progress`, el resto en el `state` de un trabajo en cola): un contador que
@@ -230,6 +231,14 @@ export const progressSchema = z.object({
   planes_total: count.default(0),
   planes_ready: count.default(0),
   elapsed_s: z.number().nonnegative().default(0),
+  /**
+   * Intento del listado de exposiciones: 1 en el primero, 2 o mas cuando el
+   * backend reintenta porque el archivo de datos (IRSA) no responde. Opcional:
+   * solo acompana a la fase `listing`, y un backend anterior no lo manda.
+   */
+  listing_attempt: count.nullish(),
+  /** Segundos hasta el proximo intento del listado; null o ausente si no esta esperando. */
+  retry_in_s: z.number().nullish(),
 });
 
 /**

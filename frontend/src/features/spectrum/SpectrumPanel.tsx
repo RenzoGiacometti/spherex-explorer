@@ -42,6 +42,12 @@ export interface SpectrumPanelProps {
   readonly onRequestPosition?:
     | ((position: { readonly ra: number; readonly dec: number }) => void)
     | undefined;
+  /**
+   * Armado apretado, para la hoja del celular: sin el encabezado del panel (ahi
+   * lo dicen las pestanas), con el relleno comun y el grafico mas bajo, para
+   * que entre entero sin desplazar.
+   */
+  readonly dense?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -130,6 +136,7 @@ export function SpectrumPanel({
   name,
   onClose,
   onRequestPosition,
+  dense = false,
   className,
 }: SpectrumPanelProps) {
   const { t } = useTranslation("spectrum");
@@ -209,10 +216,11 @@ export function SpectrumPanel({
 
   return (
     <GlassPanel
-      title={t("panel.title")}
+      title={dense ? undefined : t("panel.title")}
+      label={t("panel.title")}
       icon="spectrum"
       aside={hasPoints ? summary : undefined}
-      padding="roomy"
+      padding={dense ? "compact" : "roomy"}
       className={className}
     >
       <div className={styles.top}>
@@ -227,11 +235,14 @@ export function SpectrumPanel({
         )}
       </div>
 
-      {/* Fuente guardada, fuente saturada y luz de otra fuente: antes del grafico, para que se lean primero. */}
+      {/*
+       * Fuente guardada, fuente saturada y luz de otra fuente: antes del grafico, para que se lean
+       * primero. Cada uno en un renglon, que se despliega: asi no empujan el grafico fuera de la vista.
+       */}
       {prominent.length === 0 ? null : (
         <ul className={styles.prominent} data-spectrum-notices="prominent">
           {prominent.map((notice) => (
-            <QualityNotice key={notice.code} as="li">
+            <QualityNotice key={notice.code} as="li" collapsible>
               {notice.text}
             </QualityNotice>
           ))}
@@ -265,6 +276,7 @@ export function SpectrumPanel({
             name={title}
             showExposures={showExposures}
             playhead={playhead}
+            compact={dense}
           />
           <div className={styles.legend}>
             <span className={styles.legendItem}>
@@ -305,20 +317,23 @@ export function SpectrumPanel({
           {soundAvailable ? null : <p className={styles.note}>{t("listen.unsupported")}</p>}
         </>
       ) : (
-        <div className={styles.empty}>
-          <QualityNotice as="div">
-            {spectrum.status === "saturated" ? t("panel.saturatedTitle") : t("panel.emptyTitle")}
+        // Sin grafico: el titulo en un renglon y, desplegado, la explicacion completa.
+        <div className={styles.prominent} data-spectrum-body="no-points">
+          <QualityNotice as="div" collapsible>
+            <span className={styles.noticeLead}>
+              {spectrum.status === "saturated" ? t("panel.saturatedTitle") : t("panel.emptyTitle")}
+            </span>{" "}
+            <span className={styles.noticeBody}>
+              {spectrum.status !== "saturated"
+                ? t("panel.emptyBody", { n: formatInteger(spectrum.provenance.n_exposures) })
+                : saturated?.n_exposures === undefined
+                  ? t("panel.saturatedBodyNoCount")
+                  : t("panel.saturatedBody", {
+                      n: formatInteger(saturated.n_exposures),
+                      total: formatInteger(saturated.n_total ?? spectrum.provenance.n_exposures),
+                    })}
+            </span>
           </QualityNotice>
-          <p className={styles.note}>
-            {spectrum.status !== "saturated"
-              ? t("panel.emptyBody", { n: formatInteger(spectrum.provenance.n_exposures) })
-              : saturated?.n_exposures === undefined
-                ? t("panel.saturatedBodyNoCount")
-                : t("panel.saturatedBody", {
-                    n: formatInteger(saturated.n_exposures),
-                    total: formatInteger(saturated.n_total ?? spectrum.provenance.n_exposures),
-                  })}
-          </p>
         </div>
       )}
 

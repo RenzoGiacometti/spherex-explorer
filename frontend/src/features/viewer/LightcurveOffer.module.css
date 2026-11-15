@@ -12,20 +12,17 @@
 }
 
 /*
- * En el celular va sobre la imagen, arriba a la izquierda de la zona libre y
- * por debajo del rotulo del modo y la banda, que ocupa esa esquina (dos
- * renglones). La celda no recibe el puntero (deja pasar el arrastre a la
- * imagen): el boton si.
+ * En el celular va con los controles, debajo de la imagen y arriba de todos:
+ * un boton a lo ancho. Sobre la imagen tapaba la mira del objeto.
  */
 .compact {
   display: flex;
-  justify-content: flex-start;
   min-width: 0;
-  margin-top: 68px;
 }
 
 .compact > * {
-  pointer-events: auto;
+  flex: 1;
+  min-width: 0;
   background-color: var(--glass-panel-bg);
   -webkit-backdrop-filter: blur(var(--effect-glass-blur));
   backdrop-filter: blur(var(--effect-glass-blur));

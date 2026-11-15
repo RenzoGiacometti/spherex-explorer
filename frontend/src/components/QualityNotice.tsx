@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatInteger } from "@/lib/format";
 import a11y from "./a11y.module.css";
@@ -15,6 +15,12 @@ export interface QualityNoticeProps {
   /** Elemento que se dibuja: `li` dentro de una lista, `p` suelto. */
   readonly as?: "li" | "p" | "div";
   readonly className?: string | undefined;
+  /**
+   * Muestra un solo renglon. Si la frase no entra, se corta con puntos
+   * suspensivos y un boton la despliega entera. Para los avisos que van arriba
+   * de un grafico: asi no lo empujan fuera de la vista.
+   */
+  readonly collapsible?: boolean;
   /** La frase del aviso, ya traducida. */
   readonly children: ReactNode;
 }
@@ -24,16 +30,59 @@ export interface QualityNoticeProps {
  * una frase en `body-sm`. No hay colores semanticos: el aviso se comunica con
  * el icono y el texto.
  */
-export function QualityNotice({ count = 1, as = "p", className, children }: QualityNoticeProps) {
+export function QualityNotice({
+  count = 1,
+  as = "p",
+  className,
+  collapsible = false,
+  children,
+}: QualityNoticeProps) {
   const { t } = useTranslation("components");
   const Element = as;
   const repeated = count > 1;
   const amount = formatInteger(count);
+  const textId = useId();
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const clamped = collapsible && !expanded;
+
+  // El boton solo aparece si la frase no entra en un renglon. Un lector de
+  // pantalla lee la frase entera igual: el corte es solo visual.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: se vuelve a medir al cambiar la frase
+  useEffect(() => {
+    if (!clamped) return;
+    const element = textRef.current;
+    if (element === null) return;
+    const measure = (): void => setOverflowing(element.scrollWidth > element.clientWidth + 1);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [clamped, children]);
 
   return (
     <Element className={classNames(styles.notice, className)}>
       <Icon name="alert" size={18} className={styles.icon} />
-      <span className={styles.text}>{children}</span>
+      <span
+        ref={textRef}
+        id={collapsible ? textId : undefined}
+        className={classNames(styles.text, clamped && styles.clamped)}
+      >
+        {children}
+      </span>
+      {collapsible && (expanded || overflowing) ? (
+        <button
+          type="button"
+          className={styles.more}
+          aria-expanded={expanded}
+          aria-controls={textId}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? t("notices.less") : t("notices.more")}
+        </button>
+      ) : null}
       {repeated ? (
         <>
           {/* El espacio no se dibuja (el aviso es flex), pero separa la frase de la cantidad al leerlas. */}{" "}

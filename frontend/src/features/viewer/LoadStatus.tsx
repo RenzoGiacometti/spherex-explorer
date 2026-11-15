@@ -7,14 +7,16 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatInteger, formatPercent } from "@/lib/format";
 import { useFieldStore } from "@/state/fieldStore";
 import styles from "./LoadStatus.module.css";
+import { useSlowListing } from "./useSlowListing";
 
 // Punto medio (U+00B7): separa la palabra del dato, como en el rotulo de imagen.
 const SEPARATOR = String.fromCodePoint(0x00b7);
 
 /**
  * Estado de la carga del campo (DESIGN.md, `progress-bar`): pidiendo, en cola
- * con su posicion, buscando exposiciones, bajando con recortes y porcentaje,
- * y al final campo completo o incompleto. Ocupa siempre su renglon, para que
+ * con su posicion, buscando exposiciones (con el intento, si el archivo de
+ * datos responde lento), bajando con recortes y porcentaje, y al final campo
+ * completo o incompleto. Ocupa siempre su renglon, para que
  * la imagen no cambie de tamano al terminar la carga.
  *
  * Un campo incompleto ofrece completarlo: el boton lo vuelve a pedir con
@@ -37,6 +39,7 @@ export function LoadStatus() {
   );
   const retryDownloads = useFieldStore((state) => state.retryDownloads);
   const completeField = useFieldStore((state) => state.completeField);
+  const slowListing = useSlowListing();
   /** El pedido de completar esta en camino. */
   const [completing, setCompleting] = useState(false);
   /** Por que fallo el ultimo pedido de completar; null si no fallo. */
@@ -92,7 +95,18 @@ export function LoadStatus() {
         );
         break;
       case "listing":
-        content = <ProgressBar label={t("load.listing")} value={null} />;
+        // El archivo de datos responde lento y el backend reintenta: no es un error.
+        content = (
+          <ProgressBar
+            label={t(slowListing.slow ? "load.listingSlow" : "load.listing")}
+            value={null}
+            valueText={
+              slowListing.attempt === null
+                ? undefined
+                : t("load.listingAttempt", { n: formatInteger(slowListing.attempt) })
+            }
+          />
+        );
         break;
       case "finishing":
         content = (

@@ -86,3 +86,98 @@
   margin: 0;
   color: var(--color-text-mute);
 }
+
+/*
+ * ---- Ficha plegada (arriba del espectro, en el visor) ----------------------
+ *
+ * Un renglon o dos: el resumen es un boton a lo ancho que despliega el resto.
+ */
+.folded {
+  gap: 0;
+  padding: var(--space-xxs);
+}
+
+.summary {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: var(--space-xxs) var(--space-xs);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background-color: transparent;
+  color: var(--color-text);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+  text-align: left;
+  cursor: pointer;
+}
+
+.summary:hover {
+  border-color: var(--color-hairline-strong);
+}
+
+.summary:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.summaryIcon {
+  flex-shrink: 0;
+  color: var(--color-text-mute);
+}
+
+/* Identificador y cifras: en un renglon si entran, en dos si no. */
+.summaryText {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-sm);
+  min-width: 0;
+}
+
+.summarySource {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-xs);
+  min-width: 0;
+  color: var(--color-text-mute);
+}
+
+.summaryLead {
+  color: var(--color-text);
+}
+
+/* "Ver ficha" y "Ocultar": texto subrayado, como el de desplegar un aviso. */
+.summaryToggle {
+  flex-shrink: 0;
+  color: var(--color-text-mute);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+  padding: var(--space-xs);
+}
+
+.details[hidden] {
+  display: none;
+}
+
+/* En el celular el boton es un blanco tactil de 44 px. */
+@media (max-width: 599px) {
+  .summary {
+    min-height: 44px;
+  }
+}

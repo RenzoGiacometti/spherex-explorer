@@ -189,6 +189,13 @@ export interface LoadProgress {
   planesReady: number;
   planesTotal: number;
   elapsedS: number;
+  /**
+   * Intento del listado de exposiciones: 1 en el primero, 2 o mas cuando el
+   * backend reintenta porque el archivo de datos no responde. 0 si no lo informa.
+   */
+  listingAttempt: number;
+  /** Segundos hasta el proximo intento del listado; null si no esta esperando. */
+  retryInS: number | null;
 }
 
 const loadProgress = memoizeLast((progress: FieldMeta["progress"]): LoadProgress => {
@@ -204,6 +211,8 @@ const loadProgress = memoizeLast((progress: FieldMeta["progress"]): LoadProgress
     planesReady: progress.planes_ready,
     planesTotal: progress.planes_total,
     elapsedS: progress.elapsed_s,
+    listingAttempt: progress.listing_attempt ?? 0,
+    retryInS: progress.retry_in_s ?? null,
   };
 });
 

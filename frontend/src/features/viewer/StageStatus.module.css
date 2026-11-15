@@ -1,9 +1,22 @@
-/* Dos franjas dentro de la zona libre del visor: el centro y, abajo, el error del campo. */
+/*
+ * Dos franjas dentro de la zona libre del visor: el centro y, abajo, el error
+ * del campo o el aviso de que el archivo de datos responde lento.
+ */
 
 .bottom {
   display: flex;
   justify-content: center;
   min-width: 0;
+}
+
+/* Aviso sobre la imagen (la vista provisoria): en vidrio, para que se lea. */
+.notice {
+  width: min(100%, 420px);
+  color: var(--color-text);
+}
+
+.notice p {
+  margin: 0;
 }
 
 .center {

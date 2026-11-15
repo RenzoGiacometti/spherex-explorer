@@ -40,12 +40,18 @@ function Swatch({ hatched }: { readonly hatched: boolean }) {
  * su descripcion y la cantidad de pixeles. La trama cubre los que el
  * procesamiento descarta (`masked`); los demas se listan sin trama.
  *
- * El nombre y la descripcion de cada flag salen del encabezado de los archivos
- * de SPHEREx, en ingles: son datos, no textos de la interfaz.
+ * El nombre de cada flag sale del encabezado de los archivos de SPHEREx: es un
+ * dato y no se traduce. La descripcion del encabezado viene en ingles; como los
+ * nombres son fijos, se muestra la de la tabla `flags.description` del idioma
+ * (en ingles, la misma del encabezado) y, si el nombre no esta en la tabla, la
+ * que trae el archivo.
  */
 export function FlagsControl({ layer }: FlagsControlProps) {
   const { t } = useTranslation("viewer");
   const { status, present, epochs } = layer;
+  const descriptions = t("flags.description", { returnObjects: true }) as Readonly<
+    Record<string, string | undefined>
+  >;
 
   // Lo que pasa con la capa, en una frase. Con la lista a la vista no hace falta.
   let message = null;
@@ -113,7 +119,9 @@ export function FlagsControl({ layer }: FlagsControlProps) {
                   </span>
                   {t("flags.pixels", { n: formatInteger(pixels) })}
                 </span>
-                <span className={styles.description}>{flag.description}</span>
+                <span className={styles.description}>
+                  {descriptions[flag.name] ?? flag.description}
+                </span>
               </li>
             ))}
           </ul>

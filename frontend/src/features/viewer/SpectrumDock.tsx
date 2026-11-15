@@ -5,8 +5,10 @@ import { bandHasCurve, LightcurvePanel } from "@/features/lightcurve";
 import { SpectrumPanel } from "@/features/spectrum";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatRa } from "@/lib/format";
+import { useFieldStore } from "@/state/fieldStore";
 import styles from "./SpectrumDock.module.css";
 import { useLightcurve } from "./useLightcurve";
+import { PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 import type { SpectrumController } from "./useSpectrum";
 
 /** Pestanas del panel de la fuente elegida. */
@@ -59,6 +61,10 @@ export function SpectrumDock({ spectrum, tab, onTabChange, band, header }: Spect
   const rootRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Partial<Record<SourceTab, HTMLButtonElement | null>>>({});
   const baseId = useId();
+  // Los rangos de cada banda, los mismos que muestra el panel Banda (BandPanel.tsx).
+  const bandRanges = useFieldStore((store) => store.meta?.detectors);
+  // En el celular el panel va en una hoja baja: armado apretado, para que el grafico entre entero.
+  const dense = useMediaQuery(PHONE_QUERY);
 
   // Cada pedido lo trae a la vista: en una ventana angosta queda debajo de la imagen.
   const point = state.status === "idle" ? null : state.point;
@@ -119,9 +125,10 @@ export function SpectrumDock({ spectrum, tab, onTabChange, band, header }: Spect
           };
     return (
       <GlassPanel
-        title={texts.title}
+        title={dense ? undefined : texts.title}
+        label={texts.title}
         icon={kind === "spectrum" ? "spectrum" : "blink"}
-        padding="roomy"
+        padding={dense ? "compact" : "roomy"}
       >
         <div className={styles.top}>
           <div className={styles.heading}>
@@ -151,6 +158,8 @@ export function SpectrumDock({ spectrum, tab, onTabChange, band, header }: Spect
           // La banda del visor, si ahi hay curva; si no, la primera que la tenga.
           initialBand={band !== undefined && bandHasCurve(document, band) ? band : undefined}
           onClose={close}
+          bandRanges={bandRanges}
+          dense={dense}
         />
       );
     } else if (request.status === "none") {
@@ -189,6 +198,7 @@ export function SpectrumDock({ spectrum, tab, onTabChange, band, header }: Spect
         name={name ?? undefined}
         onClose={close}
         onRequestPosition={requestPosition}
+        dense={dense}
       />
     );
   } else if (state.status === "loading") {

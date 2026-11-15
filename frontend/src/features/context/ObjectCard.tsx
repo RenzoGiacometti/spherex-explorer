@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
-import { useMemo } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, classNames, DataGroup, DataRow, GlassPanel } from "@/components";
+import { Button, classNames, DataGroup, DataRow, GlassPanel, Icon } from "@/components";
 import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatArcseconds, formatDecimal, formatInteger, NO_VALUE } from "@/lib/format";
@@ -42,6 +42,14 @@ export interface ObjectCardProps {
    * punto elegido. Sin esta funcion solo lo informa.
    */
   readonly onPick?: ((point: FramePoint) => void) | undefined;
+  /**
+   * Ficha plegada: un resumen de uno o dos renglones (identificador, distancia
+   * y movimiento, o que Gaia no tiene nada en el punto) con un boton que
+   * despliega el resto. Empieza cerrada y se vuelve a cerrar con cada punto
+   * nuevo. Es como va arriba del espectro en el visor, para no empujarlo fuera
+   * de la vista.
+   */
+  readonly collapsible?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -141,10 +149,20 @@ export function ObjectCard({
   year,
   searchRadiusArcsec = DEFAULT_SEARCH_RADIUS_ARCSEC,
   onPick,
+  collapsible = false,
   className,
 }: ObjectCardProps) {
   const { t } = useTranslation("objectCard");
   const language = useLanguage();
+  const detailsId = useId();
+  const [open, setOpen] = useState(false);
+  const pointX = point?.x;
+  const pointY = point?.y;
+  // Otro punto: la ficha vuelve a su resumen, para que lo primero que se vea sea el grafico.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: se cierra al cambiar de punto
+  useEffect(() => {
+    setOpen(false);
+  }, [pointX, pointY]);
 
   const found = useMemo(
     () =>
@@ -157,6 +175,39 @@ export function ObjectCard({
     () => (catalog === null || found === null ? null : objectFacts(catalog, found.index)),
     [catalog, found],
   );
+
+  /** La ficha entera, o plegada: el resumen con su boton y, desplegado, el resto. */
+  const frame = (summary: ReactNode, details: ReactNode, aside?: string): ReactNode => {
+    if (!collapsible) {
+      return (
+        <GlassPanel title={t("title")} icon="info" aside={aside} className={className}>
+          {details}
+        </GlassPanel>
+      );
+    }
+    return (
+      <GlassPanel label={t("title")} className={classNames(styles.folded, className)}>
+        <button
+          type="button"
+          className={styles.summary}
+          aria-expanded={open}
+          aria-controls={detailsId}
+          data-object-summary=""
+          onClick={() => setOpen((value) => !value)}
+        >
+          <Icon name="info" size={18} className={styles.summaryIcon} />
+          <span className={styles.summaryText}>{summary}</span>
+          <span className={styles.summaryToggle}>
+            {open ? t("summary.hide") : t("summary.show")}
+          </span>
+        </button>
+        <div id={detailsId} className={styles.details} hidden={!open}>
+          {aside === undefined ? null : <p className={styles.note}>{aside}</p>}
+          {details}
+        </div>
+      </GlassPanel>
+    );
+  };
 
   if (catalog === null || point === null) {
     return (
@@ -183,35 +234,35 @@ export function ObjectCard({
       const pixel = skyToPixel(grid, position.ra, position.dec);
       if (pixel !== null) onPick(pixel);
     };
-    return (
-      <GlassPanel title={t("title")} icon="info" className={className}>
-        <div className={styles.empty} data-object-card="empty">
+    return frame(
+      <span className={styles.summaryLead}>{t("empty.title")}</span>,
+      <div className={styles.empty} data-object-card="empty">
+        {/* Plegada, la frase ya esta en el resumen. */}
+        {collapsible ? null : (
           <p className={classNames(styles.emptyTitle, "type-title")}>{t("empty.title")}</p>
-          <p className={styles.sentence}>
-            {t("empty.radius", { radius: formatArcseconds(searchRadiusArcsec, language, 1) })}
-          </p>
-          <p className={styles.sentence}>{t("empty.why")}</p>
-          <p className={styles.sentence}>{t("empty.other")}</p>
-          {nearby === null ? null : (
-            <div className={styles.nearby} data-nearby-index={nearby.index}>
-              <p className={styles.note}>
-                {t("empty.nearby", {
-                  distance: formatArcseconds(nearby.separationArcsec, language, 1),
-                  magnitude:
-                    nearbyMagnitude === null
-                      ? NO_VALUE
-                      : formatDecimal(nearbyMagnitude, language, 1),
-                })}
-              </p>
-              {onPick === undefined ? null : (
-                <Button icon="target" onClick={showNearest}>
-                  {t("empty.showNearest")}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
-      </GlassPanel>
+        )}
+        <p className={styles.sentence}>
+          {t("empty.radius", { radius: formatArcseconds(searchRadiusArcsec, language, 1) })}
+        </p>
+        <p className={styles.sentence}>{t("empty.why")}</p>
+        <p className={styles.sentence}>{t("empty.other")}</p>
+        {nearby === null ? null : (
+          <div className={styles.nearby} data-nearby-index={nearby.index}>
+            <p className={styles.note}>
+              {t("empty.nearby", {
+                distance: formatArcseconds(nearby.separationArcsec, language, 1),
+                magnitude:
+                  nearbyMagnitude === null ? NO_VALUE : formatDecimal(nearbyMagnitude, language, 1),
+              })}
+            </p>
+            {onPick === undefined ? null : (
+              <Button icon="target" onClick={showNearest}>
+                {t("empty.showNearest")}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>,
     );
   }
 
@@ -228,78 +279,92 @@ export function ObjectCard({
   ];
   const moving = facts.motion?.significant === true;
 
-  return (
-    <GlassPanel
-      title={t("title")}
-      icon="info"
-      aside={t("source.offset", {
-        distance: formatArcseconds(found.separationArcsec, language, 1),
-      })}
-      className={className}
-    >
-      <div className={styles.card} data-object-card="source" data-source-id={facts.sourceId}>
-        <p className={styles.source}>
-          <span className="type-label-cap">{t("source.name")}</span>
-          <span className={classNames(styles.sourceId, "type-data")}>{facts.sourceId}</span>
+  const sourceLine = (
+    <>
+      <span className="type-label-cap">{t("source.name")}</span>
+      <span className={classNames(styles.sourceId, "type-data")}>{facts.sourceId}</span>
+    </>
+  );
+  // El resumen: lo mismo que las dos cifras destacadas, en un renglon.
+  const summaryLine = t("summary.line", {
+    distance:
+      facts.distance.kind === "none"
+        ? t("summary.noDistance")
+        : t("summary.distance", { value: distanceFigure(facts, language) }),
+    motion:
+      facts.motion === null
+        ? t("summary.noMotion")
+        : t("summary.motion", { value: formatMotionRate(facts.motion.total, language) }),
+  });
+
+  return frame(
+    <>
+      <span className={styles.summarySource}>{sourceLine}</span>
+      <span className={styles.summaryLead}>{summaryLine}</span>
+    </>,
+    <div className={styles.card} data-object-card="source" data-source-id={facts.sourceId}>
+      {/* Plegada, el identificador ya esta en el resumen. */}
+      {collapsible ? null : <p className={styles.source}>{sourceLine}</p>}
+
+      <div className={styles.cells}>
+        <p className={styles.cell}>
+          <span className={classNames(styles.cellLabel, "type-label-cap")}>
+            {t("cells.distance")}
+          </span>
+          <span className="type-data-lg">{distanceFigure(facts, language)}</span>
+          <span className={classNames(styles.cellUnit, "type-data-sm")}>
+            {facts.distance.kind === "none" ? t("cells.unknown") : t("cells.lightYears")}
+          </span>
         </p>
-
-        <div className={styles.cells}>
-          <p className={styles.cell}>
-            <span className={classNames(styles.cellLabel, "type-label-cap")}>
-              {t("cells.distance")}
-            </span>
-            <span className="type-data-lg">{distanceFigure(facts, language)}</span>
-            <span className={classNames(styles.cellUnit, "type-data-sm")}>
-              {facts.distance.kind === "none" ? t("cells.unknown") : t("cells.lightYears")}
-            </span>
-          </p>
-          <p className={styles.cell}>
-            <span className={classNames(styles.cellLabel, "type-label-cap")}>
-              {t("cells.motion")}
-            </span>
-            <span className="type-data-lg">
-              {facts.motion === null ? NO_VALUE : formatMotionRate(facts.motion.total, language)}
-            </span>
-            <span className={classNames(styles.cellUnit, "type-data-sm")}>
-              {facts.motion === null ? t("cells.unknown") : t("cells.perYear")}
-            </span>
-          </p>
-        </div>
-
-        <ul className={styles.sentences} data-moving={moving}>
-          {sentences.map((sentence) => (
-            <li key={sentence} className={styles.sentence}>
-              {sentence}
-            </li>
-          ))}
-        </ul>
-
-        <DataGroup>
-          <DataRow
-            label={t("rows.parallax")}
-            value={
-              facts.parallaxMas === null
-                ? NO_VALUE
-                : t("rows.units.mas", { value: formatDecimal(facts.parallaxMas, language, 3) })
-            }
-          />
-          <DataRow
-            label={t("rows.properMotion")}
-            value={
-              facts.motion === null
-                ? NO_VALUE
-                : t("rows.units.masPerYear", {
-                    east: formatDecimal(facts.motion.east, language, 2),
-                    north: formatDecimal(facts.motion.north, language, 2),
-                  })
-            }
-          />
-          <DataRow
-            label={t("rows.magnitude")}
-            value={facts.gMag === null ? NO_VALUE : formatDecimal(facts.gMag, language, 2)}
-          />
-        </DataGroup>
+        <p className={styles.cell}>
+          <span className={classNames(styles.cellLabel, "type-label-cap")}>
+            {t("cells.motion")}
+          </span>
+          <span className="type-data-lg">
+            {facts.motion === null ? NO_VALUE : formatMotionRate(facts.motion.total, language)}
+          </span>
+          <span className={classNames(styles.cellUnit, "type-data-sm")}>
+            {facts.motion === null ? t("cells.unknown") : t("cells.perYear")}
+          </span>
+        </p>
       </div>
-    </GlassPanel>
+
+      <ul className={styles.sentences} data-moving={moving}>
+        {sentences.map((sentence) => (
+          <li key={sentence} className={styles.sentence}>
+            {sentence}
+          </li>
+        ))}
+      </ul>
+
+      <DataGroup>
+        <DataRow
+          label={t("rows.parallax")}
+          value={
+            facts.parallaxMas === null
+              ? NO_VALUE
+              : t("rows.units.mas", { value: formatDecimal(facts.parallaxMas, language, 3) })
+          }
+        />
+        <DataRow
+          label={t("rows.properMotion")}
+          value={
+            facts.motion === null
+              ? NO_VALUE
+              : t("rows.units.masPerYear", {
+                  east: formatDecimal(facts.motion.east, language, 2),
+                  north: formatDecimal(facts.motion.north, language, 2),
+                })
+          }
+        />
+        <DataRow
+          label={t("rows.magnitude")}
+          value={facts.gMag === null ? NO_VALUE : formatDecimal(facts.gMag, language, 2)}
+        />
+      </DataGroup>
+    </div>,
+    t("source.offset", {
+      distance: formatArcseconds(found.separationArcsec, language, 1),
+    }),
   );
 }

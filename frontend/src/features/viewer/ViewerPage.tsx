@@ -23,7 +23,10 @@
 //            inferior, modo, banda y linea de tiempo con el transporte. Lo
 //            demas va en el cajon de herramientas, que ocupa ese mismo lugar.
 //            El espectro se abre ahi mismo, en una hoja que sube sobre la parte
-//            de abajo de la imagen sin taparla entera. La herramienta Medir
+//            de abajo de la imagen sin taparla entera. En los modos que comparan
+//            con una epoca de referencia la imagen conserva el alto que tenia
+//            en el parpadeo: lo que crece es la zona de controles, que se
+//            desplaza. La herramienta Medir
 //            va arriba de los controles: apagada es una tira con su
 //            conmutador; prendida, su panel, con alto acotado.
 //
@@ -47,14 +50,24 @@
 //
 // En el campo de una estrella variable del desafio (challengeVariables.ts) se
 // ofrece su curva de luz de entrada (LightcurveOffer.tsx): en la columna
-// derecha y, en el celular, sobre la imagen.
+// derecha y, en el celular, con los controles, debajo de la imagen.
 //
-// El estado sale de tres lugares: la URL (campo, banda, modo, epoca), el store
-// del campo (metadatos e imagenes) y useViewerController (reproductor, epoca
-// de referencia, contraste, capa de flags). App.tsx mantiene el store al dia
-// con la URL.
+// El estado sale de tres lugares: la URL (campo, banda, modo, epoca, epoca de
+// referencia, estirado, contraste, capas de flags y de Gaia, y el punto elegido
+// con su pestana, que escribe useSourceUrl.ts), el store del campo (metadatos e
+// imagenes) y useViewerController (reproductor, viaje, cortina). App.tsx
+// mantiene el store al dia con la URL.
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components";
 import { contractGridShape } from "@/data/gridShape";
@@ -91,6 +104,7 @@ import { ToolsDrawer, type ToolsSection } from "./ToolsDrawer";
 import { TopBar } from "./TopBar";
 import { PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useQualityNotices } from "./useQualityNotices";
+import { useSourceUrl } from "./useSourceUrl";
 import { useSpectrum } from "./useSpectrum";
 import { useStageInsets } from "./useStageInsets";
 import { useViewerController } from "./useViewerController";
@@ -178,6 +192,8 @@ export function ViewerPage() {
   useEffect(() => {
     if (spectrumIdle) setSourceTab("spectrum");
   }, [spectrumIdle]);
+  // El punto elegido y su pestana van en la URL: el link copiado abre con el panel a la vista.
+  useSourceUrl({ enabled: layout !== "embed", spectrum, tab: sourceTab, setTab: setSourceTab });
 
   // ---- Herramienta Medir ----------------------------------------------------
 
@@ -230,6 +246,26 @@ export function ViewerPage() {
   // Se ofrece con el campo ya abierto y mientras el panel de la fuente esta cerrado.
   // Midiendo tampoco: el clic es del medidor y el panel de la fuente esta cerrado.
   const offered = layout !== "embed" && fieldReady && !spectrumOpen && !measuring ? variable : null;
+  // En el celular va con los controles, debajo de la imagen. Debajo del cajon o de la hoja del
+  // espectro sigue en su lugar, sin verse, como los demas controles: la imagen no cambia de tamano.
+  const phoneOffer = layout === "phone" && fieldReady && !measuring ? variable : null;
+
+  // ---- Celular: la imagen no se achica en los modos que comparan -------------
+
+  // La epoca de referencia y el boton de mantener suman alto a los controles. La zona de la imagen
+  // conserva el alto que tenia en el parpadeo (o la suma, que tiene los mismos controles) y son
+  // los controles los que se desplazan (ViewerPage.module.css, `data-stage-lock`).
+  const stageCellRef = useRef<HTMLDivElement | null>(null);
+  const [plainStageHeight, setPlainStageHeight] = useState<number | null>(null);
+  const pairMode = mode === "difference" || mode === "redcyan" || mode === "hold";
+  const plainMode = (mode === "blink" || mode === "sum") && !measuring;
+  // Mide despues de cada dibujo: el alto cambia con la ventana y con lo que haya en los controles.
+  useLayoutEffect(() => {
+    if (layout !== "phone" || !plainMode) return;
+    const height = stageCellRef.current?.offsetHeight ?? 0;
+    if (height > 0) setPlainStageHeight(height);
+  });
+  const stageLock = layout === "phone" && pairMode ? plainStageHeight : null;
 
   const openTools = useCallback(
     (section: ToolsSection) => {
@@ -294,6 +330,8 @@ export function ViewerPage() {
         point={cardPoint}
         year={gaia.year}
         onPick={(pixel) => requestSpectrumPosition(pixelToSky(cardGrid, pixel.x, pixel.y))}
+        // Plegada: arriba del espectro va su resumen, y el grafico queda a la vista.
+        collapsible
       />
     );
 
@@ -339,6 +377,12 @@ export function ViewerPage() {
       data-click={canPick ? clickMode : undefined}
       data-measure={layout === "embed" ? undefined : measuring ? "on" : "off"}
       data-measure-marks={measuring ? rawMeasure.marks.length : undefined}
+      data-stage-lock={stageLock === null ? undefined : ""}
+      style={
+        stageLock === null
+          ? undefined
+          : ({ "--viewer-stage-lock": `${stageLock}px` } as CSSProperties)
+      }
     >
       {layout === "embed" ? null : (
         <div className={styles.top}>
@@ -399,13 +443,10 @@ export function ViewerPage() {
         {measuring ? ` ${tMeasure("panel.hint")}` : null}
       </p>
 
-      <div className={styles.stage}>
+      <div ref={stageCellRef} className={styles.stage}>
         {/* La zona donde se encuadra la imagen. El pie de la placa va debajo y le saca lugar. */}
         <div ref={stageRef} className={styles.frame}>
           {curtainOn ? <CurtainStage controller={controller} /> : null}
-          {layout === "phone" && offered !== null && openSection === null ? (
-            <LightcurveOffer variable={offered} onOpen={openLightcurve} variant="compact" />
-          ) : null}
           <StageStatus controller={controller} />
         </div>
         {plateCaption}
@@ -440,6 +481,10 @@ export function ViewerPage() {
             className={styles.controls}
             data-covered={openSection === null && !spectrumOpen ? undefined : "true"}
           >
+            {/* Fuera de la imagen: sobre ella tapaba la mira del objeto. */}
+            {phoneOffer === null ? null : (
+              <LightcurveOffer variable={phoneOffer} onOpen={openLightcurve} variant="compact" />
+            )}
             <MeasurePanel
               measure={measure}
               collapsible

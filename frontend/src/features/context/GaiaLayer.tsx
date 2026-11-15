@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ControlHeader, classNames, GlassPanel, Slider, Toggle } from "@/components";
 import { useLanguage } from "@/i18n/useLanguage";
@@ -37,7 +37,21 @@ export interface GaiaLayerProps {
   readonly limit?: number;
   /** Indice, en el catalogo, de la fuente destacada: va en ambar. */
   readonly highlightIndex?: number | null;
+  /**
+   * Rectangulo de la imagen dentro de la capa, en pixeles de pantalla. Con el,
+   * el dibujo se recorta ahi: en el visor la capa ocupa la ventana entera y una
+   * flecha larga seguiria por encima de los paneles o del fondo.
+   */
+  readonly clip?: GaiaClipRect | undefined;
   readonly className?: string | undefined;
+}
+
+/** Rectangulo de recorte de la capa, en pixeles de pantalla. */
+export interface GaiaClipRect {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 interface DrawnMarker {
@@ -67,9 +81,11 @@ export function GaiaLayer({
   maxGMag = null,
   limit = DEFAULT_GAIA_LIMIT,
   highlightIndex = null,
+  clip,
   className,
 }: GaiaLayerProps) {
   const { t } = useTranslation("context");
+  const clipId = `gaia-clip-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const markers = useMemo(
     () => gaiaMarkers(catalog, grid, { year, arrowYears, maxGMag, limit }),
     [catalog, grid, year, arrowYears, maxGMag, limit],
@@ -113,8 +129,22 @@ export function GaiaLayer({
       aria-label={t("gaia.layer", { count: formatInteger(drawn.length) })}
       data-gaia-sources={drawn.length}
     >
-      {shapes("under")}
-      {shapes("over")}
+      {clip === undefined ? null : (
+        <defs>
+          <clipPath id={clipId}>
+            <rect
+              x={clip.left}
+              y={clip.top}
+              width={Math.max(0, clip.width)}
+              height={Math.max(0, clip.height)}
+            />
+          </clipPath>
+        </defs>
+      )}
+      <g clipPath={clip === undefined ? undefined : `url(#${clipId})`}>
+        {shapes("under")}
+        {shapes("over")}
+      </g>
     </svg>
   );
 }

@@ -1,8 +1,8 @@
 // Estado de la pantalla del visor que no esta en el store del campo: el
-// reproductor, mantener apretado, el contraste, la capa de flags, el viaje
-// entre misiones, la cortina visible/infrarrojo y la capa de Gaia. Con eso, la URL (modo, epoca actual, epoca
-// de referencia, estirado) y los planos bajados arma lo que se ve (viewModel.ts)
-// y la escena que dibuja ImageViewer.
+// reproductor, mantener apretado, el viaje entre misiones y la cortina
+// visible/infrarrojo. Con eso, la URL (modo, epoca actual, epoca de referencia,
+// estirado, contraste, capa de flags y capa de Gaia prendidas) y los planos
+// bajados arma lo que se ve (viewModel.ts) y la escena que dibuja ImageViewer.
 //
 // Se usa una sola vez, en ViewerPage, que reparte el resultado a los paneles.
 
@@ -44,16 +44,18 @@ import {
   toRgb,
 } from "@/viewer/colors";
 import type { Scene } from "@/viewer/compose";
-import {
-  contrastCuts,
-  DEFAULT_CONTRAST,
-  type DisplayRange,
-  type StretchKind,
-} from "@/viewer/stretch";
+import { contrastCuts, type DisplayRange, type StretchKind } from "@/viewer/stretch";
 import { type FieldContextStatus, useFieldContext } from "./useFieldContext";
 import { type FlagLayer, useFlagLayer } from "./useFlagLayer";
 import { useHoldKey } from "./useHoldKey";
-import { defaultStretchForMode, deriveView, stepEpoch, type ViewModel } from "./viewModel";
+import {
+  contrastFromPercent,
+  contrastToPercent,
+  defaultStretchForMode,
+  deriveView,
+  stepEpoch,
+  type ViewModel,
+} from "./viewModel";
 
 /** Velocidades del reproductor. */
 export const PLAYBACK_SPEEDS = [0.5, 1, 2] as const;
@@ -68,6 +70,13 @@ export const DEFAULT_SPEED: PlaybackSpeed = 1;
  * un pixel.
  */
 export const FRAME_MS = 800;
+
+/**
+ * Espera, en ms, entre el ultimo movimiento del control de contraste y su
+ * escritura en la URL: arrastrarlo no reescribe el historial en cada paso (los
+ * navegadores limitan cuantas veces se puede por segundo).
+ */
+export const CONTRAST_URL_DELAY_MS = 250;
 
 /**
  * De donde sale lo que se dibuja: planos de SPHEREx, la vista provisoria de
@@ -254,6 +263,9 @@ export function useViewerController(): ViewerController {
   const urlEpoch = useUrlState((state) => state.epoch);
   const urlReference = useUrlState((state) => state.ref);
   const urlStretch = useUrlState((state) => state.stretch);
+  const urlContrast = useUrlState((state) => state.contrast);
+  const flagsOn = useUrlState((state) => state.flags);
+  const gaiaOn = useUrlState((state) => state.gaia);
   const embed = useUrlState((state) => state.embed);
   const update = useUrlState((state) => state.update);
 
@@ -296,7 +308,10 @@ export function useViewerController(): ViewerController {
   const [frame, setFrame] = useState<number | null>(null);
   const [speed, setSpeed] = useState<PlaybackSpeed>(DEFAULT_SPEED);
   const [holding, setHoldingState] = useState(false);
-  const [contrast, setContrast] = useState(DEFAULT_CONTRAST);
+  // El contraste se mueve aca y llega a la URL con una demora corta.
+  const [contrast, setContrastState] = useState(() => contrastFromPercent(urlContrast));
+  const [seenUrlContrast, setSeenUrlContrast] = useState(urlContrast);
+  const contrastTimer = useRef<number | null>(null);
   const [noDataColor] = useState(readNoDataColor);
   const [hatchColor] = useState(() => readHatchColor(noDataColor));
   /** Capa de otra mision elegida en el viaje; null si se ve una epoca de SPHEREx. */
@@ -305,13 +320,19 @@ export function useViewerController(): ViewerController {
   /** El viaje ya eligio su parada de arranque (la mas antigua) desde que se entro al modo. */
   const [journeyStarted, setJourneyStarted] = useState(false);
   const [curtainPosition, setCurtainPositionState] = useState(DEFAULT_CURTAIN);
-  const [gaiaOn, setGaiaOn] = useState(false);
   const [arrowStep, setArrowStep] = useState<number>(DEFAULT_ARROW_STEP);
   const [chosenMagnitude, setChosenMagnitude] = useState<number | null>(null);
 
+  // La URL manda sobre el contraste cuando cambia desde afuera: un link, o
+  // atras y adelante en el historial. Lo que escribe este control llega igual.
+  if (seenUrlContrast !== urlContrast) {
+    setSeenUrlContrast(urlContrast);
+    setContrastState(contrastFromPercent(urlContrast));
+  }
+
   // Otro campo: lo elegido para el anterior (cuadro, capa del viaje, magnitud
-  // limite) ya no vale. El contraste, la velocidad y la capa de Gaia prendida
-  // son gustos de la persona y quedan. La epoca de referencia la limpia la URL.
+  // limite) ya no vale. El contraste, la velocidad y las capas prendidas son
+  // gustos de la persona y quedan. La epoca de referencia la limpia la URL.
   const [seenRequest, setSeenRequest] = useState(request);
   if (seenRequest !== request) {
     setSeenRequest(request);
@@ -564,6 +585,28 @@ export function useViewerController(): ViewerController {
   const stretch = urlStretch ?? defaultStretchForMode(mode);
   const setStretch = useCallback((next: StretchKind) => update({ stretch: next }), [update]);
 
+  // ---- Contraste y capas, que van en la URL --------------------------------
+
+  const setContrast = useCallback(
+    (next: number) => {
+      setContrastState(next);
+      if (contrastTimer.current !== null) window.clearTimeout(contrastTimer.current);
+      contrastTimer.current = window.setTimeout(() => {
+        contrastTimer.current = null;
+        update({ contrast: contrastToPercent(next) });
+      }, CONTRAST_URL_DELAY_MS);
+    },
+    [update],
+  );
+  useEffect(
+    () => () => {
+      if (contrastTimer.current !== null) window.clearTimeout(contrastTimer.current);
+    },
+    [],
+  );
+  const setFlagsOn = useCallback((on: boolean) => update({ flags: on }), [update]);
+  const setGaiaOn = useCallback((on: boolean) => update({ gaia: on }), [update]);
+
   // ---- Mantener apretado --------------------------------------------------
 
   const setHolding = useCallback((next: boolean) => setHoldingState(next), []);
@@ -597,7 +640,7 @@ export function useViewerController(): ViewerController {
 
   // Los flags son de los planos de SPHEREx que se ven: en una comparacion, de
   // todas las epocas que entran. La vista provisoria y las otras misiones no tienen.
-  const flags = useFlagLayer(composition?.epochs ?? NO_EPOCHS);
+  const flags = useFlagLayer(composition?.epochs ?? NO_EPOCHS, flagsOn, setFlagsOn);
   const flagMask = flags.mask;
 
   const scene = useMemo<Scene | null>(() => {

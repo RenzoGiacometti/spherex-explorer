@@ -8,7 +8,7 @@
 // bajada. Por eso al cambiar de epoca, de banda o de revision la capa sigue a
 // la imagen: mientras llegan las capas nuevas no se dibuja ninguna.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import type { AuxLayers } from "@/api/binary";
 import { planeKey } from "@/data/planeKey";
@@ -66,9 +66,15 @@ function maskOf(layers: readonly AuxLayers[], bits: number): Uint8Array | null {
 /**
  * Capa de flags de las epocas que se ven en pantalla. `epochs` tiene que ser
  * estable mientras no cambie lo que se ve (sale de `ViewModel.composition`).
+ *
+ * Si esta prendida lo dice quien la usa (`on` y `setOn`): el visor lo guarda en
+ * la URL (`flags=1`), para que el link abra con la capa a la vista.
  */
-export function useFlagLayer(epochs: readonly number[]): FlagLayer {
-  const [on, setOn] = useState(false);
+export function useFlagLayer(
+  epochs: readonly number[],
+  on: boolean,
+  setOn: (on: boolean) => void,
+): FlagLayer {
   const loadAux = useFieldStore((state) => state.loadAux);
   const band = useFieldStore((state) => state.band);
   const flags = useFieldStore((state) => state.meta?.flags);

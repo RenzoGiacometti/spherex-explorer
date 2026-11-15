@@ -24,7 +24,7 @@ import type { BandPlane } from "@/data/selectors";
 import type { ViewMode } from "@/state/urlState";
 import { MAX_SCENE_PLANES, type SceneMode } from "@/viewer/compose";
 import type { PlaneImage } from "@/viewer/planeImage";
-import { DEFAULT_STRETCH, type StretchKind } from "@/viewer/stretch";
+import { DEFAULT_STRETCH, MAX_CONTRAST, MIN_CONTRAST, type StretchKind } from "@/viewer/stretch";
 
 /** Lo que eligio la persona y lo que hay para mostrar. */
 export interface ViewSelection {
@@ -305,4 +305,18 @@ export function stepEpoch(
   const next =
     step > 0 ? stops.find((epoch) => epoch > from) : stops.filter((epoch) => epoch < from).at(-1);
   return next ?? (step > 0 ? stops[0] : stops.at(-1)) ?? null;
+}
+
+// ---- Contraste en la URL --------------------------------------------------
+
+/** Posicion del control de contraste (`contrastCuts`) para el porcentaje de la URL. */
+export function contrastFromPercent(percent: number): number {
+  const fraction = Math.min(100, Math.max(0, percent)) / 100;
+  return MIN_CONTRAST + fraction * (MAX_CONTRAST - MIN_CONTRAST);
+}
+
+/** Porcentaje entero, de 0 a 100, con el que la URL guarda una posicion del control. */
+export function contrastToPercent(contrast: number): number {
+  const fraction = (contrast - MIN_CONTRAST) / (MAX_CONTRAST - MIN_CONTRAST);
+  return Math.round(Math.min(1, Math.max(0, fraction)) * 100);
 }

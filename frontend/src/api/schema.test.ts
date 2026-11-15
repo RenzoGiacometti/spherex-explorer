@@ -417,8 +417,12 @@ describe("progress", () => {
 
   it("los contadores son numeros, sin ausencias que manejar", () => {
     const progress: Progress = progressSchema.parse(progressEventData());
-    // Este objeto no compila si algun contador es opcional.
-    const counters: Record<Exclude<keyof Progress, "phase">, number> = {
+    // Este objeto no compila si algun contador es opcional. Los dos del
+    // reintento del listado si lo son: solo acompanan a la fase `listing`.
+    const counters: Record<
+      Exclude<keyof Progress, "phase" | "listing_attempt" | "retry_in_s">,
+      number
+    > = {
       queue_position: progress.queue_position,
       cutouts_total: progress.cutouts_total,
       cutouts_done: progress.cutouts_done,
@@ -429,6 +433,16 @@ describe("progress", () => {
       elapsed_s: progress.elapsed_s,
     };
     expect(Object.values(counters).every((value) => typeof value === "number")).toBe(true);
+  });
+
+  it("acepta el intento del listado y la espera hasta el proximo, que son opcionales", () => {
+    const retrying = progressSchema.parse({ phase: "listing", listing_attempt: 2, retry_in_s: 12 });
+    expect(retrying.listing_attempt).toBe(2);
+    expect(retrying.retry_in_s).toBe(12);
+    const first = progressSchema.parse({ phase: "listing", listing_attempt: 1, retry_in_s: null });
+    expect(first.listing_attempt).toBe(1);
+    expect(first.retry_in_s).toBeNull();
+    expect(progressSchema.parse({ phase: "listing" }).listing_attempt).toBeUndefined();
   });
 
   it("rechaza contadores en null, negativos o con decimales", () => {

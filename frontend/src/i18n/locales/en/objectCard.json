@@ -6,6 +6,15 @@
     "name": "Gaia DR3",
     "offset": "{{distance}} from the click"
   },
+  "summary": {
+    "line": "{{distance}} · {{motion}}",
+    "distance": "{{value}} light-years",
+    "motion": "{{value}} per year",
+    "noDistance": "distance not measured",
+    "noMotion": "motion not measured",
+    "show": "Details",
+    "hide": "Hide"
+  },
   "cells": {
     "distance": "Distance",
     "lightYears": "light-years",

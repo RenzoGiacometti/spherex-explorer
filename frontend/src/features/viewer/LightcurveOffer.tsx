@@ -10,7 +10,7 @@ export interface LightcurveOfferProps {
   readonly onOpen: () => void;
   /**
    * `panel`: un panel de la columna derecha, con una frase. `compact`: solo el
-   * boton, para ponerlo sobre la imagen en el celular.
+   * boton, a lo ancho, para ponerlo con los controles del celular.
    */
   readonly variant?: "panel" | "compact";
 }
@@ -26,7 +26,14 @@ export function LightcurveOffer({ variable, onOpen, variant = "panel" }: Lightcu
   if (variant === "compact") {
     return (
       <div className={styles.compact} data-lightcurve-offer={variable.name}>
-        <Button icon="blink" onClick={onOpen}>
+        <Button
+          icon="blink"
+          onClick={(event) => {
+            // El boton queda tapado por la hoja que abre: suelta el foco, y el panel lo toma.
+            event.currentTarget.blur();
+            onOpen();
+          }}
+        >
           {t("offer.actionNamed", { name: variable.name })}
         </Button>
       </div>

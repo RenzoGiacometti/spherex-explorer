@@ -13,6 +13,7 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatBand, formatDecimal, formatInteger, formatWavelength, MICRO } from "@/lib/format";
 import {
   fluxDomain,
+  layoutLabels,
   linearScale,
   nearestBin,
   niceTicks,
@@ -35,6 +36,8 @@ export interface SpectrumChartProps {
   readonly showExposures?: boolean;
   /** Longitud de onda por la que va el recorrido sonoro, um; mueve el cursor. */
   readonly playhead?: number | null;
+  /** Grafico mas bajo, para la hoja del celular: entra entero sin desplazar. */
+  readonly compact?: boolean | undefined;
 }
 
 const MARGIN = { right: 12, bottom: 34, left: 52 } as const;
@@ -43,9 +46,14 @@ const LABEL_ROW_PX = 15;
 const DEFAULT_WIDTH = 640;
 const WIDE_HEIGHT = 320;
 const NARROW_HEIGHT = 260;
+const COMPACT_HEIGHT = 216;
 const NARROW_WIDTH = 520;
+/** Renglones de formulas sobre el grafico. */
+const LABEL_ROWS = 2;
 /** Separacion minima entre dos formulas en el mismo renglon, px. */
 const LABEL_GAP_PX = 34;
+/** Hasta donde llega el titulo del eje Y, que ocupa el comienzo del renglon de arriba, px. */
+const AXIS_TITLE_RIGHT_PX = 88;
 
 function useWidth(): [React.RefObject<HTMLDivElement | null>, number] {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -90,6 +98,7 @@ export function SpectrumChart({
   name,
   showExposures = true,
   playhead = null,
+  compact = false,
 }: SpectrumChartProps) {
   const { t } = useTranslation("spectrum");
   const language = useLanguage();
@@ -99,13 +108,11 @@ export function SpectrumChart({
 
   const bins = spectrum.binned;
   const narrow = width < NARROW_WIDTH;
-  const height = narrow ? NARROW_HEIGHT : WIDE_HEIGHT;
-  // En una pantalla angosta las bandas quedan pegadas: las formulas se reparten en un renglon mas.
-  const labelRows = narrow ? 3 : 2;
+  const height = compact ? COMPACT_HEIGHT : narrow ? NARROW_HEIGHT : WIDE_HEIGHT;
   const plot = {
     left: MARGIN.left,
     right: width - MARGIN.right,
-    top: 10 + labelRows * LABEL_ROW_PX,
+    top: 10 + LABEL_ROWS * LABEL_ROW_PX,
     bottom: height - MARGIN.bottom,
   };
 
@@ -127,18 +134,21 @@ export function SpectrumChart({
     setActive(null);
   }, [spectrum]);
 
-  // Formulas en dos renglones cuando dos bandas quedan pegadas.
+  // Formulas escalonadas en dos renglones cuando dos bandas quedan pegadas. En un grafico angosto,
+  // la que chocaria con otra no se rotula (su franja se dibuja igual): asi no se enciman.
   const bandLabels = useMemo(() => {
-    const lastX: number[] = Array.from({ length: labelRows }, () => Number.NEGATIVE_INFINITY);
-    return MOLECULE_BANDS.map((band) => {
-      const centre = x(bandCenter(band));
-      // El primer renglon con lugar; si no hay ninguno, el que deja mas aire.
-      let row = lastX.findIndex((last) => centre - last >= LABEL_GAP_PX);
-      if (row < 0) row = lastX.indexOf(Math.min(...lastX));
-      lastX[row] = centre;
-      return { band, centre, row };
+    const centres = MOLECULE_BANDS.map((band) => x(bandCenter(band)));
+    const rows = layoutLabels(centres, {
+      rows: LABEL_ROWS,
+      minGap: LABEL_GAP_PX,
+      reserved: [Number.NEGATIVE_INFINITY, AXIS_TITLE_RIGHT_PX],
     });
-  }, [x, labelRows]);
+    return MOLECULE_BANDS.map((band, index) => ({
+      band,
+      centre: centres[index] ?? 0,
+      row: rows[index] ?? null,
+    }));
+  }, [x]);
 
   const layers = useMemo(() => {
     const exposures = showExposures
@@ -264,9 +274,11 @@ export function SpectrumChart({
                 y1={plot.top}
                 y2={plot.top}
               />
-              <text className={styles.bandLabel} x={centre} y={plot.top - 8 - row * LABEL_ROW_PX}>
-                {MOLECULE_FORMULA[band.molecule]}
-              </text>
+              {row === null ? null : (
+                <text className={styles.bandLabel} x={centre} y={plot.top - 8 - row * LABEL_ROW_PX}>
+                  {MOLECULE_FORMULA[band.molecule]}
+                </text>
+              )}
             </g>
           ))}
 
