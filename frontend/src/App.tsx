@@ -1,10 +1,15 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { DevPageHost } from "@/dev/DevPageHost";
-import { SpherePage } from "@/features/sphere";
 import { ViewerPage } from "@/features/viewer";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
 import { useFieldUrlSync } from "@/state/fieldUrlSync";
 import { useUrlState } from "@/state/urlState";
+
+// La esfera trae three.js y la textura del cielo: va en un trozo aparte, para que un
+// link directo al visor no los descargue.
+const SpherePage = lazy(() =>
+  import("@/features/sphere").then((module) => ({ default: module.SpherePage })),
+);
 
 /**
  * Cascaron de la aplicacion. La URL decide que se ve: sin coordenadas, la
@@ -30,5 +35,10 @@ export function App() {
     : null;
   if (devPage) return <DevPageHost id={devPage} />;
 
-  return showViewer ? <ViewerPage /> : <SpherePage />;
+  if (showViewer) return <ViewerPage />;
+  return (
+    <Suspense fallback={null}>
+      <SpherePage />
+    </Suspense>
+  );
 }

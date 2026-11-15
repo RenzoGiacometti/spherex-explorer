@@ -19,7 +19,7 @@ import { DEFAULT_URL_STATE, parseUrlState, useUrlState } from "@/state/urlState"
 import { SpherePage } from "./SpherePage";
 import enSphere from "./sphere.en.json";
 import esSphere from "./sphere.es.json";
-import { PRECOMPUTED_FIELDS, SKY_TARGETS, type SkyTarget } from "./targets";
+import { RANDOM_FIELDS, SKY_TARGETS, type SkyTarget } from "./targets";
 
 // ---- Respuestas de /api/resolve --------------------------------------------
 //
@@ -232,9 +232,11 @@ describe("SpherePage sin WebGL", () => {
 
     fireEvent.click(randomButton());
 
-    const last = PRECOMPUTED_FIELDS[PRECOMPUTED_FIELDS.length - 1] as SkyTarget;
+    const last = RANDOM_FIELDS[RANDOM_FIELDS.length - 1] as SkyTarget;
     expect(SKY_TARGETS).not.toContain(last);
-    expect(window.location.search).toContain(`?ra=${last.ra}&dec=${last.dec}&fov=0.1667&band=3`);
+    expect(window.location.search).toContain(
+      `?ra=${last.ra}&dec=${last.dec}&fov=0.1667&band=${last.band}`,
+    );
     expect(window.history.length).toBe(before + 1);
     expect(announced()).toBe(`Abriendo ${last.label}…`);
   });
@@ -375,7 +377,7 @@ describe("SpherePage sin WebGL", () => {
 
       await waitFor(() => expect(useUrlState.getState().ra).toBe(133.7598));
       expect(fake.names).toEqual(["133.7598 -7.2422"]);
-      expect(window.location.search).toBe("?ra=133.7598&dec=-7.2422&fov=0.1667&band=3&mode=blink");
+      expect(window.location.search).toBe("?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink");
       expect(urlState().name).toBeNull();
     });
 

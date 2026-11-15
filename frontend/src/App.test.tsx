@@ -51,10 +51,11 @@ async function imageShown(): Promise<void> {
 }
 
 describe("App", () => {
-  it("sin coordenadas en la URL muestra la entrada y no pide ningun campo", () => {
+  it("sin coordenadas en la URL muestra la entrada y no pide ningun campo", async () => {
     render(<App />);
 
-    expect(screen.getByTestId("entry")).toBeTruthy();
+    // La entrada se carga en un trozo aparte.
+    expect(await screen.findByTestId("entry")).toBeTruthy();
     expect(viewer()).toBeNull();
     expect(backend.calls).toHaveLength(0);
     expect(useFieldStore.getState().phase).toBe("idle");

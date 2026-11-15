@@ -96,6 +96,67 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
   R_DRACONIS,
 ];
 
+/**
+ * Los demas campos precalculados (backend/data/fields): no llevan marcador en la
+ * esfera, pero se abren por nombre y, salvo M 42, salen en "Lugar al azar".
+ *
+ * Banda de apertura de cada campo, la misma para el buscador, el marcador y el
+ * azar: la de mejor senal para su objeto. Sale del espectro guardado del objeto
+ * (backend/data/spectra/fields), medido el 15 de noviembre de 2026: el detector
+ * con mayor senal sobre ruido entre los que tienen al menos la mitad de sus
+ * exposiciones sin saturar; si ninguno llega a la mitad, el que tiene mas
+ * exposiciones validas; y la banda 3 si el objeto satura en los seis o si la
+ * diferencia con la 3 es de menos del 10 %.
+ *
+ * - Luhman 16 y Teegarden: banda 5 (senal sobre ruido de 314 y 313).
+ * - Wolf 359: banda 6, la unica con exposiciones validas ademas de una de la 1.
+ * - M 82: banda 1, la unica donde el nucleo no satura.
+ * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
+ *   mejor senal en la 3 o a menos del 10 % de ella.
+ *
+ * De los cinco objetos de prueba, WISE 0855 abre en la 6 aunque su apertura
+ * mida mas senal en las bandas 1 a 3: ahi lo que se mide es la estrella de
+ * fondo que tiene a 4 segundos de arco (SPEC.md, seccion 6).
+ */
+const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
+  {
+    id: "proxima-centauri",
+    label: "Proxima Centauri",
+    name: "Proxima Centauri",
+    ra: 217.3698,
+    dec: -62.6739,
+    band: 3,
+  },
+  { id: "luhman-16", label: "Luhman 16", name: "Luhman 16", ra: 162.2955, dec: -53.317, band: 5 },
+  { id: "wolf-359", label: "Wolf 359", name: "Wolf 359", ra: 164.0925, dec: 6.9952, band: 6 },
+  {
+    id: "teegarden",
+    label: "Teegarden's Star",
+    name: "Teegarden's Star",
+    ra: 43.2795,
+    dec: 16.8538,
+    band: 5,
+  },
+  { id: "m-82", label: "M 82", name: "M 82", ra: 148.9685, dec: 69.6797, band: 1 },
+  { id: "m-51", label: "M 51", name: "M 51", ra: 202.4696, dec: 47.1953, band: 3 },
+  { id: "m-42", label: "M 42", name: "M 42", ra: 83.8201, dec: -5.3876, band: 3 },
+  { id: "m-1", label: "M 1", name: "M 1", ra: 83.6324, dec: 22.0174, band: 3 },
+  {
+    id: "kapteyn",
+    label: "Kapteyn's Star",
+    name: "Kapteyn's Star",
+    ra: 77.9853,
+    dec: -45.0596,
+    band: 3,
+  },
+];
+
+/** Todos los campos precalculados: los cinco objetos de prueba y los demas. */
+export const PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
+  ...FEATURED_OBJECTS,
+  ...MORE_PRECOMPUTED_OBJECTS,
+];
+
 /** Objeto del ejemplo del buscador: su nombre y las coordenadas de su campo. */
 export const SEARCH_EXAMPLE: FeaturedObject = BARNARD;
 
@@ -149,15 +210,27 @@ export function resolvableName(text: string): string {
   return FEATURED_OBJECTS.find((object) => normalize(object.label) === wanted)?.name ?? text;
 }
 
+/** Diferencia maxima, en grados, para tomar un centro como el de un campo precalculado. */
+const SAME_CENTER_DEG = 1e-4;
+
 /**
- * Banda con la que conviene abrir lo buscado, si es un destacado (por su nombre
- * visible o el de catalogo): WISE 0855 solo se detecta en la banda 6 y en la
- * banda por defecto su campo parece vacio. `null` para cualquier otro texto.
+ * Banda de apertura de lo buscado, si es un campo precalculado: se reconoce
+ * por el texto (su nombre visible o el de catalogo) o por el centro del campo
+ * que resolvio el backend. Es la misma banda con la que abren el marcador y
+ * "Lugar al azar". `null` para cualquier otro lugar.
  */
-export function featuredBand(text: string): FeaturedObject["band"] | null {
+export function openingBand(
+  text: string,
+  center?: { readonly ra: number; readonly dec: number },
+): FeaturedObject["band"] | null {
   const wanted = normalize(text);
-  const match = FEATURED_OBJECTS.find(
-    (object) => normalize(object.label) === wanted || normalize(object.name) === wanted,
+  const match = PRECOMPUTED_OBJECTS.find(
+    (object) =>
+      normalize(object.label) === wanted ||
+      normalize(object.name) === wanted ||
+      (center !== undefined &&
+        Math.abs(object.ra - center.ra) < SAME_CENTER_DEG &&
+        Math.abs(object.dec - center.dec) < SAME_CENTER_DEG),
   );
   return match?.band ?? null;
 }

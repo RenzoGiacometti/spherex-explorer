@@ -6,7 +6,7 @@ import { DEFAULT_URL_STATE, parseUrlState, serializeUrlState } from "@/state/url
 import barnardMeta from "@/test/fixtures/barnard/meta.json";
 import epsIndBMeta from "@/test/fixtures/epsindb/meta.json";
 import wiseMeta from "@/test/fixtures/wise0855/meta.json";
-import { PRECOMPUTED_FIELDS, pickRandomField, SKY_TARGETS } from "./targets";
+import { PRECOMPUTED_FIELDS, pickRandomField, RANDOM_FIELDS, SKY_TARGETS } from "./targets";
 
 function target(id: string) {
   const found = SKY_TARGETS.find((candidate) => candidate.id === id);
@@ -94,9 +94,9 @@ describe("campos precalculados", () => {
       ),
     ).toEqual([
       "?ra=217.3698&dec=-62.6739&fov=0.1667&band=3&mode=blink&name=Proxima+Centauri",
-      "?ra=162.2955&dec=-53.317&fov=0.1667&band=3&mode=blink&name=Luhman+16",
-      "?ra=164.0925&dec=6.9952&fov=0.1667&band=3&mode=blink&name=Wolf+359",
-      "?ra=43.2795&dec=16.8538&fov=0.1667&band=3&mode=blink&name=Teegarden%27s+Star",
+      "?ra=162.2955&dec=-53.317&fov=0.1667&band=5&mode=blink&name=Luhman+16",
+      "?ra=164.0925&dec=6.9952&fov=0.1667&band=6&mode=blink&name=Wolf+359",
+      "?ra=43.2795&dec=16.8538&fov=0.1667&band=5&mode=blink&name=Teegarden%27s+Star",
     ]);
   });
 });
@@ -104,12 +104,12 @@ describe("campos precalculados", () => {
 describe("lugar al azar", () => {
   it("elige siempre un campo precalculado", () => {
     for (const value of [0, 0.19, 0.5, 0.99, 0.999999]) {
-      expect(PRECOMPUTED_FIELDS).toContain(pickRandomField(null, () => value));
+      expect(RANDOM_FIELDS).toContain(pickRandomField(null, () => value));
     }
   });
 
   it("no repite el anterior", () => {
-    for (const previous of PRECOMPUTED_FIELDS) {
+    for (const previous of RANDOM_FIELDS) {
       for (const value of [0, 0.3, 0.6, 0.99]) {
         expect(pickRandomField(previous.id, () => value).id).not.toBe(previous.id);
       }
@@ -117,7 +117,7 @@ describe("lugar al azar", () => {
   });
 
   it("recorre todos los campos", () => {
-    const total = PRECOMPUTED_FIELDS.length;
+    const total = RANDOM_FIELDS.length;
     const seen = new Set<string>();
     // El medio paso evita caer justo en el borde entre dos campos.
     for (let step = 0; step < total; step += 1) {

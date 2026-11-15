@@ -10,6 +10,8 @@ export {
   FEATURED_OBJECTS,
   type FeaturedObject,
   featuredUrlPatch,
+  openingBand,
+  PRECOMPUTED_OBJECTS,
   resolvableName,
   SEARCH_EXAMPLE,
   typedCoordinates,
