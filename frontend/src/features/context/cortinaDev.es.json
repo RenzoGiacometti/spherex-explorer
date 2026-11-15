@@ -1,0 +1,30 @@
+{
+  "title": "Luz visible e infrarrojo",
+  "field": "Campo",
+  "view": {
+    "label": "Vista",
+    "curtain": "Cortina",
+    "journey": "Viaje"
+  },
+  "sides": {
+    "optical": "Lado visible",
+    "infrared": "Lado infrarrojo",
+    "spherex": "SPHEREx"
+  },
+  "image": {
+    "title": "Imagen",
+    "band": "Banda de SPHEREx",
+    "contrast": "Contraste",
+    "target": "Posición esperada del objeto"
+  },
+  "notes": {
+    "outside": "En esa fecha el objeto estaba fuera de este campo: se movió hasta acá después.",
+    "noOptical": "Este campo no tiene placas del Digitized Sky Survey guardadas.",
+    "noSpherex": "Este servidor no tiene armado el campo de SPHEREx de este objeto.",
+    "skipped": "La placa {{plate}} no entra en el viaje: la fecha de su encabezado no es de fiar."
+  },
+  "status": {
+    "loading": "Cargando el contexto",
+    "error": "No se pudo cargar el contexto. Hace falta el backend de prueba: desde backend/, uv run uvicorn app.context.devapp2:app --port 8000"
+  }
+}

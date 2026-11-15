@@ -1,0 +1,9 @@
+{
+  "label": "Cortina entre {{left}} y {{right}}",
+  "value": "{{percent}} de {{left}}, el resto de {{right}}",
+  "image": "{{name}}, {{detail}}",
+  "visible": "Luz visible",
+  "infrared": "Infrarrojo",
+  "credit": "Digitized Sky Survey, placa {{plate}} ({{survey}}). © {{owner}}",
+  "unreliableDate": "fecha de la placa no disponible"
+}
