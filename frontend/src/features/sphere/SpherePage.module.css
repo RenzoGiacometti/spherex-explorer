@@ -144,11 +144,13 @@
 }
 
 /*
- * "Lugar al azar" va a la altura del campo: baja el renglon de la etiqueta y
- * la mitad de lo que le falta para los 56 px del campo.
+ * Las acciones van a la altura del campo: bajan el renglon de la etiqueta y la
+ * mitad de lo que les falta para los 56 px del campo.
  */
-.random {
+.actions {
+  display: flex;
   flex: none;
+  gap: var(--space-sm);
   margin-top: calc(
     var(--type-label-cap-size) *
     var(--type-label-cap-line-height) +
@@ -156,21 +158,48 @@
     (var(--search-field-height) - var(--button-ghost-height)) /
     2
   );
-  /* Sobre el cielo el boton fantasma lleva el mismo vidrio que el campo. */
+}
+
+/* Sobre el cielo el boton fantasma lleva el mismo vidrio que el campo. */
+.action {
   background-color: var(--color-glass);
   -webkit-backdrop-filter: blur(var(--effect-glass-blur));
   backdrop-filter: blur(var(--effect-glass-blur));
   white-space: nowrap;
 }
 
-/* Aviso: icono alert y texto, sin color semantico. */
+/* Ventana al cielo: abajo, en la zona del pulgar, solo el boton principal. */
+.windowDock {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  width: min(420px, 100%);
+  pointer-events: auto;
+}
+
+/*
+ * Aviso: icono alert y texto, sin color semantico. Va en vidrio, porque cae
+ * sobre el cielo y una frase larga no se lee sobre la Via Lactea.
+ */
 .notice {
   display: flex;
   align-items: flex-start;
   gap: var(--space-xs);
-  color: var(--color-text);
+  padding: var(--glass-panel-padding);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  color: var(--glass-panel-text);
   font: var(--type-body-sm-font);
   letter-spacing: var(--type-body-sm-tracking);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .notice {
+    background-color: var(--color-glass-solid);
+  }
 }
 
 .noticeIcon {
@@ -203,6 +232,29 @@
 }
 
 /*
+ * Anchos intermedios (tableta, ventana angosta): las acciones bajan a su
+ * propio renglon, repartidas, para que el campo conserve su ejemplo entero.
+ */
+@media (max-width: 899px) {
+  .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search {
+    min-height: 0;
+  }
+
+  .actions {
+    margin-top: 0;
+  }
+
+  .action {
+    flex: 1;
+  }
+}
+
+/*
  * Celular: todo a 12 px del borde. Los controles quedan abajo, en la zona del
  * pulgar; arriba solo hay informacion (la marca, el idioma y el centro).
  */
@@ -224,17 +276,8 @@
     padding: 0 var(--space-sm) var(--space-sm);
   }
 
-  .searchRow {
+  .actions {
     flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search {
-    min-height: 0;
-  }
-
-  .random {
-    margin-top: 0;
   }
 
   .credit {

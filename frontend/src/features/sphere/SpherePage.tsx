@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Icon,
+  IconButton,
   LanguageSelector,
   QuickLink,
   QuickLinkList,
@@ -10,12 +11,14 @@ import {
 } from "@/components";
 import type { NameResolver } from "@/data/nameResolver";
 import { useLanguage } from "@/i18n/useLanguage";
-import { formatDec, formatRa } from "@/lib/format";
-import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
+import { formatDec, formatDegrees, formatRa } from "@/lib/format";
+import { DEFAULT_VIEW_FOV } from "@/lib/fov";
+import { DEFAULT_BAND, DEFAULT_MODE, DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus } from "./SkySphere";
+import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
-import { clamp } from "./skyMath";
+import { angularSeparation, clamp } from "./skyMath";
 import {
   type FieldUrlPatch,
   pickRandomField,
@@ -26,6 +29,7 @@ import {
   viewerHref,
 } from "./targets";
 import { useSphereTexts } from "./texts";
+import { useSkyWindow } from "./useSkyWindow";
 import { type FoundPlace, useSphereSearch } from "./useSphereSearch";
 
 /**
@@ -40,12 +44,46 @@ const DRIFT_RATE = 0.5;
 /** Campo de vision al que llega el acercamiento antes de abrir el visor, en grados. */
 const ZOOM_FOV = 14;
 
+/** Campo de vision de la ventana al cielo, sobre el lado largo de la pantalla. */
+const WINDOW_FOV = 75;
+
+/**
+ * Un destacado cuenta como "en la mira" si esta dentro del circulo, y nunca a
+ * menos de este radio en grados: la brujula del telefono no es mas precisa.
+ */
+const MIN_LOCK_RADIUS = 5;
+
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
 
 /** Opacidad del fundido a negro segun el avance del vuelo: ocupa el ultimo tramo. */
 function fadeAt(progress: number): number {
   return clamp((progress - 0.55) / 0.45, 0, 1) ** 2;
+}
+
+/** Destacado mas cercano al centro de la ventana al cielo. */
+interface Nearest {
+  readonly id: string;
+  /** Distancia al centro en grados enteros: no hace falta redibujar por menos. */
+  readonly distance: number;
+  /** Esta dentro de la mira. */
+  readonly locked: boolean;
+}
+
+function nearestTarget(view: SkyView): Nearest | null {
+  let best: { target: SkyTarget; distance: number } | null = null;
+  for (const target of SKY_TARGETS) {
+    const distance = angularSeparation(view, target);
+    if (best === null || distance < best.distance) best = { target, distance };
+  }
+  if (best === null) return null;
+  const longSide = Math.max(window.innerWidth, window.innerHeight, 1);
+  const reticleRadius = ((WINDOW_RETICLE_SIZE / 2) * view.fov) / longSide;
+  return {
+    id: best.target.id,
+    distance: Math.round(best.distance),
+    locked: best.distance <= Math.max(reticleRadius, MIN_LOCK_RADIUS),
+  };
 }
 
 export interface SpherePageProps {
@@ -63,13 +101,21 @@ export interface SpherePageProps {
   readonly extraMarkers?: readonly SkyMarker[] | undefined;
   /** Fuente de azar de "Lugar al azar"; por defecto Math.random. */
   readonly random?: (() => number) | undefined;
+  /**
+   * Muestra el boton "Ventana al cielo". Por defecto, solo donde el puntero
+   * principal es un dedo (telefonos y tabletas).
+   */
+  readonly offerSkyWindow?: boolean | undefined;
+  /** Solo para la pagina de prueba: acepta sensores simulados sin brujula. */
+  readonly allowRelativeOrientation?: boolean | undefined;
 }
 
 /**
  * Pantalla de entrada con la esfera celeste (SPEC.md, Etapa 4): el cielo a
  * pantalla completa, los cinco objetos de prueba marcados, el buscador y el
  * boton "Lugar al azar". Elegir un lugar acerca la camara al punto y abre su
- * campo en el visor.
+ * campo en el visor. En un telefono suma la "ventana al cielo": la esfera
+ * sigue la direccion a la que apunta el aparato.
  */
 export function SpherePage({
   resolver,
@@ -78,6 +124,8 @@ export function SpherePage({
   driftRate,
   extraMarkers,
   random,
+  offerSkyWindow,
+  allowRelativeOrientation,
 }: SpherePageProps) {
   const t = useSphereTexts();
   const { t: tCommon } = useTranslation("common");
@@ -99,8 +147,32 @@ export function SpherePage({
   const [query, setQuery] = useState("");
   const [opening, setOpening] = useState<string | null>(null);
   const [sphereStatus, setSphereStatus] = useState<SkySphereStatus>("loading");
+  const [nearest, setNearest] = useState<Nearest | null>(null);
+  const [coarsePointer] = useState(
+    () =>
+      typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
+  );
   const search = useSphereSearch(resolver);
   const { status } = search;
+
+  const skyWindow = useSkyWindow({
+    onPointing: (pointing) => sphereRef.current?.setFreeOrientation(pointing),
+    allowRelative: allowRelativeOrientation,
+  });
+  const windowState = skyWindow.state;
+  const windowOn = windowState.kind === "on";
+  const windowOnRef = useRef(windowOn);
+  windowOnRef.current = windowOn;
+
+  // La ventana al cielo usa un campo de vision propio; al salir vuelve el de la entrada.
+  useEffect(() => {
+    if (!windowOn) return;
+    sphereRef.current?.setView({ fov: WINDOW_FOV });
+    return () => {
+      sphereRef.current?.setView({ fov: DEFAULT_FOV });
+      setNearest(null);
+    };
+  }, [windowOn]);
 
   useEffect(
     () => () => {
@@ -176,6 +248,8 @@ export function SpherePage({
     const target = SKY_TARGETS.find((candidate) => candidate.id === id);
     if (target === undefined || !isPlainClick(event)) return;
     event.preventDefault();
+    // El vuelo necesita la vista con el norte arriba: el sensor deja de mandar.
+    skyWindow.stop();
     openTarget(target);
   }
 
@@ -201,11 +275,56 @@ export function SpherePage({
     if (status.kind !== "idle") search.reset();
   }
 
+  function formatPosition(ra: number, dec: number): string {
+    return `${formatRa(ra, { language })} ${formatDec(dec, { language })}`;
+  }
+
   function handleViewChange(view: SkyView): void {
     const element = readoutRef.current;
-    if (element === null) return;
-    const text = `${formatRa(view.ra, { language })} ${formatDec(view.dec, { language })}`;
-    if (element.textContent !== text) element.textContent = text;
+    if (element !== null) {
+      const text = formatPosition(view.ra, view.dec);
+      if (element.textContent !== text) element.textContent = text;
+    }
+    if (!windowOnRef.current) return;
+    const next = nearestTarget(view);
+    // Corre en cada cuadro: solo cambia el estado cuando cambia lo que se muestra.
+    setNearest((previous) =>
+      previous !== null &&
+      next !== null &&
+      previous.id === next.id &&
+      previous.distance === next.distance &&
+      previous.locked === next.locked
+        ? previous
+        : next,
+    );
+  }
+
+  const nearestObject =
+    nearest === null ? undefined : SKY_TARGETS.find((target) => target.id === nearest.id);
+  const lockedTarget = nearest?.locked ? nearestObject : undefined;
+
+  /** Abre lo que esta en la mira: el destacado, o el punto del cielo al que apunta el telefono. */
+  function handleWindowOpen(): void {
+    const view = sphereRef.current?.getView() ?? null;
+    skyWindow.stop();
+    if (lockedTarget !== undefined) {
+      openTarget(lockedTarget);
+      return;
+    }
+    if (view === null) return;
+    search.reset();
+    void openPlace({
+      label: formatPosition(view.ra, view.dec),
+      patch: {
+        ra: view.ra,
+        dec: view.dec,
+        fov: DEFAULT_VIEW_FOV,
+        band: DEFAULT_BAND,
+        mode: DEFAULT_MODE,
+        epoch: null,
+        name: null,
+      },
+    });
   }
 
   const targetHref = useCallback(
@@ -231,7 +350,7 @@ export function SpherePage({
 
   const example = t("search.example", {
     name: SEARCH_EXAMPLE.label,
-    coordinates: `${formatRa(SEARCH_EXAMPLE.ra, { language })} ${formatDec(SEARCH_EXAMPLE.dec, { language })}`,
+    coordinates: formatPosition(SEARCH_EXAMPLE.ra, SEARCH_EXAMPLE.dec),
   });
 
   // Un solo renglon debajo del campo: lo que esta pasando o, en reposo, como se usa la esfera.
@@ -242,6 +361,9 @@ export function SpherePage({
     liveText = hintText;
   } else if (status.kind === "resolving") {
     hintText = t("search.resolving", { query: status.query });
+    liveText = hintText;
+  } else if (windowState.kind === "starting") {
+    hintText = t("window.starting");
     liveText = hintText;
   }
 
@@ -258,15 +380,19 @@ export function SpherePage({
   }
 
   const busy = opening !== null || status.kind === "resolving";
-  const noticeText =
-    sphereStatus === "no-webgl"
-      ? t("status.noWebgl")
-      : sphereStatus === "texture-error"
-        ? t("status.textureError")
-        : null;
+
+  // Avisos sobre el buscador: la esfera no se pudo dibujar, o la ventana al cielo no esta disponible.
+  const notices: string[] = [];
+  if (sphereStatus === "no-webgl") notices.push(t("status.noWebgl"));
+  else if (sphereStatus === "texture-error") notices.push(t("status.textureError"));
+  if (windowState.kind === "unavailable") {
+    notices.push(`${t(`window.unavailable.${windowState.issue}`)} ${t("window.dragMode")}`);
+  }
+
+  const showWindowButton = (offerSkyWindow ?? coarsePointer) && sphereStatus !== "no-webgl";
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-window={windowOn}>
       <SkySphere
         ref={sphereRef}
         label={t("stage.label")}
@@ -275,16 +401,33 @@ export function SpherePage({
         onMarkerClick={(marker, event) => handleTargetClick(marker.id, event)}
         initialView={initialView ?? INITIAL_VIEW}
         driftRate={driftRate ?? DRIFT_RATE}
+        unlabelledMarkerId={lockedTarget?.id ?? null}
+        interactive={!windowOn}
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
       />
       {/* Fundido a negro del final del acercamiento: el visor abre sobre el mismo negro. */}
       <div ref={fadeRef} className={styles.fade} aria-hidden="true" />
 
+      {windowOn ? (
+        <SkyWindowOverlay
+          lockedName={lockedTarget?.label ?? null}
+          nearestText={
+            nearestObject === undefined ? null : t("window.nearest", { name: nearestObject.label })
+          }
+          nearestDistance={nearest === null ? null : formatDegrees(nearest.distance, language, 0)}
+        />
+      ) : null}
+
       <header className={styles.topbar}>
         <p className={styles.brand}>{tCommon("app.name")}</p>
-        {/* El idioma va en la URL (`lang`); App lo aplica a i18next. */}
-        <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+        {windowOn ? (
+          // En la ventana al cielo, arriba solo queda la salida.
+          <IconButton icon="close" label={t("window.exit")} onClick={skyWindow.stop} />
+        ) : (
+          // El idioma va en la URL (`lang`); App lo aplica a i18next.
+          <LanguageSelector value={language} onChange={(lang) => updateUrl({ lang })} />
+        )}
       </header>
 
       <p className={styles.readout} data-hidden={sphereStatus === "no-webgl"}>
@@ -293,55 +436,79 @@ export function SpherePage({
       </p>
 
       <div className={styles.bottom}>
-        <main className={styles.dock}>
-          {noticeText === null ? null : (
-            <p className={styles.notice} role="status">
-              <Icon name="alert" size={18} className={styles.noticeIcon} />
-              <span>{noticeText}</span>
-            </p>
-          )}
-          {sphereStatus !== "no-webgl" ? null : (
-            <QuickLinkList label={t("markers.nav")}>
-              {SKY_TARGETS.map((target) => (
-                <QuickLink
-                  key={target.id}
-                  href={targetHref(target)}
-                  onClick={(event) => handleTargetClick(target.id, event)}
-                >
-                  {target.label}
-                </QuickLink>
-              ))}
-            </QuickLinkList>
-          )}
-          <div className={styles.searchRow}>
-            <SearchField
-              className={styles.search}
-              label={t("search.label")}
-              value={query}
-              onChange={handleQueryChange}
-              onSubmit={(text) => void handleSubmit(text)}
-              submitLabel={t("search.submit")}
-              placeholder={example}
-              hint={hintText}
-              error={errorText}
-              busy={busy}
-              inputRef={inputRef}
-            />
-            <Button
-              className={styles.random}
-              variant="ghost"
-              icon="shuffle"
-              disabled={busy}
-              onClick={handleRandom}
-            >
-              {t("random")}
+        {windowOn ? (
+          <main className={styles.windowDock}>
+            {/* El unico boton relleno de la vista: abre lo que esta en la mira. */}
+            <Button variant="primary" icon="target" disabled={busy} onClick={handleWindowOpen}>
+              {lockedTarget === undefined
+                ? t("window.openHere")
+                : t("window.open", { name: lockedTarget.label })}
             </Button>
-          </div>
-          {/* Siempre montado, para que el lector de pantalla anuncie el cambio de texto. */}
-          <p className={styles.visuallyHidden} role="status">
-            {liveText}
-          </p>
-        </main>
+          </main>
+        ) : (
+          <main className={styles.dock}>
+            {notices.map((notice) => (
+              <p key={notice} className={styles.notice} role="status">
+                <Icon name="alert" size={18} className={styles.noticeIcon} />
+                <span>{notice}</span>
+              </p>
+            ))}
+            {sphereStatus !== "no-webgl" ? null : (
+              <QuickLinkList label={t("markers.nav")}>
+                {SKY_TARGETS.map((target) => (
+                  <QuickLink
+                    key={target.id}
+                    href={targetHref(target)}
+                    onClick={(event) => handleTargetClick(target.id, event)}
+                  >
+                    {target.label}
+                  </QuickLink>
+                ))}
+              </QuickLinkList>
+            )}
+            <div className={styles.searchRow}>
+              <SearchField
+                className={styles.search}
+                label={t("search.label")}
+                value={query}
+                onChange={handleQueryChange}
+                onSubmit={(text) => void handleSubmit(text)}
+                submitLabel={t("search.submit")}
+                placeholder={example}
+                hint={hintText}
+                error={errorText}
+                busy={busy}
+                inputRef={inputRef}
+              />
+              <div className={styles.actions}>
+                <Button
+                  className={styles.action}
+                  variant="ghost"
+                  icon="shuffle"
+                  disabled={busy}
+                  onClick={handleRandom}
+                >
+                  {t("random")}
+                </Button>
+                {showWindowButton ? (
+                  <Button
+                    className={styles.action}
+                    variant="ghost"
+                    icon="compass"
+                    disabled={busy || windowState.kind === "starting"}
+                    onClick={() => void skyWindow.start()}
+                  >
+                    {t("window.enter")}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </main>
+        )}
+        {/* Siempre montado, para que el lector de pantalla anuncie el cambio de texto. */}
+        <p className={styles.visuallyHidden} role="status">
+          {liveText}
+        </p>
         <p className={styles.credit}>{t("credit")}</p>
       </div>
     </div>

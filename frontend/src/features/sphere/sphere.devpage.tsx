@@ -12,8 +12,9 @@
 //                     textura esta bien orientada, cada anillo rodea a su
 //                     estrella. Es la comprobacion de que la imagen y los
 //                     marcadores usan la misma convencion.
-//   sensor=1          (pagina de prueba) muestra "Ventana al cielo" tambien
-//                     en una computadora, para probarla con sensores simulados
+//   sensor=1          muestra "Ventana al cielo" tambien en una computadora y
+//                     acepta los sensores simulados de las herramientas de
+//                     desarrollo (More tools > Sensors), que no traen brujula
 //
 // El buscador necesita el backend (o el servidor falso) en /api; los cinco
 // marcadores y "Lugar al azar" no.
@@ -65,11 +66,14 @@ function openInViewer(patch: FieldUrlPatch): void {
 
 function SphereDevPage() {
   const params = new URLSearchParams(window.location.search);
+  const sensor = params.get("sensor") === "1";
   return (
     <SpherePage
       initialView={parseView(params.get("view"))}
       driftRate={parseNumber(params.get("drift"))}
       extraMarkers={params.get("check") === "1" ? BRIGHT_STARS : undefined}
+      offerSkyWindow={sensor ? true : undefined}
+      allowRelativeOrientation={sensor}
       onOpenField={openInViewer}
     />
   );

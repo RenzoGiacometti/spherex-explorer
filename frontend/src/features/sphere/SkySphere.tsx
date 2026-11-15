@@ -50,6 +50,8 @@ export interface SkySphereProps {
   readonly initialView?: SkyView | undefined;
   /** Grados por segundo de la deriva hasta la primera interaccion. Solo se lee al montar. */
   readonly driftRate?: number | undefined;
+  /** Marcador que no muestra su nombre: la ventana al cielo ya lo escribe debajo de la mira. */
+  readonly unlabelledMarkerId?: string | null | undefined;
   /** En false los gestos no mueven la vista (ventana al cielo). */
   readonly interactive?: boolean | undefined;
   /** Despues de cada cuadro: centro y campo de vision. No conviene guardarlo en estado de React. */
@@ -65,7 +67,16 @@ export interface SkySphereProps {
  * llegar con el teclado y tomar el color del token de acento.
  */
 export function SkySphere(props: SkySphereProps) {
-  const { ref, label, markersLabel, markers, onMarkerClick, interactive = true, className } = props;
+  const {
+    ref,
+    label,
+    markersLabel,
+    markers,
+    onMarkerClick,
+    unlabelledMarkerId,
+    interactive = true,
+    className,
+  } = props;
 
   const stageRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SkyScene | null>(null);
@@ -191,6 +202,7 @@ export function SkySphere(props: SkySphereProps) {
               className={styles.marker}
               data-kind={marker.kind ?? "target"}
               data-marker={marker.id}
+              data-unlabelled={marker.id === unlabelledMarkerId}
               hidden
             >
               <span className={styles.ring} />
@@ -203,6 +215,7 @@ export function SkySphere(props: SkySphereProps) {
               className={styles.marker}
               data-kind={marker.kind ?? "target"}
               data-marker={marker.id}
+              data-unlabelled={marker.id === unlabelledMarkerId}
               href={marker.href}
               aria-label={marker.openLabel}
               draggable={false}

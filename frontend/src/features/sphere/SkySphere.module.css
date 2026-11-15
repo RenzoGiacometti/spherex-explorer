@@ -124,6 +124,11 @@
   opacity: 1;
 }
 
+/* En la mira de la ventana al cielo el nombre va debajo, no al lado. */
+.marker[data-unlabelled="true"] .name {
+  display: none;
+}
+
 /* Sin cursor no hay "pasar por encima": en pantallas tactiles el nombre va siempre. */
 @media (hover: none) {
   .name {
