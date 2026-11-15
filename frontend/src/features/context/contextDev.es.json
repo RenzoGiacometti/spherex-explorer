@@ -1,0 +1,22 @@
+{
+  "title": "Contexto de otras misiones",
+  "objects": {
+    "label": "Objeto",
+    "barnard": "Barnard",
+    "epsindb": "Eps Ind B",
+    "wise0855": "WISE 0855",
+    "rwaur": "RW Aur",
+    "rdra": "R Dra"
+  },
+  "view": {
+    "title": "Imagen",
+    "band": "Banda de SPHEREx",
+    "contrast": "Contraste",
+    "target": "Posición esperada del objeto"
+  },
+  "status": {
+    "loading": "Cargando el contexto",
+    "error": "No se pudo cargar el contexto. Hace falta el backend de prueba: desde backend/, uv run uvicorn app.context.devapp:app --port 8000",
+    "noSpherex": "Este servidor no tiene armado el campo de SPHEREx de este objeto: el viaje muestra solo 2MASS y WISE."
+  }
+}

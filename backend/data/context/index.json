@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "fields": [
+    {
+      "key": "133.7598_-7.2422_0.1667",
+      "field_id": "bfcb329969cde224",
+      "alias": "wise0855",
+      "name": "WISEA J085510.74-071442.5",
+      "ra": 133.7598,
+      "dec": -7.2422,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 242
+    },
+    {
+      "key": "248.1672_+66.7550_0.1667",
+      "field_id": "721817858ae5e0d2",
+      "alias": "rdra",
+      "name": "V* R Dra",
+      "ra": 248.1672,
+      "dec": 66.755,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 160
+    },
+    {
+      "key": "269.4463_+4.7683_0.1667",
+      "field_id": "95d4d56e51048aa4",
+      "alias": "barnard",
+      "name": "NAME Barnard's star",
+      "ra": 269.4463,
+      "dec": 4.7683,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 2159
+    },
+    {
+      "key": "331.0966_-56.8006_0.1667",
+      "field_id": "35e036ee3dee68e9",
+      "alias": "epsindb",
+      "name": "* eps Ind B",
+      "ra": 331.0966,
+      "dec": -56.8006,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 212
+    },
+    {
+      "key": "76.9566_+30.4013_0.1667",
+      "field_id": "09413d9ee9d96187",
+      "alias": "rwaur",
+      "name": "V* RW Aur",
+      "ra": 76.9566,
+      "dec": 30.4013,
+      "fov": 0.1667,
+      "layers": [
+        "twomass_ks",
+        "wise_w2"
+      ],
+      "gaia_sources": 998
+    }
+  ]
+}

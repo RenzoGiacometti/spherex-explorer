@@ -1,0 +1,22 @@
+{
+  "title": "Context from other missions",
+  "objects": {
+    "label": "Object",
+    "barnard": "Barnard",
+    "epsindb": "Eps Ind B",
+    "wise0855": "WISE 0855",
+    "rwaur": "RW Aur",
+    "rdra": "R Dra"
+  },
+  "view": {
+    "title": "Image",
+    "band": "SPHEREx band",
+    "contrast": "Contrast",
+    "target": "Expected position of the object"
+  },
+  "status": {
+    "loading": "Loading the context",
+    "error": "The context could not be loaded. It needs the test backend: from backend/, uv run uvicorn app.context.devapp:app --port 8000",
+    "noSpherex": "This server does not have the SPHEREx field of this object: the journey shows only 2MASS and WISE."
+  }
+}
