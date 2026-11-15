@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>Sgr A*</name>
+  <!-- Q209102 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 34ms [34] -->
+    <oid>2419046</oid>
+    <oname>NAME Sgr A*</oname>
+    <otype>X</otype>
+    <jpos>17:45:40.03 -29:00:28.1</jpos>
+    <jradeg>266.416816625</jradeg>
+    <jdedeg>-29.007824972</jdedeg>
+    <refPos>2011AJ....142...35P</refPos>
+    <errRAmas>1.42</errRAmas><errDEmas>2.65</errDEmas>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,16:46:53z)==== -->
