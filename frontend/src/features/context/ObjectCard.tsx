@@ -1,4 +1,6 @@
+import type { TFunction } from "i18next";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, classNames, DataGroup, DataRow, GlassPanel } from "@/components";
 import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
@@ -7,8 +9,6 @@ import { type GridWcs, skyToPixel } from "@/lib/wcs";
 import { gaiaPositionAt } from "./gaia";
 import type { FramePoint } from "./journey";
 import styles from "./ObjectCard.module.css";
-import objectCardEn from "./objectCard.en.json";
-import objectCardEs from "./objectCard.es.json";
 import {
   DEFAULT_SEARCH_RADIUS_ARCSEC,
   NEARBY_RADIUS_ARCSEC,
@@ -18,13 +18,9 @@ import {
   roundSignificant,
 } from "./objectFacts";
 import type { GaiaCatalog } from "./schema";
-import { registerTexts, type Texts, useTexts } from "./texts";
 
-// Los textos de la ficha van al lado y se registran al cargar este modulo (ver texts.ts).
-export const OBJECT_CARD_NAMESPACE = "objectCard";
-registerTexts(OBJECT_CARD_NAMESPACE, { es: objectCardEs, en: objectCardEn });
-
-type CardTexts = Texts<typeof objectCardEs>;
+// Los textos estan en src/i18n/locales/<idioma>/objectCard.json (namespace `objectCard`).
+type CardTexts = TFunction<"objectCard">;
 
 // Signo "mayor que" (U+003E), armado por codigo para que no parezca una etiqueta en el JSX.
 const GREATER_THAN = String.fromCodePoint(0x003e);
@@ -147,7 +143,7 @@ export function ObjectCard({
   onPick,
   className,
 }: ObjectCardProps) {
-  const t = useTexts<typeof objectCardEs>(OBJECT_CARD_NAMESPACE);
+  const { t } = useTranslation("objectCard");
   const language = useLanguage();
 
   const found = useMemo(

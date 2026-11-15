@@ -19,6 +19,7 @@ import { ApiError, errorFromResponse, networkError } from "@/api/errors";
 import { displaySchema, gridSchema } from "@/api/schema";
 import type { FieldGeometry } from "./contextApi";
 import type { JourneyFrame, Mission } from "./journey";
+import { type CompassPoint, compassPoint } from "./objectFacts";
 import { layerTargetSchema } from "./schema";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -150,16 +151,10 @@ export const opticalApi: OpticalApi = createOpticalApi();
 // ---- Viaje entre misiones ----------------------------------------------------
 
 /** Nombre de la mision con el que las placas aparecen en el viaje. */
-export const DSS_MISSION = "DSS";
+export const DSS_MISSION: Mission = "DSS";
 
 /**
  * Cuadro del viaje para una placa del DSS. `values` es null si todavia no se bajo.
- *
- * `JourneyFrame.mission` esta tipado como "2MASS" | "WISE" | "SPHEREx" en
- * journey.ts, que esta etapa no toca: por eso el nombre "DSS" entra con una
- * conversion de tipo. En ejecucion no cambia nada, porque `MissionJourney`
- * solo usa `mission` como texto y para agrupar marcas vecinas. Al integrar:
- * sumar "DSS" a `MISSIONS` en journey.ts y quitar la conversion.
  *
  * La posicion esperada del objeto solo se informa si cae dentro del campo: una
  * estrella rapida puede haber estado afuera (Barnard, en 1950 y en 1991).
@@ -171,7 +166,7 @@ export function opticalFrame(
 ): JourneyFrame {
   return {
     id: layer.key,
-    mission: DSS_MISSION as Mission,
+    mission: DSS_MISSION,
     band: layer.band,
     waveUm: [layer.wave_um],
     mjd: layer.mjd,
@@ -210,6 +205,29 @@ export function curtainLayer(document: OpticalDocument): OpticalLayer | null {
 /** True si el objeto del campo tenia posicion en la fecha de la placa y caia fuera del campo. */
 export function targetOutsideField(layer: OpticalLayer): boolean {
   return layer.target !== null && !layer.target.in_field;
+}
+
+/** Donde estaba el objeto respecto del centro del campo: a cuantos minutos de arco y hacia que rumbo. */
+export interface TargetOffset {
+  readonly arcmin: number;
+  readonly direction: CompassPoint | null;
+}
+
+/**
+ * Separacion entre el centro del campo y una posicion del cielo (grados ICRS),
+ * en minutos de arco, y el rumbo desde el centro. Aproximacion de plano
+ * tangente: vale para las fracciones de grado que separan a una estrella rapida
+ * de su campo en una placa vieja (Barnard: 13 minutos al sur en 1950).
+ */
+export function targetOffset(
+  center: { readonly ra: number; readonly dec: number },
+  target: { readonly ra: number; readonly dec: number },
+): TargetOffset {
+  // La diferencia de ascension recta, por el camino corto: 359,9 y 0,1 estan a 0,2 grados.
+  const deltaRa = ((((target.ra - center.ra) % 360) + 540) % 360) - 180;
+  const east = deltaRa * Math.cos((center.dec * Math.PI) / 180) * 60;
+  const north = (target.dec - center.dec) * 60;
+  return { arcmin: Math.hypot(east, north), direction: compassPoint(east, north) };
 }
 
 /** Credito de una placa, con sus datos tal como vienen: "SF04022", "POSSII-F", "Caltech/Palomar". */

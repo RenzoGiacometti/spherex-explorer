@@ -31,6 +31,7 @@
 //                                data-gaia-total, data-card (none | source | empty)
 
 import { type MouseEvent, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isApiError } from "@/api/errors";
 import { classNames, GlassPanel, ImageTag, SegmentedControl, Toggle } from "@/components";
 import type { DevPage } from "@/dev/devPages";
@@ -46,7 +47,7 @@ import { frameBandText, frameDateText } from "./MissionJourney";
 import { ObjectCard } from "./ObjectCard";
 import { nearestSource } from "./objectFacts";
 import type { ContextDocument, ContextIndex, GaiaCatalog } from "./schema";
-import { registerTexts, useContextTexts, useTexts } from "./texts";
+import { registerTexts, useTexts } from "./texts";
 
 const DEV_NAMESPACE = "fichaDev";
 registerTexts(DEV_NAMESPACE, { es: fichaDevEs, en: fichaDevEn });
@@ -117,7 +118,7 @@ function readInitialState(search: string): InitialState {
 
 function FichaDevPage() {
   const t = useTexts<typeof fichaDevEs>(DEV_NAMESPACE);
-  const tc = useContextTexts();
+  const { t: tc } = useTranslation("context");
   const language = useLanguage();
   const [initial] = useState(() => readInitialState(window.location.search));
 

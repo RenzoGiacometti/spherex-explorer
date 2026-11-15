@@ -35,6 +35,7 @@
 //                                  data-frames, data-frame, data-spherex (yes | no)
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "@/api/client";
 import { isApiError } from "@/api/errors";
 import { isListed, type ListedFieldMeta } from "@/api/types";
@@ -44,7 +45,7 @@ import type { Language } from "@/i18n/languages";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatBand, formatPercent, formatWaveRange } from "@/lib/format";
 import { DEFAULT_CONTRAST, MAX_CONTRAST, MIN_CONTRAST } from "@/viewer/stretch";
-import { Curtain, type CurtainSide, OpticalCredit, useCurtainTexts } from "./Curtain";
+import { Curtain, type CurtainSide, OpticalCredit } from "./Curtain";
 import { contextApi, type FieldGeometry } from "./contextApi";
 import cortinaDevEn from "./cortinaDev.en.json";
 import cortinaDevEs from "./cortinaDev.es.json";
@@ -65,7 +66,7 @@ import {
 } from "./optical";
 import type { ContextDocument, ContextIndex } from "./schema";
 import { TargetMark } from "./TargetMark";
-import { registerTexts, useContextTexts, useTexts } from "./texts";
+import { registerTexts, useTexts } from "./texts";
 
 const DEV_NAMESPACE = "cortinaDev";
 registerTexts(DEV_NAMESPACE, { es: cortinaDevEs, en: cortinaDevEn });
@@ -134,8 +135,8 @@ function sideDetail(frame: JourneyFrame, language: Language, dateText: string): 
 
 function CortinaDevPage() {
   const t = useTexts<typeof cortinaDevEs>(DEV_NAMESPACE);
-  const tc = useContextTexts();
-  const tk = useCurtainTexts();
+  const { t: tc } = useTranslation("context");
+  const { t: tk } = useTranslation("curtain");
   const language = useLanguage();
   const [params] = useState(() => new URLSearchParams(window.location.search));
 

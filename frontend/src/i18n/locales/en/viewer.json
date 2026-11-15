@@ -33,7 +33,8 @@
     "sum": "Sum",
     "redcyan": "Red/cyan",
     "hold": "Press and hold",
-    "journey": "Mission journey"
+    "journey": "Mission journey",
+    "curtain": "Curtain"
   },
   "comparison": {
     "group": "Comparison mode",
@@ -45,7 +46,8 @@
       "redcyan": "A in red and B in cyan. What did not change stays grey.",
       "sum": "Average of the epochs with an image: {{n}}.",
       "hold": "A is shown. While the button or the space bar is held down, B is shown.",
-      "journey": "2MASS, WISE and the SPHEREx epochs, in date order. Step through them with the control below."
+      "journey": "DSS plates, 2MASS, WISE and the SPHEREx epochs, in date order. Step through them with the control below.",
+      "curtain": "Left of the divider, the DSS visible-light plate; right of it, SPHEREx in the chosen band and epoch. Drag the divider."
     },
     "holdButton": "Hold to see B",
     "issue": {

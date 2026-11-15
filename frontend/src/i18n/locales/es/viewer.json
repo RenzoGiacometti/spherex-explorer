@@ -33,7 +33,8 @@
     "sum": "Suma",
     "redcyan": "Rojo/cian",
     "hold": "Mantener apretado",
-    "journey": "Viaje entre misiones"
+    "journey": "Viaje entre misiones",
+    "curtain": "Cortina"
   },
   "comparison": {
     "group": "Modo de comparación",
@@ -45,7 +46,8 @@
       "redcyan": "A en rojo y B en cian. Lo que no cambió queda gris.",
       "sum": "Promedio de las épocas con imagen: {{n}}.",
       "hold": "Se ve A. Mientras se mantiene apretado el botón o la barra espaciadora, se ve B.",
-      "journey": "2MASS, WISE y las épocas de SPHEREx, en orden de fecha. Se recorre con el control de abajo."
+      "journey": "Placas del DSS, 2MASS, WISE y las épocas de SPHEREx, en orden de fecha. Se recorre con el control de abajo.",
+      "curtain": "A la izquierda del divisor, la placa en luz visible del DSS; a la derecha, SPHEREx en la banda y la época elegidas. El divisor se arrastra."
     },
     "holdButton": "Mantener para ver B",
     "issue": {

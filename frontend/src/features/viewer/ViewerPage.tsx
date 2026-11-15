@@ -13,6 +13,11 @@
 //            muelle inferior   transporte, linea de tiempo y estado de la carga;
 //                              en el modo `journey`, el control del viaje entre misiones
 //
+//            En el modo `curtain` la zona libre muestra la cortina
+//            visible/infrarrojo (CurtainStage.tsx) en lugar de la imagen del
+//            visor. Cada vez que se ve una placa del DSS, en la cortina o en el
+//            viaje, su credito va debajo de la imagen (`PlateCaption`).
+//
 //   phone    menos de 600 px (DESIGN.md, "Responsive Behavior"): arriba, la
 //            salida, el objeto y la cantidad de avisos; la imagen; y en el 45 %
 //            inferior, modo, banda y linea de tiempo con el transporte. Lo
@@ -30,8 +35,9 @@
 //
 // Que hace un clic sobre la imagen lo decide imageClick.ts, en un solo lugar:
 // por defecto pide el espectro de ese punto (useSpectrum.ts) y abre
-// SpectrumDock, con sus pestanas de espectro y curva de luz; si una herramienta
-// tomo el clic, va a ella. En `embed` no hay clic: ahi solo va la imagen.
+// SpectrumDock, con la ficha del objeto (features/context, `ObjectCard`) arriba
+// de sus pestanas de espectro y curva de luz; si una herramienta tomo el clic,
+// va a ella. En `embed` no hay clic: ahi solo va la imagen.
 //
 // La herramienta Medir (features/measure) es una de esas: prendida toma el clic
 // con el id "measure" y cada clic marca la posicion del objeto en la epoca que
@@ -52,14 +58,17 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components";
 import { contractGridShape } from "@/data/gridShape";
-import { MissionJourney } from "@/features/context";
+import { selectTargetPosition } from "@/data/selectors";
+import { MissionJourney, ObjectCard } from "@/features/context";
 import { type Measure, MeasureLayer, MeasurePanel, useMeasure } from "@/features/measure";
+import { pixelToSky, skyToPixel } from "@/lib/wcs";
 import { useFieldStore } from "@/state/fieldStore";
 import { useUrlState } from "@/state/urlState";
 import type { ImageSize } from "@/viewer/compose";
 import { type ImageClick, ImageViewer, type ViewerOverlay } from "@/viewer/ImageViewer";
 import { homeZoomForViewFov } from "@/viewer/view";
 import { BandPanel } from "./BandPanel";
+import { CurtainStage, PlateCaption } from "./CurtainStage";
 import { challengeVariableFor } from "./challengeVariables";
 import { EmbedBar } from "./EmbedBar";
 import { GaiaOverlay } from "./GaiaOverlay";
@@ -108,9 +117,11 @@ export function ViewerPage() {
   const gridShape = useFieldStore((state) => state.meta?.grid?.shape);
   const requestFov = useFieldStore((state) => state.request?.fov);
   const controller = useViewerController();
-  const { view, scene, source, journey } = controller;
+  const { view, scene, source, journey, gaia } = controller;
   // El control del viaje ocupa el lugar de la linea de tiempo mientras dura el modo.
   const journeyOn = controller.mode === "journey";
+  // La cortina se dibuja en la zona libre, en lugar de la imagen del visor.
+  const curtainOn = controller.mode === "curtain";
   const journeyControl = journeyOn ? (
     <MissionJourney
       frames={journey.frames}
@@ -149,13 +160,14 @@ export function ViewerPage() {
   const {
     requestAt: requestSpectrum,
     requestObject: requestSpectrumOfObject,
+    requestPosition: requestSpectrumPosition,
     close: closeSpectrum,
   } = spectrum;
   const spectrumState = spectrum.state;
   const spectrumOpen = layout !== "embed" && spectrumState.status !== "idle";
   // Solo hay algo que medir sobre una imagen de SPHEREx. Mientras se mantiene
-  // apretado para ver B, soltar no es un clic.
-  const canPick = layout !== "embed" && source === "spherex" && !controller.holding;
+  // apretado para ver B, soltar no es un clic; en la cortina el puntero mueve el divisor.
+  const canPick = layout !== "embed" && source === "spherex" && !controller.holding && !curtainOn;
   /** Quien tiene el clic: "source" (espectro y curva de luz) o la herramienta que lo tomo. */
   const clickMode = useImageClickMode();
 
@@ -257,6 +269,41 @@ export function ViewerPage() {
     };
   }, [spectrumState]);
 
+  // ---- Ficha del objeto ------------------------------------------------------
+
+  // Va arriba de las pestanas del panel de la fuente, si el campo tiene contexto:
+  // las fuentes de Gaia, el pixel elegido y la fecha de la imagen que se ve.
+  const cardGrid = gaia.grid;
+  const cardPoint = useMemo(() => {
+    if (spectrumState.status === "idle" || cardGrid === null) return null;
+    const { pixel, query } = spectrumState.point;
+    if (pixel !== null) return pixel;
+    // El objeto buscado no trae pixel (ya tiene su mira). La ficha busca en Gaia la fuente que
+    // esta en ese punto en la fecha de la imagen, asi que va la posicion del objeto en la epoca
+    // que se ve y no la de referencia: Barnard se corre 7 segundos de arco entre 2026,0 y su
+    // ultima epoca, mas que el radio de busqueda de la ficha.
+    const target = selectTargetPosition(useFieldStore.getState(), shownEpoch);
+    if (target !== null) return { x: target.x, y: target.y };
+    return skyToPixel(cardGrid, query.ra, query.dec);
+  }, [spectrumState, cardGrid, shownEpoch]);
+  const objectCard =
+    cardGrid === null ? null : (
+      <ObjectCard
+        catalog={gaia.catalog}
+        grid={cardGrid}
+        point={cardPoint}
+        year={gaia.year}
+        onPick={(pixel) => requestSpectrumPosition(pixelToSky(cardGrid, pixel.x, pixel.y))}
+      />
+    );
+
+  // Pie de la placa del DSS que se ve en el viaje: su credito y, si el objeto
+  // estaba fuera del campo en esa fecha, el aviso.
+  const plateCaption =
+    journeyOn && source === "survey" && journey.plate !== null ? (
+      <PlateCaption plate={journey.plate} outside={journey.outside} name={urlName} />
+    ) : null;
+
   useEffect(() => {
     const open = openSection !== null;
     // Recien despues de dibujar: mientras el cajon esta abierto, lo que lo abrio no se puede enfocar.
@@ -285,6 +332,8 @@ export function ViewerPage() {
       data-playing={controller.playing || journey.playing ? "true" : undefined}
       data-context={journey.status}
       data-journey-frame={journeyOn ? (journey.currentId ?? undefined) : undefined}
+      data-curtain={controller.curtain.available ? "available" : undefined}
+      data-plate={plateCaption === null ? undefined : (journey.plate?.key ?? undefined)}
       data-flags={controller.flags.status}
       data-spectrum={spectrumOpen ? "open" : undefined}
       data-click={canPick ? clickMode : undefined}
@@ -316,7 +365,7 @@ export function ViewerPage() {
        */}
       <div ref={viewerRef} className={styles.viewer}>
         <ImageViewer
-          scene={scene}
+          scene={curtainOn ? null : scene}
           imageSize={imageSize}
           homeZoom={homeZoomForViewFov(fov)}
           insets={insets}
@@ -324,19 +373,22 @@ export function ViewerPage() {
           ariaDescribedBy={helpId}
           onImageClick={canPick ? handleImageClick : undefined}
         >
-          {(overlay: ViewerOverlay) => (
-            <>
-              <GaiaOverlay overlay={overlay} gaia={controller.gaia} shown={source !== "none"} />
-              <ImageAnnotations
-                overlay={overlay}
-                controller={controller}
-                spectrumMark={spectrumOpen ? spectrumMark : null}
-              />
-              {measuring ? (
-                <MeasureLayer overlay={overlay} measure={measure} clicks="external" />
-              ) : null}
-            </>
-          )}
+          {(overlay: ViewerOverlay) =>
+            // En la cortina la imagen del visor no se ve: sus anotaciones tampoco.
+            curtainOn ? null : (
+              <>
+                <GaiaOverlay overlay={overlay} gaia={controller.gaia} shown={source !== "none"} />
+                <ImageAnnotations
+                  overlay={overlay}
+                  controller={controller}
+                  spectrumMark={spectrumOpen ? spectrumMark : null}
+                />
+                {measuring ? (
+                  <MeasureLayer overlay={overlay} measure={measure} clicks="external" />
+                ) : null}
+              </>
+            )
+          }
         </ImageViewer>
       </div>
       <p id={helpId} hidden>
@@ -347,11 +399,16 @@ export function ViewerPage() {
         {measuring ? ` ${tMeasure("panel.hint")}` : null}
       </p>
 
-      <div ref={stageRef} className={styles.stage}>
-        {layout === "phone" && offered !== null && openSection === null ? (
-          <LightcurveOffer variable={offered} onOpen={openLightcurve} variant="compact" />
-        ) : null}
-        <StageStatus controller={controller} />
+      <div className={styles.stage}>
+        {/* La zona donde se encuadra la imagen. El pie de la placa va debajo y le saca lugar. */}
+        <div ref={stageRef} className={styles.frame}>
+          {curtainOn ? <CurtainStage controller={controller} /> : null}
+          {layout === "phone" && offered !== null && openSection === null ? (
+            <LightcurveOffer variable={offered} onOpen={openLightcurve} variant="compact" />
+          ) : null}
+          <StageStatus controller={controller} />
+        </div>
+        {plateCaption}
       </div>
 
       {layout === "desktop" ? (
@@ -362,6 +419,7 @@ export function ViewerPage() {
             tab={sourceTab}
             onTabChange={setSourceTab}
             band={band}
+            header={objectCard}
           />
           <MeasurePanel measure={measure} collapsible />
           <MetadataPanel currentEpoch={view.current} />
@@ -420,6 +478,7 @@ export function ViewerPage() {
                 tab={sourceTab}
                 onTabChange={setSourceTab}
                 band={band}
+                header={objectCard}
               />
             </div>
           ) : null}

@@ -176,6 +176,16 @@
   align-self: flex-start;
 }
 
+/*
+ * Renglon del recorrido guiado y los accesos directos (viaje en el tiempo,
+ * cortina). Si no entran en una linea, pasan a la siguiente.
+ */
+.shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
 /* Ventana al cielo: abajo, en la zona del pulgar, solo el boton principal. */
 .windowDock {
   display: flex;

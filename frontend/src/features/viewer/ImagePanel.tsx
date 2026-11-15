@@ -19,7 +19,7 @@ const CONTRAST_STEPS = 100;
 
 /**
  * Panel Imagen: contraste, estirado, campo de vision, capa de flags y capa de
- * Gaia (deshabilitada, con su explicacion, en los campos sin contexto). El
+ * Gaia (deshabilitada en los campos sin contexto). El
  * contraste mueve el corte alto entre los dos extremos de la escala del
  * detector (`contrastCuts`). Las vistas de 5 y 10 minutos comparten cubo (5 es
  * un acercamiento al doble); la de 30 abre el escalon amplio, que es otro campo.

@@ -1,6 +1,6 @@
 // Estado de la pantalla del visor que no esta en el store del campo: el
 // reproductor, mantener apretado, el contraste, la capa de flags, el viaje
-// entre misiones y la capa de Gaia. Con eso, la URL (modo, epoca actual, epoca
+// entre misiones, la cortina visible/infrarrojo y la capa de Gaia. Con eso, la URL (modo, epoca actual, epoca
 // de referencia, estirado) y los planos bajados arma lo que se ve (viewModel.ts)
 // y la escena que dibuja ImageViewer.
 //
@@ -16,13 +16,22 @@ import {
 } from "@/data/selectors";
 import {
   type ContextDocument,
+  clampCurtain,
+  curtainLayer,
   DEFAULT_ARROW_STEP,
+  DEFAULT_CURTAIN,
   type GaiaCatalog,
   type JourneyFrame,
+  journeyLayers,
   mjdToYear,
+  type OpticalLayer,
+  opticalFrame,
   orderFrames,
   spherexFrame,
   surveyFrame,
+  type TargetOffset,
+  targetOffset,
+  targetOutsideField,
 } from "@/features/context";
 import { useFieldStore } from "@/state/fieldStore";
 import { DEFAULT_MODE, useUrlState, type ViewMode } from "@/state/urlState";
@@ -67,7 +76,11 @@ export const FRAME_MS = 800;
  */
 export type ImageSource = "spherex" | "preview" | "survey" | "none";
 
-/** Viaje entre misiones (modo `journey`): 2MASS, WISE y las epocas de SPHEREx en orden de fecha. */
+/**
+ * Viaje entre misiones (modo `journey`): las placas del DSS, 2MASS, WISE y las
+ * epocas de SPHEREx en orden de fecha. Al entrar arranca por la parada mas
+ * antigua.
+ */
 export interface JourneyControl {
   /** Estado del contexto del campo: explica por que el modo no se puede elegir. */
   readonly status: FieldContextStatus;
@@ -79,10 +92,37 @@ export interface JourneyControl {
   readonly currentId: string | null;
   /** Cuadro de otra mision que se esta viendo; null si se ve una epoca de SPHEREx. */
   readonly survey: JourneyFrame | null;
+  /** Placa del DSS que se esta viendo: su credito va siempre con la imagen. null si no es una placa. */
+  readonly plate: OpticalLayer | null;
+  /**
+   * Si en la fecha de esa placa el objeto del campo estaba fuera del campo,
+   * donde estaba respecto del centro; null si estaba adentro o no hay objeto.
+   */
+  readonly outside: TargetOffset | null;
   readonly playing: boolean;
   /** Elige un cuadro. Una epoca de SPHEREx pasa a ser la actual en la URL. */
   select(id: string): void;
   setPlaying(playing: boolean): void;
+}
+
+/**
+ * Cortina visible/infrarrojo (modo `curtain`): de un lado la placa optica del
+ * DSS y del otro la imagen de SPHEREx de la banda y la epoca que se ven.
+ */
+export interface CurtainControl {
+  /** El campo tiene placa optica y la pantalla la muestra: el modo se puede elegir. */
+  readonly available: boolean;
+  /** Placa del lado visible; null si el campo no tiene. Su credito va siempre con la imagen. */
+  readonly plate: OpticalLayer | null;
+  /** Lado visible: el cuadro de la placa (sin imagen mientras no llega). */
+  readonly visible: JourneyFrame | null;
+  /** Lado infrarrojo: la epoca de SPHEREx que se ve, en la banda elegida. */
+  readonly infrared: JourneyFrame | null;
+  /** Forma de la grilla `[ny, nx]` de las dos imagenes. */
+  readonly shape: readonly [number, number] | null;
+  /** Donde esta el divisor, de 0 (borde izquierdo) a 1. */
+  readonly position: number;
+  setPosition(position: number): void;
 }
 
 /** Capa de Gaia: fuentes del catalogo del campo con su movimiento propio. */
@@ -109,7 +149,8 @@ export interface GaiaControl {
 export interface ViewerController {
   /**
    * Modo que se ve. Es el de la URL, salvo `journey` en un campo sin contexto
-   * guardado (o en `embed`), que cae a `blink`.
+   * y `curtain` en un campo sin placa optica (o cualquiera de los dos en
+   * `embed`), que caen a `blink`.
    */
   readonly mode: ViewMode;
   /** Planos de la banda actual, uno por epoca. */
@@ -157,6 +198,7 @@ export interface ViewerController {
 
   // ---- Contexto de otras misiones ----
   readonly journey: JourneyControl;
+  readonly curtain: CurtainControl;
   readonly gaia: GaiaControl;
 }
 
@@ -226,8 +268,27 @@ export function useViewerController(): ViewerController {
   // la URL se respeta; si resulta que no hay, cae a parpadeo.
   const journeyAvailable = context.status === "ready" && !embed;
   const journeyPending = !embed && (context.status === "loading" || context.status === "idle");
+
+  const { document: contextDocument, layers: contextLayers, optical } = context;
+  // Las capas del contexto solo sirven si estan en la grilla del campo abierto.
+  const contextShape = contextDocument?.grid.shape;
+  const sameGrid =
+    contextShape !== undefined &&
+    (gridShape === undefined ||
+      (gridShape[0] === contextShape[0] && gridShape[1] === contextShape[1]));
+
+  // La cortina necesita una placa optica con pixeles validos. Mientras el
+  // pedido de las placas esta en camino el modo de la URL se respeta.
+  const candidatePlate = optical === null || !sameGrid ? null : curtainLayer(optical);
+  const curtainPlate =
+    candidatePlate !== null && candidatePlate.display !== null ? candidatePlate : null;
+  const curtainAvailable = journeyAvailable && curtainPlate !== null;
+  const curtainPending = journeyPending || (journeyAvailable && context.opticalPending);
   const mode: ViewMode =
-    urlMode === "journey" && !journeyAvailable && !journeyPending ? DEFAULT_MODE : urlMode;
+    (urlMode === "journey" && !journeyAvailable && !journeyPending) ||
+    (urlMode === "curtain" && !curtainAvailable && !curtainPending)
+      ? DEFAULT_MODE
+      : urlMode;
 
   const [playing, setPlayingState] = useState(false);
   const [frame, setFrame] = useState<number | null>(null);
@@ -239,6 +300,9 @@ export function useViewerController(): ViewerController {
   /** Capa de otra mision elegida en el viaje; null si se ve una epoca de SPHEREx. */
   const [journeySurvey, setJourneySurvey] = useState<string | null>(null);
   const [journeyPlaying, setJourneyPlayingState] = useState(false);
+  /** El viaje ya eligio su parada de arranque (la mas antigua) desde que se entro al modo. */
+  const [journeyStarted, setJourneyStarted] = useState(false);
+  const [curtainPosition, setCurtainPositionState] = useState(DEFAULT_CURTAIN);
   const [gaiaOn, setGaiaOn] = useState(false);
   const [arrowStep, setArrowStep] = useState<number>(DEFAULT_ARROW_STEP);
   const [chosenMagnitude, setChosenMagnitude] = useState<number | null>(null);
@@ -254,6 +318,7 @@ export function useViewerController(): ViewerController {
     setHoldingState(false);
     setJourneySurvey(null);
     setJourneyPlayingState(false);
+    setJourneyStarted(false);
     setChosenMagnitude(null);
   }
   // El modo tambien cambia desde afuera (atras y adelante en el historial).
@@ -262,10 +327,11 @@ export function useViewerController(): ViewerController {
     setFrame(null);
   }
   if (holding && mode !== "hold") setHoldingState(false);
-  // Al salir del viaje se vuelve a SPHEREx: al entrar de nuevo arranca por la epoca actual.
-  if (mode !== "journey" && (journeySurvey !== null || journeyPlaying)) {
+  // Al salir del viaje se vuelve a SPHEREx: al entrar de nuevo arranca por la parada mas antigua.
+  if (mode !== "journey" && (journeySurvey !== null || journeyPlaying || journeyStarted)) {
     setJourneySurvey(null);
     setJourneyPlayingState(false);
+    setJourneyStarted(false);
   }
 
   const spherexView = useMemo(
@@ -283,18 +349,16 @@ export function useViewerController(): ViewerController {
 
   // ---- Viaje entre misiones -----------------------------------------------
 
-  const { document: contextDocument, layers: contextLayers } = context;
-  // Las capas del contexto solo sirven si estan en la grilla del campo abierto.
-  const contextShape = contextDocument?.grid.shape;
-  const sameGrid =
-    contextShape !== undefined &&
-    (gridShape === undefined ||
-      (gridShape[0] === contextShape[0] && gridShape[1] === contextShape[1]));
-
   const journeyFrames = useMemo<readonly JourneyFrame[]>(() => {
     if (mode !== "journey") return NO_FRAMES;
     const list: JourneyFrame[] = [];
     if (contextDocument !== null && sameGrid) {
+      // Las placas del DSS con fecha fiable: son las paradas mas antiguas.
+      for (const layer of optical === null ? [] : journeyLayers(optical)) {
+        if (layer.display === null) continue;
+        const values = contextLayers.get(layer.key)?.values ?? null;
+        list.push(opticalFrame(layer, contextDocument.grid.shape, values));
+      }
       for (const layer of contextDocument.surveys) {
         // Sin escala de contraste la capa no tiene pixeles validos: no hay cuadro que mostrar.
         if (layer.display === null) continue;
@@ -318,7 +382,15 @@ export function useViewerController(): ViewerController {
       );
     }
     return orderFrames(list);
-  }, [mode, contextDocument, contextLayers, sameGrid, entries, band, bandInfo]);
+  }, [mode, contextDocument, optical, contextLayers, sameGrid, entries, band, bandInfo]);
+
+  // Al entrar al viaje se arranca por la parada mas antigua (la placa de los
+  // anios 50, si el campo la tiene): se espera a saber que paradas hay.
+  if (mode === "journey" && !journeyStarted && journeyAvailable && !context.opticalPending) {
+    setJourneyStarted(true);
+    const first = journeyFrames[0];
+    if (first !== undefined && first.mission !== "SPHEREx") setJourneySurvey(first.id);
+  }
 
   const survey =
     journeySurvey === null
@@ -363,6 +435,56 @@ export function useViewerController(): ViewerController {
     [update],
   );
   const setJourneyPlaying = useCallback((next: boolean) => setJourneyPlayingState(next), []);
+
+  // Placa del DSS que se esta viendo en el viaje, y si el objeto del campo
+  // estaba fuera del campo en esa fecha (Barnard, en 1950 y en 1991).
+  const journeyPlate =
+    survey === null || survey.mission !== "DSS"
+      ? null
+      : (optical?.layers.find((layer) => layer.key === survey.id) ?? null);
+  const fieldCenter = contextDocument?.request ?? null;
+  const journeyOutside = useMemo<TargetOffset | null>(
+    () =>
+      journeyPlate === null ||
+      journeyPlate.target === null ||
+      fieldCenter === null ||
+      !targetOutsideField(journeyPlate)
+        ? null
+        : targetOffset(fieldCenter, journeyPlate.target),
+    [journeyPlate, fieldCenter],
+  );
+
+  // ---- Cortina visible/infrarrojo -------------------------------------------
+
+  const curtainOn = mode === "curtain";
+  const curtainValues =
+    curtainPlate === null ? null : (contextLayers.get(curtainPlate.key)?.values ?? null);
+  const curtainVisible = useMemo<JourneyFrame | null>(
+    () =>
+      !curtainOn || curtainPlate === null || contextShape === undefined
+        ? null
+        : opticalFrame(curtainPlate, contextShape, curtainValues),
+    [curtainOn, curtainPlate, contextShape, curtainValues],
+  );
+  const curtainEpoch = spherexView.displayed;
+  const curtainInfrared = useMemo<JourneyFrame | null>(() => {
+    if (!curtainOn) return null;
+    const entry = entries.find((item) => item.epoch.epoch === curtainEpoch);
+    if (entry === undefined) return null;
+    const image = entry.loaded?.image ?? null;
+    return spherexFrame({
+      epoch: entry.epoch,
+      detector: band,
+      waveRangeUm: [bandInfo?.waveMinUm ?? 0, bandInfo?.waveMaxUm ?? 0],
+      display: bandInfo?.display ?? null,
+      shape: image === null ? [1, 1] : [image.height, image.width],
+      values: image?.values ?? null,
+    });
+  }, [curtainOn, entries, curtainEpoch, band, bandInfo]);
+  const setCurtainPosition = useCallback(
+    (position: number) => setCurtainPositionState(clampCurtain(position)),
+    [],
+  );
 
   // ---- Reproductor --------------------------------------------------------
 
@@ -424,11 +546,13 @@ export function useViewerController(): ViewerController {
 
   const setMode = useCallback(
     (next: ViewMode) => {
-      // Sin contexto guardado el viaje no se puede elegir (el boton esta deshabilitado).
+      // Sin contexto el viaje no se puede elegir, ni la cortina sin placa optica
+      // (sus botones estan deshabilitados).
       if (next === "journey" && !journeyAvailable) return;
+      if (next === "curtain" && !curtainAvailable) return;
       update({ mode: next });
     },
-    [update, journeyAvailable],
+    [update, journeyAvailable, curtainAvailable],
   );
 
   // ---- Comparacion y estirado ---------------------------------------------
@@ -538,9 +662,20 @@ export function useViewerController(): ViewerController {
     frames: journeyFrames,
     currentId: journeyCurrentId,
     survey,
+    plate: journeyPlate,
+    outside: journeyOutside,
     playing: journeyPlaying && mode === "journey",
     select: selectJourneyFrame,
     setPlaying: setJourneyPlaying,
+  };
+  const curtain: CurtainControl = {
+    available: curtainAvailable,
+    plate: curtainPlate,
+    visible: curtainVisible,
+    infrared: curtainInfrared,
+    shape: contextShape ?? null,
+    position: curtainPosition,
+    setPosition: setCurtainPosition,
   };
   const gaia: GaiaControl = {
     status: context.status,
@@ -580,6 +715,7 @@ export function useViewerController(): ViewerController {
     setStretch,
     flags,
     journey,
+    curtain,
     gaia,
   };
 }

@@ -150,8 +150,8 @@ describe("parseUrlState", () => {
   });
 
   describe("mode", () => {
-    it("acepta los seis modos", () => {
-      for (const mode of ["blink", "difference", "sum", "redcyan", "hold", "journey"]) {
+    it("acepta los siete modos", () => {
+      for (const mode of ["blink", "difference", "sum", "redcyan", "hold", "journey", "curtain"]) {
         expect(parseUrlState(`?mode=${mode}`).mode).toBe(mode);
       }
     });

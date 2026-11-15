@@ -8,7 +8,7 @@
 //   ra, dec  centro del campo en grados ICRS (4 decimales, como normaliza el backend)
 //   fov      lado de la vista en grados: 0.0833 (5'), 0.1667 (10') o 0.5 (30')
 //   band     detector que se esta mirando, de 1 a 6
-//   mode     blink, difference, sum, redcyan, hold o journey
+//   mode     blink, difference, sum, redcyan, hold, journey o curtain
 //   epoch    epoca actual, desde 1 (opcional)
 //   ref      epoca de referencia (B) elegida a mano, desde 1 (opcional; sin
 //            ella el visor elige la mejor cubierta y mas lejana en fecha)
@@ -30,7 +30,15 @@ import { STRETCH_KINDS, type StretchKind } from "@/viewer/stretch";
  * viaje entre misiones (2MASS, WISE y las epocas de SPHEREx en orden de fecha;
  * solo en los campos con contexto guardado, en los demas cae a parpadeo).
  */
-export const VIEW_MODES = ["blink", "difference", "sum", "redcyan", "hold", "journey"] as const;
+export const VIEW_MODES = [
+  "blink",
+  "difference",
+  "sum",
+  "redcyan",
+  "hold",
+  "journey",
+  "curtain",
+] as const;
 
 export type ViewMode = (typeof VIEW_MODES)[number];
 

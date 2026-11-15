@@ -11,7 +11,8 @@
   min-width: 0;
 }
 
-.panel {
+.panel,
+.header {
   min-width: 0;
 }
 

@@ -268,6 +268,7 @@ describe("ViewerPage: celular", () => {
       "Rojo/cian",
       "Mantener apretado",
       "Viaje entre misiones",
+      "Cortina",
     ]);
 
     // Las seis bandas en una fila: el nombre solo a la vista, el rango para quien escucha.

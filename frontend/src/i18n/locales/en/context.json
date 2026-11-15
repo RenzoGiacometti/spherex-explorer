@@ -18,7 +18,9 @@
     "notSpherex": "Not a SPHEREx image",
     "frame": "{{mission}} {{band}}, {{date}}",
     "noImage": "No image for this date",
-    "target": "Expected position of the object"
+    "target": "Expected position of the object",
+    "outside": "In {{year}}, {{name}} was outside this field: {{distance}} to the {{direction}}. That is why it does not appear on this plate.",
+    "outsideObject": "the object of this field"
   },
   "gaia": {
     "title": "Gaia DR3",
@@ -32,8 +34,14 @@
     "layer": "Gaia DR3 sources with their proper motion: {{count}}",
     "toggle": "Gaia layer"
   },
-  "availability": {
-    "unavailable": "For now, context from other missions is only available for some precomputed fields.",
-    "error": "The context from other missions could not be loaded for this field."
+  "direction": {
+    "n": "north",
+    "ne": "northeast",
+    "e": "east",
+    "se": "southeast",
+    "s": "south",
+    "sw": "southwest",
+    "w": "west",
+    "nw": "northwest"
   }
 }

@@ -1,13 +1,15 @@
 // Textos de las paginas de desarrollo del contexto y como se registran.
 //
-// Los textos de los componentes (`MissionJourney`, `GaiaLayer`, `GaiaControls`)
-// estan en src/i18n/locales/<idioma>/context.json, registrados en
-// src/i18n/resources.ts: se leen con `useTranslation("context")` y sus claves
-// pasan por el tipado global de i18next.
+// Los textos de los componentes estan en src/i18n/locales/<idioma>/, registrados
+// en src/i18n/resources.ts: `context.json` (`MissionJourney`, `GaiaLayer`,
+// `GaiaControls`), `curtain.json` (`Curtain`, `OpticalCredit`) y
+// `objectCard.json` (`ObjectCard`). Se leen con `useTranslation(<namespace>)` y
+// sus claves pasan por el tipado global de i18next.
 //
-// Lo que queda aca es para la pagina de prueba (`context.devpage.tsx`): sus
-// textos van al lado (`contextDev.*.json`), no viajan en el sitio compilado y
-// se suman a i18next al cargar la pagina, con claves tipadas contra su JSON.
+// Lo que queda aca es para las paginas de prueba (`*.devpage.tsx`): sus textos
+// van al lado (`contextDev.*.json`, `cortinaDev.*.json`, `fichaDev.*.json`), no
+// viajan en el sitio compilado y se suman a i18next al cargar la pagina, con
+// claves tipadas contra su JSON.
 
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";

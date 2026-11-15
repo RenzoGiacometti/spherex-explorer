@@ -7,13 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { classNames, ImageTag } from "@/components";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatPercent } from "@/lib/format";
 import { DEFAULT_CONTRAST, DEFAULT_STRETCH, type StretchKind } from "@/viewer/stretch";
 import styles from "./Curtain.module.css";
-import curtainEn from "./curtain.en.json";
-import curtainEs from "./curtain.es.json";
 import {
   CURTAIN_STEPS,
   clampCurtain,
@@ -24,15 +23,8 @@ import {
 import { FrameCanvas, type FrameLayout } from "./FrameCanvas";
 import type { FrameImage } from "./journey";
 import type { PlateCredit } from "./optical";
-import { registerTexts, type Texts, useTexts } from "./texts";
 
-export const CURTAIN_NAMESPACE = "curtain";
-registerTexts(CURTAIN_NAMESPACE, { es: curtainEs, en: curtainEn });
-
-/** Textos de la cortina, para quien arma sus rotulos desde afuera. */
-export function useCurtainTexts(): Texts<typeof curtainEs> {
-  return useTexts<typeof curtainEs>(CURTAIN_NAMESPACE);
-}
+// Los textos estan en src/i18n/locales/<idioma>/curtain.json (namespace `curtain`).
 
 // Punto medio (U+00B7): separa el nombre de la mision de su dato.
 const SEPARATOR = String.fromCodePoint(0x00b7);
@@ -89,7 +81,7 @@ export function Curtain({
   children,
   className,
 }: CurtainProps) {
-  const t = useCurtainTexts();
+  const { t } = useTranslation("curtain");
   const language = useLanguage();
   const inputId = useId();
   const boxRef = useRef<HTMLDivElement | null>(null);
@@ -218,7 +210,7 @@ export interface OpticalCreditProps {
  * relevamiento.
  */
 export function OpticalCredit({ credit, className }: OpticalCreditProps) {
-  const t = useCurtainTexts();
+  const { t } = useTranslation("curtain");
   return (
     <p className={classNames(styles.credit, className)}>
       {t("credit", { plate: credit.plate, survey: credit.survey, owner: credit.owner })}

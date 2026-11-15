@@ -30,6 +30,7 @@ import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus } from "./SkySphere";
 import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
+import { ENTRY_SHORTCUTS, type EntryShortcut } from "./shortcuts";
 import { angularSeparation, clamp } from "./skyMath";
 import { pickRandomField, SKY_TARGETS } from "./targets";
 import { useSphereTexts } from "./texts";
@@ -116,8 +117,9 @@ export interface SpherePageProps {
 /**
  * Pantalla de entrada de la aplicacion: lo que se ve cuando la URL no trae
  * coordenadas (SPEC.md, Etapa 4). El cielo a pantalla completa, los cinco
- * objetos de prueba marcados, el buscador, el boton "Lugar al azar" y el que
- * inicia el recorrido guiado (src/features/guide). Elegir un
+ * objetos de prueba marcados, el buscador, el boton "Lugar al azar", el que
+ * inicia el recorrido guiado (src/features/guide) y, a su lado, dos accesos
+ * directos (shortcuts.ts): el viaje en el tiempo y la cortina. Elegir un
  * lugar acerca la camara al punto y abre su campo en el visor. En un telefono
  * suma la "ventana al cielo": la esfera sigue la direccion a la que apunta el
  * aparato.
@@ -262,6 +264,13 @@ export function SpherePage({
     // El vuelo necesita la vista con el norte arriba: el sensor deja de mandar.
     skyWindow.stop();
     openTarget(target);
+  }
+
+  /** Acceso directo: abre su campo en el modo que lo muestra mejor. */
+  function handleShortcut(shortcut: EntryShortcut): void {
+    skyWindow.stop();
+    search.reset();
+    void openPlace({ label: shortcut.label, patch: shortcut.patch });
   }
 
   function handleRandom(): void {
@@ -484,7 +493,22 @@ export function SpherePage({
               </QuickLinkList>
             )}
             {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
-            <GuideLauncher className={classNames(styles.action, styles.guide)} />
+            <div className={styles.shortcuts}>
+              <GuideLauncher className={classNames(styles.action, styles.guide)} />
+              {ENTRY_SHORTCUTS.map((shortcut) => (
+                <Button
+                  key={shortcut.id}
+                  className={styles.action}
+                  variant="ghost"
+                  icon={shortcut.icon}
+                  disabled={busy}
+                  data-shortcut={shortcut.id}
+                  onClick={() => handleShortcut(shortcut)}
+                >
+                  {t(`shortcuts.${shortcut.id}`)}
+                </Button>
+              ))}
+            </div>
             <div className={styles.searchRow}>
               <SearchField
                 className={styles.search}

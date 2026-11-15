@@ -1,14 +1,15 @@
 // Viaje entre misiones: los cuadros que recorre el control, en orden de fecha.
 //
-// Un cuadro es una imagen del mismo campo en la misma grilla: un recorte de
-// 2MASS o de WISE (capas del contexto) o una epoca de SPHEREx (un plano del
-// cubo). Funciones puras, sin DOM ni red.
+// Un cuadro es una imagen del mismo campo en la misma grilla: una placa del
+// Digitized Sky Survey (optical.ts), un recorte de 2MASS o de WISE (capas del
+// contexto) o una epoca de SPHEREx (un plano del cubo). Funciones puras, sin
+// DOM ni red.
 
 import type { GridShape } from "@/api/binary";
 import type { Display, Epoch } from "@/api/types";
 import type { SurveyLayer } from "./schema";
 
-export const MISSIONS = ["2MASS", "WISE", "SPHEREx"] as const;
+export const MISSIONS = ["DSS", "2MASS", "WISE", "SPHEREx"] as const;
 export type Mission = (typeof MISSIONS)[number];
 
 /** Imagen de un cuadro: un plano Float32 (fila 0 = sur, NaN sin datos) y su escala de contraste. */

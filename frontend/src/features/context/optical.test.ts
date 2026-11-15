@@ -21,6 +21,7 @@ import {
   opticalFrame,
   opticalLayerSchema,
   plateCredit,
+  targetOffset,
   targetOutsideField,
 } from "./optical";
 
@@ -135,6 +136,44 @@ describe("placas que entran al viaje", () => {
     expect(targetOutsideField(outside)).toBe(true);
     expect(targetOutsideField(inside)).toBe(false);
     expect(targetOutsideField(SECOND)).toBe(false);
+  });
+});
+
+describe("objeto fuera del campo en una placa vieja", () => {
+  it("da la distancia en minutos de arco y el rumbo desde el centro", () => {
+    // Barnard en 1950: unos 13 minutos al sur del centro del campo de 2026.
+    const south = targetOffset({ ra: 269.4463, dec: 4.7683 }, { ra: 269.4463, dec: 4.5516 });
+    expect(south.arcmin).toBeCloseTo(13.0, 1);
+    expect(south.direction).toBe("s");
+
+    const north = targetOffset({ ra: 10, dec: 0 }, { ra: 10, dec: 0.1 });
+    expect(north.arcmin).toBeCloseTo(6, 6);
+    expect(north.direction).toBe("n");
+  });
+
+  it("el este es hacia donde crece la ascension recta, achicada por el coseno de la declinacion", () => {
+    const east = targetOffset({ ra: 100, dec: 60 }, { ra: 100.2, dec: 60 });
+    // 0,2 grados de ascension recta a 60 grados de declinacion son 6 minutos en el cielo.
+    expect(east.arcmin).toBeCloseTo(6, 6);
+    expect(east.direction).toBe("e");
+    expect(targetOffset({ ra: 100, dec: 60 }, { ra: 99.8, dec: 60 }).direction).toBe("w");
+    expect(targetOffset({ ra: 100, dec: 0 }, { ra: 100.1, dec: -0.1 }).direction).toBe("se");
+  });
+
+  it("cruza el meridiano 0 por el camino corto", () => {
+    const across = targetOffset({ ra: 359.95, dec: 0 }, { ra: 0.05, dec: 0 });
+    expect(across.arcmin).toBeCloseTo(6, 6);
+    expect(across.direction).toBe("e");
+    const back = targetOffset({ ra: 0.05, dec: 0 }, { ra: 359.95, dec: 0 });
+    expect(back.arcmin).toBeCloseTo(6, 6);
+    expect(back.direction).toBe("w");
+  });
+
+  it("en el mismo punto no hay rumbo", () => {
+    expect(targetOffset({ ra: 50, dec: 20 }, { ra: 50, dec: 20 })).toEqual({
+      arcmin: 0,
+      direction: null,
+    });
   });
 });
 

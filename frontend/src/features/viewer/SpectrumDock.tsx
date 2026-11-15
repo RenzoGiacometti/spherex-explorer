@@ -21,11 +21,14 @@ export interface SpectrumDockProps {
   readonly onTabChange: (tab: SourceTab) => void;
   /** Banda que se ve en el visor: con ella abre la curva de luz, si ahi hay curva. */
   readonly band?: number | undefined;
+  /** Lo que va arriba de las pestanas: la ficha del objeto (features/context, `ObjectCard`). */
+  readonly header?: ReactNode;
 }
 
 /**
  * Panel de la fuente elegida en el visor. Se abre con un clic sobre la imagen
- * (useSpectrum.ts) y tiene dos pestanas, que hablan de la misma fuente:
+ * (useSpectrum.ts). Arriba va la ficha del objeto (`header`), si el campo tiene
+ * contexto, y debajo dos pestanas, que hablan de la misma fuente:
  *
  * Espectro, que pasa por tres estados:
  *
@@ -46,7 +49,7 @@ export interface SpectrumDockProps {
  * hay un boton para cerrar el panel, y Escape tambien lo cierra. Cerrado no
  * dibuja nada.
  */
-export function SpectrumDock({ spectrum, tab, onTabChange, band }: SpectrumDockProps) {
+export function SpectrumDock({ spectrum, tab, onTabChange, band, header }: SpectrumDockProps) {
   const { t } = useTranslation("spectrum");
   const { t: tCurve } = useTranslation("lightcurve");
   const { t: tViewer } = useTranslation("viewer");
@@ -221,6 +224,11 @@ export function SpectrumDock({ spectrum, tab, onTabChange, band }: SpectrumDockP
       data-lightcurve={lightcurveStatus}
       onKeyDown={handleKeyDown}
     >
+      {header === undefined || header === null ? null : (
+        <div className={styles.header} data-source-card="">
+          {header}
+        </div>
+      )}
       <div className={styles.tabs} role="tablist" aria-label={tViewer("source.tabs")}>
         {TABS.map((id) => (
           <button

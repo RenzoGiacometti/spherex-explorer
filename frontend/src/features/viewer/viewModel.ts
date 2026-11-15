@@ -204,8 +204,9 @@ function single(entry: BandPlane | undefined): Composition | null {
 /** Decide que se ve. */
 export function deriveView(selection: ViewSelection): ViewModel {
   const { entries } = selection;
-  // El viaje entre misiones muestra las epocas de SPHEREx de a una, como el parpadeo.
-  const mode = selection.mode === "journey" ? "blink" : selection.mode;
+  // El viaje entre misiones y la cortina muestran las epocas de SPHEREx de a una, como el parpadeo.
+  const mode =
+    selection.mode === "journey" || selection.mode === "curtain" ? "blink" : selection.mode;
   const find = (epoch: number | null): BandPlane | undefined =>
     epoch === null ? undefined : entries.find((entry) => epochOf(entry) === epoch);
   const withImage = entries.filter(hasImage);

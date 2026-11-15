@@ -107,6 +107,22 @@
   padding: var(--space-sm) 0;
 }
 
+/*
+ * Dentro de `stage`, la parte donde se encuadra la imagen: es lo que mide
+ * ViewerPage. Debajo puede ir el pie de una placa del DSS (su credito), que le
+ * saca lugar para quedar siempre debajo de la imagen. En el modo `curtain` la
+ * cortina se dibuja aca adentro.
+ */
+.frame {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+  min-height: 0;
+}
+
 .dock {
   grid-area: dock;
 }
@@ -209,6 +225,20 @@
 .page[data-layout="phone"] .stage,
 .page[data-layout="embed"] .stage {
   padding: 0;
+}
+
+/*
+ * En el celular la zona de la imagen es chica. La cortina es la imagen y el
+ * control a la vez, asi que se le da un cuadrado de casi todo el ancho; con el
+ * pie de una placa del viaje, la zona crece lo que ocupa el pie. Si no entra
+ * todo, la pagina se desplaza.
+ */
+.page[data-layout="phone"][data-mode="curtain"] {
+  grid-template-rows: auto minmax(min(100vw, 50vh), 1fr) auto;
+}
+
+.page[data-layout="phone"][data-plate] {
+  grid-template-rows: auto minmax(240px, 1fr) auto;
 }
 
 .thumb {

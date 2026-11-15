@@ -31,5 +31,9 @@
       "locationFailed": "No se pudo obtener la ubicación."
     }
   },
-  "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC"
+  "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC",
+  "shortcuts": {
+    "journey": "Viaje en el tiempo",
+    "curtain": "Visible contra infrarrojo"
+  }
 }

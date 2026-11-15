@@ -18,7 +18,9 @@
     "notSpherex": "No es una imagen de SPHEREx",
     "frame": "{{mission}} {{band}}, {{date}}",
     "noImage": "Sin imagen para esta fecha",
-    "target": "Posición esperada del objeto"
+    "target": "Posición esperada del objeto",
+    "outside": "En {{year}}, {{name}} estaba fuera de este campo: a {{distance}} hacia el {{direction}}. Por eso no aparece en esta placa.",
+    "outsideObject": "el objeto de este campo"
   },
   "gaia": {
     "title": "Gaia DR3",
@@ -32,8 +34,14 @@
     "layer": "Fuentes de Gaia DR3 con su movimiento propio: {{count}}",
     "toggle": "Capa de Gaia"
   },
-  "availability": {
-    "unavailable": "Por ahora solo hay contexto de otras misiones para algunos campos precalculados.",
-    "error": "No se pudo cargar el contexto de otras misiones de este campo."
+  "direction": {
+    "n": "norte",
+    "ne": "noreste",
+    "e": "este",
+    "se": "sureste",
+    "s": "sur",
+    "sw": "suroeste",
+    "w": "oeste",
+    "nw": "noroeste"
   }
 }

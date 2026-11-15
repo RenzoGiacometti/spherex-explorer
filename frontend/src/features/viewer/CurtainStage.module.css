@@ -1,0 +1,74 @@
+/*
+ * Cortina visible/infrarrojo y pie de las placas del DSS, en la zona libre del
+ * visor. Solo tokens.
+ */
+
+/*
+ * La cortina ocupa la zona libre entera y se centra en ella. La zona es un
+ * contenedor con medidas: de ahi sale el lado del cuadrado.
+ */
+.box {
+  --curtain-credit-room: calc(
+    var(--type-body-sm-size) *
+    var(--type-body-sm-line-height) *
+    2 +
+    var(--space-xs)
+  );
+
+  position: absolute;
+  inset: 0;
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+/*
+ * El cuadrado mas grande que entra dejando lugar al credito debajo. El alto
+ * sale de la proporcion de la grilla, que pone el componente.
+ */
+.box .curtain {
+  flex: none;
+  width: min(100cqw, calc(100cqh - var(--curtain-credit-room)));
+  pointer-events: auto;
+}
+
+/* Credito de la placa: siempre debajo de la imagen, centrado y legible sobre el negro. */
+.box .credit,
+.caption .credit {
+  max-width: 100%;
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-mute);
+  text-align: center;
+  pointer-events: auto;
+}
+
+/*
+ * Pie de una placa en el viaje: debajo de la zona donde se encuadra la imagen.
+ * Lleva fondo de vidrio porque, acercada, la imagen pasa por detras.
+ */
+.caption {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  gap: var(--space-xs);
+  max-width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--color-glass-solid);
+}
+
+.caption .credit {
+  margin: 0;
+}
+
+.outside {
+  max-width: 64ch;
+  pointer-events: auto;
+}
