@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { DevPageHost } from "@/dev/DevPageHost";
 import { EntryPlaceholder } from "@/features/entry/EntryPlaceholder";
 import { ViewerPlaceholder } from "@/features/viewer/ViewerPlaceholder";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
@@ -16,6 +17,12 @@ export function App() {
   useEffect(() => {
     void setLanguage(urlLanguage ?? detectLanguage("", browserLanguages()));
   }, [urlLanguage]);
+
+  // Solo con `pnpm dev`: `/?dev=<id>` abre una pagina de desarrollo (src/dev/devPages.ts).
+  const devPage = import.meta.env.DEV
+    ? new URLSearchParams(window.location.search).get("dev")
+    : null;
+  if (devPage) return <DevPageHost id={devPage} />;
 
   return showViewer ? <ViewerPlaceholder /> : <EntryPlaceholder />;
 }
