@@ -156,8 +156,13 @@ class FieldEntry:
 
 
 def object_alias(name: str) -> str:
-    """Alias corto de un nombre de catalogo: `NAME Luhman 16` da `luhman-16`, `V* R Dra` da `r-dra`."""
-    text = re.sub(r"^(NAME|V\*|\*\*?|EM\*|HD|GJ)\s+", "", name.strip(), flags=re.IGNORECASE) or name
+    """Alias corto de un nombre de catalogo: `NAME Luhman 16` da `luhman-16`, `V* R Dra` da `r-dra`.
+
+    Se quitan solo los prefijos de tipo de SIMBAD (`NAME`, `V*`, `*`, `**`,
+    `EM*`), que no son parte del nombre. Una sigla de catalogo se conserva:
+    `HD 33793` da `hd-33793`, porque el numero solo no dice nada.
+    """
+    text = re.sub(r"^(NAME|V\*|\*\*?|EM\*)\s+", "", name.strip(), flags=re.IGNORECASE) or name
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-") or "campo"
 
 
