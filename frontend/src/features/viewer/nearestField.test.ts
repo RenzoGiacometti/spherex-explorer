@@ -47,14 +47,14 @@ describe("nearestField", () => {
     expect(nearestField({ ra: 10, dec: 0 }, [{ ra: 10, dec: 0 }])).toBeNull();
   });
 
-  it("cerca de M 42 ofrece M 42, y desde M 42, M 1", () => {
+  it("cerca de M 42 ofrece M 42, y desde M 42, 2MASS J0415-0935", () => {
     // Un punto a 6 minutos de arco al norte del centro de M 42.
     const near = nearestField({ ra: 83.8201, dec: -5.2876 }, PRECOMPUTED_OBJECTS);
     expect(near?.field.id).toBe("m-42");
     expect(near?.distanceDeg).toBeCloseTo(0.1, 6);
-    // Desde el campo guardado de M 42 el mas cercano es otro: M 1, a 27,4 grados.
+    // Desde el campo guardado de M 42 el mas cercano es otro: 2MASS J0415-0935, a 20,2 grados.
     const other = nearestField({ ra: 83.8201, dec: -5.3876 }, PRECOMPUTED_OBJECTS);
-    expect(other?.field.id).toBe("m-1");
-    expect(other?.distanceDeg).toBeCloseTo(27.4, 1);
+    expect(other?.field.id).toBe("2mass-0415");
+    expect(other?.distanceDeg).toBeCloseTo(20.2, 1);
   });
 });
