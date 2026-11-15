@@ -3,6 +3,9 @@
 //
 // No va en el store del campo: es de la pantalla del visor y se descarta al
 // cambiar de campo. Un pedido nuevo cancela el anterior.
+//
+// Si el backend ajusto el clic a una fuente guardada del campo, el punto que
+// queda marcado sobre la imagen es el de la fuente (spectrumClick.ts).
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ApiErrorCode, isAbortError, isApiError } from "@/api/errors";
@@ -11,7 +14,12 @@ import { selectTargetPosition } from "@/data/selectors";
 import { fetchSpectrum, type SpectrumDocument } from "@/features/spectrum";
 import { useFieldStore } from "@/state/fieldStore";
 import type { ImageClick } from "@/viewer/ImageViewer";
-import { type SpectrumPoint, spectrumPointForClick } from "./spectrumClick";
+import {
+  type SpectrumPoint,
+  snapPointToSource,
+  spectrumPointForClick,
+  spectrumPointForSky,
+} from "./spectrumClick";
 
 export type SpectrumRequestState =
   | { readonly status: "idle" }
@@ -33,6 +41,8 @@ export interface SpectrumController {
   readonly state: SpectrumRequestState;
   /** Pide el espectro del punto de la imagen donde cayo un clic. */
   requestAt(click: ImageClick): void;
+  /** Pide el espectro de una posicion del cielo (grados ICRS) del campo abierto. */
+  requestPosition(position: { readonly ra: number; readonly dec: number }): void;
   /** Vuelve a pedir el mismo punto, despues de un error. */
   retry(): void;
   /** Cierra el panel y cancela el pedido en camino. */
@@ -73,7 +83,9 @@ export function useSpectrum(shownEpoch: number | null): SpectrumController {
     setState({ status: "loading", point });
     fetchSpectrum(point.query, { signal: request.signal }).then(
       (spectrum) => {
-        if (!request.signal.aborted) setState({ status: "ready", point, spectrum });
+        if (request.signal.aborted) return;
+        const grid = useFieldStore.getState().meta?.grid ?? null;
+        setState({ status: "ready", point: snapPointToSource(point, spectrum, grid), spectrum });
       },
       (error: unknown) => {
         if (request.signal.aborted || isAbortError(error)) return;
@@ -108,6 +120,16 @@ export function useSpectrum(shownEpoch: number | null): SpectrumController {
     [run, shownEpoch],
   );
 
+  const requestPosition = useCallback(
+    (position: { readonly ra: number; readonly dec: number }): void => {
+      const store = useFieldStore.getState();
+      const grid = store.meta?.grid;
+      if (store.fieldId === null || grid === undefined) return;
+      run(spectrumPointForSky({ ...position, grid, fieldId: store.fieldId }));
+    },
+    [run],
+  );
+
   const retry = useCallback((): void => {
     if (state.status === "error") run(state.point);
   }, [run, state]);
@@ -118,5 +140,5 @@ export function useSpectrum(shownEpoch: number | null): SpectrumController {
     setState(IDLE);
   }, []);
 
-  return { state, requestAt, retry, close };
+  return { state, requestAt, requestPosition, retry, close };
 }

@@ -18,7 +18,9 @@ export interface SpectrumDockProps {
  * - cargando: medir cientos de recortes lleva segundos, y se dice;
  * - error: la frase sale del namespace `errors` a partir del codigo, con un
  *   boton para reintentar si tiene sentido;
- * - listo: el panel de espectro (features/spectrum), con sus avisos arriba.
+ * - listo: el panel de espectro (features/spectrum), con sus avisos arriba. Si
+ *   el campo solo tiene espectros guardados y el punto no esta cerca de
+ *   ninguno, el panel lo explica y ofrece pedir la fuente mas cercana.
  *
  * En los tres hay un boton para cerrarlo, y Escape tambien lo cierra. Cerrado
  * no dibuja nada.
@@ -27,7 +29,7 @@ export function SpectrumDock({ spectrum }: SpectrumDockProps) {
   const { t } = useTranslation("spectrum");
   const { t: tErrors } = useTranslation("errors");
   const language = useLanguage();
-  const { state, close, retry } = spectrum;
+  const { state, close, retry, requestPosition } = spectrum;
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   // Cada pedido lo trae a la vista: en una ventana angosta queda debajo de la imagen.
@@ -55,6 +57,7 @@ export function SpectrumDock({ spectrum }: SpectrumDockProps) {
         spectrum={state.spectrum}
         name={state.point.name ?? undefined}
         onClose={close}
+        onRequestPosition={requestPosition}
       />
     );
   } else {

@@ -3,6 +3,7 @@
     "title": "Spectrum",
     "summary": "{{points}} points · {{epochs}} epochs",
     "unnamed": "Point on the sky",
+    "savedSource": "Saved source of the field",
     "close": "Close the spectrum",
     "source": {
       "precomputed": "Precomputed",
@@ -13,6 +14,11 @@
     "saturatedBodyNoCount": "The source is too bright for SPHEREx: its centre was saturated and no exposure gave a valid measurement. No spectrum is shown, to avoid giving false numbers.",
     "emptyTitle": "No valid measurements at this point",
     "emptyBody": "None of the {{n}} exposures gave a clean measurement: there were discarded pixels inside the aperture.",
+    "noSourceTitle": "No saved spectrum for this point",
+    "noSourceBody": "This field only has saved spectra of its {{n}} brightest sources, and the chosen point is not near any of them.",
+    "noSourceBodyNoCount": "This field only has saved spectra of its brightest sources, and the chosen point is not near any of them.",
+    "noSourceNearest": "The nearest one is {{offset}} from this point.",
+    "noSourceShow": "Show the nearest source",
     "footnote": "Aperture photometry on each exposure: {{radius}} radius, background from an annulus, no aperture correction. Each exposure sees the object at a different wavelength and on a different date."
   },
   "chart": {
@@ -57,6 +63,7 @@
     "unsupported": "This browser cannot play sound."
   },
   "notice": {
+    "snapped": "This spectrum belongs to the nearest saved source, {{offset}} from the chosen point.",
     "saturated": "Saturated source in {{bands}}: {{n}} of {{total}} exposures could not be measured.",
     "saturatedNoCount": "Saturated source in {{bands}}: its centre has no valid measurement.",
     "offset": "In {{bands}} the measured light is offset {{offset}} from the object: another source is inside the aperture and those points mostly belong to it.",

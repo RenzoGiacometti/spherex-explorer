@@ -25,7 +25,12 @@ export {
   type MoleculeId,
 } from "./molecules";
 export { SpectrumChart, type SpectrumChartProps } from "./SpectrumChart";
-export { formatBandList, SpectrumPanel, type SpectrumPanelProps } from "./SpectrumPanel";
+export {
+  formatBandList,
+  SNAP_NOTICE_MIN_ARCSEC,
+  SpectrumPanel,
+  type SpectrumPanelProps,
+} from "./SpectrumPanel";
 export {
   buildSoundPlan,
   canPlaySound,
@@ -40,6 +45,7 @@ export {
   type SpectrumBin,
   type SpectrumDetector,
   type SpectrumDocument,
+  type SpectrumNearest,
   type SpectrumPoint,
   type SpectrumStatus,
   type SpectrumWarning,

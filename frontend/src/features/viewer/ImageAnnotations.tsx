@@ -69,9 +69,10 @@ export interface ImageAnnotationsProps {
   readonly overlay: ViewerOverlay;
   readonly controller: ViewerController;
   /**
-   * Punto del que se pidio el espectro, en pixeles de imagen, con el radio de
-   * la apertura si ya se conoce. null si no hay ninguno o si es el objeto
-   * buscado, que ya tiene su mira.
+   * Punto medido para el espectro, en pixeles de imagen, con el radio de la
+   * apertura si ya se conoce: el del clic o, si el espectro se ajusto a una
+   * fuente guardada del campo, el de esa fuente. null si no hay ninguno o si
+   * es el objeto buscado, que ya tiene su mira.
    */
   readonly spectrumMark?: SpectrumMark | null | undefined;
 }

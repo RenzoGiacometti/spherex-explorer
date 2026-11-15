@@ -2,6 +2,13 @@
   "title": "Panel de espectro",
   "intro": "Página de prueba de la Etapa 2. Muestra el panel con los espectros precalculados de los cinco objetos de prueba, sin el visor.",
   "object": "Objeto",
+  "example": "Caso",
+  "examples": {
+    "plain": "Tal cual",
+    "snapped": "Ajustado a una fuente guardada",
+    "noSource": "Sin fuente guardada cerca"
+  },
+  "exampleNote": "Los dos últimos casos se arman a mano sobre el documento elegido, con la forma de la respuesta de /api/spectrum en un campo precalculado.",
   "live": "Pedir al backend (/api/spectrum)",
   "source": {
     "fixture": "Datos precalculados guardados en el repositorio.",

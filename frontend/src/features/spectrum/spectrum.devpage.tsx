@@ -6,6 +6,10 @@
 // el mismo punto al backend, para probar la ruta de punta a punta:
 //   uv run uvicorn app.spectrum.server:app --port 8000
 //
+// "Caso" arma a mano, sobre el documento elegido, las dos respuestas propias de
+// un campo precalculado: el clic ajustado a una fuente guardada (aviso
+// `snapped_source`) y el clic sin fuente guardada cerca (`status: "no_source"`).
+//
 // Los textos de la pagina estan al lado (spectrumDev.es.json y .en.json) y se
 // registran al cargar este modulo: no viajan en el sitio compilado.
 
@@ -46,6 +50,46 @@ const SAMPLES = [
 
 type SampleId = (typeof SAMPLES)[number]["id"];
 
+const EXAMPLES = ["plain", "snapped", "noSource"] as const;
+
+type ExampleId = (typeof EXAMPLES)[number];
+
+/** Distancias de ejemplo, en segundos de arco: clic ajustado y fuente mas cercana. */
+const EXAMPLE_SNAP_ARCSEC = 14.3;
+const EXAMPLE_NEAREST_ARCSEC = 96.4;
+const EXAMPLE_SAVED_SOURCES = 20;
+
+/** El documento con la forma del caso elegido; pasa por `parseSpectrum`, como una respuesta. */
+function asExample(spectrum: SpectrumDocument, example: ExampleId): SpectrumDocument {
+  const { ra, dec } = spectrum.target;
+  if (example === "snapped") {
+    return parseSpectrum({
+      ...spectrum,
+      source: "precomputed",
+      target: { ...spectrum.target, name: null },
+      warnings: [
+        ...spectrum.warnings,
+        { code: "snapped_source", ra, dec, offset_arcsec: EXAMPLE_SNAP_ARCSEC },
+      ],
+    });
+  }
+  if (example === "noSource") {
+    return parseSpectrum({
+      ...spectrum,
+      status: "no_source",
+      target: { ...spectrum.target, name: null, motion: null, track: [] },
+      epochs: [],
+      detectors: [],
+      points: [],
+      binned: [],
+      warnings: [],
+      nearest: { ra, dec, offset_arcsec: EXAMPLE_NEAREST_ARCSEC },
+      saved_sources: EXAMPLE_SAVED_SOURCES,
+    });
+  }
+  return spectrum;
+}
+
 // Se cargan a pedido y sin tipo: pasan por `parseSpectrum`, como la respuesta del backend.
 const fixtures = import.meta.glob<{ default: unknown }>("./fixtures/*.json");
 
@@ -70,6 +114,7 @@ function SpectrumDevPage() {
   const language = useLanguage();
   const [sample, setSample] = useState<SampleId>("wise0855");
   const [live, setLive] = useState(false);
+  const [example, setExample] = useState<ExampleId>("plain");
   const [loaded, setLoaded] = useState<Loaded>({ state: "loading" });
 
   useEffect(() => {
@@ -105,6 +150,9 @@ function SpectrumDevPage() {
     };
   }, [sample, live]);
 
+  // Lo que se muestra: el documento cargado, con la forma del caso elegido.
+  const shown = loaded.state === "ready" ? asExample(loaded.spectrum, example) : null;
+
   return (
     <div className={styles.page}>
       <header className={styles.topBar}>
@@ -124,16 +172,22 @@ function SpectrumDevPage() {
           />
           <Toggle label={t("live")} checked={live} onChange={setLive} />
           <p className={styles.note}>{live ? t("source.live") : t("source.fixture")}</p>
-          {loaded.state === "ready" ? (
+          <SegmentedControl
+            label={t("example")}
+            showLabel
+            options={EXAMPLES.map((id) => ({ value: id, label: t(`examples.${id}`) }))}
+            value={example}
+            onChange={setExample}
+            columns={3}
+          />
+          <p className={styles.note}>{t("exampleNote")}</p>
+          {shown === null ? null : (
             <DataGroup>
-              <DataRow label={t("status")} value={loaded.spectrum.status} />
-              <DataRow
-                label={t("exposures")}
-                value={formatInteger(loaded.spectrum.provenance.n_exposures)}
-              />
-              <DataRow label={t("points")} value={formatInteger(loaded.spectrum.points.length)} />
+              <DataRow label={t("status")} value={shown.status} />
+              <DataRow label={t("exposures")} value={formatInteger(shown.provenance.n_exposures)} />
+              <DataRow label={t("points")} value={formatInteger(shown.points.length)} />
             </DataGroup>
-          ) : null}
+          )}
         </GlassPanel>
         {loaded.state === "loading" ? <p className={styles.note}>{t("loading")}</p> : null}
         {loaded.state === "error" ? (
@@ -141,7 +195,13 @@ function SpectrumDevPage() {
             {t("error", { reason: loaded.reason })}
           </p>
         ) : null}
-        {loaded.state === "ready" ? <SpectrumPanel spectrum={loaded.spectrum} /> : null}
+        {shown === null ? null : (
+          <SpectrumPanel
+            spectrum={shown}
+            // La fuente mas cercana del ejemplo es el objeto elegido: se la muestra ajustada.
+            onRequestPosition={() => setExample("snapped")}
+          />
+        )}
       </main>
     </div>
   );

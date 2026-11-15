@@ -3,6 +3,7 @@
     "title": "Espectro",
     "summary": "{{points}} puntos · {{epochs}} épocas",
     "unnamed": "Punto del cielo",
+    "savedSource": "Fuente guardada del campo",
     "close": "Cerrar el espectro",
     "source": {
       "precomputed": "Precalculado",
@@ -13,6 +14,11 @@
     "saturatedBodyNoCount": "La fuente es demasiado brillante para SPHEREx: su centro quedó saturado y ninguna exposición dejó una medición válida. No se muestra un espectro para no dar números falsos.",
     "emptyTitle": "No hay mediciones válidas en este punto",
     "emptyBody": "Ninguna de las {{n}} exposiciones dejó una medición limpia: había píxeles descartados dentro de la apertura.",
+    "noSourceTitle": "No hay un espectro guardado para este punto",
+    "noSourceBody": "En este campo solo hay espectros guardados de sus {{n}} fuentes más brillantes, y el punto elegido no está cerca de ninguna.",
+    "noSourceBodyNoCount": "En este campo solo hay espectros guardados de sus fuentes más brillantes, y el punto elegido no está cerca de ninguna.",
+    "noSourceNearest": "La más cercana está a {{offset}} de este punto.",
+    "noSourceShow": "Ver la fuente más cercana",
     "footnote": "Fotometría de apertura sobre cada exposición: radio de {{radius}}, fondo en un anillo, sin corrección de apertura. Cada exposición ve el objeto en otra longitud de onda y en otra fecha."
   },
   "chart": {
@@ -57,6 +63,7 @@
     "unsupported": "Este navegador no puede reproducir sonido."
   },
   "notice": {
+    "snapped": "Este espectro es el de la fuente guardada más cercana, a {{offset}} del punto elegido.",
     "saturated": "Fuente saturada en {{bands}}: {{n}} de {{total}} exposiciones no se pudieron medir.",
     "saturatedNoCount": "Fuente saturada en {{bands}}: su centro no tiene medición válida.",
     "offset": "En {{bands}} la luz medida está corrida {{offset}} del objeto: hay otra fuente dentro de la apertura y esos puntos son sobre todo de ella.",

@@ -2,7 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { type GridWcs, separationArcsec } from "@/lib/wcs";
 import { imageToScreen, screenToImage, type ViewTransform } from "@/viewer/view";
-import { isOnTarget, spectrumPointForClick } from "./spectrumClick";
+import {
+  isOnTarget,
+  snapPointToSource,
+  spectrumPointForClick,
+  spectrumPointForSky,
+} from "./spectrumClick";
 
 // Grilla, /resolve y /track de los ejemplos de docs/contrato-cubo.md (Barnard).
 const GRID: GridWcs = {
@@ -119,5 +124,67 @@ describe("spectrumPointForClick", () => {
       false,
     );
     expect(isOnTarget({ x: 97.3, y: 96.0, scale: 4 }, null)).toBe(false);
+  });
+});
+
+describe("snapPointToSource", () => {
+  // Un clic suelto y una fuente guardada a 3 px al oeste y 2 al norte de el.
+  const click = spectrumPointForClick({
+    x: 120,
+    y: 60,
+    scale: 4,
+    grid: GRID,
+    fieldId: FIELD,
+    name: null,
+    target: null,
+    resolved: null,
+  });
+  const source = spectrumPointForSky({
+    ...spectrumPointForClick({
+      x: 123,
+      y: 62,
+      scale: 4,
+      grid: GRID,
+      fieldId: FIELD,
+      name: null,
+      target: null,
+      resolved: null,
+    }).query,
+    grid: GRID,
+    fieldId: FIELD,
+  });
+  const target = { ra: source.query.ra, dec: source.query.dec };
+  const snapped = { code: "snapped_source", ...target, offset_arcsec: 22.2 };
+
+  it("una posicion del cielo vuelve al pixel del que salio", () => {
+    expect(source.query.field).toBe(FIELD);
+    expect(source.name).toBeNull();
+    expect(source.pixel?.x).toBeCloseTo(123, 6);
+    expect(source.pixel?.y).toBeCloseTo(62, 6);
+  });
+
+  it("con snapped_source el anillo pasa al pixel de la fuente", () => {
+    const point = snapPointToSource(click, { target, warnings: [snapped] }, GRID);
+    expect(point.pixel?.x).toBeCloseTo(123, 6);
+    expect(point.pixel?.y).toBeCloseTo(62, 6);
+    // El pedido sigue siendo el del clic: es lo que se reintenta.
+    expect(point.query).toEqual(click.query);
+  });
+
+  it("si el aviso no trae posicion vale la de target", () => {
+    const point = snapPointToSource(
+      click,
+      { target, warnings: [{ code: "snapped_source" }] },
+      GRID,
+    );
+    expect(point.pixel?.x).toBeCloseTo(123, 6);
+    expect(point.pixel?.y).toBeCloseTo(62, 6);
+  });
+
+  it("sin el aviso, sin grilla o sobre la mira, el punto queda como estaba", () => {
+    expect(snapPointToSource(click, { target, warnings: [] }, GRID)).toBe(click);
+    expect(snapPointToSource(click, { target, warnings: [snapped] }, null)).toBe(click);
+    const onTarget = { ...click, name: "Barnard's Star", pixel: null };
+    expect(snapPointToSource(onTarget, { target, warnings: [snapped] }, GRID)).toBe(onTarget);
   });
 });

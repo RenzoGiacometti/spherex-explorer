@@ -2,6 +2,13 @@
   "title": "Spectrum panel",
   "intro": "Stage 2 test page. Shows the panel with the precomputed spectra of the five test objects, without the viewer.",
   "object": "Object",
+  "example": "Case",
+  "examples": {
+    "plain": "As is",
+    "snapped": "Snapped to a saved source",
+    "noSource": "No saved source nearby"
+  },
+  "exampleNote": "The last two cases are built by hand on top of the chosen document, with the shape of the /api/spectrum response in a precomputed field.",
   "live": "Ask the backend (/api/spectrum)",
   "source": {
     "fixture": "Precomputed data stored in the repository.",

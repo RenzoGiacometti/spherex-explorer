@@ -57,6 +57,10 @@ const epochSchema = z.object({
 // `saturated_source` tiene la forma del aviso del campo (docs/contrato-cubo.md,
 // seccion 5): `ra`, `dec`, `radius_arcsec`, `epochs` y `detectors`. El espectro
 // puede sumarle `n_exposures` y `n_total` (exposiciones saturadas y medidas).
+//
+// `snapped_source` dice que el espectro es el de una fuente guardada del campo
+// y no el del punto pedido: trae `ra` y `dec` de la fuente y, en
+// `offset_arcsec`, la distancia entre el punto pedido y ella.
 const warningSchema = z.object({
   code: z.string(),
   ra: z.number().optional(),
@@ -71,10 +75,24 @@ const warningSchema = z.object({
 
 const range = z.tuple([z.number(), z.number()]);
 
+/** Fuente guardada mas cercana al punto pedido, con su distancia a el. */
+const nearestSchema = z.object({
+  ra: z.number(),
+  dec: z.number(),
+  offset_arcsec: z.number(),
+});
+
 export const spectrumSchema = z.object({
   version: z.number().int(),
-  status: z.enum(["ok", "partial", "saturated", "empty"]),
+  // `no_source`: el campo solo tiene espectros guardados de sus fuentes mas
+  // brillantes y el punto pedido no esta cerca de ninguna. No es un error:
+  // llega sin puntos, con `nearest` y `saved_sources`.
+  status: z.enum(["ok", "partial", "saturated", "empty", "no_source"]),
   source: z.enum(["precomputed", "computed"]).optional(),
+  /** Solo con `no_source`: la fuente guardada mas cercana, o null si no hay. */
+  nearest: nearestSchema.nullable().optional(),
+  /** Solo con `no_source`: cuantas fuentes del campo tienen espectro guardado. */
+  saved_sources: z.number().int().optional(),
   target: z.object({
     name: z.string().nullable(),
     ra: z.number(),
@@ -123,6 +141,7 @@ export type SpectrumPoint = z.infer<typeof pointSchema>;
 export type SpectrumBin = z.infer<typeof binSchema>;
 export type SpectrumDetector = z.infer<typeof detectorSchema>;
 export type SpectrumWarning = z.infer<typeof warningSchema>;
+export type SpectrumNearest = z.infer<typeof nearestSchema>;
 export type SpectrumStatus = SpectrumDocument["status"];
 
 /** Valida un documento de espectro. Lanza `ZodError` si no cumple el formato. */
