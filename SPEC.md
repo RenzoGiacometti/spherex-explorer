@@ -20,7 +20,7 @@ Las coordenadas de WISE 0855 son las de 2010. Se mueve 8,1" por año: en la épo
 - WCS-WAVE es una tabla de consulta por detector: resultó idéntica en todas las exposiciones de un mismo detector, y lo único que cambia por recorte son `CRPIX1W` y `CRPIX2W` en el encabezado de IMAGE. **[VERIFICAR]** que también vale entre versiones de procesamiento (se comprobó solo con `l2b-v27`).
 - Bits de FLAGS documentados en el encabezado de la extensión FLAGS (`MSKNnnnn`, `MSKDnnnn`), 23 en total: TRANSIENT, OVERFLOW, SUR_ERROR, NONFUNC, DICHROIC, MISSING_DATA, HOT, COLD, FULLSAMPLE, PHANMISS, NONLINEAR, PERSIST, OUTLIER, CROSSTALK, SOURCE, GHOST, GHOST_FPA, GHOST_EXT, STREAK, BLOOM, SNOWBALL, HALO, SATELLITE_HALO. No todos los archivos declaran los mismos: sobre 2242 recortes, SNOWBALL (bit 27) falta en 87 y SATELLITE_HALO (bit 29) aparece solo en 6. El número de bit de cada nombre es el mismo en todos. Siempre leer el bit por nombre desde el encabezado de cada archivo.
 - Máscara por defecto: los flags del aviso `CONTAINS_BAD_PIXEL` del suplemento explicativo, que es la lista del tutorial oficial de fotometría: todos menos FULLSAMPLE, PHANMISS, OUTLIER y SOURCE. SOURCE marca píxeles de fuentes conocidas: no enmascararlo.
-- Las estrellas brillantes saturan. Barnard queda con el núcleo enmascarado (un hueco de 15" a 30") en los seis detectores; R Draconis, con uno de 40" a 90" en todas las épocas y detectores; RW Aurigae satura a medias de D2 a D6. Epsilon Indi B y WISE 0855 no saturan. Los flags que marcan el hueco son BLOOM (97,6 % del núcleo) y OVERFLOW (59,5 %); una cuarta parte de esos píxeles trae `NaN` en IMAGE.
+- Las estrellas brillantes saturan. Barnard queda con el núcleo enmascarado (un hueco de 15" a 30") en los seis detectores; R Draconis, con uno de 40" a 90" en todas las épocas y detectores; RW Aurigae satura a medias de D2 a D6 y, en exposiciones individuales, también en D1: 37 de sus 56 exposiciones de D1 tienen la apertura saturada y otra está enmascarada, así que quedan 18 medidas válidas. Epsilon Indi B y WISE 0855 no saturan. Los flags que marcan el hueco son BLOOM (97,6 % del núcleo) y OVERFLOW (59,5 %); una cuarta parte de esos píxeles trae `NaN` en IMAGE.
 - Restar ZODI no deja el fondo en cero: queda un residuo de 0,01 a 0,23 MJy/sr que varía entre exposiciones.
 - Colecciones vigentes: `spherex_dr1`, `spherex_dr1_deep`, `spherex_qr3`, `spherex_qr3_deep`. Usar DR1 y QR3, no QR2. En los campos probados DR1 llega hasta mayo de 2026 y QR3 empieza en agosto de 2026, sin exposiciones repetidas entre ambas.
 - Hay pocas épocas: una pasada cada 6 meses desde fines de abril de 2025. Cuatro de los objetos de prueba tienen 3 y Epsilon Indi B tiene 4, con 74 a 212 exposiciones por pasada. Una pasada dura de 2 a 7 semanas, y cerca del polo eclíptico casi 3 meses (R Draconis: 67 a 88 días, 539 exposiciones en total). Con un campo de 10′ una pasada puede quedar en menos de un día: la primera de WISE 0855 son 30 exposiciones en 0,8 días.
@@ -48,7 +48,7 @@ Navegador (React + Vite + TypeScript)
   ├─ Visor 2D: WebGL sobre el "cubo del campo"
   ├─ Esfera: three.js
   ├─ Mapa de contexto: Aladin Lite v3
-  └─ Gráficos: uPlot (espectro, curva de luz)
+  └─ Gráficos: SVG propio, sin biblioteca de gráficos (espectro, curva de luz)
         │  HTTP + SSE
 Backend (Python, FastAPI)
   ├─ astropy, pyvo/astroquery, reproject, photutils, numpy
@@ -131,12 +131,13 @@ Cada etapa termina en algo que se puede mostrar.
 
 ### Etapa 2 — Espectro (8, 9, 10, 7, 13, 30, 31, 32, 41)
 - `/spectrum` y panel de espectro al hacer clic, con barras de error.
-- Marcas de H2O, CO2, CO, CH4 y plantillas (enana T, enana Y, estrella M).
+- Marcas de H2O, CO2, CO, CH4 y plantillas (enana T, enana Y, estrella M). **[VERIFICAR]** Los límites de las bandas de `frontend/src/features/spectrum/molecules.ts` salen de la bibliografía que cita ese archivo (Cushing, Rayner y Vacca 2005; Yamamura, Tsuji y Tanabe 2010), redondeados a la resolución del instrumento. No se contrastaron con espectros de SPHEREx ni con las tablas de bandas de la misión.
+- El gráfico del espectro es SVG propio (`SpectrumChart`), no uPlot: son a lo sumo unos cientos de puntos y así las barras de error, las bandas moleculares y los tokens de color quedan bajo control del sistema de diseño.
 - RGB eligiendo tres detectores. Curva de luz por detector.
 - Huella química (rotulada como "indicio"), lupa espectral, sonificación con WebAudio.
 - Slider de longitud de onda y arrastre en dos ejes (con botón de modo para no chocar con el paneo).
 - Investigación: fotometría sobre las alas para fuentes saturadas, con R Draconis y Barnard como casos de prueba. R Draconis no tiene ningún píxel válido sobre la estrella en ninguna exposición.
-- **Hecho cuando:** clic en RW Aurigae muestra espectro y curva de luz coherentes en D1, el único detector donde no satura.
+- **Hecho cuando:** clic en RW Aurigae muestra espectro y curva de luz coherentes en D1. RW Aurigae también satura en D1 en exposiciones individuales (37 de 56): el criterio se cumple con sus 18 puntos válidos, todos de D1.
 
 ### Etapa 3 — Contexto (16, 17, 18, 47, 29, 33)
 - Aladin Lite como mapa base con WISE, 2MASS, DSS.
@@ -146,7 +147,7 @@ Cada etapa termina en algo que se puede mostrar.
 - **Hecho cuando:** el slider de misiones muestra a Barnard moviéndose a lo largo de décadas.
 
 ### Etapa 4 — Esfera (28, 23, 37)
-- Esfera three.js con textura de todo el cielo en baja resolución (WISE o 2MASS primero; SPHEREx si el procesamiento offline del HiPS resulta viable).
+- Esfera three.js con textura de todo el cielo: el mapa estelar "Deep Star Maps 2020" de NASA Scientific Visualization Studio (estrellas de Hipparcos-2, Tycho-2 y Gaia DR2 más la Vía Láctea), equirrectangular de 4096 × 2048 px. Es luz visible, no infrarrojo: sirve de mapa para ubicarse y no es una imagen de SPHEREx. Origen, licencia, crédito y orientación, en `frontend/src/features/sphere/assets/FUENTES.md`. Una textura infrarroja (WISE, 2MASS o SPHEREx) queda para después, si el procesamiento offline del HiPS resulta viable.
 - Marcadores de los 5 objetos, clic → zoom → visor. Botón de lugar al azar.
 - Modo celular como ventana: DeviceOrientation + geolocalización + hora para pasar de altitud/azimut a RA/Dec. Requiere HTTPS y permiso explícito en iOS.
 
@@ -166,7 +167,7 @@ Cada etapa termina en algo que se puede mostrar.
 | IRSA lento o con fallos durante la demo (confirmado: 502 en SIA2 y TAP, 503 en recortes, TAP sin responder) | Caché y precálculo; la demo corre sobre objetos en caché. Un campo nuevo tarda de 2 a 3 minutos: barra de progreso obligatoria |
 | WISE 0855 mezclado con una estrella de fondo (a 4" en mayo de 2026, acercándose) | Se detecta en D6, donde la estrella aporta poco; marcar la posición esperada y mostrar la diferencia entre épocas |
 | Estrellas brillantes saturadas (Barnard: hueco en el centro) | El núcleo se dibuja en blanco máximo con contorno y aviso, y se enmascara en diferencia y rojo/cian; las posiciones se miden ajustando las alas |
-| R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1; la fotometría sobre las alas queda como investigación |
+| R Draconis satura por completo: no hay píxeles válidos sobre la estrella en ninguna exposición | El criterio de la Etapa 2 pasó a RW Aurigae en D1, que tampoco está libre de saturación: 37 de 56 exposiciones, y el criterio se cumple con los 18 puntos válidos. La fotometría sobre las alas queda como investigación |
 | El campo de 1° de la maqueta no es viable con recortes (4 GB por campo) | Campos de 5′, 10′ y 30′; para contexto amplio, el mapa de la Etapa 3 |
 | hips2fits de CDS sin responder (pasó el 15 de noviembre de 2026: 404 con la página "Page unavailable" en siete sondeos entre las 10:11 y las 13:44 UTC) | La vista provisoria de WISE es opcional: si falla, el campo carga igual. **[VERIFICAR]** La vista está implementada contra la documentación y no se pudo probar contra el servicio. Queda apagada detrás de `SPHEREX_PREVIEW_ENABLED` (a las 16:16 UTC seguía caído) |
 | Pocas épocas, movimiento subpíxel | Rojo/cian, diferencia y viaje entre misiones. La diferencia entre épocas ya muestra un dipolo claro en Barnard y en WISE 0855 |
