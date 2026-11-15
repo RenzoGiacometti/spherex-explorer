@@ -46,6 +46,7 @@ import {
 import {
   clamp,
   DEG,
+  followOrientation,
   QUAT_IDENTITY,
   type Quat,
   quatAngle,
@@ -151,8 +152,6 @@ const INERTIA_MIN_SPEED = 0.4;
 /** Con la vista muy cerca el corte se mide en pixeles por segundo, o la inercia no llegaria a verse. */
 const INERTIA_MIN_SPEED_PX = 8;
 const INERTIA_MAX_SPEED = 400;
-/** Con que rapidez la camara sigue al sensor de orientacion (1/s). */
-const ORIENTATION_FOLLOW = 14;
 /** Por debajo de este angulo (grados) entre la camara y el sensor, la camara ya llego. */
 const ORIENTATION_REST = 1e-3;
 /** Tiempo, en segundos, en que la vista vuelve al norte arriba al salir de la orientacion libre. */
@@ -535,6 +534,12 @@ export class SkyScene {
   /** Pide un cuadro nuevo aunque la vista no haya cambiado (por ejemplo, cambiaron los marcadores). */
   invalidate(): void {
     this.dirty = true;
+  }
+
+  /** Orientacion de la camara tal como se dibujo el ultimo cuadro (diagnostico). */
+  getOrientation(): Quat {
+    const q = this.camera.quaternion;
+    return [q.x, q.y, q.z, q.w];
   }
 
   /** Centro de lo que se ve y campo de vision. En orientacion libre el centro sale del sensor. */
@@ -958,8 +963,7 @@ export class SkyScene {
     // Filtro pasabajos: el sensor tiembla y la camara lo sigue con un retardo
     // corto. Interpolando cuaterniones el giro es uno solo y por el camino mas
     // corto, mire adonde mire la camara.
-    const blend = dt === 0 ? 1 : 1 - Math.exp(-dt * ORIENTATION_FOLLOW);
-    this.freeQuat = quatSlerp(this.freeQuat, this.targetQuat, blend);
+    this.freeQuat = followOrientation(this.freeQuat, this.targetQuat, dt);
     return true;
   }
 

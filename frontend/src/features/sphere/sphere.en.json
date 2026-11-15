@@ -44,6 +44,13 @@
       "locationFailed": "The location could not be obtained."
     }
   },
+  "debug": {
+    "noSensor": "sensor: no readings",
+    "angles": "alpha {{alpha}}  beta {{beta}}  gamma {{gamma}}  screen {{screen}}",
+    "quaternion": "q  {{x}}  {{y}}  {{z}}  {{w}}",
+    "center": "centre  {{position}}",
+    "jump": "turn {{now}}  largest {{largest}}  jumps {{jumps}}  held {{held}}"
+  },
   "credit": "Sky: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC · Field images: SPHEREx / IRSA",
   "shortcuts": {
     "journey": "Time travel",

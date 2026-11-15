@@ -27,6 +27,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  createOrientationGate,
   type DeviceAngles,
   deviceToSceneQuaternion,
   type Observer,
@@ -53,7 +54,19 @@ export type SkyWindowState =
   /** No se pudo: la esfera sigue en modo de arrastre. */
   | { readonly kind: "unavailable"; readonly issue: SkyWindowIssue };
 
+/** Lo ultimo que dio el sensor, para el diagnostico en pantalla (`?debug=1`). */
+export interface SkyWindowReading {
+  /** Angulos del evento, con `alpha` ya referido al norte. */
+  readonly angles: DeviceAngles;
+  /** `screen.orientation.angle` en el momento de la lectura. */
+  readonly screenAngle: number;
+  /** Lecturas retenidas por la compuerta desde que se prendio la ventana. */
+  readonly held: number;
+}
+
 export interface SkyWindowOptions {
+  /** Cada lectura del sensor, tal como llego. Solo para el diagnostico. */
+  readonly onReading?: ((reading: SkyWindowReading) => void) | undefined;
   /** Recibe la orientacion de la camara en cada dato del sensor, y null al salir. */
   readonly onOrientation: (orientation: Quat | null) => void;
   /**
@@ -150,11 +163,14 @@ function createAngleReader(
 
 export function useSkyWindow({
   onOrientation,
+  onReading,
   allowRelative = false,
 }: SkyWindowOptions): SkyWindow {
   const [state, setState] = useState<SkyWindowState>(OFF);
   const onPointingRef = useRef(onOrientation);
   onPointingRef.current = onOrientation;
+  const onReadingRef = useRef(onReading);
+  onReadingRef.current = onReading;
   /** Apaga los sensores de la sesion en curso; null si no hay ninguna. */
   const teardownRef = useRef<(() => void) | null>(null);
   /** Cambia en cada `start` y `stop`: lo que llega de una sesion vieja se descarta. */
@@ -218,6 +234,11 @@ export function useSkyWindow({
     let observer: Observer | null = null;
     let latest: DeviceAngles | null = null;
     let running = false;
+    // Los angulos pasan a cuaternion tal como llegan, sin promediar: alpha da la
+    // vuelta en 360 y beta en 180, y un promedio de esos numeros apuntaria al
+    // lado opuesto. Lo unico que se filtra es la orientacion ya compuesta.
+    const gate = createOrientationGate();
+    let held = 0;
 
     const apply = (): void => {
       if (observer === null || latest === null) return;
@@ -225,7 +246,11 @@ export function useSkyWindow({
         running = true;
         setState({ kind: "on" });
       }
-      onPointingRef.current(deviceToSceneQuaternion(latest, screenAngle(), observer, new Date()));
+      const angle = screenAngle();
+      const reading = gate(deviceToSceneQuaternion(latest, angle, observer, new Date()));
+      if (reading.held) held += 1;
+      onReadingRef.current?.({ angles: latest, screenAngle: angle, held });
+      onPointingRef.current(reading.orientation);
     };
     const onOrientation = (event: DeviceOrientationEvent): void => {
       if (sessionRef.current !== session) return;

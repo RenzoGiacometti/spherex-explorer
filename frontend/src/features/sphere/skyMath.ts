@@ -300,6 +300,68 @@ export function quatSlerp(from: Quat, to: Quat, t: number): Quat {
   ]);
 }
 
+/** Con que rapidez la camara sigue al sensor de orientacion (1/s). */
+export const ORIENTATION_FOLLOW = 14;
+
+/**
+ * Un paso del filtro con el que la camara sigue al sensor: recorre una
+ * fraccion de lo que le falta, por el giro mas corto. `q` y `-q` son la misma
+ * orientacion, asi que un objetivo que llega con el signo cambiado (pasa cuando
+ * beta cruza 180 grados) no mueve la camara.
+ */
+export function followOrientation(
+  current: Quat,
+  target: Quat,
+  seconds: number,
+  rate = ORIENTATION_FOLLOW,
+): Quat {
+  const blend = seconds <= 0 ? 1 : 1 - Math.exp(-seconds * rate);
+  return quatSlerp(current, target, blend);
+}
+
+/** Salto entre dos lecturas seguidas, en grados, a partir del cual una lectura es sospechosa. */
+export const GATE_JUMP = 60;
+/** Dos lecturas sospechosas seguidas que coinciden dentro de estos grados son un giro de verdad. */
+export const GATE_CONFIRM = 25;
+
+export interface GatedOrientation {
+  /** Orientacion que hay que usar: la lectura, o la anterior si la lectura quedo retenida. */
+  readonly orientation: Quat;
+  /** La lectura quedo retenida por sospechosa. */
+  readonly held: boolean;
+}
+
+/**
+ * Compuerta contra lecturas sueltas disparatadas del sensor. Nadie gira un
+ * telefono 60 grados entre dos lecturas (a 60 por segundo serian 3600 grados
+ * por segundo): una lectura asi se retiene y la camara sigue con la anterior.
+ * Si la lectura siguiente la confirma era un cambio de verdad (por ejemplo, la
+ * pantalla giro) y se acepta, con una lectura de atraso. La comparacion es
+ * entre orientaciones, no entre angulos: el signo del cuaternion y las vueltas
+ * de alpha, beta y gamma no cuentan como salto.
+ */
+export function createOrientationGate(
+  jump = GATE_JUMP,
+  confirm = GATE_CONFIRM,
+): (reading: Quat) => GatedOrientation {
+  let accepted: Quat | null = null;
+  let pending: Quat | null = null;
+  return (reading) => {
+    if (accepted === null || quatAngle(accepted, reading) <= jump) {
+      accepted = reading;
+      pending = null;
+      return { orientation: reading, held: false };
+    }
+    if (pending !== null && quatAngle(pending, reading) <= confirm) {
+      accepted = reading;
+      pending = null;
+      return { orientation: reading, held: false };
+    }
+    pending = reading;
+    return { orientation: accepted, held: true };
+  };
+}
+
 /**
  * Hacia donde mira y donde queda el arriba de una camara con esa orientacion.
  * La camara (three.js) mira hacia su -z y tiene el arriba en su +y.

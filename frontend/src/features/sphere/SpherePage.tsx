@@ -34,6 +34,7 @@ import {
   loadConstellationFigures,
 } from "./constellations";
 import { findPatch } from "./patches";
+import { SkyDebug } from "./SkyDebug";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import {
   type SkyBox,
@@ -55,7 +56,7 @@ import {
   skyPointField,
 } from "./targets";
 import { useSphereTexts } from "./texts";
-import { useSkyWindow } from "./useSkyWindow";
+import { type SkyWindowReading, useSkyWindow } from "./useSkyWindow";
 
 /**
  * Vista al entrar: el centro galactico abajo, la Via Lactea cruzando la
@@ -297,8 +298,19 @@ export function SpherePage({
   const search = useObjectSearch(resolver);
   const { status } = search;
 
+  // Diagnostico de la orientacion: `?debug=1` (SkyDebug.tsx). Se lee una vez, al montar.
+  const [debug] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("debug") === "1",
+  );
+  const debugReadingRef = useRef<SkyWindowReading | null>(null);
+
   const skyWindow = useSkyWindow({
     onOrientation: (orientation) => sphereRef.current?.setFreeOrientation(orientation),
+    onReading: (reading) => {
+      debugReadingRef.current = reading;
+    },
     allowRelative: allowRelativeOrientation,
   });
   const windowState = skyWindow.state;
@@ -736,6 +748,8 @@ export function SpherePage({
         escena oscurece el cielo y deja la imagen del campo.
       */}
       <div ref={fadeRef} className={styles.fade} aria-hidden="true" />
+
+      {debug ? <SkyDebug sphereRef={sphereRef} readingRef={debugReadingRef} /> : null}
 
       {windowOn ? (
         <SkyWindowOverlay

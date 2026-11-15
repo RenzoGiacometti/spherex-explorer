@@ -44,6 +44,13 @@
       "locationFailed": "No se pudo obtener la ubicación."
     }
   },
+  "debug": {
+    "noSensor": "sensor: sin lecturas",
+    "angles": "alfa {{alpha}}  beta {{beta}}  gamma {{gamma}}  pantalla {{screen}}",
+    "quaternion": "q  {{x}}  {{y}}  {{z}}  {{w}}",
+    "center": "centro  {{position}}",
+    "jump": "giro {{now}}  mayor {{largest}}  saltos {{jumps}}  retenidas {{held}}"
+  },
   "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC · Imágenes de los campos: SPHEREx / IRSA",
   "shortcuts": {
     "journey": "Viaje en el tiempo",

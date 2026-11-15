@@ -102,6 +102,8 @@ export interface SkySphereHandle {
   /** Oscurece el cielo, de 0 a 1, sin tocar los parches. */
   setSkyDim(amount: number): void;
   getView(): SkyView | null;
+  /** Orientacion de la camara en el ultimo cuadro; null sin esfera. Para el diagnostico. */
+  getOrientation(): Quat | null;
   setView(view: Partial<SkyView>): void;
   /**
    * Donde se ve un punto del cielo, en pixeles desde la esquina del escenario;
@@ -433,6 +435,7 @@ export function SkySphere(props: SkySphereProps) {
         sceneRef.current?.flyToPatch(id, options) ?? Promise.resolve(false),
       setSkyDim: (amount) => sceneRef.current?.setSkyDim(amount),
       getView: () => sceneRef.current?.getView() ?? null,
+      getOrientation: () => sceneRef.current?.getOrientation() ?? null,
       setView: (view) => sceneRef.current?.setView(view),
       project: (position) => {
         const out = { x: 0, y: 0 };
