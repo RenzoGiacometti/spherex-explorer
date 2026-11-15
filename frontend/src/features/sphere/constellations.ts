@@ -111,3 +111,17 @@ export async function loadConstellationFigures(): Promise<readonly Constellation
   const module = await import("./assets/constelaciones/lineas.json");
   return module.default as unknown as readonly ConstellationFigure[];
 }
+
+// ---- Estrellas brillantes ----------------------------------------------------
+
+/** Estrella con nombre propio: [nombre, RA y Dec en grados (ICRS), magnitud visual]. */
+export type BrightStar = readonly [name: string, ra: number, dec: number, magnitude: number];
+
+/**
+ * Las 200 estrellas mas brillantes con nombre propio, de la mas brillante a la
+ * mas debil. Van con la capa de constelaciones y se piden al prenderla.
+ */
+export async function loadBrightStars(): Promise<readonly BrightStar[]> {
+  const module = await import("./assets/constelaciones/estrellas.json");
+  return module.default as unknown as readonly BrightStar[];
+}

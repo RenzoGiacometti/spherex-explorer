@@ -37,6 +37,22 @@ const RING_REACH = 10;
 const PICK_REACH = 20;
 /** Aire, en pixeles, entre un nombre de constelacion y lo que no tiene que tocar. */
 const LABEL_GAP = 4;
+/** Distancia, en pixeles, del punto de una estrella al comienzo de su nombre. */
+const STAR_LABEL_OFFSET = 7;
+/** Aire entre el nombre de una estrella y lo demas: van apretados, pero sin tocarse. */
+const STAR_LABEL_GAP = 2;
+/** Cuantas estrellas se nombran: pocas con la vista abierta, mas al acercarse. */
+const STAR_LABELS_FAR = 50;
+const STAR_LABELS_NEAR = 200;
+/** Campo de vision, en grados, desde el que van las pocas y hasta el que van todas. */
+const STAR_FOV_FAR = 85;
+const STAR_FOV_NEAR = 25;
+
+/** Cuantos nombres de estrellas se muestran con un campo de vision, de los mas brillantes. */
+export function starLabelLimit(fov: number): number {
+  const t = Math.min(1, Math.max(0, (fov - STAR_FOV_NEAR) / (STAR_FOV_FAR - STAR_FOV_NEAR)));
+  return Math.round(STAR_LABELS_NEAR + (STAR_LABELS_FAR - STAR_LABELS_NEAR) * t);
+}
 /** Duracion, en milisegundos, del corrimiento del cielo de `shiftBy`. */
 const SHIFT_MS = 320;
 
@@ -77,10 +93,18 @@ export interface SkyMarker extends SkyPosition {
   readonly kind?: "target" | "probe";
 }
 
-/** Texto sobre el cielo, sin interaccion: el nombre de una constelacion. */
+/**
+ * Texto sobre el cielo, sin interaccion. `area` (por defecto) es el nombre de
+ * una constelacion, centrado en su posicion. `star` es el nombre de una
+ * estrella: va al costado de su punto, y solo se muestran las de menor `rank`
+ * (las mas brillantes) segun cuanto se acerco la vista (`starLabelLimit`).
+ */
 export interface SkyLabel extends SkyPosition {
   readonly id: string;
   readonly text: string;
+  readonly kind?: "area" | "star" | undefined;
+  /** Orden de brillo de una estrella, desde 0. */
+  readonly rank?: number | undefined;
 }
 
 /**
@@ -245,6 +269,9 @@ export function SkySphere(props: SkySphereProps) {
      * 2. Los marcadores con su nombre y la mira del punto elegido.
      * 3. Los nombres de las constelaciones: el que toca algo de lo anterior no
      *    se escribe.
+     * 4. Los nombres de las estrellas, de la mas brillante a la mas debil: cada
+     *    uno se escribe solo si no toca nada de lo anterior, tampoco a otra
+     *    estrella ya nombrada.
      */
     function placeMarkers(scene: SkyScene): void {
       const covers = propsRef.current.occluders?.() ?? NO_BOXES;
@@ -310,33 +337,38 @@ export function SkySphere(props: SkySphereProps) {
         }
       }
 
+      const starLimit = starLabelLimit(scene.getView().fov);
+      // Las constelaciones van primero en la lista y las estrellas despues, por brillo.
       for (const label of propsRef.current.labels ?? []) {
         const element = labelElementsRef.current.get(label.id);
         if (element === undefined) continue;
-        if (!scene.project(label, point)) {
+        const star = label.kind === "star";
+        if ((star && (label.rank ?? 0) >= starLimit) || !scene.project(label, point)) {
           if (!element.hidden) element.hidden = true;
           continue;
         }
         const { x, y } = point;
-        element.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
+        element.style.transform = star
+          ? `translate(${(x + STAR_LABEL_OFFSET).toFixed(1)}px, ${y.toFixed(1)}px) translate(0, -50%)`
+          : `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
         if (element.hidden) element.hidden = false;
         let size = labelSizes.get(element);
         if (size === undefined || size.text !== label.text) {
           size = { text: label.text, width: element.offsetWidth, height: element.offsetHeight };
           labelSizes.set(element, size);
         }
+        const left = star ? x + STAR_LABEL_OFFSET : x - size.width / 2;
         const box: SkyBox = {
-          left: x - size.width / 2,
+          left,
           top: y - size.height / 2,
-          right: x + size.width / 2,
+          right: left + size.width,
           bottom: y + size.height / 2,
         };
-        // Gana el rotulo del marcador: el nombre de la constelacion no se escribe.
-        setFlag(
-          element,
-          "covered",
-          touchesAny(box, taken, LABEL_GAP) || touchesAny(box, covers, LABEL_GAP),
-        );
+        // Gana lo que ya esta: el rotulo de un marcador, la mira, un nombre anterior.
+        const gap = star ? STAR_LABEL_GAP : LABEL_GAP;
+        const covered = touchesAny(box, taken, gap) || touchesAny(box, covers, gap);
+        setFlag(element, "covered", covered);
+        if (!covered) taken.push(box);
       }
       // Que mapa se esta viendo (4k, fundido u 8k), a la vista en el inspector.
       const detail = scene.getDetailState();
@@ -483,6 +515,7 @@ export function SkySphere(props: SkySphereProps) {
               else labelElementsRef.current.set(item.id, element);
             }}
             className={styles.label}
+            data-kind={item.kind ?? "area"}
             hidden
           >
             {item.text}

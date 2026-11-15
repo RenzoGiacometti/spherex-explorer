@@ -27,10 +27,12 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import {
+  type BrightStar,
   CONSTELLATION_NAMES,
   type ConstellationFigure,
   constellationAt,
   constellationLabel,
+  loadBrightStars,
   loadConstellationFigures,
 } from "./constellations";
 import { findPatch } from "./patches";
@@ -258,9 +260,18 @@ export function SpherePage({
   // y las figuras se piden al prenderla.
   const constellationsOn = useUrlState((state) => state.constellations);
   const [figures, setFigures] = useState<readonly ConstellationFigure[] | null>(null);
+  const [stars, setStars] = useState<readonly BrightStar[] | null>(null);
   useEffect(() => {
     if (!constellationsOn || figures !== null) return;
     let alive = true;
+    // Los nombres de las estrellas brillantes van con la misma capa.
+    loadBrightStars()
+      .then((loaded) => {
+        if (alive) setStars(loaded);
+      })
+      .catch((error: unknown) => {
+        console.warn("esfera: no se pudieron cargar las estrellas", error);
+      });
     loadConstellationFigures()
       .then((loaded) => {
         if (alive) setFigures(loaded);
@@ -286,6 +297,23 @@ export function SpherePage({
         text: CONSTELLATION_NAMES[figure.abbr]?.[language] ?? figure.abbr,
       })),
     [shownFigures, language],
+  );
+  const shownStars = constellationsOn ? stars : null;
+  // Primero las constelaciones y despues las estrellas, de la mas brillante a la mas debil:
+  // en ese orden la esfera decide cual se escribe cuando dos se tocarian.
+  const skyLabels = useMemo<SkyLabel[]>(
+    () => [
+      ...constellationLabels,
+      ...(shownStars ?? []).map(([name, ra, dec], rank) => ({
+        id: `star-${rank}`,
+        ra,
+        dec,
+        text: name,
+        kind: "star" as const,
+        rank,
+      })),
+    ],
+    [constellationLabels, shownStars],
   );
 
   /** Punto del cielo elegido con un clic o un toque: lleva la mira y la tarjeta. */
@@ -735,7 +763,7 @@ export function SpherePage({
         unlabelledMarkerId={lockedTarget?.id ?? null}
         interactive={!windowOn}
         lines={constellationLines}
-        labels={constellationLabels}
+        labels={skyLabels}
         pick={windowOn ? null : pick}
         occluders={coveredBoxes}
         onSkyTap={handleSkyTap}

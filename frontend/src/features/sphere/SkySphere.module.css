@@ -242,6 +242,12 @@
   display: none;
 }
 
+/* Nombre de una estrella: mas chico y en el gris mas oscuro, al costado de su punto. */
+.label[data-kind="star"] {
+  color: var(--color-text-dim);
+  font-size: var(--type-data-sm-size);
+}
+
 /*
  * Un nombre que tocaria el rotulo de un marcador, la mira del punto elegido o
  * la interfaz de encima no se escribe: gana lo otro. Sigue ocupando su lugar,
