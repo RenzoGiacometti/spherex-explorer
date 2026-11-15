@@ -1,0 +1,19 @@
+{
+  "title": "Ficha del objeto",
+  "field": {
+    "label": "Campo",
+    "custom": "Centro de la URL",
+    "layer": "Imagen",
+    "live": "Este campo no está precalculado: la imagen de WISE y las fuentes de Gaia se pidieron en vivo a IRSA."
+  },
+  "image": {
+    "label": "Imagen del campo. Un clic elige la fuente de Gaia más cercana.",
+    "click": "Punto elegido",
+    "gaia": "Fuentes de Gaia"
+  },
+  "status": {
+    "loading": "Cargando el contexto",
+    "error": "No se pudo cargar el contexto. Hace falta el backend de prueba: desde backend/, uv run uvicorn app.context.devapp2:app --port 8000",
+    "unavailable": "IRSA no respondió a tiempo: el contexto de este campo no está disponible por ahora."
+  }
+}

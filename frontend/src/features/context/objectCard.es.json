@@ -1,0 +1,66 @@
+{
+  "title": "Ficha del objeto",
+  "hint": "Un clic sobre una fuente de la imagen muestra lo que se sabe de ella.",
+  "noCatalog": "Todavía no hay datos de Gaia para este campo.",
+  "source": {
+    "name": "Gaia DR3",
+    "offset": "a {{distance}} del clic"
+  },
+  "cells": {
+    "distance": "Distancia",
+    "lightYears": "años luz",
+    "motion": "Movimiento",
+    "perYear": "por año",
+    "unknown": "sin medir"
+  },
+  "distance": {
+    "measured": "Está a unos {{lightYears}} años luz.",
+    "rough": "Está a unos {{lightYears}} años luz, a grandes rasgos: su paralaje es muy chica y la medida tiene mucho margen.",
+    "far": "Está demasiado lejos para medir su distancia: a más de {{lightYears}} años luz.",
+    "none": "Gaia no pudo medir su distancia."
+  },
+  "light": {
+    "measured": "Esta luz salió hace unos {{years}} años.",
+    "rough": "Esta luz salió hace unos {{years}} años, más o menos.",
+    "far": "Esta luz salió hace más de {{years}} años."
+  },
+  "motion": {
+    "moving": "Se mueve {{rate}} por año hacia el {{direction}}. A ese paso tarda unos {{years}} años en recorrer el ancho de la Luna llena.",
+    "still": "Gaia no le encuentra movimiento sobre el cielo.",
+    "none": "Gaia no pudo medir su movimiento.",
+    "velocity": "A esa distancia son unos {{speed}} km/s a través del cielo."
+  },
+  "direction": {
+    "n": "norte",
+    "ne": "noreste",
+    "e": "este",
+    "se": "sureste",
+    "s": "sur",
+    "sw": "suroeste",
+    "w": "oeste",
+    "nw": "noroeste"
+  },
+  "brightness": {
+    "nakedEye": "En luz visible tiene magnitud {{magnitude}}: se ve a simple vista en un cielo oscuro.",
+    "binoculars": "En luz visible tiene magnitud {{magnitude}}: se ve con binoculares.",
+    "smallTelescope": "En luz visible tiene magnitud {{magnitude}}: hace falta un telescopio de aficionado.",
+    "largeTelescope": "En luz visible tiene magnitud {{magnitude}}: solo la alcanzan telescopios grandes."
+  },
+  "rows": {
+    "parallax": "Paralaje",
+    "properMotion": "Movimiento propio (este, norte)",
+    "magnitude": "Magnitud G",
+    "units": {
+      "mas": "{{value}} mas",
+      "masPerYear": "{{east}}, {{north}} mas/año"
+    }
+  },
+  "empty": {
+    "title": "Gaia no tiene ninguna fuente en este punto",
+    "radius": "No hay ninguna a menos de {{radius}} de este punto.",
+    "nearby": "La más cercana está a {{distance}} y tiene magnitud {{magnitude}}. Si el clic iba para esa estrella, se la puede ver con el botón.",
+    "showNearest": "Ver la fuente más cercana",
+    "why": "Gaia mide en luz visible. Un objeto muy frío casi no emite ahí, aunque brille en el infrarrojo: por eso puede verse en WISE y en SPHEREx y faltar en Gaia. Es el caso de WISE 0855, la enana marrón más fría que se conoce.",
+    "other": "También puede ser una galaxia lejana, parte de una nebulosa o un defecto de la imagen."
+  }
+}
