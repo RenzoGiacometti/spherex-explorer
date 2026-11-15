@@ -754,10 +754,10 @@
     "cutouts_total": 320,
     "cutouts_done": 320,
     "cutouts_failed": 0,
-    "cutouts_cached": 93,
+    "cutouts_cached": 66,
     "planes_total": 18,
     "planes_ready": 18,
-    "elapsed_s": 213.9
+    "elapsed_s": 220.4
   },
   "warnings": [
     {
@@ -790,9 +790,9 @@
       "spherex_dr1",
       "spherex_qr3"
     ],
-    "listed_at": "2026-11-15T17:32:26Z",
+    "listed_at": "2026-11-15T17:32:10Z",
     "list_stale": false,
     "download_mode": "truncated",
-    "built_at": "2026-11-15T17:35:24Z"
+    "built_at": "2026-11-15T17:35:27Z"
   }
 }
