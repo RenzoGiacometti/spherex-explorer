@@ -1,0 +1,78 @@
+{
+  "panel": {
+    "title": "Measure motion",
+    "count": "{{marked}} / {{total}}",
+    "toggle": "Mark with a click",
+    "hint": "Click the object in each epoch. The mark snaps to the center of the source.",
+    "current": "On screen",
+    "currentMarked": "{{date}} · marked",
+    "currentUnmarked": "{{date}} · not marked",
+    "currentNone": "no image",
+    "markCenter": "Mark at the center of the view",
+    "clear": "Clear marks",
+    "measuring": "Saturated source: measuring with the coverage layer…",
+    "needTwo": "Mark the object in another epoch to measure how far it moved.",
+    "sameDate": "The marks share the same date: another epoch is needed."
+  },
+  "marks": {
+    "title": "Marks",
+    "label": "{{date}} · {{band}}",
+    "centroid": "±{{sigma}} · centroid",
+    "wings": "±{{sigma}} · wings",
+    "wingsPending": "±{{sigma}} · wings, provisional"
+  },
+  "result": {
+    "title": "Result",
+    "displacement": "Displacement",
+    "interval": "Interval",
+    "years": "{{value}} years",
+    "motion": "Proper motion",
+    "perYear": "{{value}} ± {{sigma}} ″/yr",
+    "components": "East, north",
+    "componentsValue": "{{east}}, {{north}} ″/yr",
+    "angle": "Position angle",
+    "predictionPosition": "Position on {{date}}",
+    "predictionError": "Error of that position",
+    "withError": "{{value}} ± {{sigma}}"
+  },
+  "catalog": {
+    "title": "Catalog",
+    "motion": "According to {{name}}",
+    "motionValue": "{{value}} ″/yr",
+    "difference": "Difference",
+    "differenceValue": "{{value}} ″/yr · {{sigmas}} σ",
+    "agrees": "Agrees with the catalog within the measurement error.",
+    "differs": "Differs from the catalog by more than the measurement error explains.",
+    "mismatch": "The marked source is {{offset}} away from where the catalog places {{name}}: it is a different object.",
+    "note": "The catalog value comes from the expected positions at the same epochs, computed the same way."
+  },
+  "notice": {
+    "wings": "Saturated source: the center comes from fitting the wings, not the core.",
+    "coverage": "The coverage layer of a mark is missing: its position is provisional.",
+    "season": "The marks are from opposite seasons, and two are not enough to separate the parallax. Mark a third epoch.",
+    "seasonWings": "The marks are from opposite seasons: two are not enough to separate the parallax or the shift of the saturated wings, and the error reflects it. Mark a third epoch.",
+    "scatter": "The marks do not fall on a trajectory: the error was enlarged {{factor}} times. Check that every mark is on the same object.",
+    "seasonal": "With three or more epochs the six-month wobble (parallax and image asymmetry) is removed."
+  },
+  "failure": {
+    "outside": "That point is outside the image.",
+    "no-data": "There is not enough data there to measure.",
+    "no-source": "There is no source there that stands out from the noise. Zoom in and click on the object.",
+    "no-fit": "The source is saturated and the wings were not enough to locate it.",
+    "no-image": "The epoch on screen has no image in this band."
+  },
+  "layer": {
+    "prediction": "+{{years}} years",
+    "summary": "Proper motion measurement",
+    "summaryMarks": "Epochs marked: {{n}}.",
+    "summaryMotion": "Proper motion: {{value}} ± {{sigma}} arcseconds per year.",
+    "summaryPrediction": "The dashed line reaches the position predicted {{years}} years later."
+  },
+  "dev": {
+    "title": "Proper motion meter",
+    "empty": "This page needs a field in the URL. Test objects:",
+    "links": "Test objects",
+    "viewerLabel": "Field image. With marking on, a click measures the position of the object.",
+    "auto": "Mark the catalog positions"
+  }
+}
