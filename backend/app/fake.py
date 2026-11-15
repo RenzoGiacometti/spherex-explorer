@@ -38,7 +38,9 @@ Como se comporta:
   los mismos bytes y la cache del navegador no mezcla una imagen provisoria con
   una definitiva.
 - Cache: con `?rev=N` la respuesta es `immutable` solo si N es la revision
-  vigente; si se pide otra, llega la vigente con `no-cache`. Las muestras usan
+  vigente; si se pide otra, llega la vigente con `no-cache`. El plano y sus
+  capas auxiliares dicen que revision traen en la cabecera `X-Plane-Rev`
+  (contrato 4.4 y 4.6). Las muestras usan
   un `pipeline` propio (`app.config.SAMPLE_PIPELINE_VERSION`), asi que su `id`
   no coincide con el del campo real del mismo centro y el navegador no confunde
   lo guardado del servidor falso con lo del backend real. Una muestra que
@@ -65,7 +67,13 @@ Como se comporta:
   respuestas de Sesame guardadas en backend/tests/fixtures/sesame. Solo conoce
   esos nombres: el texto buscado y el nombre principal de cada respuesta, sin
   distinguir mayusculas ni signos. `GET /api/health` los lista. Con
-  `?scenario=upstream_unavailable` responde 503.
+  `?scenario=upstream_unavailable` responde 503. La respuesta guardada se lee
+  y se propaga con el mismo codigo que el backend real (`app.resolve`), asi
+  que los valores y los redondeos son los suyos; lo unico propio del servidor
+  falso es de donde sale la respuesta de Sesame.
+- `GET .../track` devuelve la trayectoria guardada con la muestra para ese
+  objeto, o `positions` vacio si no hay ninguna. Antes de `listed` el campo
+  todavia no tiene epocas y responde `409 not_ready` (contrato 4.9).
 
 La simulacion no usa tareas de fondo: el estado de un trabajo es una funcion
 del tiempo transcurrido y avanza cuando llega un pedido o cuando el flujo SSE
@@ -81,10 +89,9 @@ import logging
 import math
 import re
 import time
-import warnings
 import xml.etree.ElementTree as ET
 from collections.abc import AsyncIterator, Callable, Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -100,11 +107,22 @@ from app.api.errors import (
     ApiError,
     invalid_request,
     no_coverage,
+    not_built,
     not_found,
     not_resolved,
     queue_full,
     register_error_handlers,
     upstream_unavailable,
+)
+from app.api.headers import (
+    BINARY_MEDIA_TYPE,
+    EVENT_STREAM_MEDIA_TYPE,
+    IMMUTABLE,
+    NO_CACHE,
+    PLANE_REV_HEADER,
+    SSE_HEADERS,
+    accepts_gzip,
+    json_with_etag,
 )
 from app.config import PIPELINE_VERSION, Settings, get_settings
 from app.contract import (
@@ -115,20 +133,18 @@ from app.contract import (
     DoneEvent,
     ErrorBody,
     ErrorDetail,
-    FieldCenter,
     FieldMeta,
     FieldRequest,
     FieldResponse,
-    Motion,
     PlaneEvent,
     PlaneInfo,
     PriorityRequest,
     Progress,
     QueuedEvent,
     ResolveResponse,
-    SkyPosition,
     TrackResponse,
 )
+from app.domain import ResolvedTarget
 from app.geometry import FOV_STEPS, angular_separation_deg, normalize_request
 from app.jobs.store import (
     META_FILENAME,
@@ -141,7 +157,9 @@ from app.jobs.store import (
 )
 from app.pipeline.stats import detector_display, plane_stats, robust_stats, saturated_regions
 from app.preview.hips2fits import preview_band
+from app.resolve import service as resolve_service
 from app.resolve.coords import parse_coordinates
+from app.resolve.sesame import SesameResponseError, normalize_query, parse_sesame
 
 logger = logging.getLogger("spherex.fake")
 
@@ -171,7 +189,6 @@ _QUEUE_WAIT = 0.4
 # Ruido de la revision provisoria, en multiplos de la sigma del plano definitivo.
 _NOISE_FACTOR = 1.5
 
-_IMMUTABLE = "public, max-age=31536000, immutable"
 _PING = b": ping\n\n"
 
 Key = tuple[int, int]  # (epoca, detector)
@@ -657,14 +674,12 @@ class _SesameEntry:
 
     keys: set[str]
     query: str | None  # el texto con el que se hizo la consulta guardada
-    name: str | None  # nombre principal segun el catalogo
-    object_type: str | None
-    ra: float
-    dec: float
-    pm_ra: float | None
-    pm_dec: float | None
-    parallax: float | None
-    radial_velocity: float | None
+    target: ResolvedTarget  # lo que dice el catalogo, leido como lo lee el backend real
+
+    @property
+    def name(self) -> str | None:
+        """Nombre principal segun el catalogo."""
+        return self.target.name
 
 
 def _name_key(text: str) -> str:
@@ -675,90 +690,30 @@ def _name_key(text: str) -> str:
 def _parse_sesame(path: Path) -> _SesameEntry | None:
     """Interpreta una respuesta XML de Sesame guardada.
 
-    Lee los mismos elementos que `resolve_name` en spike/field.py, que se probo
-    contra el servicio (`jradeg`, `jdedeg`, `pm/pmRA`, `pm/pmDE`, `plx/v`,
-    `Vel/v` y `oname` dentro de `Target/Resolver`), mas `Target/name` (el texto
-    buscado) y `otype`, que se usan solo si estan.
+    El objeto sale de `app.resolve.sesame.parse_sesame`, el mismo lector que usa
+    el backend real. Aca solo se lee ademas `Target/name` (el texto con el que
+    se hizo la consulta guardada), para poder encontrar la respuesta por ese
+    texto. Una respuesta que no es de Sesame o que no trae posicion no sirve.
     """
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
-        root = ET.fromstring(text.split("<!---")[0])
-    except (OSError, ET.ParseError) as exc:
+        target = parse_sesame(text, path.stem)
+    except (OSError, SesameResponseError) as exc:
         logger.warning("respuesta de Sesame ilegible en %s: %s", path, exc)
         return None
-
-    def number(node: ET.Element, tag: str) -> float | None:
-        value = node.findtext(tag)
-        try:
-            return float(value) if value and value.strip() else None
-        except ValueError:
-            return None
-
-    for resolver in root.findall("./Target/Resolver"):
-        ra, dec = number(resolver, "jradeg"), number(resolver, "jdedeg")
-        if ra is None or dec is None:
-            continue
-        name = (resolver.findtext("oname") or "").strip() or None
-        query = (root.findtext("./Target/name") or "").strip() or None
-        keys = {_name_key(path.stem)}
-        for candidate in (name, query):
-            if candidate:
-                keys.add(_name_key(candidate))
-                keys.add(_name_key(candidate.removeprefix("NAME ")))
-        return _SesameEntry(
-            keys={key for key in keys if key},
-            query=query,
-            name=name,
-            object_type=(resolver.findtext("otype") or "").strip() or None,
-            ra=ra,
-            dec=dec,
-            pm_ra=number(resolver, "pm/pmRA"),
-            pm_dec=number(resolver, "pm/pmDE"),
-            parallax=number(resolver, "plx/v"),
-            radial_velocity=number(resolver, "Vel/v"),
-        )
-    return None
-
-
-def _propagate(entry: _SesameEntry, year: float) -> tuple[float, float]:
-    """Posicion del objeto en el anio juliano `year`: movimiento propio mas paralaje.
-
-    Misma cuenta que `Target.position_at` en spike/field.py. La implementacion
-    del backend real va en app/resolve/motion.py; esta copia es solo para que el
-    servidor falso no dependa de ella.
-    """
-    import astropy.units as u
-    from astropy.coordinates import Distance, SkyCoord, get_body_barycentric
-    from astropy.time import Time
-    from erfa import ErfaWarning
-
-    when = Time(year, format="jyear")
-    parallax = entry.parallax or 0.0
-    kwargs: dict[str, Any] = {
-        "ra": entry.ra * u.deg,
-        "dec": entry.dec * u.deg,
-        "pm_ra_cosdec": (entry.pm_ra or 0.0) * u.mas / u.yr,
-        "pm_dec": (entry.pm_dec or 0.0) * u.mas / u.yr,
-        "obstime": Time(2000.0, format="jyear"),
-        "frame": "icrs",
-    }
-    if parallax > 0:
-        kwargs["distance"] = Distance(parallax=parallax * u.mas)
-        kwargs["radial_velocity"] = (entry.radial_velocity or 0.0) * u.km / u.s
-    with warnings.catch_warnings():
-        # Sin paralaje, ERFA propaga con una distancia muy grande y lo avisa ("distance
-        # overridden"): es lo que se quiere, movimiento propio puro.
-        warnings.simplefilter("ignore", ErfaWarning)
-        moved = SkyCoord(**kwargs).apply_space_motion(new_obstime=when)
-    ra, dec = float(moved.ra.deg), float(moved.dec.deg)
-    if parallax > 0:
-        x, y, z = get_body_barycentric("earth", when).xyz.to_value(u.au)
-        a, d = math.radians(ra), math.radians(dec)
-        east = parallax * (x * math.sin(a) - y * math.cos(a))
-        north = parallax * (x * math.cos(a) * math.sin(d) + y * math.sin(a) * math.sin(d) - z * math.cos(d))
-        ra += east / 3.6e6 / math.cos(d)
-        dec += north / 3.6e6
-    return ra % 360.0, dec
+    if target is None:
+        return None
+    try:
+        asked = ET.fromstring(text.split("<!---")[0].strip()).findtext("./Target/name")
+    except ET.ParseError:
+        asked = None
+    query = normalize_query(asked or "") or None
+    keys = {_name_key(path.stem)}
+    for candidate in (target.name, query):
+        if candidate:
+            keys.add(_name_key(candidate))
+            keys.add(_name_key(candidate.removeprefix("NAME ")))
+    return _SesameEntry(keys={key for key in keys if key}, query=query, target=target)
 
 
 # -------------------------------------------------------------------- servidor
@@ -938,7 +893,7 @@ class FakeBackend:
         el navegador mostraria la muestra en su lugar.
         """
         cacheable = requested is not None and requested == current and sample.pipeline != self.real_pipeline
-        return {"Cache-Control": _IMMUTABLE if cacheable else "no-cache"}
+        return {"Cache-Control": IMMUTABLE if cacheable else NO_CACHE}
 
     def _plane(self, field_id: str, epoch: int, detector: int) -> tuple[FieldMeta, PlaneInfo, _Run | None]:
         """El plano en su estado actual, o el error del contrato: 404 si no existe o esta vacio, 409 si falta."""
@@ -955,10 +910,10 @@ class FakeBackend:
     def plane_payload(
         self, field_id: str, epoch: int, detector: int, requested_rev: int | None = None
     ) -> tuple[bytes, dict[str, str]]:
-        """Bytes del plano en su revision vigente y la cabecera de cache que le corresponde."""
+        """Bytes del plano en su revision vigente y sus cabeceras: la de cache y `X-Plane-Rev`."""
         sample, plane, run = self._plane(field_id, epoch, detector)
         assert sample.grid is not None
-        headers = self.revision_headers(sample, requested_rev, plane.rev)
+        headers = self.revision_headers(sample, requested_rev, plane.rev) | {PLANE_REV_HEADER: str(plane.rev)}
         if plane.status == "building" and run is not None:
             return np.ascontiguousarray(run.images[(epoch, detector)], dtype="<f4").tobytes(), headers
         try:
@@ -966,11 +921,19 @@ class FakeBackend:
         except ResourceNotFoundError as exc:
             raise not_found(str(exc)) from exc
 
-    def aux_payload(self, field_id: str, epoch: int, detector: int, accept_gzip: bool) -> tuple[bytes, bool]:
-        """Capa auxiliar del plano. Devuelve los bytes y si van comprimidos con gzip."""
+    def aux_payload(self, field_id: str, epoch: int, detector: int, accept_gzip: bool) -> tuple[bytes, dict[str, str]]:
+        """Capa auxiliar del plano en su revision vigente y sus cabeceras.
+
+        Las capas cambian con cada revision: van con `no-cache` y con
+        `X-Plane-Rev`, igual que el plano (contrato 4.6). Si el cliente acepta
+        gzip se sirven comprimidas, como estan en disco.
+        """
         sample, plane, run = self._plane(field_id, epoch, detector)
         assert sample.grid is not None
         shape = sample.grid.shape
+        headers = {"Cache-Control": NO_CACHE, "Vary": "Accept-Encoding", PLANE_REV_HEADER: str(plane.rev)}
+        if accept_gzip:
+            headers["Content-Encoding"] = "gzip"
         try:
             if plane.status == "building" and run is not None:
                 # Media cobertura, y cero donde la imagen provisoria no tiene dato.
@@ -978,11 +941,11 @@ class FakeBackend:
                 valid = np.isfinite(run.images[(epoch, detector)])
                 coverage = np.where(valid, np.maximum((coverage + 1) // 2, 1), 0).astype(np.uint16)
                 if accept_gzip:
-                    return compress_aux(flags, coverage, shape), True
-                return flags.astype("<u4").tobytes() + coverage.astype("<u2").tobytes(), False
+                    return compress_aux(flags, coverage, shape), headers
+                return flags.astype("<u4").tobytes() + coverage.astype("<u2").tobytes(), headers
             if accept_gzip:
-                return self.store.read_aux_gzip(field_id, epoch, detector, shape=shape), True
-            return self.store.read_aux_bytes(field_id, epoch, detector, shape=shape), False
+                return self.store.read_aux_gzip(field_id, epoch, detector, shape=shape), headers
+            return self.store.read_aux_bytes(field_id, epoch, detector, shape=shape), headers
         except ResourceNotFoundError as exc:
             raise not_found(str(exc)) from exc
 
@@ -1030,7 +993,13 @@ class FakeBackend:
         return sorted(names)
 
     def resolve(self, query: str, scenario: ResolveScenario | None = None) -> ResolveResponse:
-        text = query.strip()
+        """`GET /api/resolve?name=` con las respuestas de Sesame guardadas.
+
+        La respuesta la arma `app.resolve.service.build_resolve_response`, igual
+        que en el backend real: mismos valores y mismos redondeos (movimiento
+        propio, paralaje y velocidad radial a 3 decimales).
+        """
+        text = normalize_query(query)
         if not text:
             raise invalid_request("name no puede estar vacio")
         if scenario == "upstream_unavailable":
@@ -1041,46 +1010,29 @@ class FakeBackend:
         coordinates = parse_coordinates(text)
         if coordinates is not None:
             ra, dec = coordinates
-            return ResolveResponse(
-                query=text,
-                source="coordinates",
-                j2000=SkyPosition(ra=round(ra, 6) % 360.0, dec=round(dec, 6)),
-                field_center=FieldCenter(ra=round(ra, 4) % 360.0, dec=round(dec, 4), epoch=self.field_epoch),
-            )
-
-        entry = self._sesame_lookup(text)
-        if entry is None:
-            raise not_resolved(f"el servidor falso no tiene guardada una respuesta de Sesame para {text!r}")
-        motion = None
-        center_ra, center_dec = entry.ra, entry.dec
-        if entry.pm_ra is not None and entry.pm_dec is not None:
-            # Paralaje y velocidad radial van como `null` si el catalogo no las trae.
-            motion = Motion(
-                pm_ra=entry.pm_ra,
-                pm_dec=entry.pm_dec,
-                parallax=entry.parallax,
-                radial_velocity=entry.radial_velocity,
-                per_year_arcsec=round(math.hypot(entry.pm_ra, entry.pm_dec) / 1000.0, 2),
-            )
-            center_ra, center_dec = _propagate(entry, self.field_epoch)
-        moved = angular_separation_deg(entry.ra, entry.dec, center_ra, center_dec) * 3600.0
-        return ResolveResponse(
-            query=text,
-            name=entry.name,
-            source="sesame",
-            object_type=entry.object_type,
-            j2000=SkyPosition(ra=round(entry.ra, 6), dec=round(entry.dec, 6)),
-            motion=motion,
-            field_center=FieldCenter(ra=round(center_ra, 4) % 360.0, dec=round(center_dec, 4), epoch=self.field_epoch),
-            moved_arcsec=round(moved, 1),
-        )
+            target = ResolvedTarget(query=text, ra=ra, dec=dec, source="coordinates")
+        else:
+            entry = self._sesame_lookup(text)
+            if entry is None:
+                raise not_resolved(f"el servidor falso no tiene guardada una respuesta de Sesame para {text!r}")
+            target = replace(entry.target, query=text)
+        return resolve_service.build_resolve_response(target, self.field_epoch)
 
     def track(self, field_id: str, name: str) -> TrackResponse:
-        """Trayectoria guardada con la muestra para ese objeto; `positions` vacio si no hay ninguna."""
-        self.state(field_id)
-        text = name.strip()
+        """Trayectoria guardada con la muestra para ese objeto; `positions` vacio si no hay ninguna.
+
+        Antes de `listed` el campo todavia no tiene epocas: `409 not_ready`
+        (contrato 4.9), como en el backend real.
+        """
+        _, meta, _ = self.state(field_id)
+        text = normalize_query(name)
         if not text:
             raise invalid_request("name no puede estar vacio")
+        if meta.grid is None or meta.epochs is None:
+            raise _not_ready(
+                meta,
+                f"el campo {field_id!r} todavia no tiene grilla ni epocas: la trayectoria sale despues de `listed`",
+            )
         keys = {_name_key(text)}
         entry = self._sesame_lookup(text)
         if entry is not None:
@@ -1108,10 +1060,7 @@ def _not_ready(meta: FieldMeta, message: str) -> ApiError:
     Si el trabajo fallo no va a estarlo: repetir el pedido no sirve hasta que
     otro `POST /api/field` reintente el campo, y por eso va con `retryable: false`.
     """
-    failed = meta.status == "failed"
-    return ApiError(
-        "not_ready", message=f"{message}; el trabajo fallo" if failed else message, retryable=False if failed else None
-    )
+    return not_built(message, job_failed=meta.status == "failed")
 
 
 def create_fake_app(
@@ -1154,7 +1103,7 @@ def create_fake_app(
         allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["ETag", "Retry-After"],
+        expose_headers=["ETag", "Retry-After", PLANE_REV_HEADER],
     )
 
     @app.get("/api/health")
@@ -1188,47 +1137,37 @@ def create_fake_app(
     async def get_events(field_id: str) -> StreamingResponse:
         sample, _, run = backend.state(field_id)
         return StreamingResponse(
-            backend.stream(sample, run),
-            media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            backend.stream(sample, run), media_type=EVENT_STREAM_MEDIA_TYPE, headers=dict(SSE_HEADERS)
         )
 
     @app.get("/api/field/{field_id}/meta")
     async def get_meta(field_id: str, request: Request) -> Response:
         _, meta, _ = backend.state(field_id)
         body = meta.model_dump_json().encode("utf-8")
-        etag = f'"{hashlib.sha256(body).hexdigest()[:32]}"'
-        headers = {"Cache-Control": "no-cache", "ETag": etag}
-        known = {item.strip().removeprefix("W/") for item in request.headers.get("if-none-match", "").split(",")}
-        if etag in known:
-            return Response(status_code=304, headers=headers)
-        return Response(content=body, media_type="application/json", headers=headers)
+        return json_with_etag(body, request.headers.get("if-none-match"))
 
     @app.get("/api/field/{field_id}/plane/{epoch}/{detector}")
     async def get_plane(
         field_id: str, epoch: int, detector: int, rev: Annotated[int | None, Query(ge=0)] = None
     ) -> Response:
         data, headers = backend.plane_payload(field_id, epoch, detector, rev)
-        return Response(content=data, media_type="application/octet-stream", headers=headers)
+        return Response(content=data, media_type=BINARY_MEDIA_TYPE, headers=headers)
 
     @app.get("/api/field/{field_id}/cube")
     async def get_cube(field_id: str, rev: Annotated[int | None, Query(ge=0)] = None) -> StreamingResponse:
         chunks, headers = backend.cube(field_id, rev)
-        return StreamingResponse(chunks, media_type="application/octet-stream", headers=headers)
+        return StreamingResponse(chunks, media_type=BINARY_MEDIA_TYPE, headers=headers)
 
     @app.get("/api/field/{field_id}/aux/{epoch}/{detector}")
     async def get_aux(field_id: str, epoch: int, detector: int, request: Request) -> Response:
-        accept_gzip = "gzip" in request.headers.get("accept-encoding", "").lower()
-        data, compressed = backend.aux_payload(field_id, epoch, detector, accept_gzip)
-        headers = {"Cache-Control": "no-cache", "Vary": "Accept-Encoding"}
-        if compressed:
-            headers["Content-Encoding"] = "gzip"
-        return Response(content=data, media_type="application/octet-stream", headers=headers)
+        accept_gzip = accepts_gzip(request.headers.get("accept-encoding"))
+        data, headers = backend.aux_payload(field_id, epoch, detector, accept_gzip)
+        return Response(content=data, media_type=BINARY_MEDIA_TYPE, headers=headers)
 
     @app.get("/api/field/{field_id}/preview")
     async def get_preview(field_id: str) -> Response:
         data = backend.preview_payload(field_id)
-        return Response(content=data, media_type="application/octet-stream", headers={"Cache-Control": "no-cache"})
+        return Response(content=data, media_type=BINARY_MEDIA_TYPE, headers={"Cache-Control": NO_CACHE})
 
     @app.get("/api/field/{field_id}/track")
     async def get_track(field_id: str, name: str) -> JSONResponse:

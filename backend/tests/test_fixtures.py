@@ -579,9 +579,9 @@ def test_fake_server_resolves_the_five_test_objects() -> None:
     # Paralaje (mas) y velocidad radial (km/s) de las respuestas de Sesame guardadas. Las de
     # Epsilon Indi B y WISE 0855 no traen velocidad radial.
     expected = {
-        "Barnard's Star": (546.9759, -110.11),
+        "Barnard's Star": (546.976, -110.11),
         "Epsilon Indi B": (270.658, None),
-        "R Draconis": (1.2509, -132.8),
+        "R Draconis": (1.251, -132.8),
         "RW Aurigae": (15.42, 15.0),
         "WISE J085510.83-071442.5": (439.0, None),
     }

@@ -79,6 +79,11 @@ class Settings:
     # Tope de disco de la cache de recortes (contrato, seccion 11); 0 o menos lo desactiva.
     cutout_cache_max_gb: float = 10.0
 
+    # Con `SPHEREX_PRECOMPUTED_ONLY=1` el backend solo sirve campos ya armados (los de
+    # `data/fields`): pedir cualquier otro responde 404 `not_found` y nunca se toca IRSA.
+    # Es el modo del despliegue publico.
+    precomputed_only: bool = False
+
     # Identidad del campo.
     field_epoch: float = FIELD_EPOCH
     pipeline_version: str = PIPELINE_VERSION
@@ -92,7 +97,12 @@ class Settings:
     resolve_cache_days: float = 30.0
     exposure_list_cache_hours: float = 24.0
 
-    # Vista provisoria de WISE: si hips2fits no responde en este tiempo, se descarta.
+    # Vista provisoria de WISE. Desactivada por defecto: hips2fits de CDS estuvo caido todo el
+    # 2026-11-15 y el pedido nunca se pudo verificar contra el servicio. Con
+    # `SPHEREX_PREVIEW_ENABLED=1` el trabajo la vuelve a pedir; sin eso, el campo sale con
+    # `preview.status = "unavailable"` desde el principio y no se toca la red.
+    preview_enabled: bool = False
+    # Si hips2fits no responde en este tiempo, se descarta.
     preview_timeout_s: float = 20.0
     # Servicio hips2fits de CDS y HiPS de WISE de cada banda (app/preview/hips2fits.py).
     # SIN VERIFICAR contra el servicio: el 2026-11-15 estaba caido. La URL sale de
@@ -184,6 +194,12 @@ def _parse(name: str, kind: object, raw: str) -> object:
     try:
         if kind is Path:
             return Path(raw).expanduser()
+        if kind is bool:
+            if raw.lower() in ("1", "true", "yes", "on"):
+                return True
+            if raw.lower() in ("0", "false", "no", "off"):
+                return False
+            raise ValueError(raw)
         if kind is int:
             return int(raw)
         if kind is float:

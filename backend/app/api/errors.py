@@ -106,6 +106,18 @@ def not_ready(message: str) -> ApiError:
     return ApiError("not_ready", message=message)
 
 
+def not_built(message: str, *, job_failed: bool = False) -> ApiError:
+    """409 `not_ready` para algo de un campo que todavia no esta construido.
+
+    Si el trabajo fallo (`job_failed`) no va a estarlo: repetir el pedido no
+    sirve hasta que otro `POST /api/field` reintente el campo, y por eso va con
+    `retryable: false` (contrato, seccion 5).
+    """
+    if not job_failed:
+        return not_ready(message)
+    return ApiError("not_ready", message=f"{message}; el trabajo fallo", retryable=False)
+
+
 def no_coverage(message: str) -> ApiError:
     """404: ninguna exposicion de DR1 o QR3 cubre el punto."""
     return ApiError("no_coverage", message=message)
