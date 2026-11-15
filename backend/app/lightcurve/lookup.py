@@ -4,6 +4,9 @@ Mismo orden que el espectro (`app/spectrum/lookup.py`):
 
 1. Si el punto cae sobre uno de los objetos precalculados (`data/lightcurves`),
    se devuelve ese documento. No hace falta tener los recortes.
+   Con `field` de un campo que tiene curvas guardadas (`saved.py`), la de la
+   fuente guardada mas cercana; si no hay ninguna cerca, `not_found`. Con
+   `SPHEREX_PRECOMPUTED_ONLY` nunca se mide: lo que no esta guardado es `not_found`.
 2. Si no, se buscan en la cache los recortes que cubren el punto; con `field`,
    solo los de ese campo.
 3. Se mide (`service.compute_lightcurve`) y el resultado queda en memoria
@@ -24,6 +27,7 @@ from app.api.errors import invalid_request, not_found
 from app.config import FIELD_EPOCH, Settings
 from app.domain import ResolvedTarget
 from app.jobs.store import FieldStore, StoreError
+from app.lightcurve.saved import saved_lightcurve
 from app.lightcurve.service import LightcurveError, compute_lightcurve
 from app.spectrum.cutouts import covering_cutouts, cutout_dirs, list_cutouts
 from app.spectrum.lookup import CUTOUT_MARGIN_PX
@@ -78,6 +82,21 @@ def lightcurve_for(
     precomputed = find_precomputed(lightcurves_dir(settings), ra, dec)
     if precomputed is not None:
         return precomputed
+
+    # Campo precalculado con curvas guardadas (`saved.py`): como en el espectro, vale lo guardado,
+    # aunque los recortes esten en disco. Asi la respuesta es la misma en local y en la imagen publica.
+    if field is not None:
+        has_file, saved = saved_lightcurve(lightcurves_dir(settings), field, ra, dec)
+        if saved is not None:
+            return saved
+        if has_file:
+            raise not_found(
+                "en este campo solo hay curvas de luz guardadas de sus fuentes mas brillantes "
+                "y el punto no esta cerca de ninguna"
+            )
+    if settings.precomputed_only:
+        # Igual que /api/field en ese modo: nunca se mide sobre recortes.
+        raise not_found("este servidor solo sirve las curvas de luz guardadas y en ese punto no hay ninguna")
 
     center = None if field is None else _field_center(field, settings)
     cutouts = covering_cutouts(list_cutouts(cutout_dirs(settings)), ra, dec, margin_px=CUTOUT_MARGIN_PX, center=center)

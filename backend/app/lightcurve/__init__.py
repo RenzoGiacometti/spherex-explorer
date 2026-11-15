@@ -11,11 +11,10 @@ canal espectral.
     calibration.py  error real de cada metodo, medido sobre estrellas que no varian
     service.py      de las medidas al documento de la curva
     lookup.py       precalculado o medido sobre los recortes en cache
+    saved.py        curvas guardadas por campo precalculado
     router.py       ruta de FastAPI
-    server.py       aplicacion suelta para probar el modulo
 
-Para sumarlo al backend: `app.include_router(lightcurve_router)` en
-`app/api/main.py`. Mientras tanto se puede correr solo:
+La ruta esta sumada a la aplicacion real (`app/api/main.py`):
 
-    uv run uvicorn app.lightcurve.server:app --port 8003
+    uv run uvicorn app.api.main:app --port 8000
 """

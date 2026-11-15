@@ -77,6 +77,7 @@ from app.jobs.deps import JobDeps
 from app.jobs.events import PING, FieldEvent, encode_sse
 from app.jobs.manager import JobManager
 from app.jobs.store import cube_nbytes
+from app.lightcurve.router import router as lightcurve_router
 from app.spectrum.router import router as spectrum_router
 
 # Silencio minimo entre dos `: ping`, por si la configuracion trae un valor que no sirve.
@@ -222,6 +223,8 @@ def create_app(
     # `/api/context/index` y `/api/survey`. Solo leen lo precalculado en data/context; nunca salen a la red,
     # asi que valen igual con `SPHEREX_PRECOMPUTED_ONLY`.
     app.include_router(context_router)
+    # Curva de luz (app/lightcurve/router.py): `GET /api/lightcurve`, con las mismas reglas que el espectro.
+    app.include_router(lightcurve_router)
 
     if settings.static_dir:
         # Despliegue de un solo proceso: el frontend ya compilado (frontend/dist) sale del mismo
