@@ -1,19 +1,12 @@
 {
-  "kicker": "NASA's <mission>SPHEREx</mission> mission · <range>{{from}} to {{to}}</range>",
-  "headline": "The infrared sky, in motion",
-  "lead": "SPHEREx images of the same patch of sky over time, to find objects that move or change in brightness.",
   "search": {
     "label": "Search by name or coordinates",
     "submit": "Search",
     "example": "{{name}} · {{coordinates}}",
     "resolving": "Searching for {{query}}…",
     "advice": {
-      "not_resolved": "Try another name or the coordinates.",
-      "upstream_unavailable": "Searching by coordinates still works."
-    }
-  },
-  "featured": {
-    "title": "Featured",
-    "nav": "Featured objects"
+      "not_resolved": "Try another name or the coordinates."
+    },
+    "nameServiceDown": "The name lookup service is not responding. Try coordinates in degrees instead, for example {{coordinates}}."
   }
 }

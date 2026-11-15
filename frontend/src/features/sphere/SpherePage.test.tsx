@@ -1,5 +1,12 @@
+// La entrada sin WebGL, que es como la ve jsdom: no hay esfera, y quedan a la
+// vista el buscador, "Lugar al azar" y los objetos destacados como links. Sin
+// esfera no hay acercamiento: elegir un lugar abre su campo en el momento.
+//
+// Los tests del buscador son los de la entrada anterior (EntryPage), que usaba
+// la misma logica (src/features/entry/useObjectSearch.ts).
+
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient, type FetchLike } from "@/api/client";
 import type { ResolveResponse } from "@/api/types";
 import { createNameResolver, type NameResolver } from "@/data/nameResolver";
@@ -9,7 +16,10 @@ import enErrors from "@/i18n/locales/en/errors.json";
 import esEntry from "@/i18n/locales/es/entry.json";
 import esErrors from "@/i18n/locales/es/errors.json";
 import { DEFAULT_URL_STATE, parseUrlState, useUrlState } from "@/state/urlState";
-import { EntryPage } from "./EntryPage";
+import { SpherePage } from "./SpherePage";
+import enSphere from "./sphere.en.json";
+import esSphere from "./sphere.es.json";
+import { PRECOMPUTED_FIELDS, SKY_TARGETS, type SkyTarget } from "./targets";
 
 // ---- Respuestas de /api/resolve --------------------------------------------
 //
@@ -129,9 +139,18 @@ function submitButton(): HTMLButtonElement {
   return screen.getByRole("button", { name: esEntry.search.submit }) as HTMLButtonElement;
 }
 
+function randomButton(): HTMLButtonElement {
+  return screen.getByRole("button", { name: esSphere.random }) as HTMLButtonElement;
+}
+
 function searchFor(text: string): void {
   fireEvent.change(input(), { target: { value: text } });
   fireEvent.submit(screen.getByRole("search"));
+}
+
+/** Texto que se le anuncia al lector de pantalla: el ultimo `status`, despues de los avisos. */
+function announced(): string {
+  return screen.getAllByRole("status").at(-1)?.textContent ?? "";
 }
 
 /** Estado de la URL sin las acciones del store. */
@@ -158,50 +177,43 @@ beforeEach(async () => {
   open("");
   initI18n("es");
   await setLanguage("es");
+  // Un navegador sin WebGL: el contexto no se puede crear, y three.js y la esfera lo avisan.
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   open("");
 });
 
 // ---- Lo que se ve ----------------------------------------------------------
 
-describe("EntryPage", () => {
-  it("muestra la marca, el titular en display, la bajada y el selector de idioma", () => {
-    render(<EntryPage />);
+describe("SpherePage sin WebGL", () => {
+  it("muestra la marca, el selector de idioma, el aviso, el buscador y los destacados", () => {
+    render(<SpherePage />);
 
     // Barra superior: la marca, escrita como es, y el idioma.
     const topbar = screen.getByRole("banner");
     expect(within(topbar).getByText("SPHEREx Explorer")).toBeTruthy();
-
-    // El titular es el unico encabezado de primer nivel.
-    expect(screen.getAllByRole("heading", { level: 1 })).toEqual([
-      screen.getByRole("heading", { name: esEntry.headline }),
-    ]);
-    expect(screen.getByText(esEntry.lead)).toBeTruthy();
-
     const language = within(topbar).getByRole("group", { name: "Idioma" });
     const radios = within(language).getAllByRole("radio") as HTMLInputElement[];
     expect(radios.map((radio) => radio.getAttribute("aria-label"))).toEqual(["Español", "English"]);
     expect(radios.map((radio) => radio.checked)).toEqual([true, false]);
 
-    // Una sola region principal, con el buscador y los destacados adentro.
+    // Una sola region principal: dice que no hay esfera y deja todo lo demas a mano.
     const main = screen.getByRole("main");
+    expect(within(main).getByText(esSphere.status.noWebgl)).toBeTruthy();
     expect(within(main).getByRole("search")).toBeTruthy();
-    expect(within(main).getByRole("navigation", { name: esEntry.featured.nav })).toBeTruthy();
+    expect(within(main).getByRole("navigation", { name: esSphere.markers.nav })).toBeTruthy();
+    expect(randomButton().disabled).toBe(false);
+    // La unica lista de destacados es la de links: la de marcadores no tiene donde ubicarse.
+    expect(screen.getAllByRole("navigation")).toHaveLength(1);
   });
 
-  it("el rango de la mision sale con el formato del idioma y su unidad", () => {
-    render(<EntryPage />);
-
-    const kicker = screen.getByText("0,75 a 5 µm").closest("p");
-    expect(kicker?.textContent).toBe("Misión SPHEREx de NASA · 0,75 a 5 µm");
-    // El nombre de la mision y el rango no heredan las mayusculas de la etiqueta.
-    expect(within(kicker as HTMLElement).getByText("SPHEREx").tagName).toBe("SPAN");
-  });
-
-  it("el buscador tiene etiqueta visible y un ejemplo de nombre y de coordenadas", () => {
-    render(<EntryPage />);
+  it("el buscador tiene etiqueta visible y un ejemplo en grados que abre el campo precalculado", () => {
+    render(<SpherePage />);
 
     const search = screen.getByRole("search", { name: esEntry.search.label });
     expect(within(search).getByText(esEntry.search.label).tagName).toBe("LABEL");
@@ -210,15 +222,21 @@ describe("EntryPage", () => {
     expect(submitButton().type).toBe("submit");
     expect(submitButton().disabled).toBe(false);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe("");
+    expect(announced()).toBe("");
   });
 
-  it("no dibuja nada de las etapas siguientes", () => {
-    render(<EntryPage />);
+  it("Lugar al azar abre un campo precalculado, tambien los que no tienen marcador", () => {
+    // Con el azar al final de la lista sale el ultimo campo precalculado.
+    render(<SpherePage random={() => 0.999} />);
+    const before = window.history.length;
 
-    // El unico boton es el de buscar: ni lugar al azar, ni capas, ni acercar.
-    expect(screen.getAllByRole("button")).toEqual([submitButton()]);
-    expect(document.querySelector("canvas, img")).toBeNull();
+    fireEvent.click(randomButton());
+
+    const last = PRECOMPUTED_FIELDS[PRECOMPUTED_FIELDS.length - 1] as SkyTarget;
+    expect(SKY_TARGETS).not.toContain(last);
+    expect(window.location.search).toContain(`?ra=${last.ra}&dec=${last.dec}&fov=0.1667&band=3`);
+    expect(window.history.length).toBe(before + 1);
+    expect(announced()).toBe(`Abriendo ${last.label}…`);
   });
 
   // ---- Destacados ----------------------------------------------------------
@@ -242,14 +260,13 @@ describe("EntryPage", () => {
     ] as const;
 
     function links(): HTMLAnchorElement[] {
-      const nav = screen.getByRole("navigation", { name: esEntry.featured.nav });
+      const nav = screen.getByRole("navigation", { name: esSphere.markers.nav });
       return within(nav).getAllByRole("link") as HTMLAnchorElement[];
     }
 
     it("los cinco objetos de prueba son links completos al visor", () => {
-      render(<EntryPage />);
+      render(<SpherePage />);
 
-      expect(screen.getByRole("heading", { level: 2, name: esEntry.featured.title })).toBeTruthy();
       expect(links().map((link) => [link.textContent, link.getAttribute("href")])).toEqual(LINKS);
     });
 
@@ -260,27 +277,20 @@ describe("EntryPage", () => {
       ["RW Aurigae", 76.9566, 30.4013, 1, "RW Aurigae"],
       ["R Draconis", 248.1672, 66.755, 3, "R Draconis"],
     ] as const)("%s abre su campo sin recargar la pagina", (label, ra, dec, band, name) => {
-      render(<EntryPage />);
+      render(<SpherePage />);
       const before = window.history.length;
+      const link = screen.getByRole("link", { name: label });
+      const href = link.getAttribute("href");
 
-      expect(clickLink(screen.getByRole("link", { name: label }))).toBe(true);
+      expect(clickLink(link)).toBe(true);
 
       const expected = { ...DEFAULT_URL_STATE, ra, dec, fov: 0.1667, band, mode: "blink", name };
       expect(urlState()).toEqual(expected);
       expect(useUrlState.getState()).toMatchObject(expected);
+      // El link y el clic llevan al mismo lugar.
+      expect(`/${window.location.search}`).toBe(href);
       // Es una entrada nueva del historial: Atras vuelve a la entrada.
       expect(window.history.length).toBe(before + 1);
-    });
-
-    it("el link y el clic llevan al mismo lugar", () => {
-      render(<EntryPage />);
-
-      for (const link of links()) {
-        const href = link.getAttribute("href") ?? "";
-        act(() => open(""));
-        clickLink(link);
-        expect(`/${window.location.search}`, link.textContent ?? "").toBe(href);
-      }
     });
 
     it.each([
@@ -289,7 +299,7 @@ describe("EntryPage", () => {
       ["Mayus", { shiftKey: true }],
       ["el boton del medio", { button: 1 }],
     ] as const)("con %s el link queda para el navegador", (_name, init) => {
-      render(<EntryPage />);
+      render(<SpherePage />);
 
       expect(clickLink(screen.getByRole("link", { name: "WISE 0855" }), init)).toBe(false);
       expect(urlState()).toEqual(DEFAULT_URL_STATE);
@@ -297,7 +307,7 @@ describe("EntryPage", () => {
 
     it("conservan el idioma pedido en la URL", () => {
       open("?lang=en");
-      render(<EntryPage />);
+      render(<SpherePage />);
 
       for (const [index, link] of links().entries()) {
         expect(link.getAttribute("href")).toBe(`${LINKS[index]?.[1]}&lang=en`);
@@ -313,15 +323,16 @@ describe("EntryPage", () => {
     it("por nombre: abre el campo en la posicion propagada, con el nombre buscado", async () => {
       const answer = deferred();
       const fake = backend(() => answer.promise);
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
       const before = window.history.length;
 
       searchFor("  Barnard's Star ");
 
-      // Resolviendo: se dice, y no se puede volver a enviar.
+      // Resolviendo: se dice, y no se puede volver a enviar ni pedir otro lugar.
       expect(fake.names).toEqual(["Barnard's Star"]);
-      expect(screen.getByRole("status").textContent).toBe("Buscando Barnard's Star…");
+      expect(announced()).toBe("Buscando Barnard's Star…");
       expect(submitButton().disabled).toBe(true);
+      expect(randomButton().disabled).toBe(true);
       expect(screen.getByRole("search").getAttribute("aria-busy")).toBe("true");
       expect(urlState()).toEqual(DEFAULT_URL_STATE);
 
@@ -347,7 +358,7 @@ describe("EntryPage", () => {
 
     it("el boton y la tecla Enter envian lo mismo", async () => {
       const fake = backend(() => json(BARNARD));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       fireEvent.change(input(), { target: { value: "Barnard's Star" } });
       fireEvent.click(submitButton());
@@ -358,7 +369,7 @@ describe("EntryPage", () => {
 
     it("por coordenadas: pasa por /api/resolve y abre el campo sin nombre", async () => {
       const fake = backend((name) => json(coordinates(name, 133.7598, -7.2422)));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("133.7598 -7.2422");
 
@@ -370,7 +381,7 @@ describe("EntryPage", () => {
 
     it("unas coordenadas copiadas de la interfaz se mandan con el signo menos del teclado", async () => {
       const fake = backend((name) => json(coordinates(name, 133.7583, -7.2422)));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       // Asi muestra el visor una declinacion negativa: con U+2212.
       searchFor("08h 55m 02s −07° 14′ 32″");
@@ -383,7 +394,7 @@ describe("EntryPage", () => {
       const fake = backend((name) =>
         name === "WISE J085510.83-071442.5" ? json(WISE_0855) : errorResponse("not_resolved", 404),
       );
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("wise 0855");
 
@@ -401,7 +412,7 @@ describe("EntryPage", () => {
     it("abre con la vista, la banda y el modo por defecto aunque la URL traiga otros", async () => {
       open("?fov=0.5&band=6&mode=sum&epoch=2&lang=en&embed=1");
       const fake = backend(() => json(BARNARD));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnard's Star");
 
@@ -422,27 +433,31 @@ describe("EntryPage", () => {
 
     it("vacio o con solo espacios no pide nada", () => {
       const fake = backend(() => json(BARNARD));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       fireEvent.submit(screen.getByRole("search"));
       searchFor("   ");
 
       expect(fake.names).toEqual([]);
-      expect(screen.getByRole("status").textContent).toBe("");
+      expect(announced()).toBe("");
       expect(screen.queryByRole("alert")).toBeNull();
     });
 
     // ---- Fallos ------------------------------------------------------------
 
     const NOT_RESOLVED = `${esErrors.code.not_resolved} ${esEntry.search.advice.not_resolved}`;
-    const UPSTREAM = `${esErrors.code.upstream_unavailable} ${esEntry.search.advice.upstream_unavailable}`;
+    // Lo caido es el servicio de nombres: no sale el texto generico del archivo de datos.
+    const NAME_SERVICE_DOWN = esEntry.search.nameServiceDown.replace(
+      "{{coordinates}}",
+      "269.4463 +4.7683",
+    );
 
     it.each([
       ["nombre no encontrado", () => errorResponse("not_resolved", 404), NOT_RESOLVED],
       [
         "servicio de nombres caido",
         () => errorResponse("upstream_unavailable", 503, true),
-        UPSTREAM,
+        NAME_SERVICE_DOWN,
       ],
       ["red caida", () => Promise.reject(new TypeError("Failed to fetch")), esErrors.code.network],
       [
@@ -461,10 +476,10 @@ describe("EntryPage", () => {
         esErrors.code.unknown,
       ],
     ] as const)(
-      "%s: avisa con el texto de errors y devuelve el foco al campo",
+      "%s: avisa con su texto y devuelve el foco al campo",
       async (_case, respond, message) => {
         const fake = backend(respond);
-        render(<EntryPage resolver={fake.resolver} />);
+        render(<SpherePage resolver={fake.resolver} />);
 
         // La persona envio con el boton: el foco estaba ahi.
         fireEvent.change(input(), { target: { value: "Barnad Star" } });
@@ -480,12 +495,24 @@ describe("EntryPage", () => {
         expect(input().value).toBe("Barnad Star");
         expect(submitButton().disabled).toBe(false);
         expect(screen.getByRole("search").getAttribute("aria-busy")).toBe("false");
-        expect(screen.getByRole("status").textContent).toBe("");
+        expect(announced()).toBe("");
         // No se abrio ningun campo.
         expect(urlState()).toEqual(DEFAULT_URL_STATE);
         expect(fake.names).toEqual(["Barnad Star"]);
       },
     );
+
+    it("el aviso del servicio de nombres invita a probar con coordenadas y no nombra al archivo de datos", async () => {
+      const fake = backend(() => errorResponse("upstream_unavailable", 503, true));
+      render(<SpherePage resolver={fake.resolver} />);
+
+      searchFor("M 31");
+
+      const text = (await screen.findByRole("alert")).textContent ?? "";
+      expect(text).toContain("coordenadas");
+      expect(text).toContain("269.4463 +4.7683");
+      expect(text).not.toContain(esErrors.code.upstream_unavailable);
+    });
 
     it("despues de un fallo pasajero se puede reintentar con el mismo texto", async () => {
       let attempt = 0;
@@ -493,15 +520,15 @@ describe("EntryPage", () => {
         attempt += 1;
         return attempt === 1 ? errorResponse("upstream_unavailable", 503, true) : json(BARNARD);
       });
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnard's Star");
-      expect((await screen.findByRole("alert")).textContent).toBe(UPSTREAM);
+      expect((await screen.findByRole("alert")).textContent).toBe(NAME_SERVICE_DOWN);
 
       fireEvent.submit(screen.getByRole("search"));
       // Mientras reintenta no queda el error anterior a la vista.
       expect(screen.queryByRole("alert")).toBeNull();
-      expect(screen.getByRole("status").textContent).toBe("Buscando Barnard's Star…");
+      expect(announced()).toBe("Buscando Barnard's Star…");
 
       await waitFor(() => expect(useUrlState.getState().ra).toBe(269.4463));
       expect(fake.names).toEqual(["Barnard's Star", "Barnard's Star"]);
@@ -509,7 +536,7 @@ describe("EntryPage", () => {
 
     it("al corregir el texto se borra el error", async () => {
       const fake = backend(() => errorResponse("not_resolved", 404));
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnad Star");
       await screen.findByRole("alert");
@@ -524,7 +551,7 @@ describe("EntryPage", () => {
     it("al cambiar el texto mientras busca se cancela el pedido y su respuesta no abre nada", async () => {
       const answer = deferred();
       const fake = backend(() => answer.promise);
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnard's Star");
       expect(fake.signals[0]?.aborted).toBe(false);
@@ -533,7 +560,7 @@ describe("EntryPage", () => {
 
       expect(fake.signals[0]?.aborted).toBe(true);
       expect(submitButton().disabled).toBe(false);
-      expect(screen.getByRole("status").textContent).toBe("");
+      expect(announced()).toBe("");
 
       // La respuesta llega igual, tarde: no se navega ni se muestra un error.
       await act(async () => {
@@ -547,7 +574,7 @@ describe("EntryPage", () => {
     it("al elegir un destacado mientras busca gana el destacado", async () => {
       const answer = deferred();
       const fake = backend(() => answer.promise);
-      render(<EntryPage resolver={fake.resolver} />);
+      render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnard's Star");
       clickLink(screen.getByRole("link", { name: "R Draconis" }));
@@ -567,7 +594,7 @@ describe("EntryPage", () => {
         deliver = done;
       });
       const resolver: NameResolver = { resolve: () => answered };
-      render(<EntryPage resolver={resolver} />);
+      render(<SpherePage resolver={resolver} />);
 
       searchFor("Barnard's Star");
       clickLink(screen.getByRole("link", { name: "R Draconis" }));
@@ -581,7 +608,7 @@ describe("EntryPage", () => {
 
     it("al salir de la entrada no queda ningun pedido en camino", () => {
       const fake = backend(() => deferred().promise);
-      const { unmount } = render(<EntryPage resolver={fake.resolver} />);
+      const { unmount } = render(<SpherePage resolver={fake.resolver} />);
 
       searchFor("Barnard's Star");
       unmount();
@@ -594,7 +621,7 @@ describe("EntryPage", () => {
 
   describe("idioma", () => {
     it("elegir un idioma lo lleva a la URL, que es de donde lo toma la aplicacion", () => {
-      render(<EntryPage />);
+      render(<SpherePage />);
       const before = window.history.length;
 
       fireEvent.click(screen.getByRole("radio", { name: "English" }));
@@ -605,18 +632,18 @@ describe("EntryPage", () => {
       expect(window.history.length).toBe(before);
     });
 
-    it("en ingles todos los textos salen del ingles, con punto decimal", async () => {
+    it("en ingles todos los textos salen del ingles", async () => {
       await setLanguage("en");
-      const fake = backend(() => errorResponse("not_resolved", 404));
-      render(<EntryPage resolver={fake.resolver} />);
-
-      expect(screen.getByRole("heading", { level: 1, name: enEntry.headline })).toBeTruthy();
-      expect(screen.getByText(enEntry.lead)).toBeTruthy();
-      expect(screen.getByText("0.75 to 5 µm").closest("p")?.textContent).toBe(
-        "NASA's SPHEREx mission · 0.75 to 5 µm",
+      const fake = backend((name) =>
+        name === "M 31"
+          ? errorResponse("upstream_unavailable", 503, true)
+          : errorResponse("not_resolved", 404),
       );
-      expect(screen.getByRole("navigation", { name: enEntry.featured.nav })).toBeTruthy();
-      expect(screen.getByRole("heading", { level: 2, name: enEntry.featured.title })).toBeTruthy();
+      render(<SpherePage resolver={fake.resolver} />);
+
+      expect(screen.getByText(enSphere.status.noWebgl)).toBeTruthy();
+      expect(screen.getByRole("navigation", { name: enSphere.markers.nav })).toBeTruthy();
+      expect(screen.getByRole("button", { name: enSphere.random })).toBeTruthy();
       expect((screen.getByRole("radio", { name: "English" }) as HTMLInputElement).checked).toBe(
         true,
       );
@@ -627,11 +654,19 @@ describe("EntryPage", () => {
       fireEvent.change(field, { target: { value: "Barnad Star" } });
       fireEvent.click(screen.getByRole("button", { name: enEntry.search.submit }));
 
-      expect(screen.getByRole("status").textContent).toBe("Searching for Barnad Star…");
+      expect(announced()).toBe("Searching for Barnad Star…");
       expect((await screen.findByRole("alert")).textContent).toBe(
         `${enErrors.code.not_resolved} ${enEntry.search.advice.not_resolved}`,
       );
       expect(document.activeElement).toBe(field);
+
+      fireEvent.change(field, { target: { value: "M 31" } });
+      fireEvent.submit(screen.getByRole("search"));
+      await waitFor(() =>
+        expect(screen.getByRole("alert").textContent).toBe(
+          enEntry.search.nameServiceDown.replace("{{coordinates}}", "269.4463 +4.7683"),
+        ),
+      );
     });
   });
 });

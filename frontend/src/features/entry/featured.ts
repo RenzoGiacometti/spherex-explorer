@@ -1,6 +1,10 @@
 // Objetos destacados de la entrada: los cinco objetos de prueba de SPEC.md
 // (seccion 1), cada uno con el link completo a su campo en el visor.
 //
+// Es la unica lista de estos objetos. La esfera (src/features/sphere) la usa
+// para sus marcadores y le suma los demas campos precalculados para "Lugar al
+// azar" (src/features/sphere/targets.ts).
+//
 // El centro de cada campo es `field_center` de GET /api/resolve: la posicion
 // propagada a la epoca 2026,0 y redondeada a 4 decimales
 // (docs/contrato-cubo.md, seccion 4.8). Para Barnard y WISE 0855 la posicion
@@ -107,11 +111,11 @@ export function typedCoordinates(object: FeaturedObject): string {
   return `${object.ra.toFixed(4)} ${sign}${Math.abs(object.dec).toFixed(4)}`;
 }
 
-/** Parte del estado de la URL que abre un campo en el visor. */
-export type ViewerUrlPatch = Pick<
-  UrlState,
-  "ra" | "dec" | "fov" | "band" | "mode" | "epoch" | "name"
->;
+/** Parte del estado de la URL que abre un campo en el visor: siempre con coordenadas. */
+export type ViewerUrlPatch = Pick<UrlState, "fov" | "band" | "mode" | "epoch" | "name"> & {
+  readonly ra: number;
+  readonly dec: number;
+};
 
 /** Estado de URL que abre el campo de un objeto destacado: vista de 10 minutos y su banda. */
 export function featuredUrlPatch(object: FeaturedObject): ViewerUrlPatch {

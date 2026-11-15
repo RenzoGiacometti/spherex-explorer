@@ -193,7 +193,8 @@ export function SkySphere(props: SkySphereProps) {
       data-status={status}
       data-interactive={interactive}
     >
-      <nav className={styles.markers} aria-label={markersLabel}>
+      {/* Sin esfera no hay donde ubicar los marcadores: quien la usa ofrece los links de otra forma. */}
+      <nav className={styles.markers} aria-label={markersLabel} hidden={status === "no-webgl"}>
         {markers.map((marker) =>
           marker.href === undefined ? (
             <span

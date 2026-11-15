@@ -1,9 +1,10 @@
 // Textos de la esfera, en espanol e ingles (sphere.es.json, sphere.en.json).
 //
 // Van al lado de la funcionalidad y se suman a i18next al cargar este modulo,
-// igual que los de las paginas de desarrollo (src/dev/devTexts.ts). Cuando la
-// esfera pase a ser la entrada, el namespace se puede mudar a
-// src/i18n/locales y registrarse en src/i18n/resources.ts como los demas.
+// igual que los de las paginas de desarrollo (src/dev/devTexts.ts). Los del
+// buscador no estan aca: son los del namespace `entry` (src/i18n/locales). El
+// resto se puede mudar a src/i18n/locales y registrarse en
+// src/i18n/resources.ts como los demas.
 //
 // Como el namespace no esta en los tipos de i18next (src/i18n/i18next.d.ts),
 // `useSphereTexts` tipa las claves con el JSON en espanol: una clave que no

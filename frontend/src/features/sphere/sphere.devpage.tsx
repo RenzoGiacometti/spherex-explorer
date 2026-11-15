@@ -20,11 +20,11 @@
 // marcadores y "Lugar al azar" no.
 
 import type { DevPage } from "@/dev/devPages";
+import { type ViewerUrlPatch, viewerHref } from "@/features/entry";
 import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import type { SkyMarker } from "./SkySphere";
 import { SpherePage } from "./SpherePage";
-import { type FieldUrlPatch, viewerHref } from "./targets";
 
 /**
  * Estrellas brillantes repartidas por todo el cielo, en grados ICRS (J2000).
@@ -59,7 +59,7 @@ function parseNumber(text: string | null): number | undefined {
 }
 
 /** Carga la URL del visor, sin `dev`: asi se ve el visor de verdad con ese campo. */
-function openInViewer(patch: FieldUrlPatch): void {
+function openInViewer(patch: ViewerUrlPatch): void {
   const { embed, lang } = useUrlState.getState();
   window.location.assign(viewerHref({ ...DEFAULT_URL_STATE, embed, lang, ...patch }));
 }

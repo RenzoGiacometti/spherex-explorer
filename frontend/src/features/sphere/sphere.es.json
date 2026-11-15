@@ -4,16 +4,6 @@
   },
   "hint": "Arrastrar para girar el cielo",
   "center": "Centro",
-  "search": {
-    "label": "Buscar por nombre o coordenadas",
-    "submit": "Buscar",
-    "example": "{{name}} · {{coordinates}}",
-    "resolving": "Buscando {{query}}…",
-    "advice": {
-      "not_resolved": "Se puede probar con otro nombre o con coordenadas.",
-      "upstream_unavailable": "La búsqueda por coordenadas sigue funcionando."
-    }
-  },
   "random": "Lugar al azar",
   "markers": {
     "nav": "Objetos destacados",

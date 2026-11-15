@@ -10,6 +10,16 @@ import {
   SearchField,
 } from "@/components";
 import type { NameResolver } from "@/data/nameResolver";
+import {
+  type FeaturedObject,
+  type FoundPlace,
+  featuredUrlPatch,
+  SEARCH_EXAMPLE,
+  typedCoordinates,
+  useObjectSearch,
+  type ViewerUrlPatch,
+  viewerHref,
+} from "@/features/entry";
 import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_VIEW_FOV } from "@/lib/fov";
@@ -19,18 +29,9 @@ import { type SkyMarker, SkySphere, type SkySphereHandle, type SkySphereStatus }
 import { SkyWindowOverlay, WINDOW_RETICLE_SIZE } from "./SkyWindowOverlay";
 import styles from "./SpherePage.module.css";
 import { angularSeparation, clamp } from "./skyMath";
-import {
-  type FieldUrlPatch,
-  pickRandomField,
-  SEARCH_EXAMPLE,
-  SKY_TARGETS,
-  type SkyTarget,
-  targetUrlPatch,
-  viewerHref,
-} from "./targets";
+import { pickRandomField, SKY_TARGETS } from "./targets";
 import { useSphereTexts } from "./texts";
 import { useSkyWindow } from "./useSkyWindow";
-import { type FoundPlace, useSphereSearch } from "./useSphereSearch";
 
 /**
  * Vista al entrar: el centro galactico abajo, la Via Lactea cruzando la
@@ -71,7 +72,7 @@ interface Nearest {
 }
 
 function nearestTarget(view: SkyView): Nearest | null {
-  let best: { target: SkyTarget; distance: number } | null = null;
+  let best: { target: FeaturedObject; distance: number } | null = null;
   for (const target of SKY_TARGETS) {
     const distance = angularSeparation(view, target);
     if (best === null || distance < best.distance) best = { target, distance };
@@ -93,7 +94,7 @@ export interface SpherePageProps {
    * Abre un campo en el visor. Por defecto escribe el campo en la URL, y
    * App.tsx muestra el visor. La pagina de prueba pasa la suya.
    */
-  readonly onOpenField?: ((patch: FieldUrlPatch) => void) | undefined;
+  readonly onOpenField?: ((patch: ViewerUrlPatch) => void) | undefined;
   readonly initialView?: SkyView | undefined;
   /** Grados por segundo de la deriva inicial; 0 la apaga. */
   readonly driftRate?: number | undefined;
@@ -111,11 +112,17 @@ export interface SpherePageProps {
 }
 
 /**
- * Pantalla de entrada con la esfera celeste (SPEC.md, Etapa 4): el cielo a
- * pantalla completa, los cinco objetos de prueba marcados, el buscador y el
- * boton "Lugar al azar". Elegir un lugar acerca la camara al punto y abre su
- * campo en el visor. En un telefono suma la "ventana al cielo": la esfera
- * sigue la direccion a la que apunta el aparato.
+ * Pantalla de entrada de la aplicacion: lo que se ve cuando la URL no trae
+ * coordenadas (SPEC.md, Etapa 4). El cielo a pantalla completa, los cinco
+ * objetos de prueba marcados, el buscador y el boton "Lugar al azar". Elegir un
+ * lugar acerca la camara al punto y abre su campo en el visor. En un telefono
+ * suma la "ventana al cielo": la esfera sigue la direccion a la que apunta el
+ * aparato.
+ *
+ * El buscador es uno solo: se ve como lo dibuja esta pantalla y busca con la
+ * logica de src/features/entry (useObjectSearch). Si el navegador no puede
+ * dibujar la esfera, quedan el buscador, "Lugar al azar" y los objetos
+ * destacados como links.
  */
 export function SpherePage({
   resolver,
@@ -128,6 +135,7 @@ export function SpherePage({
   allowRelativeOrientation,
 }: SpherePageProps) {
   const t = useSphereTexts();
+  const { t: tEntry } = useTranslation("entry");
   const { t: tCommon } = useTranslation("common");
   const { t: tErrors } = useTranslation("errors");
   const language = useLanguage();
@@ -152,7 +160,7 @@ export function SpherePage({
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
   );
-  const search = useSphereSearch(resolver);
+  const search = useObjectSearch(resolver);
   const { status } = search;
 
   const skyWindow = useSkyWindow({
@@ -227,9 +235,9 @@ export function SpherePage({
     [onOpenField, setFade, updateUrl],
   );
 
-  function openTarget(target: SkyTarget): void {
+  function openTarget(target: FeaturedObject): void {
     search.reset();
-    void openPlace({ label: target.label, patch: targetUrlPatch(target) });
+    void openPlace({ label: target.label, patch: featuredUrlPatch(target) });
   }
 
   /** Con una tecla modificadora, o con otro boton, el navegador abre el link por su cuenta. */
@@ -260,13 +268,10 @@ export function SpherePage({
   }
 
   async function handleSubmit(text: string): Promise<void> {
-    const place = await search.submit(text);
-    if (place === null) {
-      // Despues de un fallo el foco vuelve al campo, para corregir o reintentar.
-      inputRef.current?.focus();
-      return;
-    }
-    await openPlace(place);
+    const result = await search.submit(text);
+    // Despues de un fallo el foco vuelve al campo, para corregir o reintentar.
+    if (result.outcome === "failed") inputRef.current?.focus();
+    if (result.outcome === "found") await openPlace(result.place);
   }
 
   function handleQueryChange(value: string): void {
@@ -328,8 +333,8 @@ export function SpherePage({
   }
 
   const targetHref = useCallback(
-    (target: SkyTarget): string =>
-      viewerHref({ ...DEFAULT_URL_STATE, embed, lang: urlLanguage, ...targetUrlPatch(target) }),
+    (target: FeaturedObject): string =>
+      viewerHref({ ...DEFAULT_URL_STATE, embed, lang: urlLanguage, ...featuredUrlPatch(target) }),
     [embed, urlLanguage],
   );
 
@@ -348,9 +353,12 @@ export function SpherePage({
     [extraMarkers, t, targetHref],
   );
 
-  const example = t("search.example", {
+  // En grados y con los 4 decimales del centro del campo: quien lo tipea abre
+  // el campo precalculado y no uno casi igual.
+  const exampleCoordinates = typedCoordinates(SEARCH_EXAMPLE);
+  const example = tEntry("search.example", {
     name: SEARCH_EXAMPLE.label,
-    coordinates: formatPosition(SEARCH_EXAMPLE.ra, SEARCH_EXAMPLE.dec),
+    coordinates: exampleCoordinates,
   });
 
   // Un solo renglon debajo del campo: lo que esta pasando o, en reposo, como se usa la esfera.
@@ -360,7 +368,7 @@ export function SpherePage({
     hintText = t("opening", { name: opening });
     liveText = hintText;
   } else if (status.kind === "resolving") {
-    hintText = t("search.resolving", { query: status.query });
+    hintText = tEntry("search.resolving", { query: status.query });
     liveText = hintText;
   } else if (windowState.kind === "starting") {
     hintText = t("window.starting");
@@ -369,13 +377,19 @@ export function SpherePage({
 
   let errorText: string | undefined;
   if (status.kind === "error" && opening === null) {
-    const message = tErrors(`code.${status.code}`);
-    // Los dos fallos que tienen una salida a mano la dicen al lado del motivo.
-    const advice =
-      status.code === "not_resolved" || status.code === "upstream_unavailable"
-        ? t(`search.advice.${status.code}`)
-        : null;
-    errorText = advice === null ? message : `${message} ${advice}`;
+    if (status.code === "upstream_unavailable") {
+      // /api/resolve solo sale a la red por un nombre: lo caido es el servicio
+      // de nombres, no el archivo de datos del texto generico. Las coordenadas
+      // no pasan por el, asi que se invita a probar con ellas.
+      errorText = tEntry("search.nameServiceDown", { coordinates: exampleCoordinates });
+    } else {
+      const message = tErrors(`code.${status.code}`);
+      // Un nombre que no existe tiene una salida a mano: se dice al lado del motivo.
+      errorText =
+        status.code === "not_resolved"
+          ? `${message} ${tEntry("search.advice.not_resolved")}`
+          : message;
+    }
     hintText = undefined;
   }
 
@@ -469,11 +483,11 @@ export function SpherePage({
             <div className={styles.searchRow}>
               <SearchField
                 className={styles.search}
-                label={t("search.label")}
+                label={tEntry("search.label")}
                 value={query}
                 onChange={handleQueryChange}
                 onSubmit={(text) => void handleSubmit(text)}
-                submitLabel={t("search.submit")}
+                submitLabel={tEntry("search.submit")}
                 placeholder={example}
                 hint={hintText}
                 error={errorText}

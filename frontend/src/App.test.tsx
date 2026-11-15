@@ -13,10 +13,10 @@ import type { FakeBackend } from "./state/fieldStore.testkit";
 import { useUrlState } from "./state/urlState";
 import wiseMeta from "./test/fixtures/meta-wise0855.json";
 
-// La entrada es de otra pantalla y tiene sus propios tests: aca alcanza con
-// saber si es lo que se muestra.
-vi.mock("@/features/entry", () => ({
-  EntryPage: () => <main data-testid="entry" />,
+// La entrada es la esfera celeste, que tiene sus propios tests y dibuja con
+// WebGL (jsdom no lo tiene): aca alcanza con saber si es lo que se muestra.
+vi.mock("@/features/sphere", () => ({
+  SpherePage: () => <main data-testid="entry" />,
 }));
 
 const WISE = "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink";

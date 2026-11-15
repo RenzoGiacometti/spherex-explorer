@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { DevPageHost } from "@/dev/DevPageHost";
-import { EntryPage } from "@/features/entry";
+import { SpherePage } from "@/features/sphere";
 import { ViewerPage } from "@/features/viewer";
 import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
 import { useFieldUrlSync } from "@/state/fieldUrlSync";
@@ -8,7 +8,8 @@ import { useUrlState } from "@/state/urlState";
 
 /**
  * Cascaron de la aplicacion. La URL decide que se ve: sin coordenadas, la
- * entrada; con `ra` y `dec`, el visor (SPEC.md, seccion 3.3).
+ * entrada, que es la esfera celeste (src/features/sphere); con `ra` y `dec`, el
+ * visor (SPEC.md, seccion 3.3).
  */
 export function App() {
   const showViewer = useUrlState((state) => state.ra !== null && state.dec !== null);
@@ -29,5 +30,5 @@ export function App() {
     : null;
   if (devPage) return <DevPageHost id={devPage} />;
 
-  return showViewer ? <ViewerPage /> : <EntryPage />;
+  return showViewer ? <ViewerPage /> : <SpherePage />;
 }
