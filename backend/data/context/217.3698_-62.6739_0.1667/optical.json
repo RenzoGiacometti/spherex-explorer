@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "key": "217.3698_-62.6739_0.1667",
+  "grid": {
+    "projection": "TAN",
+    "crval": [
+      217.3698,
+      -62.6739
+    ],
+    "crpix": [
+      98.0,
+      98.0
+    ],
+    "cdelt": [
+      -0.000854166667,
+      0.000854166667
+    ],
+    "shape": [
+      195,
+      195
+    ],
+    "fov": 0.1667,
+    "pixel_scale_arcsec": 3.075,
+    "native_pixel_scale_arcsec": 6.15
+  },
+  "layers": [
+    {
+      "key": "dss1",
+      "survey": "DSS",
+      "generation": "DSS1",
+      "band": "Bj",
+      "wave_um": 0.47,
+      "file": "dss1.f32",
+      "mjd": 42848.0,
+      "date": "1976-03-11",
+      "year": 1976.19,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.6999,
+      "display": {
+        "vmin": -1030.35,
+        "vmax": 13421.4,
+        "median": 0.0,
+        "sigma": 515.173
+      },
+      "valid_fraction": 1.0,
+      "plate": "J2098",
+      "plate_survey": "SERC-J",
+      "telescope": "UK Schmidt - Singl",
+      "emulsion": "IIIaJ",
+      "filter": "GG395",
+      "exposure_min": 70.0,
+      "copyright": "AAO/ROE",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=phase2_gsc1&r=217.369800&d=-62.673900&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": {
+        "ra": 217.483067,
+        "dec": -62.684678,
+        "x": 36.15,
+        "y": 84.33,
+        "in_field": true
+      }
+    },
+    {
+      "key": "dss2_red",
+      "survey": "DSS",
+      "generation": "DSS2",
+      "band": "R",
+      "wave_um": 0.65,
+      "file": "dss2_red.f32",
+      "mjd": 50518.0,
+      "date": "1997-03-11",
+      "year": 1997.19,
+      "unit": "plate density",
+      "native_pixel_scale_arcsec": 1.0083,
+      "display": {
+        "vmin": -601.772,
+        "vmax": 12778.7,
+        "median": 0.0,
+        "sigma": 300.886
+      },
+      "valid_fraction": 1.0,
+      "plate": "OR17454",
+      "plate_survey": "AAO-GR",
+      "telescope": "UK Schmidt - Doubl",
+      "emulsion": "IIIaF",
+      "filter": "OG590",
+      "exposure_min": 5.0,
+      "copyright": "AAO/ROE",
+      "url": "https://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=217.369800&d=-62.673900&e=J2000&h=14.55&w=14.55&f=fits&c=none&fov=NONE&v3=",
+      "date_reliable": true,
+      "target": {
+        "ra": 217.434965,
+        "dec": -62.680126,
+        "x": 61.99,
+        "y": 89.69,
+        "in_field": true
+      }
+    }
+  ],
+  "generated_at": "2026-11-15T17:59:23Z"
+}
