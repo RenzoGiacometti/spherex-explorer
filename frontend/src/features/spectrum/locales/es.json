@@ -19,7 +19,7 @@
     "axisY": "Flujo",
     "hint": "Mover el cursor sobre el gráfico, o usar las flechas, para leer un valor.",
     "readout": "λ {{wavelength}} · {{flux}} ± {{error}} mJy",
-    "readoutBand": "{{band}} · {{n}} exposiciones",
+    "readoutBand": "{{band}} · exposiciones: {{n}}",
     "saturatedBand": "saturada",
     "noDataBand": "sin datos",
     "legendBinned": "Promedio por canal, con su error",

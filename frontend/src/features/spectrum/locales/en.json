@@ -19,7 +19,7 @@
     "axisY": "Flux",
     "hint": "Move the pointer over the chart, or use the arrow keys, to read a value.",
     "readout": "λ {{wavelength}} · {{flux}} ± {{error}} mJy",
-    "readoutBand": "{{band}} · {{n}} exposures",
+    "readoutBand": "{{band}} · exposures: {{n}}",
     "saturatedBand": "saturated",
     "noDataBand": "no data",
     "legendBinned": "Average per channel, with its error",

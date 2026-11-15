@@ -36,13 +36,15 @@ export interface SpectrumChartProps {
   readonly playhead?: number | null;
 }
 
-const MARGIN = { top: 40, right: 12, bottom: 34, left: 52 } as const;
+const MARGIN = { right: 12, bottom: 34, left: 52 } as const;
+/** Alto de un renglon de formulas sobre el grafico, px. */
+const LABEL_ROW_PX = 15;
 const DEFAULT_WIDTH = 640;
 const WIDE_HEIGHT = 320;
 const NARROW_HEIGHT = 260;
 const NARROW_WIDTH = 520;
 /** Separacion minima entre dos formulas en el mismo renglon, px. */
-const LABEL_GAP_PX = 36;
+const LABEL_GAP_PX = 34;
 
 function useWidth(): [React.RefObject<HTMLDivElement | null>, number] {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -95,11 +97,14 @@ export function SpectrumChart({
   const [active, setActive] = useState<number | null>(null);
 
   const bins = spectrum.binned;
-  const height = width < NARROW_WIDTH ? NARROW_HEIGHT : WIDE_HEIGHT;
+  const narrow = width < NARROW_WIDTH;
+  const height = narrow ? NARROW_HEIGHT : WIDE_HEIGHT;
+  // En una pantalla angosta las bandas quedan pegadas: las formulas se reparten en un renglon mas.
+  const labelRows = narrow ? 3 : 2;
   const plot = {
     left: MARGIN.left,
     right: width - MARGIN.right,
-    top: MARGIN.top,
+    top: 10 + labelRows * LABEL_ROW_PX,
     bottom: height - MARGIN.bottom,
   };
 
@@ -123,14 +128,16 @@ export function SpectrumChart({
 
   // Formulas en dos renglones cuando dos bandas quedan pegadas.
   const bandLabels = useMemo(() => {
-    const lastX: number[] = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    const lastX: number[] = Array.from({ length: labelRows }, () => Number.NEGATIVE_INFINITY);
     return MOLECULE_BANDS.map((band) => {
       const centre = x(bandCenter(band));
-      const row = centre - (lastX[0] ?? 0) >= LABEL_GAP_PX ? 0 : 1;
+      // El primer renglon con lugar; si no hay ninguno, el que deja mas aire.
+      let row = lastX.findIndex((last) => centre - last >= LABEL_GAP_PX);
+      if (row < 0) row = lastX.indexOf(Math.min(...lastX));
       lastX[row] = centre;
       return { band, centre, row };
     });
-  }, [x]);
+  }, [x, labelRows]);
 
   const layers = useMemo(() => {
     const exposures = showExposures
@@ -256,7 +263,7 @@ export function SpectrumChart({
                 y1={plot.top}
                 y2={plot.top}
               />
-              <text className={styles.bandLabel} x={centre} y={plot.top - 8 - row * 15}>
+              <text className={styles.bandLabel} x={centre} y={plot.top - 8 - row * LABEL_ROW_PX}>
                 {MOLECULE_FORMULA[band.molecule]}
               </text>
             </g>
