@@ -1,0 +1,20 @@
+{
+  "placeholder": {
+    "heading": "Viewer",
+    "body": "The viewer is not built yet. This is the state read from the address."
+  },
+  "field": {
+    "ra": "Right ascension",
+    "dec": "Declination",
+    "fov": "Field of view",
+    "band": "Band",
+    "mode": "Mode"
+  },
+  "mode": {
+    "blink": "Blink",
+    "difference": "Difference",
+    "sum": "Sum",
+    "redcyan": "Red/cyan",
+    "hold": "Press and hold"
+  }
+}

@@ -1,0 +1,14 @@
+# Configuracion de pnpm para el frontend (no es un monorepo: no hay "packages").
+# pnpm 12 lee estas opciones de aca y no de .npmrc.
+
+# Versiones exactas al agregar dependencias (sin ^ ni ~).
+saveExact: true
+
+# pnpm bloquea los scripts de instalacion de las dependencias; estas son las
+# unicas autorizadas. esbuild comprueba su binario en el postinstall.
+# @biomejs/biome 2.6.7 no trae script de instalacion (su binario llega como
+# dependencia opcional), pero queda autorizado por si una version posterior
+# vuelve a necesitarlo.
+allowBuilds:
+  esbuild: true
+  "@biomejs/biome": true

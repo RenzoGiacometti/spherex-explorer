@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# Corre Biome sobre los archivos de frontend/ que estan en el indice.
+# Git ejecuta el hook desde la raiz del repositorio, con el sh de Git.
+#
+# Nunca frena un commit por falta de herramientas: si no hay archivos de
+# frontend en el indice, si las dependencias no estan instaladas o si node no
+# esta en el PATH, avisa y sale con 0. No necesita pnpm: usa el binario que
+# pnpm install deja en node_modules/.bin.
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- frontend)
+[ -n "$staged" ] || exit 0
+
+cd frontend || exit 0
+
+biome=node_modules/.bin/biome
+if [ ! -f "$biome" ]; then
+  echo "pre-commit: faltan las dependencias de frontend (pnpm install); se omite Biome." >&2
+  exit 0
+fi
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node no esta en el PATH; se omite Biome." >&2
+  exit 0
+fi
+
+# Rutas relativas a frontend/, separadas por NUL para tolerar espacios.
+# Biome descarta las que su configuracion ignora (por ejemplo los datos de muestra).
+git diff --cached --name-only --diff-filter=ACMR -z --relative -- . |
+  xargs -0 "$biome" check --no-errors-on-unmatched --files-ignore-unknown=true

@@ -1,0 +1,31 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-height: 100%;
+  padding: var(--space-lg);
+}
+
+.body {
+  max-width: 60ch;
+  color: var(--color-text-mute);
+}
+
+.example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-xs);
+  color: var(--color-text-mute);
+}
+
+.example a {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 599px) {
+  .root {
+    padding: var(--space-sm);
+  }
+}

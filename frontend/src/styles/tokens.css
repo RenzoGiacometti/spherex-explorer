@@ -1,0 +1,301 @@
+/*
+ * Tokens de DESIGN.md como variables CSS.
+ *
+ * Es el UNICO archivo del frontend con colores literales: todo lo demas usa
+ * var(--color-*). Los nombres siguen el front matter de DESIGN.md:
+ *   colors.x      -> --color-x
+ *   typography.x  -> --type-x-family, -size, -weight, -line-height, -tracking,
+ *                    -transform, -numeric y el atajo --type-x-font
+ *   rounded.x     -> --radius-x
+ *   spacing.x     -> --space-x
+ *   effects.x     -> --effect-x
+ *   components.x  -> --x-bg, --x-text, --x-radius, --x-padding, --x-height, --x-size
+ *
+ * src/test/tokens.test.ts compara este archivo con DESIGN.md: si cambia uno,
+ * hay que cambiar el otro.
+ */
+
+:root {
+  /* ---- colors ---------------------------------------------------------- */
+
+  /* Superficie */
+  --color-void: #000000;
+  --color-glass: #08080ab8;
+  --color-glass-solid: #0b0b0d;
+  --color-hairline: #ffffff24;
+  --color-hairline-strong: #ffffff52;
+  --color-divider: #ffffff14;
+
+  /* Texto */
+  --color-text: #ffffff;
+  --color-text-mute: #b4b4bc;
+  --color-text-dim: #8e8e97;
+
+  /* Seleccion: blanco solido con texto negro, nunca acento */
+  --color-selected: #ffffff;
+  --color-on-selected: #000000;
+
+  /*
+   * Acento: el unico color de la interfaz. Cuatro usos y ninguno mas: la mira y
+   * los marcadores, la epoca actual, el avance de la barra de progreso y la
+   * accion principal de la vista.
+   */
+  --color-accent: #ffb020;
+  --color-on-accent: #000000;
+
+  /* ---- typography ------------------------------------------------------ */
+
+  --font-condensed: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* display: titular de la entrada */
+  --type-display-family: var(--font-condensed);
+  --type-display-size: 44px;
+  --type-display-weight: 600;
+  --type-display-line-height: 1.05;
+  --type-display-tracking: 1.2px;
+  --type-display-transform: uppercase;
+  --type-display-numeric: normal;
+  --type-display-font:
+    var(--type-display-weight) var(--type-display-size) / var(--type-display-line-height)
+    var(--type-display-family);
+
+  /* display-sm: titular dentro de un panel */
+  --type-display-sm-family: var(--font-condensed);
+  --type-display-sm-size: 30px;
+  --type-display-sm-weight: 600;
+  --type-display-sm-line-height: 1.08;
+  --type-display-sm-tracking: 0.9px;
+  --type-display-sm-transform: uppercase;
+  --type-display-sm-numeric: normal;
+  --type-display-sm-font:
+    var(--type-display-sm-weight) var(--type-display-sm-size) / var(--type-display-sm-line-height)
+    var(--type-display-sm-family);
+
+  /* title: nombre de objeto */
+  --type-title-family: var(--font-sans);
+  --type-title-size: 20px;
+  --type-title-weight: 600;
+  --type-title-line-height: 1.2;
+  --type-title-tracking: 0;
+  --type-title-transform: none;
+  --type-title-numeric: normal;
+  --type-title-font:
+    var(--type-title-weight) var(--type-title-size) / var(--type-title-line-height)
+    var(--type-title-family);
+
+  /* body: texto de apoyo */
+  --type-body-family: var(--font-sans);
+  --type-body-size: 14px;
+  --type-body-weight: 400;
+  --type-body-line-height: 1.45;
+  --type-body-tracking: 0;
+  --type-body-transform: none;
+  --type-body-numeric: normal;
+  --type-body-font:
+    var(--type-body-weight) var(--type-body-size) / var(--type-body-line-height)
+    var(--type-body-family);
+
+  /* body-sm: etiquetas de fila, avisos */
+  --type-body-sm-family: var(--font-sans);
+  --type-body-sm-size: 13px;
+  --type-body-sm-weight: 400;
+  --type-body-sm-line-height: 1.45;
+  --type-body-sm-tracking: 0;
+  --type-body-sm-transform: none;
+  --type-body-sm-numeric: normal;
+  --type-body-sm-font:
+    var(--type-body-sm-weight) var(--type-body-sm-size) / var(--type-body-sm-line-height)
+    var(--type-body-sm-family);
+
+  /* button-cap: botones */
+  --type-button-cap-family: var(--font-condensed);
+  --type-button-cap-size: 13px;
+  --type-button-cap-weight: 600;
+  --type-button-cap-line-height: 1;
+  --type-button-cap-tracking: 1.2px;
+  --type-button-cap-transform: uppercase;
+  --type-button-cap-numeric: normal;
+  --type-button-cap-font:
+    var(--type-button-cap-weight) var(--type-button-cap-size) / var(--type-button-cap-line-height)
+    var(--type-button-cap-family);
+
+  /* label-cap: encabezados de panel, opciones, estados */
+  --type-label-cap-family: var(--font-condensed);
+  --type-label-cap-size: 11px;
+  --type-label-cap-weight: 600;
+  --type-label-cap-line-height: 1.3;
+  --type-label-cap-tracking: 1.2px;
+  --type-label-cap-transform: uppercase;
+  --type-label-cap-numeric: normal;
+  --type-label-cap-font:
+    var(--type-label-cap-weight) var(--type-label-cap-size) / var(--type-label-cap-line-height)
+    var(--type-label-cap-family);
+
+  /* data: coordenadas, fechas, valores */
+  --type-data-family: var(--font-mono);
+  --type-data-size: 13px;
+  --type-data-weight: 400;
+  --type-data-line-height: 1.4;
+  --type-data-tracking: 0;
+  --type-data-transform: none;
+  --type-data-numeric: tabular-nums;
+  --type-data-font:
+    var(--type-data-weight) var(--type-data-size) / var(--type-data-line-height)
+    var(--type-data-family);
+
+  /* data-sm: ejes, rangos de banda, marcas de la linea de tiempo */
+  --type-data-sm-family: var(--font-mono);
+  --type-data-sm-size: 11px;
+  --type-data-sm-weight: 400;
+  --type-data-sm-line-height: 1.4;
+  --type-data-sm-tracking: 0;
+  --type-data-sm-transform: none;
+  --type-data-sm-numeric: tabular-nums;
+  --type-data-sm-font:
+    var(--type-data-sm-weight) var(--type-data-sm-size) / var(--type-data-sm-line-height)
+    var(--type-data-sm-family);
+
+  /* data-lg: cifra destacada en la ficha del objeto */
+  --type-data-lg-family: var(--font-mono);
+  --type-data-lg-size: 20px;
+  --type-data-lg-weight: 400;
+  --type-data-lg-line-height: 1.4;
+  --type-data-lg-tracking: 0;
+  --type-data-lg-transform: none;
+  --type-data-lg-numeric: tabular-nums;
+  --type-data-lg-font:
+    var(--type-data-lg-weight) var(--type-data-lg-size) / var(--type-data-lg-line-height)
+    var(--type-data-lg-family);
+
+  /* ---- rounded --------------------------------------------------------- */
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-pill: 32px;
+  --radius-full: 9999px;
+
+  /* ---- spacing (unidad base de 4px) ------------------------------------ */
+
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-huge: 48px;
+
+  /* ---- effects --------------------------------------------------------- */
+
+  --effect-glass-blur: 20px;
+  --effect-icon-stroke: 1.5px;
+
+  /* ---- components ------------------------------------------------------ */
+  /* La tipografia de cada componente va en el comentario: se aplica con las
+     clases .type-* de base.css o con las variables --type-*. */
+
+  /* glass-panel (body-sm) */
+  --glass-panel-bg: var(--color-glass);
+  --glass-panel-text: var(--color-text);
+  --glass-panel-radius: var(--radius-sm);
+  --glass-panel-padding: 14px;
+
+  /* button-primary (button-cap) */
+  --button-primary-bg: var(--color-accent);
+  --button-primary-text: var(--color-on-accent);
+  --button-primary-radius: var(--radius-pill);
+  --button-primary-padding: 0px 20px;
+  --button-primary-height: 44px;
+
+  /* button-ghost (button-cap) */
+  --button-ghost-bg: var(--color-void);
+  --button-ghost-text: var(--color-text);
+  --button-ghost-radius: var(--radius-pill);
+  --button-ghost-padding: 0px 20px;
+  --button-ghost-height: 44px;
+
+  /* button-icon */
+  --button-icon-bg: var(--color-void);
+  --button-icon-text: var(--color-text);
+  --button-icon-radius: var(--radius-full);
+  --button-icon-size: 44px;
+
+  /* option (label-cap) */
+  --option-bg: var(--color-void);
+  --option-text: var(--color-text);
+  --option-radius: var(--radius-xs);
+  --option-padding: 0px 8px;
+  --option-height: 36px;
+
+  /* option-selected (label-cap) */
+  --option-selected-bg: var(--color-selected);
+  --option-selected-text: var(--color-on-selected);
+  --option-selected-radius: var(--radius-xs);
+  --option-selected-padding: 0px 8px;
+  --option-selected-height: 36px;
+
+  /* search-field (body) */
+  --search-field-bg: var(--color-glass);
+  --search-field-text: var(--color-text);
+  --search-field-radius: var(--radius-sm);
+  --search-field-padding: 0px 16px;
+  --search-field-height: 56px;
+
+  /* quick-link (body-sm) */
+  --quick-link-bg: var(--color-void);
+  --quick-link-text: var(--color-text);
+  --quick-link-radius: var(--radius-pill);
+  --quick-link-padding: 0px 14px;
+  --quick-link-height: 36px;
+
+  /* data-row (data) */
+  --data-row-bg: var(--color-glass);
+  --data-row-text: var(--color-text);
+  --data-row-radius: var(--radius-xs);
+  --data-row-padding: 6px 0px;
+
+  /* timeline-epoch (data-sm) */
+  --timeline-epoch-bg: var(--color-text);
+  --timeline-epoch-text: var(--color-text-dim);
+  --timeline-epoch-radius: var(--radius-full);
+  --timeline-epoch-size: 8px;
+
+  /* timeline-epoch-current (data-sm) */
+  --timeline-epoch-current-bg: var(--color-accent);
+  --timeline-epoch-current-text: var(--color-text);
+  --timeline-epoch-current-radius: var(--radius-full);
+  --timeline-epoch-current-size: 12px;
+
+  /* timeline-epoch-provisional (data-sm) */
+  --timeline-epoch-provisional-bg: var(--color-void);
+  --timeline-epoch-provisional-text: var(--color-text-dim);
+  --timeline-epoch-provisional-radius: var(--radius-full);
+  --timeline-epoch-provisional-size: 8px;
+
+  /* image-tag (label-cap) */
+  --image-tag-bg: var(--color-glass);
+  --image-tag-text: var(--color-text);
+  --image-tag-radius: var(--radius-pill);
+  --image-tag-padding: 0px 12px;
+  --image-tag-height: 28px;
+
+  /* progress-bar (data-sm) */
+  --progress-bar-bg: var(--color-hairline-strong);
+  --progress-bar-text: var(--color-accent);
+  --progress-bar-radius: var(--radius-xs);
+  --progress-bar-height: 2px;
+
+  /* reticle (label-cap) */
+  --reticle-bg: var(--color-void);
+  --reticle-text: var(--color-accent);
+  --reticle-radius: var(--radius-full);
+  --reticle-size: 64px;
+}
+
+/*
+ * Anchos de "Responsive Behavior" en DESIGN.md. Una variable CSS no se puede
+ * usar dentro de @media, asi que se escriben a mano en cada consulta:
+ *   escritorio: min-width: 1180px
+ *   celular:    max-width: 599px
+ */

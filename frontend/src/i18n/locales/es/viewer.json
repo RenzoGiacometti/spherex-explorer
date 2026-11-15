@@ -1,0 +1,20 @@
+{
+  "placeholder": {
+    "heading": "Visor",
+    "body": "El visor todavía no está construido. Este es el estado leído de la dirección."
+  },
+  "field": {
+    "ra": "Ascensión recta",
+    "dec": "Declinación",
+    "fov": "Campo de visión",
+    "band": "Banda",
+    "mode": "Modo"
+  },
+  "mode": {
+    "blink": "Parpadeo",
+    "difference": "Diferencia",
+    "sum": "Suma",
+    "redcyan": "Rojo/cian",
+    "hold": "Mantener apretado"
+  }
+}

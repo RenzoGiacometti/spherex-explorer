@@ -1,0 +1,12 @@
+# Texto siempre con LF en el arbol de trabajo, tambien en Windows con
+# core.autocrlf=true: Biome exige LF y el hook de husky no corre con CRLF.
+* text=auto eol=lf
+
+# Se repiten los binarios de la raiz porque la regla de arriba pisa su atributo "text".
+*.f32 binary
+*.bin binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

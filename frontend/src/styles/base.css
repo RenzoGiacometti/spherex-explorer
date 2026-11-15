@@ -1,0 +1,125 @@
+/*
+ * Estilos base: lienzo negro puro y tipografia por defecto.
+ * Sin colores literales: solo tokens de tokens.css.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* No hay tema claro (DESIGN.md). */
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-void);
+  color: var(--color-text);
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+dl,
+dd {
+  margin: 0;
+}
+
+/* Los controles heredan la tipografia y el color en vez de usar los del sistema. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+/* Sin el azul ni el violeta que el navegador pone en los enlaces. */
+a {
+  color: inherit;
+}
+
+/* Foco visible en blanco: el acento tiene cuatro usos y este no es uno. */
+:focus-visible {
+  outline: 1px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* ---- Tipografia: una clase por token de DESIGN.md ----------------------- */
+
+.type-display {
+  font: var(--type-display-font);
+  letter-spacing: var(--type-display-tracking);
+  text-transform: var(--type-display-transform);
+}
+
+.type-display-sm {
+  font: var(--type-display-sm-font);
+  letter-spacing: var(--type-display-sm-tracking);
+  text-transform: var(--type-display-sm-transform);
+}
+
+.type-title {
+  font: var(--type-title-font);
+  letter-spacing: var(--type-title-tracking);
+}
+
+.type-body {
+  font: var(--type-body-font);
+  letter-spacing: var(--type-body-tracking);
+}
+
+.type-body-sm {
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.type-button-cap {
+  font: var(--type-button-cap-font);
+  letter-spacing: var(--type-button-cap-tracking);
+  text-transform: var(--type-button-cap-transform);
+}
+
+.type-label-cap {
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+/* Todo dato numerico va en mono con cifras tabulares. */
+.type-data {
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.type-data-sm {
+  font: var(--type-data-sm-font);
+  letter-spacing: var(--type-data-sm-tracking);
+  font-variant-numeric: var(--type-data-sm-numeric);
+}
+
+.type-data-lg {
+  font: var(--type-data-lg-font);
+  letter-spacing: var(--type-data-lg-tracking);
+  font-variant-numeric: var(--type-data-lg-numeric);
+}

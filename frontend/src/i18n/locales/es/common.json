@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "SPHEREx Explorer"
+  },
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  }
+}
