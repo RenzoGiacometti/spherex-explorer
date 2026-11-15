@@ -182,6 +182,7 @@ export function SpherePage({
   const sphereRef = useRef<SkySphereHandle>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const topbarRef = useRef<HTMLElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -281,6 +282,20 @@ export function SpherePage({
     if (fadeRef.current !== null) fadeRef.current.style.opacity = String(opacity);
   }, []);
 
+  /**
+   * Cuanto se ve la interfaz de abajo (buscador, botones, credito y lectura del
+   * centro), de 0 a 1. Al acercarse a un campo con imagen se retira junto con
+   * el cielo, para que nada tape la imagen: en un celular el buscador ocupa
+   * casi media pantalla.
+   */
+  const setChrome = useCallback((opacity: number) => {
+    const page = pageRef.current;
+    if (page === null) return;
+    page.style.setProperty("--sphere-chrome", String(opacity));
+    // Invisible del todo, tampoco recibe el puntero ni el foco.
+    page.dataset.chrome = opacity <= 0.01 ? "hidden" : "shown";
+  }, []);
+
   /** Acerca la camara al lugar y abre su campo. Un arrastre a mitad de camino lo cancela. */
   const openPlace = useCallback(
     async (place: FoundPlace): Promise<void> => {
@@ -297,7 +312,13 @@ export function SpherePage({
       let arrived = true;
       if (hasScene && patch !== undefined) {
         arrived = await sphere.flyToPatch(patch.id, {
-          onProgress: (progress) => sphere.setSkyDim(fadeAt(progress)),
+          // La imagen no llega hasta la barra superior.
+          inset: topbarRef.current?.offsetHeight ?? 0,
+          onProgress: (progress) => {
+            const fade = fadeAt(progress);
+            sphere.setSkyDim(fade);
+            setChrome(1 - fade);
+          },
         });
         if (arrived) await wait(PATCH_DWELL_MS);
       } else if (hasScene) {
@@ -309,6 +330,7 @@ export function SpherePage({
 
       if (!arrived) {
         setFade(0);
+        setChrome(1);
         sphere?.setSkyDim(0);
         openingRef.current = false;
         setOpening(null);
@@ -323,6 +345,7 @@ export function SpherePage({
       restoreTimerRef.current = window.setTimeout(() => {
         restoreTimerRef.current = null;
         setFade(0);
+        setChrome(1);
         sphereRef.current?.setSkyDim(0);
         openingRef.current = false;
         setOpening(null);
@@ -332,7 +355,7 @@ export function SpherePage({
         );
       }, RESTORE_DELAY_MS);
     },
-    [onOpenField, setFade, updateUrl],
+    [onOpenField, setChrome, setFade, updateUrl],
   );
 
   function openTarget(target: FeaturedObject): void {
@@ -578,7 +601,7 @@ export function SpherePage({
         />
       ) : null}
 
-      <header className={styles.topbar}>
+      <header ref={topbarRef} className={styles.topbar}>
         <p className={styles.brand}>{tCommon("app.name")}</p>
         {windowOn ? (
           // En la ventana al cielo, arriba solo queda la salida.

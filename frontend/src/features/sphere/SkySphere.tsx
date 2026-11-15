@@ -5,7 +5,7 @@ import skyTextureUrl from "./assets/cielo-nasa-svs-4k.jpg";
 // El mismo mapa en 8k. Importarlo solo trae su URL: la imagen se pide al acercarse.
 import skyDetailTextureUrl from "./assets/cielo-nasa-svs-8k.jpg";
 import { SKY_PATCHES } from "./patches";
-import { type FlyOptions, SkyScene, type SkyView } from "./SkyScene";
+import { type FlyOptions, type PatchFlyOptions, SkyScene, type SkyView } from "./SkyScene";
 import styles from "./SkySphere.module.css";
 import { attachSkyControls, type SkyControls } from "./skyControls";
 import type { Quat, SkyPosition } from "./skyMath";
@@ -43,7 +43,7 @@ export interface SkySphereHandle {
    * la vista. Da true cuando la imagen ya se ve, y false si no hay esfera, no
    * existe el parche o el vuelo se interrumpio.
    */
-  flyToPatch(id: string, options?: Omit<FlyOptions, "fov">): Promise<boolean>;
+  flyToPatch(id: string, options?: PatchFlyOptions): Promise<boolean>;
   /** Oscurece el cielo, de 0 a 1, sin tocar los parches. */
   setSkyDim(amount: number): void;
   getView(): SkyView | null;

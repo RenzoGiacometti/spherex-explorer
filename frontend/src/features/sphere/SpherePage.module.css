@@ -14,7 +14,7 @@
   color: var(--color-text);
 }
 
-/* Fundido a negro al abrir un campo. Tapa el cielo, no la interfaz. */
+/* Fundido a negro al abrir un lugar sin imagen. Tapa el cielo, no la interfaz. */
 .fade {
   position: absolute;
   inset: 0;
@@ -358,4 +358,19 @@
     max-width: 100%;
     text-align: center;
   }
+}
+
+/*
+ * Al acercarse a un campo que tiene imagen, la interfaz de abajo se retira con
+ * el cielo (`--sphere-chrome`, de 1 a 0) y queda la imagen sola: el buscador no
+ * la tapa. Retirada del todo, tampoco recibe el puntero ni el foco.
+ */
+.bottom,
+.readout {
+  opacity: var(--sphere-chrome, 1);
+}
+
+.page[data-chrome="hidden"] .bottom,
+.page[data-chrome="hidden"] .readout {
+  visibility: hidden;
 }

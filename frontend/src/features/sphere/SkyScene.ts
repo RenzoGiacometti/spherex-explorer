@@ -178,6 +178,15 @@ export interface SkyPatchSpec extends SkyPosition {
   readonly heightDeg: number;
 }
 
+/** Opciones del vuelo a un parche. */
+export interface PatchFlyOptions extends Omit<FlyOptions, "fov"> {
+  /**
+   * Franja, en pixeles, que tiene que quedar libre arriba y abajo de la imagen
+   * al llegar (la barra superior de quien usa la esfera). Por defecto, nada.
+   */
+  readonly inset?: number | undefined;
+}
+
 export interface SkySceneOptions {
   /** Elemento que contiene al canvas; la escena lo crea y lo agrega al principio. */
   readonly container: HTMLElement;
@@ -742,11 +751,17 @@ export class SkyScene {
    * ya se ve entera (o no se pudo cargar), y false si el vuelo se interrumpio o
    * el parche no existe.
    */
-  flyToPatch(id: string, options: Omit<FlyOptions, "fov"> = {}): Promise<boolean> {
+  flyToPatch(id: string, options: PatchFlyOptions = {}): Promise<boolean> {
     const layer = this.patches.find((candidate) => candidate.spec.id === id);
     if (layer === undefined) return Promise.resolve(false);
     this.loadPatch(layer);
-    return this.startFlight(layer.spec, this.fovToFit(layer.sizeDeg / PATCH_FIT), options, layer);
+    // Lado de la imagen al llegar: casi todo el lado corto, sin meterse en la
+    // franja reservada arriba y abajo.
+    const short = Math.min(this.width, this.height);
+    const inset = Math.max(0, options.inset ?? 0);
+    const side = Math.max(48, Math.min(PATCH_FIT * short, this.height - 2 * inset));
+    const fov = this.fovToFit((layer.sizeDeg * short) / side);
+    return this.startFlight(layer.spec, fov, options, layer);
   }
 
   /** Campo de vision (sobre el lado largo) con el que `degrees` ocupa justo el lado corto. */
