@@ -41,7 +41,8 @@ in README.md):
 - The SPHEREx, 2MASS and WISE products under backend/data and the test
   fixtures come from the NASA/IPAC Infrared Science Archive and are used with
   the acknowledgments their projects ask for.
-- frontend/src/features/sphere/assets/cielo-nasa-svs-4k.jpg is derived from
-  NASA Scientific Visualization Studio's "Deep Star Maps 2020"
+- frontend/src/features/sphere/assets/cielo-nasa-svs-4k.jpg and
+  cielo-nasa-svs-8k.jpg are derived from NASA Scientific Visualization
+  Studio's "Deep Star Maps 2020"
   (NASA/Goddard Space Flight Center Scientific Visualization Studio; Gaia DR2:
   ESA/Gaia/DPAC).
