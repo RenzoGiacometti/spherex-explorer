@@ -242,10 +242,17 @@
   display: none;
 }
 
-/* Nombre de una estrella: mas chico y en el gris mas oscuro, al costado de su punto. */
+/*
+ * Nombre de una estrella: mas chico que el de una constelacion, al costado de
+ * su punto. Va en `text-mute` y con un halo fino en el negro del fondo, como el
+ * nombre de un marcador: en `text-dim` y sin halo no se leia sobre la Via Lactea.
+ */
 .label[data-kind="star"] {
-  color: var(--color-text-dim);
+  color: var(--color-text-mute);
   font-size: var(--type-data-sm-size);
+  text-shadow:
+    0 0 1px var(--color-void),
+    0 0 3px var(--color-void);
 }
 
 /*

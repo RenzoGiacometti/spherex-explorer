@@ -153,7 +153,11 @@ function usePhoneWidth(): boolean {
   return phone;
 }
 
-/** Destacado mas cercano al centro de la ventana al cielo. */
+/**
+ * Campo guardado mas cercano al centro de la ventana al cielo: cualquiera de
+ * los catorce, no solo los cinco destacados. Todos tienen marcador y abren al
+ * instante.
+ */
 interface Nearest {
   readonly id: string;
   /** Distancia al centro en grados enteros: no hace falta redibujar por menos. */
@@ -164,7 +168,7 @@ interface Nearest {
 
 function nearestTarget(view: SkyView): Nearest | null {
   let best: { target: FeaturedObject; distance: number } | null = null;
-  for (const target of SKY_TARGETS) {
+  for (const target of PRECOMPUTED_FIELDS) {
     const distance = angularSeparation(view, target);
     if (best === null || distance < best.distance) best = { target, distance };
   }
@@ -694,7 +698,7 @@ export function SpherePage({
   }
 
   const nearestObject =
-    nearest === null ? undefined : SKY_TARGETS.find((target) => target.id === nearest.id);
+    nearest === null ? undefined : PRECOMPUTED_FIELDS.find((target) => target.id === nearest.id);
   const lockedTarget = nearest?.locked ? nearestObject : undefined;
 
   /** Abre lo que esta en la mira: el destacado, o el punto del cielo al que apunta el telefono. */
