@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sesame xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="https://vizier.cds.unistra.fr/xml/sesame_4x.xsd">
+<Target option="S">
+  <name>HD 33793</name>
+  <!-- Q209421 #1 -->
+  <Resolver name="S=Simbad, IDIA (via url)"><!--delay: 23ms [23] -->
+    <oid>2966222</oid>
+    <oname>HD 33793</oname>
+    <otype>PM*</otype>
+    <jpos>05:11:40.58 -45:01:06.3</jpos>
+    <jradeg>77.91912433145708</jradeg>
+    <jdedeg>-45.01843381524333</jdedeg>
+    <refPos>2020yCat.1350....0G</refPos>
+    <errRAmas>0.0151</errRAmas><errDEmas>0.0164</errDEmas>
+    <pm>
+      <v>8644.319</v><e>0.028</e><q>A</q><r>2020yCat.1350....0G</r>
+      <pa>131.330</pa>
+      <pmRA>6491.223</pmRA><epmRA>0.018</epmRA>
+      <pmDE>-5708.614</pmDE><epmDE>0.021</epmDE>
+    </pm>
+    <plx><v>254.1986</v><e>0.0168</e><q>A</q><r>2020yCat.1350....0G</r></plx>
+    <Vel><v>245.234</v><e>0.0004</e><q>A</q><r>2018A&amp;A...616A...7S</r></Vel>
+    <spType>M1VIp</spType><spNum>0.00026200.0038.0000000000010000</spNum>
+  </Resolver>
+</Target>
+</Sesame>
+<!--- ====Done (2026-Nov-15,17:15:01z)==== -->
