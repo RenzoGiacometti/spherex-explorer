@@ -1,0 +1,99 @@
+/* Panel de espectro: el contenedor es GlassPanel con relleno de 24 px (DESIGN.md). Solo tokens. */
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xxs) var(--space-md);
+}
+
+/* Nombre del objeto: como en el catalogo, sin mayusculas. */
+.name {
+  margin: 0;
+  color: var(--color-text);
+  font: var(--type-title-font);
+  letter-spacing: var(--type-title-tracking);
+}
+
+.position {
+  margin: 0;
+  color: var(--color-text-mute);
+  font: var(--type-data-font);
+  letter-spacing: var(--type-data-tracking);
+  font-variant-numeric: var(--type-data-numeric);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxs) var(--space-md);
+  color: var(--color-text-mute);
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.swatchBinned,
+.swatchExposure {
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+}
+
+.swatchBinned {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-text);
+}
+
+.swatchExposure {
+  width: 4px;
+  height: 4px;
+  background-color: color-mix(in srgb, var(--color-text) 30%, transparent);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-lg);
+}
+
+.note,
+.footnote {
+  margin: 0;
+  font: var(--type-body-sm-font);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.note {
+  color: var(--color-text-mute);
+}
+
+.footnote {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-divider);
+  color: var(--color-text-dim);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
