@@ -11,6 +11,8 @@ Archivos de origen:
                                   que distribuye astropy
 - constellations.json             nombres y posicion del nombre (d3-celestial)
 - constellations.lines.json       lineas de las figuras (d3-celestial)
+- stars.6.json                    estrellas hasta magnitud 6 (d3-celestial)
+- starnames.json                  nombres de las estrellas (d3-celestial)
 
 Escribe:
 
@@ -21,6 +23,8 @@ Escribe:
 - lineas.json   por figura, donde va el nombre y los tramos de la figura, con
                 la ascension recta en grados de 0 a 360 (ICRS/J2000). Serpens
                 son dos figuras (Ser1 y Ser2) con el mismo nombre.
+- estrellas.json  las 200 estrellas mas brillantes que tienen nombre propio:
+                [nombre, RA, Dec, magnitud], de la mas brillante a la mas debil.
 """
 
 from __future__ import annotations
@@ -35,6 +39,9 @@ OUTPUT_DIR = HERE / "constelaciones"
 
 # Decimales de las coordenadas de las figuras: 0,001 grados son 3,6 segundos de arco.
 DECIMALS = 3
+
+# Estrellas con nombre propio que se guardan, de la mas brillante a la mas debil.
+STAR_COUNT = 200
 
 # Correcciones propias a los nombres de d3-celestial, que salen de Wikipedia.
 # Solo lo que esta mal: "Baston" no es Octans, "Conejo" no es una liebre, el
@@ -91,6 +98,25 @@ def read_bounds(source: Path) -> list[list]:
     if len(rows) != 357:
         raise SystemExit(f"la tabla de Roman tiene 357 renglones, se leyeron {len(rows)}")
     return rows
+
+
+def read_stars(sources: Path) -> list[list]:
+    """Las estrellas mas brillantes con nombre propio: [nombre, RA, Dec, magnitud]."""
+    stars = json.loads((sources / "stars.6.json").read_text(encoding="utf-8"))["features"]
+    star_names = json.loads((sources / "starnames.json").read_text(encoding="utf-8"))
+    named = []
+    for star in stars:
+        name = clean(star_names.get(str(star["id"]), {}).get("name", ""))
+        if not name:
+            continue
+        longitude, latitude = star["geometry"]["coordinates"]
+        named.append(
+            [name, ra_degrees(longitude), round(latitude, DECIMALS), star["properties"]["mag"]]
+        )
+    named.sort(key=lambda row: (row[3], row[0]))
+    if len(named) < STAR_COUNT:
+        raise SystemExit(f"solo hay {len(named)} estrellas con nombre propio")
+    return named[:STAR_COUNT]
 
 
 def main() -> None:
@@ -162,7 +188,10 @@ def main() -> None:
     write_json("limites.json", bounds)
     write_json("nombres.json", dict(sorted(names.items())))
     write_json("lineas.json", figures)
+    stars = read_stars(sources)
+    write_json("estrellas.json", stars)
     print(f"{len(bounds)} limites, {len(names)} nombres, {len(figures)} figuras, {points} puntos")
+    print(f"{len(stars)} estrellas, de {stars[0][0]} ({stars[0][3]}) a {stars[-1][0]} ({stars[-1][3]})")
 
 
 if __name__ == "__main__":

@@ -142,9 +142,17 @@ Las líneas de las 88 constelaciones (89 figuras, porque Serpens son dos; 893 pu
 - **Coordenadas:** la fuente escribe la ascensión recta como longitud de −180° a 180°; el script la pasa a grados de 0 a 360 (ICRS/J2000) y redondea a 0,001°.
 - **Comprobación:** en la página de prueba (`/?dev=sphere&const=1&view=84,0,60`), la figura de Orión pasa por Betelgeuse, Rigel y las tres estrellas del cinturón del mapa de fondo.
 
+## `estrellas.json`: nombres de las estrellas brillantes
+
+Las 200 estrellas más brillantes que tienen nombre propio, de Sirius (magnitud −1,44) a Minelauva (3,39): nombre, ascensión recta y declinación en grados (ICRS/J2000) y magnitud visual. Son los rótulos de estrellas de la capa "Constelaciones": con la vista abierta se nombran las 50 más brillantes y al acercarse se llega a las 200 (`starLabelLimit` en `../SkySphere.tsx`), en el gris `text-mute` de DESIGN.md con un halo fino en negro (en `text-dim` no se leían sobre la Vía Láctea) y sin encimarse con marcadores, nombres de constelaciones ni otros rótulos.
+
+- **Origen y licencia:** d3-celestial, el mismo repositorio y commit que las figuras, archivos `data/stars.6.json` (posición y magnitud) y `data/starnames.json` (nombres), bajados el 15 de noviembre de 2026. BSD de 3 cláusulas; el texto va en `constelaciones/LICENCIA-d3-celestial.txt`.
+- **De dónde los toma d3-celestial**, según su `readme.md`: las estrellas, de XHIP, "An Extended Hipparcos Compilation" (Anderson y Francis, 2012; VizieR V/137D); los nombres, de los índices cruzados HD-DM-GC-HR-HIP-Bayer-Flamsteed (Kostjuk, 2002; VizieR IV/27A) y FK5-SAO-HD-Common Name (Smith, 1996; VizieR IV/22).
+- **Qué se guarda:** de cada estrella con el campo `name` no vacío, el nombre tal cual (sin traducir: son nombres propios). Las posiciones no llevan movimiento propio; para un rótulo no hace falta.
+
 ## Regenerar
 
-Con los tres archivos de origen en una carpeta (`constellation_data_roman87.dat`, `constellations.json` y `constellations.lines.json`), desde la raíz del repositorio:
+Con los archivos de origen en una carpeta (`constellation_data_roman87.dat`, `constellations.json`, `constellations.lines.json`, `stars.6.json` y `starnames.json`), desde la raíz del repositorio:
 
 ```
 uv run --no-project python frontend/src/features/sphere/assets/generar_constelaciones.py <carpeta>

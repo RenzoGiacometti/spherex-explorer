@@ -243,6 +243,19 @@
 }
 
 /*
+ * Nombre de una estrella: mas chico que el de una constelacion, al costado de
+ * su punto. Va en `text-mute` y con un halo fino en el negro del fondo, como el
+ * nombre de un marcador: en `text-dim` y sin halo no se leia sobre la Via Lactea.
+ */
+.label[data-kind="star"] {
+  color: var(--color-text-mute);
+  font-size: var(--type-data-sm-size);
+  text-shadow:
+    0 0 1px var(--color-void),
+    0 0 3px var(--color-void);
+}
+
+/*
  * Un nombre que tocaria el rotulo de un marcador, la mira del punto elegido o
  * la interfaz de encima no se escribe: gana lo otro. Sigue ocupando su lugar,
  * asi la esfera lo puede medir.

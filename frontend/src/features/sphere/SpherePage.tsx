@@ -27,13 +27,17 @@ import { useLanguage } from "@/i18n/useLanguage";
 import { formatDec, formatDegrees, formatRa } from "@/lib/format";
 import { DEFAULT_URL_STATE, useUrlState } from "@/state/urlState";
 import {
+  type BrightStar,
   CONSTELLATION_NAMES,
   type ConstellationFigure,
   constellationAt,
   constellationLabel,
+  figureFrame,
+  loadBrightStars,
   loadConstellationFigures,
 } from "./constellations";
 import { findPatch } from "./patches";
+import { SkyDebug } from "./SkyDebug";
 import { DEFAULT_FOV, type SkyView } from "./SkyScene";
 import {
   type SkyBox,
@@ -49,13 +53,14 @@ import { ENTRY_SHORTCUTS, type EntryShortcut } from "./shortcuts";
 import { angularSeparation, clamp, type SkyPosition, wrapDegrees } from "./skyMath";
 import {
   lastRandomFieldId,
+  PRECOMPUTED_FIELDS,
   pickRandomField,
   rememberRandomField,
   SKY_TARGETS,
   skyPointField,
 } from "./targets";
 import { useSphereTexts } from "./texts";
-import { useSkyWindow } from "./useSkyWindow";
+import { type SkyWindowReading, useSkyWindow } from "./useSkyWindow";
 
 /**
  * Vista al entrar: el centro galactico abajo, la Via Lactea cruzando la
@@ -77,6 +82,12 @@ const WINDOW_FOV = 75;
  * menos de este radio en grados: la brujula del telefono no es mas precisa.
  */
 const MIN_LOCK_RADIUS = 5;
+
+/** Al encuadrar una constelacion, cuanto mas que su tamano abarca la vista. */
+const FRAME_MARGIN = 1.35;
+/** Limites del campo de vision al encuadrar una constelacion, en grados. */
+const FRAME_MIN_FOV = 12;
+const FRAME_MAX_FOV = 110;
 
 /** Si despues de abrir un campo la pantalla sigue montada, vuelve a su estado normal. */
 const RESTORE_DELAY_MS = 1500;
@@ -142,7 +153,11 @@ function usePhoneWidth(): boolean {
   return phone;
 }
 
-/** Destacado mas cercano al centro de la ventana al cielo. */
+/**
+ * Campo guardado mas cercano al centro de la ventana al cielo: cualquiera de
+ * los catorce, no solo los cinco destacados. Todos tienen marcador y abren al
+ * instante.
+ */
 interface Nearest {
   readonly id: string;
   /** Distancia al centro en grados enteros: no hace falta redibujar por menos. */
@@ -153,7 +168,7 @@ interface Nearest {
 
 function nearestTarget(view: SkyView): Nearest | null {
   let best: { target: FeaturedObject; distance: number } | null = null;
-  for (const target of SKY_TARGETS) {
+  for (const target of PRECOMPUTED_FIELDS) {
     const distance = angularSeparation(view, target);
     if (best === null || distance < best.distance) best = { target, distance };
   }
@@ -257,9 +272,18 @@ export function SpherePage({
   // y las figuras se piden al prenderla.
   const constellationsOn = useUrlState((state) => state.constellations);
   const [figures, setFigures] = useState<readonly ConstellationFigure[] | null>(null);
+  const [stars, setStars] = useState<readonly BrightStar[] | null>(null);
   useEffect(() => {
     if (!constellationsOn || figures !== null) return;
     let alive = true;
+    // Los nombres de las estrellas brillantes van con la misma capa.
+    loadBrightStars()
+      .then((loaded) => {
+        if (alive) setStars(loaded);
+      })
+      .catch((error: unknown) => {
+        console.warn("esfera: no se pudieron cargar las estrellas", error);
+      });
     loadConstellationFigures()
       .then((loaded) => {
         if (alive) setFigures(loaded);
@@ -286,9 +310,31 @@ export function SpherePage({
       })),
     [shownFigures, language],
   );
+  const shownStars = constellationsOn ? stars : null;
+  // Primero las constelaciones y despues las estrellas, de la mas brillante a la mas debil:
+  // en ese orden la esfera decide cual se escribe cuando dos se tocarian.
+  const skyLabels = useMemo<SkyLabel[]>(
+    () => [
+      ...constellationLabels,
+      ...(shownStars ?? []).map(([name, ra, dec], rank) => ({
+        id: `star-${rank}`,
+        ra,
+        dec,
+        text: name,
+        kind: "star" as const,
+        rank,
+      })),
+    ],
+    [constellationLabels, shownStars],
+  );
 
   /** Punto del cielo elegido con un clic o un toque: lleva la mira y la tarjeta. */
   const [pick, setPick] = useState<SkyPosition | null>(null);
+  /**
+   * Estrella brillante elegida al tocar su nombre. Vale mientras el punto
+   * elegido siga siendo el suyo: otro toque sobre el cielo la deja de lado.
+   */
+  const [pickStar, setPickStar] = useState<(SkyPosition & { name: string }) | null>(null);
   const [coarsePointer] = useState(
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
@@ -297,8 +343,19 @@ export function SpherePage({
   const search = useObjectSearch(resolver);
   const { status } = search;
 
+  // Diagnostico de la orientacion: `?debug=1` (SkyDebug.tsx). Se lee una vez, al montar.
+  const [debug] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("debug") === "1",
+  );
+  const debugReadingRef = useRef<SkyWindowReading | null>(null);
+
   const skyWindow = useSkyWindow({
     onOrientation: (orientation) => sphereRef.current?.setFreeOrientation(orientation),
+    onReading: (reading) => {
+      debugReadingRef.current = reading;
+    },
     allowRelative: allowRelativeOrientation,
   });
   const windowState = skyWindow.state;
@@ -475,7 +532,7 @@ export function SpherePage({
   }
 
   function handleTargetClick(id: string, event: MouseEvent<HTMLAnchorElement>): void {
-    const target = SKY_TARGETS.find((candidate) => candidate.id === id);
+    const target = PRECOMPUTED_FIELDS.find((candidate) => candidate.id === id);
     if (target === undefined || !isPlainClick(event)) return;
     event.preventDefault();
     // El vuelo necesita la vista con el norte arriba: el sensor deja de mandar.
@@ -491,6 +548,31 @@ export function SpherePage({
   }
 
   /** Clic o toque corto sobre el cielo: deja la mira ahi y abre la tarjeta del punto. */
+  /**
+   * Toque sobre un nombre del cielo. El de una constelacion vuela hasta
+   * encuadrarla. El de una estrella (o la estrella misma) la elige como punto,
+   * y la tarjeta avisa que una estrella asi de brillante satura en SPHEREx.
+   */
+  function handleLabelTap(label: SkyLabel): void {
+    if (openingRef.current) return;
+    if (label.kind === "star") {
+      const position = { ra: wrapDegrees(label.ra), dec: label.dec };
+      setPick(position);
+      setPickStar({ ...position, name: label.text });
+      return;
+    }
+    const figure = figures?.find((candidate) => candidate.id === label.id);
+    const sphere = sphereRef.current;
+    if (figure === undefined || sphere === null) return;
+    const { center, radius } = figureFrame(figure);
+    // El campo de vision se mide sobre el lado largo de la ventana y la figura
+    // tiene que entrar en el corto, con aire alrededor.
+    const long = Math.max(window.innerWidth, window.innerHeight);
+    const short = Math.max(1, Math.min(window.innerWidth, window.innerHeight));
+    const fov = clamp(2 * radius * FRAME_MARGIN * (long / short), FRAME_MIN_FOV, FRAME_MAX_FOV);
+    void sphere.flyTo(center, { fov });
+  }
+
   function handleSkyTap(position: SkyPosition): void {
     if (openingRef.current) return;
     // Con los cuatro decimales de un centro de campo (docs/contrato-cubo.md, seccion 4.8).
@@ -516,6 +598,11 @@ export function SpherePage({
 
   /** Campo guardado cuya huella contiene al punto elegido, o null: lo que dice la tarjeta. */
   const pickSaved = pick === null ? null : skyPointField(pick).saved;
+  /** Nombre de la estrella brillante elegida, si el punto elegido es una. */
+  const pickedStar =
+    pick !== null && pickStar !== null && pickStar.ra === pick.ra && pickStar.dec === pick.dec
+      ? pickStar.name
+      : null;
 
   /** Abre el punto elegido en el visor. */
   function handlePickOpen(): void {
@@ -611,7 +698,7 @@ export function SpherePage({
   }
 
   const nearestObject =
-    nearest === null ? undefined : SKY_TARGETS.find((target) => target.id === nearest.id);
+    nearest === null ? undefined : PRECOMPUTED_FIELDS.find((target) => target.id === nearest.id);
   const lockedTarget = nearest?.locked ? nearestObject : undefined;
 
   /** Abre lo que esta en la mira: el destacado, o el punto del cielo al que apunta el telefono. */
@@ -633,9 +720,11 @@ export function SpherePage({
     [embed, urlLanguage],
   );
 
+  // Un marcador en ambar por cada campo guardado, no solo los cinco destacados:
+  // asi se distingue de lejos donde hay un campo que abre al instante.
   const markers = useMemo<SkyMarker[]>(
     () => [
-      ...SKY_TARGETS.map((target) => ({
+      ...PRECOMPUTED_FIELDS.map((target) => ({
         id: target.id,
         label: target.label,
         ra: target.ra,
@@ -723,10 +812,11 @@ export function SpherePage({
         unlabelledMarkerId={lockedTarget?.id ?? null}
         interactive={!windowOn}
         lines={constellationLines}
-        labels={constellationLabels}
+        labels={skyLabels}
         pick={windowOn ? null : pick}
         occluders={coveredBoxes}
         onSkyTap={handleSkyTap}
+        onLabelTap={handleLabelTap}
         onViewChange={handleViewChange}
         onStatusChange={setSphereStatus}
       />
@@ -736,6 +826,8 @@ export function SpherePage({
         escena oscurece el cielo y deja la imagen del campo.
       */}
       <div ref={fadeRef} className={styles.fade} aria-hidden="true" />
+
+      {debug ? <SkyDebug sphereRef={sphereRef} readingRef={debugReadingRef} /> : null}
 
       {windowOn ? (
         <SkyWindowOverlay
@@ -866,6 +958,9 @@ export function SpherePage({
                       name: constellationLabel(constellationAt(pick), language),
                     })}
                   </p>
+                  {pickedStar === null ? null : (
+                    <p role="status">{t("pick.star", { name: pickedStar })}</p>
+                  )}
                   <p className={styles.pickNote} role="status">
                     {pickSaved === null
                       ? t("pick.new")

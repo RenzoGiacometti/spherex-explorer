@@ -1,0 +1,33 @@
+/*
+ * Diagnostico de la orientacion (`?debug=1`): recuadro chico en mono, debajo de
+ * la barra y de la lectura del centro. No recibe el puntero.
+ */
+.debug {
+  position: absolute;
+  top: 96px;
+  left: var(--space-sm);
+  z-index: 3;
+  margin: 0;
+  padding: var(--space-xs);
+  border: 1px solid var(--color-hairline-strong);
+  background-color: var(--color-glass-solid);
+  color: var(--color-text-mute);
+  font-family: var(--type-data-sm-family);
+  font-size: var(--type-data-sm-size);
+  font-weight: var(--type-data-sm-weight);
+  line-height: var(--type-data-sm-line-height);
+  font-variant-numeric: var(--type-data-sm-numeric);
+  white-space: pre;
+  pointer-events: none;
+}
+
+/*
+ * Salto de mas de 20 grados entre dos cuadros: en rojo. El sistema de diseno no
+ * tiene un rojo (DESIGN.md: blanco, grises y un unico acento), y este recuadro
+ * no es parte de la interfaz: el rojo sale de girar el tono del acento.
+ */
+.debug[data-alert="true"] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  filter: hue-rotate(-42deg) saturate(3);
+}
