@@ -138,6 +138,7 @@ export const FEATURED_OBJECTS: readonly FeaturedObject[] = [
  * - Luhman 16 y Teegarden: banda 5 (senal sobre ruido de 314 y 313).
  * - Wolf 359: banda 6, la unica con exposiciones validas ademas de una de la 1.
  * - M 82: banda 1, la unica donde el nucleo no satura.
+ * - M 31: banda 5 (senal sobre ruido de 98); el nucleo satura en las bandas 1 a 4.
  * - Proxima, Kapteyn y M 42 saturan en los seis detectores; M 51 y M 1 dan su
  *   mejor senal en la 3 o a menos del 10 % de ella.
  *
@@ -232,6 +233,15 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     dec: -45.0596,
     band: 3,
     aliases: ["Kapteyn", "Kapteyn Star", "Estrella de Kapteyn"],
+  },
+  {
+    id: "m-31",
+    label: "M 31",
+    name: "M 31",
+    ra: 10.6847,
+    dec: 41.2687,
+    band: 5,
+    aliases: ["Messier 31", "Andromeda Galaxy", "Galaxia de Andromeda"],
   },
 ];
 

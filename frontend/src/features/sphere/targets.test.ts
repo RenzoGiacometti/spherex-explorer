@@ -73,6 +73,7 @@ describe("campos precalculados", () => {
       "M 42",
       "M 1",
       "Kapteyn's Star",
+      "M 31",
     ]);
     expect(new Set(PRECOMPUTED_FIELDS.map((field) => field.id)).size).toBe(
       PRECOMPUTED_FIELDS.length,
@@ -149,7 +150,7 @@ describe("punto elegido en la esfera", () => {
     for (const point of [
       // A 5,5 minutos de arco de Barnard: pasado el borde de la huella.
       { ra: barnard.ra, dec: barnard.dec + 5.5 * ARCMIN },
-      { ra: 10.6847, dec: 41.269 },
+      { ra: 187.7059, dec: 12.3911 },
     ]) {
       const { saved, patch } = skyPointField(point);
       expect(saved).toBeNull();

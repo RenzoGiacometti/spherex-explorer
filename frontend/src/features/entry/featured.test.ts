@@ -133,6 +133,7 @@ describe("savedFieldByName", () => {
     "m-82": ["M82", "M 82"],
     "m-42": ["M42", "M 42", "Orion Nebula", "Nebulosa de Orion", "Nebulosa de Orión"],
     "m-1": ["M1", "M 1", "Crab Nebula", "Nebulosa del Cangrejo"],
+    "m-31": ["M31", "M 31", "Messier 31", "Andromeda Galaxy", "Galaxia de Andrómeda"],
   };
 
   it("cada campo guardado se abre por su nombre y por sus alias", () => {
@@ -164,7 +165,7 @@ describe("savedFieldByName", () => {
   it("otro nombre, un nombre parecido o unas coordenadas no son un alias", () => {
     for (const text of [
       "",
-      "M 31",
+      "M 87",
       "M 13",
       "M 511",
       "Barnad Star",
@@ -259,8 +260,8 @@ describe("savedFieldAt", () => {
   });
 
   it("un punto lejos de todo campo guardado no cae en ninguno", () => {
-    // M 31, y un punto a 10 minutos de arco de Barnard.
-    expect(savedFieldAt({ ra: 10.6847, dec: 41.269 })).toBeNull();
+    // M 87, y un punto a 10 minutos de arco de Barnard.
+    expect(savedFieldAt({ ra: 187.7059, dec: 12.3911 })).toBeNull();
     expect(savedFieldAt({ ra: 269.4463, dec: 4.7683 + 10 / 60 })).toBeNull();
   });
 });

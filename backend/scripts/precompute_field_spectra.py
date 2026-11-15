@@ -67,6 +67,7 @@ FIELD_NAMES = {
     "d1182d95a5142a4d": "M 51",
     "f7b2e086cecaccae": "M 42",
     "12856d74fb2832ab": "M 1",
+    "377ccf5770a2ee85": "M 31",
 }
 # Fuentes que se detectan de mas, por las que salen `empty` y no se guardan.
 SPARE_SOURCES = 10
