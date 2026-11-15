@@ -1,0 +1,2888 @@
+{
+  "version": 1,
+  "status": "ok",
+  "variability": {
+    "verdict": "variable",
+    "detectors": [4, 5, 6],
+    "marginal_detectors": [],
+    "amplitude": 0.6555
+  },
+  "target": {
+    "name": "R Draconis",
+    "ra": 248.167234,
+    "dec": 66.755024,
+    "epoch": 2026.0,
+    "motion": {
+      "pm_ra": -20.643,
+      "pm_dec": 6.149,
+      "parallax": 1.2509
+    },
+    "track": [
+      { "epoch": 1, "mjd": 60845.9032, "ra": 248.167241, "dec": 66.755023 },
+      { "epoch": 2, "mjd": 61006.0592, "ra": 248.167234, "dec": 66.755023 },
+      { "epoch": 3, "mjd": 61198.9219, "ra": 248.167227, "dec": 66.755025 }
+    ],
+    "catalog_name": "V* R Dra"
+  },
+  "field": "721817858ae5e0d2",
+  "epochs": [
+    {
+      "epoch": 1,
+      "start": "2025-05-16",
+      "end": "2025-07-22",
+      "mjd_start": 60811.9565,
+      "mjd_end": 60878.6089,
+      "mjd_mean": 60845.9032,
+      "n_exposures": 153
+    },
+    {
+      "epoch": 2,
+      "start": "2025-10-17",
+      "end": "2026-01-13",
+      "mjd_start": 60965.6152,
+      "mjd_end": 61053.4153,
+      "mjd_mean": 61006.0592,
+      "n_exposures": 212
+    },
+    {
+      "epoch": 3,
+      "start": "2026-04-22",
+      "end": "2026-07-16",
+      "mjd_start": 61152.3317,
+      "mjd_end": 61237.8739,
+      "mjd_mean": 61198.9219,
+      "n_exposures": 174
+    }
+  ],
+  "series": [
+    {
+      "detector": 1,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 0.735,
+      "wave_max_um": 1.126,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 91,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "saturated": 91
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 1,
+      "method": "wings",
+      "preferred": true,
+      "status": "unstable",
+      "relative_only": true,
+      "wave_min_um": 0.735,
+      "wave_max_um": 1.126,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 8.0,
+        "outer_px": 12.0,
+        "sky_inner_px": 14.0,
+        "sky_outer_px": 19.0
+      },
+      "n_exposures": 91,
+      "n_measured": 78,
+      "n_points": 78,
+      "n_channels": 17,
+      "rejected": {
+        "edge": 4,
+        "masked": 9
+      },
+      "scatter": {
+        "points": 0.3598,
+        "residual": 0.1689,
+        "formal": 0.0067,
+        "excess": 0.1688
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": true,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 2,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 1.086,
+      "wave_max_um": 1.668,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 89,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "edge": 2,
+        "saturated": 87
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 2,
+      "method": "wings",
+      "preferred": true,
+      "status": "unstable",
+      "relative_only": true,
+      "wave_min_um": 1.086,
+      "wave_max_um": 1.668,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 8.0,
+        "outer_px": 12.0,
+        "sky_inner_px": 14.0,
+        "sky_outer_px": 19.0
+      },
+      "n_exposures": 89,
+      "n_measured": 76,
+      "n_points": 76,
+      "n_channels": 17,
+      "rejected": {
+        "edge": 8,
+        "masked": 5
+      },
+      "scatter": {
+        "points": 0.5178,
+        "residual": 0.2453,
+        "formal": 0.0067,
+        "excess": 0.2452
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": false,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 3,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 1.616,
+      "wave_max_um": 2.439,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 91,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "saturated": 91
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 3,
+      "method": "wings",
+      "preferred": true,
+      "status": "unstable",
+      "relative_only": true,
+      "wave_min_um": 1.616,
+      "wave_max_um": 2.439,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 9.0,
+        "outer_px": 13.0,
+        "sky_inner_px": 15.0,
+        "sky_outer_px": 20.0
+      },
+      "n_exposures": 91,
+      "n_measured": 85,
+      "n_points": 85,
+      "n_channels": 17,
+      "rejected": {
+        "edge": 1,
+        "masked": 5
+      },
+      "scatter": {
+        "points": 0.4128,
+        "residual": 0.1716,
+        "formal": 0.0062,
+        "excess": 0.1715
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": false,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 4,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 2.398,
+      "wave_max_um": 3.863,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 88,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "saturated": 88
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 4,
+      "method": "wings",
+      "preferred": true,
+      "status": "ok",
+      "relative_only": true,
+      "wave_min_um": 2.398,
+      "wave_max_um": 3.863,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 11.0,
+        "outer_px": 15.0,
+        "sky_inner_px": 17.0,
+        "sky_outer_px": 22.0
+      },
+      "n_exposures": 88,
+      "n_measured": 77,
+      "n_points": 76,
+      "n_channels": 16,
+      "rejected": {
+        "edge": 3,
+        "masked": 8
+      },
+      "scatter": {
+        "points": 0.2067,
+        "residual": 0.0559,
+        "formal": 0.0062,
+        "excess": 0.0556
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": true,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": {
+        "verdict": "variable",
+        "amplitude": 0.6555,
+        "amplitude_error": 0.068,
+        "significance": 9.6,
+        "brightest_epoch": 1,
+        "faintest_epoch": 3
+      },
+      "epochs": [
+        {
+          "epoch": 1,
+          "mjd": 60863.367,
+          "date": "2025-07-07",
+          "value": 1.5258,
+          "error": 0.0591,
+          "n": 20
+        },
+        {
+          "epoch": 2,
+          "mjd": 60977.6,
+          "date": "2025-10-29",
+          "value": 1.0,
+          "error": 0.0345,
+          "n": 36
+        },
+        {
+          "epoch": 3,
+          "mjd": 61232.527,
+          "date": "2026-07-11",
+          "value": 0.8703,
+          "error": 0.0337,
+          "n": 20
+        }
+      ],
+      "bins": [
+        {
+          "mjd": 60832.477,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.6181,
+          "error": 0.0729,
+          "n": 4
+        },
+        {
+          "mjd": 60861.981,
+          "date": "2025-07-05",
+          "epoch": 1,
+          "value": 1.4026,
+          "error": 0.0632,
+          "n": 4
+        },
+        {
+          "mjd": 60874.126,
+          "date": "2025-07-18",
+          "epoch": 1,
+          "value": 1.5557,
+          "error": 0.0541,
+          "n": 12
+        },
+        {
+          "mjd": 60966.766,
+          "date": "2025-10-18",
+          "epoch": 2,
+          "value": 1.0024,
+          "error": 0.0334,
+          "n": 16
+        },
+        {
+          "mjd": 60985.826,
+          "date": "2025-11-06",
+          "epoch": 2,
+          "value": 0.961,
+          "error": 0.0334,
+          "n": 12
+        },
+        {
+          "mjd": 60993.935,
+          "date": "2025-11-14",
+          "epoch": 2,
+          "value": 1.2229,
+          "error": 0.0551,
+          "n": 4
+        },
+        {
+          "mjd": 61232.527,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.8703,
+          "error": 0.0282,
+          "n": 20
+        }
+      ],
+      "points": [
+        {
+          "mjd": 60832.47455,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.7696,
+          "error": 0.1007,
+          "wavelength_um": 3.1691,
+          "channel": 9
+        },
+        {
+          "mjd": 60832.47605,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.7104,
+          "error": 0.0973,
+          "wavelength_um": 3.2557,
+          "channel": 10
+        },
+        {
+          "mjd": 60832.47754,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.5258,
+          "error": 0.0868,
+          "wavelength_um": 3.3432,
+          "channel": 11
+        },
+        {
+          "mjd": 60832.47903,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.5258,
+          "error": 0.0868,
+          "wavelength_um": 3.4345,
+          "channel": 12
+        },
+        {
+          "mjd": 60860.54086,
+          "date": "2025-07-04",
+          "epoch": 1,
+          "value": 1.4321,
+          "error": 0.0815,
+          "wavelength_um": 3.5281,
+          "channel": 13
+        },
+        {
+          "mjd": 60861.96285,
+          "date": "2025-07-05",
+          "epoch": 1,
+          "value": 1.2243,
+          "error": 0.0697,
+          "wavelength_um": 3.6233,
+          "channel": 14
+        },
+        {
+          "mjd": 60861.96435,
+          "date": "2025-07-05",
+          "epoch": 1,
+          "value": 1.3731,
+          "error": 0.0781,
+          "wavelength_um": 3.7208,
+          "channel": 15
+        },
+        {
+          "mjd": 60863.45774,
+          "date": "2025-07-07",
+          "epoch": 1,
+          "value": 1.5983,
+          "error": 0.091,
+          "wavelength_um": 3.2436,
+          "channel": 10
+        },
+        {
+          "mjd": 60870.72969,
+          "date": "2025-07-14",
+          "epoch": 1,
+          "value": 1.5258,
+          "error": 0.0868,
+          "wavelength_um": 2.4775,
+          "channel": 1
+        },
+        {
+          "mjd": 60870.73118,
+          "date": "2025-07-14",
+          "epoch": 1,
+          "value": 1.5856,
+          "error": 0.0903,
+          "wavelength_um": 2.545,
+          "channel": 2
+        },
+        {
+          "mjd": 60873.44444,
+          "date": "2025-07-17",
+          "epoch": 1,
+          "value": 1.7731,
+          "error": 0.1009,
+          "wavelength_um": 2.833,
+          "channel": 5
+        },
+        {
+          "mjd": 60873.44593,
+          "date": "2025-07-17",
+          "epoch": 1,
+          "value": 1.5979,
+          "error": 0.0909,
+          "wavelength_um": 2.9105,
+          "channel": 6
+        },
+        {
+          "mjd": 60873.44742,
+          "date": "2025-07-17",
+          "epoch": 1,
+          "value": 1.7844,
+          "error": 0.1015,
+          "wavelength_um": 2.9899,
+          "channel": 7
+        },
+        {
+          "mjd": 60873.44892,
+          "date": "2025-07-17",
+          "epoch": 1,
+          "value": 1.4818,
+          "error": 0.0844,
+          "wavelength_um": 3.0733,
+          "channel": 8
+        },
+        {
+          "mjd": 60874.66718,
+          "date": "2025-07-18",
+          "epoch": 1,
+          "value": 1.5031,
+          "error": 0.0856,
+          "wavelength_um": 2.6134,
+          "channel": 3
+        },
+        {
+          "mjd": 60874.66868,
+          "date": "2025-07-18",
+          "epoch": 1,
+          "value": 1.4657,
+          "error": 0.0835,
+          "wavelength_um": 2.6849,
+          "channel": 4
+        },
+        {
+          "mjd": 60874.67017,
+          "date": "2025-07-18",
+          "epoch": 1,
+          "value": 1.5884,
+          "error": 0.0904,
+          "wavelength_um": 2.7579,
+          "channel": 4
+        },
+        {
+          "mjd": 60874.87052,
+          "date": "2025-07-18",
+          "epoch": 1,
+          "value": 1.6603,
+          "error": 0.0945,
+          "wavelength_um": 3.1573,
+          "channel": 9
+        },
+        {
+          "mjd": 60876.7748,
+          "date": "2025-07-20",
+          "epoch": 1,
+          "value": 1.1111,
+          "error": 0.0632,
+          "wavelength_um": 3.7571,
+          "channel": 16
+        },
+        {
+          "mjd": 60878.60889,
+          "date": "2025-07-22",
+          "epoch": 1,
+          "value": 1.4229,
+          "error": 0.0811,
+          "wavelength_um": 3.6582,
+          "channel": 15
+        },
+        {
+          "mjd": 60965.61517,
+          "date": "2025-10-17",
+          "epoch": 2,
+          "value": 1.2349,
+          "error": 0.0703,
+          "wavelength_um": 2.5512,
+          "channel": 2
+        },
+        {
+          "mjd": 60965.61668,
+          "date": "2025-10-17",
+          "epoch": 2,
+          "value": 1.2568,
+          "error": 0.0715,
+          "wavelength_um": 2.6198,
+          "channel": 3
+        },
+        {
+          "mjd": 60965.61818,
+          "date": "2025-10-17",
+          "epoch": 2,
+          "value": 1.0984,
+          "error": 0.0625,
+          "wavelength_um": 2.6905,
+          "channel": 4
+        },
+        {
+          "mjd": 60965.61967,
+          "date": "2025-10-17",
+          "epoch": 2,
+          "value": 0.9573,
+          "error": 0.0545,
+          "wavelength_um": 2.7634,
+          "channel": 5
+        },
+        {
+          "mjd": 60966.90502,
+          "date": "2025-10-18",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 2.4683,
+          "channel": 1
+        },
+        {
+          "mjd": 60966.97064,
+          "date": "2025-10-18",
+          "epoch": 2,
+          "value": 0.7401,
+          "error": 0.0421,
+          "wavelength_um": 2.8385,
+          "channel": 6
+        },
+        {
+          "mjd": 60966.97213,
+          "date": "2025-10-18",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 2.9158,
+          "channel": 6
+        },
+        {
+          "mjd": 60966.97362,
+          "date": "2025-10-18",
+          "epoch": 2,
+          "value": 0.9042,
+          "error": 0.0515,
+          "wavelength_um": 2.9951,
+          "channel": 7
+        },
+        {
+          "mjd": 60967.03905,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 0.9252,
+          "error": 0.0527,
+          "wavelength_um": 3.0777,
+          "channel": 8
+        },
+        {
+          "mjd": 60967.04054,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 0.9848,
+          "error": 0.0561,
+          "wavelength_um": 3.1623,
+          "channel": 9
+        },
+        {
+          "mjd": 60967.04204,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 0.8325,
+          "error": 0.0474,
+          "wavelength_um": 3.2482,
+          "channel": 10
+        },
+        {
+          "mjd": 60967.04353,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 1.0157,
+          "error": 0.0578,
+          "wavelength_um": 3.3362,
+          "channel": 11
+        },
+        {
+          "mjd": 60967.44809,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 1.0048,
+          "error": 0.0572,
+          "wavelength_um": 3.4253,
+          "channel": 12
+        },
+        {
+          "mjd": 60967.44958,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 1.1317,
+          "error": 0.0645,
+          "wavelength_um": 3.517,
+          "channel": 13
+        },
+        {
+          "mjd": 60967.45107,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 1.0957,
+          "error": 0.0624,
+          "wavelength_um": 3.6118,
+          "channel": 14
+        },
+        {
+          "mjd": 60967.45257,
+          "date": "2025-10-19",
+          "epoch": 2,
+          "value": 1.1328,
+          "error": 0.0645,
+          "wavelength_um": 3.71,
+          "channel": 15
+        },
+        {
+          "mjd": 60972.94899,
+          "date": "2025-10-24",
+          "epoch": 2,
+          "value": 1.0042,
+          "error": 0.0572,
+          "wavelength_um": 3.8106,
+          "channel": 16
+        },
+        {
+          "mjd": 60973.55852,
+          "date": "2025-10-25",
+          "epoch": 2,
+          "value": 0.835,
+          "error": 0.0476,
+          "wavelength_um": 2.7239,
+          "channel": 4
+        },
+        {
+          "mjd": 60973.56001,
+          "date": "2025-10-25",
+          "epoch": 2,
+          "value": 0.9153,
+          "error": 0.0521,
+          "wavelength_um": 2.7975,
+          "channel": 5
+        },
+        {
+          "mjd": 60984.28828,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 0.6682,
+          "error": 0.0381,
+          "wavelength_um": 2.5129,
+          "channel": 1
+        },
+        {
+          "mjd": 60984.28977,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 0.9623,
+          "error": 0.0549,
+          "wavelength_um": 2.5815,
+          "channel": 2
+        },
+        {
+          "mjd": 60984.29126,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 1.0036,
+          "error": 0.0572,
+          "wavelength_um": 2.6522,
+          "channel": 3
+        },
+        {
+          "mjd": 60984.83398,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.057,
+          "wavelength_um": 2.9668,
+          "channel": 7
+        },
+        {
+          "mjd": 60984.83547,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 1.0735,
+          "error": 0.0612,
+          "wavelength_um": 3.0485,
+          "channel": 8
+        },
+        {
+          "mjd": 60984.83696,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 0.9523,
+          "error": 0.0543,
+          "wavelength_um": 3.1326,
+          "channel": 9
+        },
+        {
+          "mjd": 60984.83846,
+          "date": "2025-11-05",
+          "epoch": 2,
+          "value": 0.9193,
+          "error": 0.0523,
+          "wavelength_um": 3.2186,
+          "channel": 10
+        },
+        {
+          "mjd": 60987.48472,
+          "date": "2025-11-08",
+          "epoch": 2,
+          "value": 0.9211,
+          "error": 0.0525,
+          "wavelength_um": 3.396,
+          "channel": 12
+        },
+        {
+          "mjd": 60987.48621,
+          "date": "2025-11-08",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.057,
+          "wavelength_um": 3.488,
+          "channel": 13
+        },
+        {
+          "mjd": 60987.48771,
+          "date": "2025-11-08",
+          "epoch": 2,
+          "value": 1.0244,
+          "error": 0.0583,
+          "wavelength_um": 3.5823,
+          "channel": 14
+        },
+        {
+          "mjd": 60987.61828,
+          "date": "2025-11-08",
+          "epoch": 2,
+          "value": 0.8483,
+          "error": 0.0483,
+          "wavelength_um": 3.6779,
+          "channel": 15
+        },
+        {
+          "mjd": 60987.61977,
+          "date": "2025-11-08",
+          "epoch": 2,
+          "value": 0.9598,
+          "error": 0.0546,
+          "wavelength_um": 3.7766,
+          "channel": 16
+        },
+        {
+          "mjd": 60993.45866,
+          "date": "2025-11-14",
+          "epoch": 2,
+          "value": 1.171,
+          "error": 0.0667,
+          "wavelength_um": 2.789,
+          "channel": 5
+        },
+        {
+          "mjd": 60993.46015,
+          "date": "2025-11-14",
+          "epoch": 2,
+          "value": 1.0718,
+          "error": 0.0611,
+          "wavelength_um": 2.8645,
+          "channel": 6
+        },
+        {
+          "mjd": 60993.46165,
+          "date": "2025-11-14",
+          "epoch": 2,
+          "value": 1.4121,
+          "error": 0.0805,
+          "wavelength_um": 2.9419,
+          "channel": 7
+        },
+        {
+          "mjd": 60995.35912,
+          "date": "2025-11-16",
+          "epoch": 2,
+          "value": 1.2749,
+          "error": 0.0726,
+          "wavelength_um": 3.1054,
+          "channel": 9
+        },
+        {
+          "mjd": 60999.6375,
+          "date": "2025-11-20",
+          "epoch": 2,
+          "value": 1.5325,
+          "error": 0.0873,
+          "wavelength_um": 2.715,
+          "channel": 4
+        },
+        {
+          "mjd": 61227.4882,
+          "date": "2026-07-06",
+          "epoch": 3,
+          "value": 0.8496,
+          "error": 0.0484,
+          "wavelength_um": 3.6056,
+          "channel": 14
+        },
+        {
+          "mjd": 61227.48969,
+          "date": "2026-07-06",
+          "epoch": 3,
+          "value": 0.9333,
+          "error": 0.0531,
+          "wavelength_um": 3.7027,
+          "channel": 15
+        },
+        {
+          "mjd": 61227.96023,
+          "date": "2026-07-06",
+          "epoch": 3,
+          "value": 0.8703,
+          "error": 0.0496,
+          "wavelength_um": 3.8013,
+          "channel": 16
+        },
+        {
+          "mjd": 61229.72629,
+          "date": "2026-07-08",
+          "epoch": 3,
+          "value": 0.8575,
+          "error": 0.0488,
+          "wavelength_um": 3.2397,
+          "channel": 10
+        },
+        {
+          "mjd": 61229.72779,
+          "date": "2026-07-08",
+          "epoch": 3,
+          "value": 0.8212,
+          "error": 0.0468,
+          "wavelength_um": 3.3271,
+          "channel": 11
+        },
+        {
+          "mjd": 61230.94712,
+          "date": "2026-07-09",
+          "epoch": 3,
+          "value": 0.8703,
+          "error": 0.0496,
+          "wavelength_um": 3.1533,
+          "channel": 9
+        },
+        {
+          "mjd": 61230.94861,
+          "date": "2026-07-09",
+          "epoch": 3,
+          "value": 0.8736,
+          "error": 0.0497,
+          "wavelength_um": 3.2398,
+          "channel": 10
+        },
+        {
+          "mjd": 61232.37482,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.905,
+          "error": 0.0515,
+          "wavelength_um": 2.4791,
+          "channel": 1
+        },
+        {
+          "mjd": 61232.37631,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.8057,
+          "error": 0.0459,
+          "wavelength_um": 2.5465,
+          "channel": 2
+        },
+        {
+          "mjd": 61232.44197,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.8703,
+          "error": 0.0496,
+          "wavelength_um": 2.9915,
+          "channel": 7
+        },
+        {
+          "mjd": 61232.44346,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.8962,
+          "error": 0.0511,
+          "wavelength_um": 3.0754,
+          "channel": 8
+        },
+        {
+          "mjd": 61232.44495,
+          "date": "2026-07-11",
+          "epoch": 3,
+          "value": 0.5964,
+          "error": 0.034,
+          "wavelength_um": 3.16,
+          "channel": 9
+        },
+        {
+          "mjd": 61234.06956,
+          "date": "2026-07-13",
+          "epoch": 3,
+          "value": 0.8672,
+          "error": 0.0495,
+          "wavelength_um": 2.6152,
+          "channel": 3
+        },
+        {
+          "mjd": 61234.07105,
+          "date": "2026-07-13",
+          "epoch": 3,
+          "value": 0.761,
+          "error": 0.0434,
+          "wavelength_um": 2.687,
+          "channel": 4
+        },
+        {
+          "mjd": 61234.07254,
+          "date": "2026-07-13",
+          "epoch": 3,
+          "value": 0.8068,
+          "error": 0.0459,
+          "wavelength_um": 2.7601,
+          "channel": 5
+        },
+        {
+          "mjd": 61234.07403,
+          "date": "2026-07-13",
+          "epoch": 3,
+          "value": 0.9091,
+          "error": 0.0518,
+          "wavelength_um": 2.8354,
+          "channel": 5
+        },
+        {
+          "mjd": 61235.90395,
+          "date": "2026-07-14",
+          "epoch": 3,
+          "value": 0.8703,
+          "error": 0.0496,
+          "wavelength_um": 3.246,
+          "channel": 10
+        },
+        {
+          "mjd": 61236.24182,
+          "date": "2026-07-15",
+          "epoch": 3,
+          "value": 0.8164,
+          "error": 0.0465,
+          "wavelength_um": 2.9123,
+          "channel": 6
+        },
+        {
+          "mjd": 61237.87092,
+          "date": "2026-07-16",
+          "epoch": 3,
+          "value": 1.1268,
+          "error": 0.0642,
+          "wavelength_um": 3.6606,
+          "channel": 15
+        },
+        {
+          "mjd": 61237.87241,
+          "date": "2026-07-16",
+          "epoch": 3,
+          "value": 0.8917,
+          "error": 0.0508,
+          "wavelength_um": 3.7595,
+          "channel": 16
+        }
+      ]
+    },
+    {
+      "detector": 5,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 3.798,
+      "wave_max_um": 4.443,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 89,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "edge": 2,
+        "saturated": 87
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 5,
+      "method": "wings",
+      "preferred": true,
+      "status": "ok",
+      "relative_only": true,
+      "wave_min_um": 3.798,
+      "wave_max_um": 4.443,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 8.0,
+        "outer_px": 12.0,
+        "sky_inner_px": 14.0,
+        "sky_outer_px": 19.0
+      },
+      "n_exposures": 89,
+      "n_measured": 76,
+      "n_points": 76,
+      "n_channels": 17,
+      "rejected": {
+        "edge": 6,
+        "masked": 7
+      },
+      "scatter": {
+        "points": 0.1411,
+        "residual": 0.04,
+        "formal": 0.0055,
+        "excess": 0.0396
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": true,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": {
+        "verdict": "variable",
+        "amplitude": 0.6352,
+        "amplitude_error": 0.0591,
+        "significance": 10.7,
+        "brightest_epoch": 1,
+        "faintest_epoch": 3
+      },
+      "epochs": [
+        {
+          "epoch": 1,
+          "mjd": 60846.077,
+          "date": "2025-06-20",
+          "value": 1.4119,
+          "error": 0.0513,
+          "n": 22
+        },
+        {
+          "epoch": 2,
+          "mjd": 61014.285,
+          "date": "2025-12-05",
+          "value": 1.0,
+          "error": 0.0334,
+          "n": 36
+        },
+        {
+          "epoch": 3,
+          "mjd": 61213.141,
+          "date": "2026-06-22",
+          "value": 0.7767,
+          "error": 0.0294,
+          "n": 18
+        }
+      ],
+      "bins": [
+        {
+          "mjd": 60835.223,
+          "date": "2025-06-09",
+          "epoch": 1,
+          "value": 1.6202,
+          "error": 0.0541,
+          "n": 8
+        },
+        {
+          "mjd": 60851.313,
+          "date": "2025-06-25",
+          "epoch": 1,
+          "value": 1.2533,
+          "error": 0.0452,
+          "n": 5
+        },
+        {
+          "mjd": 60858.5,
+          "date": "2025-07-02",
+          "epoch": 1,
+          "value": 1.3753,
+          "error": 0.048,
+          "n": 6
+        },
+        {
+          "mjd": 60997.736,
+          "date": "2025-11-18",
+          "epoch": 2,
+          "value": 0.9293,
+          "error": 0.0351,
+          "n": 4
+        },
+        {
+          "mjd": 61009.925,
+          "date": "2025-11-30",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0313,
+          "n": 14
+        },
+        {
+          "mjd": 61021.355,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0076,
+          "error": 0.0309,
+          "n": 18
+        },
+        {
+          "mjd": 61213.141,
+          "date": "2026-06-22",
+          "epoch": 3,
+          "value": 0.7769,
+          "error": 0.0238,
+          "n": 18
+        }
+      ],
+      "points": [
+        {
+          "mjd": 60834.78842,
+          "date": "2025-06-08",
+          "epoch": 1,
+          "value": 1.636,
+          "error": 0.0929,
+          "wavelength_um": 4.1797,
+          "channel": 10
+        },
+        {
+          "mjd": 60834.78991,
+          "date": "2025-06-08",
+          "epoch": 1,
+          "value": 1.5892,
+          "error": 0.0903,
+          "wavelength_um": 4.2158,
+          "channel": 11
+        },
+        {
+          "mjd": 60834.7914,
+          "date": "2025-06-08",
+          "epoch": 1,
+          "value": 1.6562,
+          "error": 0.0941,
+          "wavelength_um": 4.2521,
+          "channel": 12
+        },
+        {
+          "mjd": 60834.79289,
+          "date": "2025-06-08",
+          "epoch": 1,
+          "value": 1.5154,
+          "error": 0.0862,
+          "wavelength_um": 4.2887,
+          "channel": 13
+        },
+        {
+          "mjd": 60835.53579,
+          "date": "2025-06-09",
+          "epoch": 1,
+          "value": 1.6253,
+          "error": 0.0924,
+          "wavelength_um": 4.3252,
+          "channel": 14
+        },
+        {
+          "mjd": 60835.53728,
+          "date": "2025-06-09",
+          "epoch": 1,
+          "value": 1.6152,
+          "error": 0.0918,
+          "wavelength_um": 4.3622,
+          "channel": 15
+        },
+        {
+          "mjd": 60835.53877,
+          "date": "2025-06-09",
+          "epoch": 1,
+          "value": 1.6313,
+          "error": 0.0929,
+          "wavelength_um": 4.3995,
+          "channel": 15
+        },
+        {
+          "mjd": 60836.01125,
+          "date": "2025-06-10",
+          "epoch": 1,
+          "value": 1.4119,
+          "error": 0.0802,
+          "wavelength_um": 3.8988,
+          "channel": 2
+        },
+        {
+          "mjd": 60841.44653,
+          "date": "2025-06-15",
+          "epoch": 1,
+          "value": 1.434,
+          "error": 0.0815,
+          "wavelength_um": 4.0375,
+          "channel": 6
+        },
+        {
+          "mjd": 60841.44802,
+          "date": "2025-06-15",
+          "epoch": 1,
+          "value": 1.4326,
+          "error": 0.0814,
+          "wavelength_um": 4.0729,
+          "channel": 7
+        },
+        {
+          "mjd": 60841.45101,
+          "date": "2025-06-15",
+          "epoch": 1,
+          "value": 1.5136,
+          "error": 0.086,
+          "wavelength_um": 4.1441,
+          "channel": 9
+        },
+        {
+          "mjd": 60848.65071,
+          "date": "2025-06-22",
+          "epoch": 1,
+          "value": 1.3812,
+          "error": 0.0785,
+          "wavelength_um": 3.8654,
+          "channel": 1
+        },
+        {
+          "mjd": 60851.5689,
+          "date": "2025-06-25",
+          "epoch": 1,
+          "value": 1.1878,
+          "error": 0.0676,
+          "wavelength_um": 4.0812,
+          "channel": 7
+        },
+        {
+          "mjd": 60851.57039,
+          "date": "2025-06-25",
+          "epoch": 1,
+          "value": 1.2157,
+          "error": 0.0692,
+          "wavelength_um": 4.1165,
+          "channel": 8
+        },
+        {
+          "mjd": 60851.57188,
+          "date": "2025-06-25",
+          "epoch": 1,
+          "value": 1.3177,
+          "error": 0.075,
+          "wavelength_um": 4.1521,
+          "channel": 9
+        },
+        {
+          "mjd": 60853.20394,
+          "date": "2025-06-27",
+          "epoch": 1,
+          "value": 1.2533,
+          "error": 0.0714,
+          "wavelength_um": 4.0698,
+          "channel": 7
+        },
+        {
+          "mjd": 60857.68392,
+          "date": "2025-07-01",
+          "epoch": 1,
+          "value": 1.4119,
+          "error": 0.0802,
+          "wavelength_um": 3.832,
+          "channel": 0
+        },
+        {
+          "mjd": 60857.6869,
+          "date": "2025-07-01",
+          "epoch": 1,
+          "value": 1.3763,
+          "error": 0.0782,
+          "wavelength_um": 3.8982,
+          "channel": 2
+        },
+        {
+          "mjd": 60858.90524,
+          "date": "2025-07-02",
+          "epoch": 1,
+          "value": 1.3742,
+          "error": 0.0781,
+          "wavelength_um": 3.9316,
+          "channel": 3
+        },
+        {
+          "mjd": 60858.90673,
+          "date": "2025-07-02",
+          "epoch": 1,
+          "value": 1.4119,
+          "error": 0.0803,
+          "wavelength_um": 3.9658,
+          "channel": 4
+        },
+        {
+          "mjd": 60858.90823,
+          "date": "2025-07-02",
+          "epoch": 1,
+          "value": 1.2871,
+          "error": 0.0732,
+          "wavelength_um": 4.0002,
+          "channel": 5
+        },
+        {
+          "mjd": 60858.90972,
+          "date": "2025-07-02",
+          "epoch": 1,
+          "value": 1.3664,
+          "error": 0.0777,
+          "wavelength_um": 4.035,
+          "channel": 6
+        },
+        {
+          "mjd": 60997.7334,
+          "date": "2025-11-18",
+          "epoch": 2,
+          "value": 0.9269,
+          "error": 0.0527,
+          "wavelength_um": 4.1851,
+          "channel": 10
+        },
+        {
+          "mjd": 60997.7349,
+          "date": "2025-11-18",
+          "epoch": 2,
+          "value": 0.9345,
+          "error": 0.0532,
+          "wavelength_um": 4.2212,
+          "channel": 11
+        },
+        {
+          "mjd": 60997.73639,
+          "date": "2025-11-18",
+          "epoch": 2,
+          "value": 0.9053,
+          "error": 0.0515,
+          "wavelength_um": 4.2575,
+          "channel": 12
+        },
+        {
+          "mjd": 60997.73788,
+          "date": "2025-11-18",
+          "epoch": 2,
+          "value": 0.9317,
+          "error": 0.053,
+          "wavelength_um": 4.2939,
+          "channel": 13
+        },
+        {
+          "mjd": 61007.58268,
+          "date": "2025-11-28",
+          "epoch": 2,
+          "value": 0.9122,
+          "error": 0.0519,
+          "wavelength_um": 4.3307,
+          "channel": 14
+        },
+        {
+          "mjd": 61007.58417,
+          "date": "2025-11-28",
+          "epoch": 2,
+          "value": 0.933,
+          "error": 0.0531,
+          "wavelength_um": 4.3676,
+          "channel": 15
+        },
+        {
+          "mjd": 61007.58566,
+          "date": "2025-11-28",
+          "epoch": 2,
+          "value": 1.0363,
+          "error": 0.059,
+          "wavelength_um": 4.405,
+          "channel": 16
+        },
+        {
+          "mjd": 61009.4839,
+          "date": "2025-11-30",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0568,
+          "wavelength_um": 3.8304,
+          "channel": 0
+        },
+        {
+          "mjd": 61009.48539,
+          "date": "2025-11-30",
+          "epoch": 2,
+          "value": 1.013,
+          "error": 0.0576,
+          "wavelength_um": 3.8636,
+          "channel": 1
+        },
+        {
+          "mjd": 61010.02326,
+          "date": "2025-12-01",
+          "epoch": 2,
+          "value": 1.0126,
+          "error": 0.0575,
+          "wavelength_um": 3.897,
+          "channel": 2
+        },
+        {
+          "mjd": 61010.02475,
+          "date": "2025-12-01",
+          "epoch": 2,
+          "value": 1.0274,
+          "error": 0.0584,
+          "wavelength_um": 3.9308,
+          "channel": 3
+        },
+        {
+          "mjd": 61010.02624,
+          "date": "2025-12-01",
+          "epoch": 2,
+          "value": 1.0269,
+          "error": 0.0584,
+          "wavelength_um": 3.9651,
+          "channel": 4
+        },
+        {
+          "mjd": 61010.02774,
+          "date": "2025-12-01",
+          "epoch": 2,
+          "value": 0.9451,
+          "error": 0.0537,
+          "wavelength_um": 3.9997,
+          "channel": 5
+        },
+        {
+          "mjd": 61011.24632,
+          "date": "2025-12-02",
+          "epoch": 2,
+          "value": 0.961,
+          "error": 0.0546,
+          "wavelength_um": 4.0346,
+          "channel": 6
+        },
+        {
+          "mjd": 61011.24781,
+          "date": "2025-12-02",
+          "epoch": 2,
+          "value": 0.9876,
+          "error": 0.0561,
+          "wavelength_um": 4.0699,
+          "channel": 7
+        },
+        {
+          "mjd": 61011.24931,
+          "date": "2025-12-02",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.1053,
+          "channel": 8
+        },
+        {
+          "mjd": 61011.2508,
+          "date": "2025-12-02",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.141,
+          "channel": 9
+        },
+        {
+          "mjd": 61012.1324,
+          "date": "2025-12-03",
+          "epoch": 2,
+          "value": 0.9789,
+          "error": 0.0557,
+          "wavelength_um": 4.1767,
+          "channel": 10
+        },
+        {
+          "mjd": 61019.87266,
+          "date": "2025-12-10",
+          "epoch": 2,
+          "value": 1.0215,
+          "error": 0.0581,
+          "wavelength_um": 4.1809,
+          "channel": 10
+        },
+        {
+          "mjd": 61019.87415,
+          "date": "2025-12-10",
+          "epoch": 2,
+          "value": 1.0701,
+          "error": 0.0609,
+          "wavelength_um": 4.2169,
+          "channel": 11
+        },
+        {
+          "mjd": 61019.87566,
+          "date": "2025-12-10",
+          "epoch": 2,
+          "value": 1.0591,
+          "error": 0.0603,
+          "wavelength_um": 4.2529,
+          "channel": 12
+        },
+        {
+          "mjd": 61019.87715,
+          "date": "2025-12-10",
+          "epoch": 2,
+          "value": 1.0858,
+          "error": 0.0618,
+          "wavelength_um": 4.289,
+          "channel": 13
+        },
+        {
+          "mjd": 61021.23089,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 0.9647,
+          "error": 0.0549,
+          "wavelength_um": 3.8267,
+          "channel": 0
+        },
+        {
+          "mjd": 61021.23238,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 0.9872,
+          "error": 0.0561,
+          "wavelength_um": 3.8594,
+          "channel": 1
+        },
+        {
+          "mjd": 61021.36287,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 0.9669,
+          "error": 0.055,
+          "wavelength_um": 3.8925,
+          "channel": 2
+        },
+        {
+          "mjd": 61021.36436,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 0.9343,
+          "error": 0.0532,
+          "wavelength_um": 3.9261,
+          "channel": 3
+        },
+        {
+          "mjd": 61021.36585,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 0.984,
+          "error": 0.0559,
+          "wavelength_um": 3.9602,
+          "channel": 4
+        },
+        {
+          "mjd": 61021.36734,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 3.9944,
+          "channel": 5
+        },
+        {
+          "mjd": 61021.49852,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0568,
+          "wavelength_um": 4.0289,
+          "channel": 6
+        },
+        {
+          "mjd": 61021.50001,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0126,
+          "error": 0.0576,
+          "wavelength_um": 4.0636,
+          "channel": 7
+        },
+        {
+          "mjd": 61021.50151,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0027,
+          "error": 0.057,
+          "wavelength_um": 4.0988,
+          "channel": 8
+        },
+        {
+          "mjd": 61021.503,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.0654,
+          "error": 0.0606,
+          "wavelength_um": 4.1341,
+          "channel": 9
+        },
+        {
+          "mjd": 61021.63778,
+          "date": "2025-12-12",
+          "epoch": 2,
+          "value": 1.025,
+          "error": 0.0583,
+          "wavelength_um": 4.3962,
+          "channel": 15
+        },
+        {
+          "mjd": 61022.78921,
+          "date": "2025-12-13",
+          "epoch": 2,
+          "value": 1.0962,
+          "error": 0.0623,
+          "wavelength_um": 4.3253,
+          "channel": 14
+        },
+        {
+          "mjd": 61022.79071,
+          "date": "2025-12-13",
+          "epoch": 2,
+          "value": 0.9756,
+          "error": 0.0555,
+          "wavelength_um": 4.3621,
+          "channel": 15
+        },
+        {
+          "mjd": 61023.73927,
+          "date": "2025-12-14",
+          "epoch": 2,
+          "value": 1.0985,
+          "error": 0.0625,
+          "wavelength_um": 4.1696,
+          "channel": 10
+        },
+        {
+          "mjd": 61212.14309,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.84,
+          "error": 0.0478,
+          "wavelength_um": 4.0189,
+          "channel": 6
+        },
+        {
+          "mjd": 61212.14458,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7926,
+          "error": 0.0451,
+          "wavelength_um": 4.054,
+          "channel": 7
+        },
+        {
+          "mjd": 61212.14607,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.799,
+          "error": 0.0454,
+          "wavelength_um": 4.0893,
+          "channel": 8
+        },
+        {
+          "mjd": 61212.14757,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7153,
+          "error": 0.0407,
+          "wavelength_um": 4.1249,
+          "channel": 8
+        },
+        {
+          "mjd": 61212.61894,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.6921,
+          "error": 0.0394,
+          "wavelength_um": 4.2325,
+          "channel": 11
+        },
+        {
+          "mjd": 61212.62043,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7333,
+          "error": 0.0417,
+          "wavelength_um": 4.269,
+          "channel": 12
+        },
+        {
+          "mjd": 61212.62192,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7207,
+          "error": 0.041,
+          "wavelength_um": 4.3056,
+          "channel": 13
+        },
+        {
+          "mjd": 61212.62342,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7071,
+          "error": 0.0402,
+          "wavelength_um": 4.3424,
+          "channel": 14
+        },
+        {
+          "mjd": 61212.68645,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7385,
+          "error": 0.042,
+          "wavelength_um": 4.3794,
+          "channel": 15
+        },
+        {
+          "mjd": 61212.68796,
+          "date": "2026-06-21",
+          "epoch": 3,
+          "value": 0.7495,
+          "error": 0.0427,
+          "wavelength_um": 4.4167,
+          "channel": 16
+        },
+        {
+          "mjd": 61213.22972,
+          "date": "2026-06-22",
+          "epoch": 3,
+          "value": 0.7612,
+          "error": 0.0433,
+          "wavelength_um": 4.1605,
+          "channel": 9
+        },
+        {
+          "mjd": 61213.23121,
+          "date": "2026-06-22",
+          "epoch": 3,
+          "value": 0.6867,
+          "error": 0.0391,
+          "wavelength_um": 4.1965,
+          "channel": 10
+        },
+        {
+          "mjd": 61214.11235,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 0.8615,
+          "error": 0.049,
+          "wavelength_um": 3.979,
+          "channel": 5
+        },
+        {
+          "mjd": 61214.11386,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 0.8788,
+          "error": 0.05,
+          "wavelength_um": 4.0138,
+          "channel": 5
+        },
+        {
+          "mjd": 61214.25051,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 1.0818,
+          "error": 0.0615,
+          "wavelength_um": 3.8109,
+          "channel": 0
+        },
+        {
+          "mjd": 61214.252,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 1.0695,
+          "error": 0.0608,
+          "wavelength_um": 3.844,
+          "channel": 1
+        },
+        {
+          "mjd": 61214.45136,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 0.999,
+          "error": 0.0568,
+          "wavelength_um": 3.8772,
+          "channel": 2
+        },
+        {
+          "mjd": 61214.45285,
+          "date": "2026-06-23",
+          "epoch": 3,
+          "value": 1.1026,
+          "error": 0.0627,
+          "wavelength_um": 3.9108,
+          "channel": 3
+        }
+      ]
+    },
+    {
+      "detector": 6,
+      "method": "aperture",
+      "preferred": false,
+      "status": "insufficient",
+      "relative_only": false,
+      "wave_min_um": 4.402,
+      "wave_max_um": 5.025,
+      "reference_mjy": null,
+      "annulus": null,
+      "n_exposures": 91,
+      "n_measured": 0,
+      "n_points": 0,
+      "n_channels": 0,
+      "rejected": {
+        "saturated": 91
+      },
+      "scatter": null,
+      "control": {
+        "name": "Epsilon Indi B",
+        "validated": true,
+        "epoch_floor": 0.0261,
+        "point_floor": 0.0402
+      },
+      "variability": null,
+      "epochs": [],
+      "bins": [],
+      "points": []
+    },
+    {
+      "detector": 6,
+      "method": "wings",
+      "preferred": true,
+      "status": "ok",
+      "relative_only": true,
+      "wave_min_um": 4.402,
+      "wave_max_um": 5.025,
+      "reference_mjy": null,
+      "annulus": {
+        "inner_px": 7.0,
+        "outer_px": 11.0,
+        "sky_inner_px": 13.0,
+        "sky_outer_px": 18.0
+      },
+      "n_exposures": 91,
+      "n_measured": 83,
+      "n_points": 83,
+      "n_channels": 17,
+      "rejected": {
+        "masked": 8
+      },
+      "scatter": {
+        "points": 0.2704,
+        "residual": 0.0316,
+        "formal": 0.0057,
+        "excess": 0.0311
+      },
+      "control": {
+        "name": "Barnard's Star",
+        "validated": true,
+        "epoch_floor": 0.0283,
+        "point_floor": 0.0566
+      },
+      "variability": {
+        "verdict": "variable",
+        "amplitude": 0.6055,
+        "amplitude_error": 0.053,
+        "significance": 11.4,
+        "brightest_epoch": 1,
+        "faintest_epoch": 3
+      },
+      "epochs": [
+        {
+          "epoch": 1,
+          "mjd": 60829.616,
+          "date": "2025-06-03",
+          "value": 1.2654,
+          "error": 0.0485,
+          "n": 16
+        },
+        {
+          "epoch": 2,
+          "mjd": 61040.874,
+          "date": "2025-12-31",
+          "value": 1.0,
+          "error": 0.0356,
+          "n": 23
+        },
+        {
+          "epoch": 3,
+          "mjd": 61175.151,
+          "date": "2026-05-15",
+          "value": 0.6599,
+          "error": 0.0213,
+          "n": 44
+        }
+      ],
+      "bins": [
+        {
+          "mjd": 60829.711,
+          "date": "2025-06-03",
+          "epoch": 1,
+          "value": 1.2057,
+          "error": 0.0386,
+          "n": 7
+        },
+        {
+          "mjd": 60838.334,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.2611,
+          "error": 0.0411,
+          "n": 6
+        },
+        {
+          "mjd": 61038.993,
+          "date": "2025-12-29",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0297,
+          "n": 20
+        },
+        {
+          "mjd": 61153.137,
+          "date": "2026-04-23",
+          "epoch": 3,
+          "value": 0.7424,
+          "error": 0.0228,
+          "n": 11
+        },
+        {
+          "mjd": 61171.791,
+          "date": "2026-05-11",
+          "epoch": 3,
+          "value": 0.6623,
+          "error": 0.0199,
+          "n": 16
+        },
+        {
+          "mjd": 61182.594,
+          "date": "2026-05-22",
+          "epoch": 3,
+          "value": 0.6466,
+          "error": 0.0204,
+          "n": 8
+        },
+        {
+          "mjd": 61199.461,
+          "date": "2026-06-08",
+          "epoch": 3,
+          "value": 0.569,
+          "error": 0.019,
+          "n": 5
+        },
+        {
+          "mjd": 61203.859,
+          "date": "2026-06-12",
+          "epoch": 3,
+          "value": 0.6241,
+          "error": 0.0216,
+          "n": 4
+        }
+      ],
+      "points": [
+        {
+          "mjd": 60811.9565,
+          "date": "2025-05-16",
+          "epoch": 1,
+          "value": 1.3377,
+          "error": 0.076,
+          "wavelength_um": 4.4377,
+          "channel": 1
+        },
+        {
+          "mjd": 60811.95799,
+          "date": "2025-05-16",
+          "epoch": 1,
+          "value": 1.3533,
+          "error": 0.0769,
+          "wavelength_um": 4.469,
+          "channel": 1
+        },
+        {
+          "mjd": 60811.95948,
+          "date": "2025-05-16",
+          "epoch": 1,
+          "value": 1.3705,
+          "error": 0.0778,
+          "wavelength_um": 4.5009,
+          "channel": 2
+        },
+        {
+          "mjd": 60828.12686,
+          "date": "2025-06-02",
+          "epoch": 1,
+          "value": 1.2057,
+          "error": 0.0685,
+          "wavelength_um": 4.8164,
+          "channel": 11
+        },
+        {
+          "mjd": 60828.12837,
+          "date": "2025-06-02",
+          "epoch": 1,
+          "value": 0.9838,
+          "error": 0.056,
+          "wavelength_um": 4.8511,
+          "channel": 12
+        },
+        {
+          "mjd": 60828.12986,
+          "date": "2025-06-02",
+          "epoch": 1,
+          "value": 1.2654,
+          "error": 0.0719,
+          "wavelength_um": 4.8869,
+          "channel": 13
+        },
+        {
+          "mjd": 60828.13135,
+          "date": "2025-06-02",
+          "epoch": 1,
+          "value": 1.1924,
+          "error": 0.0678,
+          "wavelength_um": 4.9226,
+          "channel": 14
+        },
+        {
+          "mjd": 60831.18688,
+          "date": "2025-06-05",
+          "epoch": 1,
+          "value": 1.3646,
+          "error": 0.0775,
+          "wavelength_um": 4.4103,
+          "channel": 0
+        },
+        {
+          "mjd": 60832.1375,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.3822,
+          "error": 0.0786,
+          "wavelength_um": 4.9937,
+          "channel": 16
+        },
+        {
+          "mjd": 60832.13924,
+          "date": "2025-06-06",
+          "epoch": 1,
+          "value": 1.1411,
+          "error": 0.0649,
+          "wavelength_um": 4.958,
+          "channel": 15
+        },
+        {
+          "mjd": 60837.3026,
+          "date": "2025-06-11",
+          "epoch": 1,
+          "value": 1.2568,
+          "error": 0.0714,
+          "wavelength_um": 4.741,
+          "channel": 9
+        },
+        {
+          "mjd": 60838.25354,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.3633,
+          "error": 0.0775,
+          "wavelength_um": 4.5714,
+          "channel": 4
+        },
+        {
+          "mjd": 60838.25503,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.2146,
+          "error": 0.0691,
+          "wavelength_um": 4.605,
+          "channel": 5
+        },
+        {
+          "mjd": 60838.6609,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.4527,
+          "error": 0.0825,
+          "wavelength_um": 4.4418,
+          "channel": 1
+        },
+        {
+          "mjd": 60838.66538,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.2654,
+          "error": 0.0719,
+          "wavelength_um": 4.5383,
+          "channel": 3
+        },
+        {
+          "mjd": 60838.86513,
+          "date": "2025-06-12",
+          "epoch": 1,
+          "value": 1.2337,
+          "error": 0.0701,
+          "wavelength_um": 4.7066,
+          "channel": 8
+        },
+        {
+          "mjd": 61035.21872,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.4267,
+          "channel": 0
+        },
+        {
+          "mjd": 61035.22021,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 0.9808,
+          "error": 0.0557,
+          "wavelength_um": 4.4582,
+          "channel": 1
+        },
+        {
+          "mjd": 61035.2217,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0568,
+          "wavelength_um": 4.4904,
+          "channel": 2
+        },
+        {
+          "mjd": 61035.55666,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 1.1231,
+          "error": 0.0639,
+          "wavelength_um": 4.523,
+          "channel": 3
+        },
+        {
+          "mjd": 61035.55815,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 0.9737,
+          "error": 0.0554,
+          "wavelength_um": 4.5559,
+          "channel": 4
+        },
+        {
+          "mjd": 61035.55965,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 1.015,
+          "error": 0.0577,
+          "wavelength_um": 4.5892,
+          "channel": 5
+        },
+        {
+          "mjd": 61035.56116,
+          "date": "2025-12-26",
+          "epoch": 2,
+          "value": 0.9966,
+          "error": 0.0567,
+          "wavelength_um": 4.6225,
+          "channel": 6
+        },
+        {
+          "mjd": 61039.15273,
+          "date": "2025-12-30",
+          "epoch": 2,
+          "value": 1.0034,
+          "error": 0.0571,
+          "wavelength_um": 4.6307,
+          "channel": 6
+        },
+        {
+          "mjd": 61039.15422,
+          "date": "2025-12-30",
+          "epoch": 2,
+          "value": 0.9695,
+          "error": 0.0552,
+          "wavelength_um": 4.665,
+          "channel": 7
+        },
+        {
+          "mjd": 61039.15571,
+          "date": "2025-12-30",
+          "epoch": 2,
+          "value": 0.9825,
+          "error": 0.0559,
+          "wavelength_um": 4.6992,
+          "channel": 8
+        },
+        {
+          "mjd": 61039.15721,
+          "date": "2025-12-30",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.7332,
+          "channel": 9
+        },
+        {
+          "mjd": 61039.8996,
+          "date": "2025-12-30",
+          "epoch": 2,
+          "value": 1.0314,
+          "error": 0.0587,
+          "wavelength_um": 4.6562,
+          "channel": 7
+        },
+        {
+          "mjd": 61040.58231,
+          "date": "2025-12-31",
+          "epoch": 2,
+          "value": 1.0282,
+          "error": 0.0585,
+          "wavelength_um": 4.8361,
+          "channel": 12
+        },
+        {
+          "mjd": 61040.5838,
+          "date": "2025-12-31",
+          "epoch": 2,
+          "value": 1.0182,
+          "error": 0.0579,
+          "wavelength_um": 4.8715,
+          "channel": 13
+        },
+        {
+          "mjd": 61041.18971,
+          "date": "2026-01-01",
+          "epoch": 2,
+          "value": 0.9086,
+          "error": 0.0517,
+          "wavelength_um": 4.9071,
+          "channel": 13
+        },
+        {
+          "mjd": 61041.1912,
+          "date": "2026-01-01",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.9428,
+          "channel": 14
+        },
+        {
+          "mjd": 61041.19269,
+          "date": "2026-01-01",
+          "epoch": 2,
+          "value": 1.0,
+          "error": 0.0569,
+          "wavelength_um": 4.9786,
+          "channel": 15
+        },
+        {
+          "mjd": 61043.56797,
+          "date": "2026-01-03",
+          "epoch": 2,
+          "value": 0.993,
+          "error": 0.0565,
+          "wavelength_um": 4.7672,
+          "channel": 10
+        },
+        {
+          "mjd": 61043.56947,
+          "date": "2026-01-03",
+          "epoch": 2,
+          "value": 0.9763,
+          "error": 0.0555,
+          "wavelength_um": 4.8017,
+          "channel": 11
+        },
+        {
+          "mjd": 61043.57096,
+          "date": "2026-01-03",
+          "epoch": 2,
+          "value": 1.0426,
+          "error": 0.0593,
+          "wavelength_um": 4.8362,
+          "channel": 12
+        },
+        {
+          "mjd": 61053.41082,
+          "date": "2026-01-13",
+          "epoch": 2,
+          "value": 1.1665,
+          "error": 0.0663,
+          "wavelength_um": 4.4194,
+          "channel": 0
+        },
+        {
+          "mjd": 61053.41231,
+          "date": "2026-01-13",
+          "epoch": 2,
+          "value": 1.1746,
+          "error": 0.0667,
+          "wavelength_um": 4.4506,
+          "channel": 1
+        },
+        {
+          "mjd": 61053.4138,
+          "date": "2026-01-13",
+          "epoch": 2,
+          "value": 1.229,
+          "error": 0.0698,
+          "wavelength_um": 4.4819,
+          "channel": 2
+        },
+        {
+          "mjd": 61152.33172,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.8225,
+          "error": 0.0468,
+          "wavelength_um": 4.6323,
+          "channel": 6
+        },
+        {
+          "mjd": 61152.33321,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.8176,
+          "error": 0.0465,
+          "wavelength_um": 4.6664,
+          "channel": 7
+        },
+        {
+          "mjd": 61152.3347,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.7311,
+          "error": 0.0416,
+          "wavelength_um": 4.7004,
+          "channel": 8
+        },
+        {
+          "mjd": 61152.33621,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.8457,
+          "error": 0.0482,
+          "wavelength_um": 4.7343,
+          "channel": 9
+        },
+        {
+          "mjd": 61152.80945,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.8054,
+          "error": 0.0458,
+          "wavelength_um": 4.7683,
+          "channel": 10
+        },
+        {
+          "mjd": 61152.81094,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.7703,
+          "error": 0.0438,
+          "wavelength_um": 4.8025,
+          "channel": 11
+        },
+        {
+          "mjd": 61152.81244,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.6599,
+          "error": 0.0376,
+          "wavelength_um": 4.8369,
+          "channel": 12
+        },
+        {
+          "mjd": 61152.81395,
+          "date": "2026-04-22",
+          "epoch": 3,
+          "value": 0.7068,
+          "error": 0.0403,
+          "wavelength_um": 4.8719,
+          "channel": 13
+        },
+        {
+          "mjd": 61154.63906,
+          "date": "2026-04-24",
+          "epoch": 3,
+          "value": 0.7424,
+          "error": 0.0422,
+          "wavelength_um": 4.9076,
+          "channel": 13
+        },
+        {
+          "mjd": 61154.64056,
+          "date": "2026-04-24",
+          "epoch": 3,
+          "value": 0.7274,
+          "error": 0.0414,
+          "wavelength_um": 4.9434,
+          "channel": 14
+        },
+        {
+          "mjd": 61154.64205,
+          "date": "2026-04-24",
+          "epoch": 3,
+          "value": 0.6896,
+          "error": 0.0393,
+          "wavelength_um": 4.9795,
+          "channel": 15
+        },
+        {
+          "mjd": 61166.25387,
+          "date": "2026-05-06",
+          "epoch": 3,
+          "value": 0.6587,
+          "error": 0.0375,
+          "wavelength_um": 4.4376,
+          "channel": 1
+        },
+        {
+          "mjd": 61166.25536,
+          "date": "2026-05-06",
+          "epoch": 3,
+          "value": 0.6599,
+          "error": 0.0375,
+          "wavelength_um": 4.4688,
+          "channel": 1
+        },
+        {
+          "mjd": 61169.98964,
+          "date": "2026-05-09",
+          "epoch": 3,
+          "value": 0.7767,
+          "error": 0.0442,
+          "wavelength_um": 4.5656,
+          "channel": 4
+        },
+        {
+          "mjd": 61170.80125,
+          "date": "2026-05-10",
+          "epoch": 3,
+          "value": 0.7288,
+          "error": 0.0415,
+          "wavelength_um": 4.5987,
+          "channel": 5
+        },
+        {
+          "mjd": 61170.80274,
+          "date": "2026-05-10",
+          "epoch": 3,
+          "value": 0.6863,
+          "error": 0.0391,
+          "wavelength_um": 4.6321,
+          "channel": 6
+        },
+        {
+          "mjd": 61170.93802,
+          "date": "2026-05-10",
+          "epoch": 3,
+          "value": 0.7038,
+          "error": 0.0401,
+          "wavelength_um": 4.6661,
+          "channel": 7
+        },
+        {
+          "mjd": 61170.93951,
+          "date": "2026-05-10",
+          "epoch": 3,
+          "value": 0.6717,
+          "error": 0.0383,
+          "wavelength_um": 4.7002,
+          "channel": 8
+        },
+        {
+          "mjd": 61171.27571,
+          "date": "2026-05-11",
+          "epoch": 3,
+          "value": 0.7532,
+          "error": 0.0429,
+          "wavelength_um": 4.734,
+          "channel": 9
+        },
+        {
+          "mjd": 61171.27721,
+          "date": "2026-05-11",
+          "epoch": 3,
+          "value": 0.6646,
+          "error": 0.0379,
+          "wavelength_um": 4.768,
+          "channel": 10
+        },
+        {
+          "mjd": 61171.2787,
+          "date": "2026-05-11",
+          "epoch": 3,
+          "value": 0.6759,
+          "error": 0.0385,
+          "wavelength_um": 4.8023,
+          "channel": 11
+        },
+        {
+          "mjd": 61173.24485,
+          "date": "2026-05-13",
+          "epoch": 3,
+          "value": 0.5429,
+          "error": 0.0309,
+          "wavelength_um": 4.8366,
+          "channel": 12
+        },
+        {
+          "mjd": 61173.24634,
+          "date": "2026-05-13",
+          "epoch": 3,
+          "value": 0.6199,
+          "error": 0.0353,
+          "wavelength_um": 4.8716,
+          "channel": 13
+        },
+        {
+          "mjd": 61173.24785,
+          "date": "2026-05-13",
+          "epoch": 3,
+          "value": 0.649,
+          "error": 0.037,
+          "wavelength_um": 4.9074,
+          "channel": 13
+        },
+        {
+          "mjd": 61176.36441,
+          "date": "2026-05-16",
+          "epoch": 3,
+          "value": 0.612,
+          "error": 0.0348,
+          "wavelength_um": 4.4295,
+          "channel": 0
+        },
+        {
+          "mjd": 61176.3659,
+          "date": "2026-05-16",
+          "epoch": 3,
+          "value": 0.6103,
+          "error": 0.0347,
+          "wavelength_um": 4.4607,
+          "channel": 1
+        },
+        {
+          "mjd": 61176.36739,
+          "date": "2026-05-16",
+          "epoch": 3,
+          "value": 0.6099,
+          "error": 0.0347,
+          "wavelength_um": 4.4924,
+          "channel": 2
+        },
+        {
+          "mjd": 61181.72649,
+          "date": "2026-05-21",
+          "epoch": 3,
+          "value": 0.6042,
+          "error": 0.0344,
+          "wavelength_um": 4.9998,
+          "channel": 16
+        },
+        {
+          "mjd": 61182.13322,
+          "date": "2026-05-22",
+          "epoch": 3,
+          "value": 0.6599,
+          "error": 0.0376,
+          "wavelength_um": 4.5246,
+          "channel": 3
+        },
+        {
+          "mjd": 61182.13471,
+          "date": "2026-05-22",
+          "epoch": 3,
+          "value": 0.6751,
+          "error": 0.0384,
+          "wavelength_um": 4.5571,
+          "channel": 4
+        },
+        {
+          "mjd": 61182.1362,
+          "date": "2026-05-22",
+          "epoch": 3,
+          "value": 0.6599,
+          "error": 0.0376,
+          "wavelength_um": 4.5904,
+          "channel": 5
+        },
+        {
+          "mjd": 61182.1377,
+          "date": "2026-05-22",
+          "epoch": 3,
+          "value": 0.6569,
+          "error": 0.0374,
+          "wavelength_um": 4.6236,
+          "channel": 6
+        },
+        {
+          "mjd": 61183.49117,
+          "date": "2026-05-23",
+          "epoch": 3,
+          "value": 0.6214,
+          "error": 0.0354,
+          "wavelength_um": 4.6575,
+          "channel": 7
+        },
+        {
+          "mjd": 61183.49416,
+          "date": "2026-05-23",
+          "epoch": 3,
+          "value": 0.6121,
+          "error": 0.0349,
+          "wavelength_um": 4.7256,
+          "channel": 9
+        },
+        {
+          "mjd": 61183.49565,
+          "date": "2026-05-23",
+          "epoch": 3,
+          "value": 0.6364,
+          "error": 0.0362,
+          "wavelength_um": 4.7596,
+          "channel": 10
+        },
+        {
+          "mjd": 61198.9738,
+          "date": "2026-06-07",
+          "epoch": 3,
+          "value": 0.559,
+          "error": 0.0318,
+          "wavelength_um": 4.4152,
+          "channel": 0
+        },
+        {
+          "mjd": 61199.58038,
+          "date": "2026-06-08",
+          "epoch": 3,
+          "value": 0.569,
+          "error": 0.0324,
+          "wavelength_um": 4.4466,
+          "channel": 1
+        },
+        {
+          "mjd": 61199.58187,
+          "date": "2026-06-08",
+          "epoch": 3,
+          "value": 0.6538,
+          "error": 0.0372,
+          "wavelength_um": 4.4782,
+          "channel": 2
+        },
+        {
+          "mjd": 61199.58336,
+          "date": "2026-06-08",
+          "epoch": 3,
+          "value": 0.5525,
+          "error": 0.0315,
+          "wavelength_um": 4.5106,
+          "channel": 3
+        },
+        {
+          "mjd": 61199.58486,
+          "date": "2026-06-08",
+          "epoch": 3,
+          "value": 0.6005,
+          "error": 0.0342,
+          "wavelength_um": 4.543,
+          "channel": 4
+        },
+        {
+          "mjd": 61203.85709,
+          "date": "2026-06-12",
+          "epoch": 3,
+          "value": 0.6451,
+          "error": 0.0367,
+          "wavelength_um": 4.5762,
+          "channel": 4
+        },
+        {
+          "mjd": 61203.85859,
+          "date": "2026-06-12",
+          "epoch": 3,
+          "value": 0.628,
+          "error": 0.0358,
+          "wavelength_um": 4.6098,
+          "channel": 5
+        },
+        {
+          "mjd": 61203.86008,
+          "date": "2026-06-12",
+          "epoch": 3,
+          "value": 0.5278,
+          "error": 0.0301,
+          "wavelength_um": 4.6436,
+          "channel": 6
+        },
+        {
+          "mjd": 61203.86157,
+          "date": "2026-06-12",
+          "epoch": 3,
+          "value": 0.6203,
+          "error": 0.0353,
+          "wavelength_um": 4.6777,
+          "channel": 7
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "saturated_source",
+      "detectors": [1, 2, 3, 4, 5, 6]
+    },
+    {
+      "code": "wings_unstable",
+      "detectors": [1, 2, 3],
+      "scatter": 0.2452
+    }
+  ],
+  "provenance": {
+    "source": "SPHEREx / IRSA",
+    "n_exposures": 539,
+    "n_unreadable": 0,
+    "processing": ["l2b-v27"],
+    "channels_per_detector": 17,
+    "error_factor_median": 1.2533,
+    "computed_at": "2026-11-15T17:48:42Z"
+  },
+  "source": "precomputed"
+}

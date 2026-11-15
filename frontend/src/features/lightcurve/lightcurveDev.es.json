@@ -1,0 +1,15 @@
+{
+  "title": "Panel de curva de luz",
+  "intro": "Página de prueba. Muestra el panel con las curvas precalculadas de los cinco objetos de prueba, sin el visor. Barnard's Star y Epsilon Indi B son las estrellas de control: no deberían variar.",
+  "object": "Objeto",
+  "live": "Pedir al backend (/api/lightcurve)",
+  "source": {
+    "fixture": "Datos precalculados guardados en el repositorio.",
+    "live": "Respuesta del backend en este momento."
+  },
+  "loading": "Cargando la curva de luz",
+  "error": "No se pudo cargar la curva de luz: {{reason}}",
+  "status": "Estado del documento",
+  "verdict": "Veredicto",
+  "exposures": "Exposiciones medidas"
+}

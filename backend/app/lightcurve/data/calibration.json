@@ -1,0 +1,172 @@
+{
+ "description": "Error real de la curva de luz, medido sobre estrellas de control que no varian (scripts/calibrate_lightcurve.py). Fracciones del brillo.",
+ "valid_if": {
+  "epoch_deviation_max": 0.04,
+  "excess_scatter_max": 0.1
+ },
+ "methods": {
+  "wings": {
+   "control": "Barnard's Star",
+   "n_exposures": 358,
+   "epoch_floor": 0.0283,
+   "point_floor": 0.0566,
+   "detectors": {
+    "1": {
+     "n_points": 58,
+     "epoch_values": [
+      1.0013,
+      1.0,
+      0.9967
+     ],
+     "epoch_deviation": 0.0033,
+     "point_scatter": 0.0566,
+     "excess_scatter": 0.0534,
+     "valid": true
+    },
+    "2": {
+     "n_points": 56,
+     "epoch_values": [
+      1.0,
+      0.9529,
+      1.2602
+     ],
+     "epoch_deviation": 0.2602,
+     "point_scatter": 0.2091,
+     "excess_scatter": 0.171,
+     "valid": false
+    },
+    "3": {
+     "n_points": 48,
+     "epoch_values": [
+      1.0,
+      0.9568,
+      1.0505
+     ],
+     "epoch_deviation": 0.0505,
+     "point_scatter": 0.2374,
+     "excess_scatter": 0.1743,
+     "valid": false
+    },
+    "4": {
+     "n_points": 54,
+     "epoch_values": [
+      1.0,
+      1.0131,
+      0.9887
+     ],
+     "epoch_deviation": 0.0131,
+     "point_scatter": 0.0266,
+     "excess_scatter": 0.0182,
+     "valid": true
+    },
+    "5": {
+     "n_points": 55,
+     "epoch_values": [
+      1.0137,
+      0.9924,
+      1.0
+     ],
+     "epoch_deviation": 0.0137,
+     "point_scatter": 0.0419,
+     "excess_scatter": 0.0376,
+     "valid": true
+    },
+    "6": {
+     "n_points": 55,
+     "epoch_values": [
+      1.0283,
+      0.993,
+      1.0
+     ],
+     "epoch_deviation": 0.0283,
+     "point_scatter": 0.0374,
+     "excess_scatter": 0.0263,
+     "valid": true
+    }
+   }
+  },
+  "aperture": {
+   "control": "Epsilon Indi B",
+   "n_exposures": 457,
+   "epoch_floor": 0.0261,
+   "point_floor": 0.0402,
+   "detectors": {
+    "1": {
+     "n_points": 32,
+     "epoch_values": [
+      1.0,
+      0.9753
+     ],
+     "epoch_deviation": 0.0247,
+     "point_scatter": 0.0305,
+     "excess_scatter": 0.0,
+     "valid": true
+    },
+    "2": {
+     "n_points": 68,
+     "epoch_values": [
+      1.0059,
+      0.9962,
+      1.0038,
+      0.9924
+     ],
+     "epoch_deviation": 0.0076,
+     "point_scatter": 0.0291,
+     "excess_scatter": 0.0233,
+     "valid": true
+    },
+    "3": {
+     "n_points": 82,
+     "epoch_values": [
+      0.9951,
+      1.017,
+      1.005,
+      0.991
+     ],
+     "epoch_deviation": 0.017,
+     "point_scatter": 0.0238,
+     "excess_scatter": 0.0225,
+     "valid": true
+    },
+    "4": {
+     "n_points": 27,
+     "epoch_values": [
+      0.9962,
+      1.0108,
+      1.0
+     ],
+     "epoch_deviation": 0.0108,
+     "point_scatter": 0.0295,
+     "excess_scatter": 0.0093,
+     "valid": true
+    },
+    "5": {
+     "n_points": 68,
+     "epoch_values": [
+      0.9981,
+      1.0044,
+      1.0019,
+      0.9739
+     ],
+     "epoch_deviation": 0.0261,
+     "point_scatter": 0.0216,
+     "excess_scatter": 0.0062,
+     "valid": true
+    },
+    "6": {
+     "n_points": 75,
+     "epoch_values": [
+      0.9965,
+      1.0146,
+      1.0035,
+      0.9936
+     ],
+     "epoch_deviation": 0.0146,
+     "point_scatter": 0.0402,
+     "excess_scatter": 0.0257,
+     "valid": true
+    }
+   }
+  }
+ }
+}

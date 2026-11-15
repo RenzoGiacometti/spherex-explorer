@@ -1,0 +1,340 @@
+{
+ "version": 1,
+ "status": "ok",
+ "variability": {
+  "verdict": "undetermined",
+  "detectors": [],
+  "marginal_detectors": [5],
+  "amplitude": 0.293
+ },
+ "target": {
+  "name": "WISE 0855-0714",
+  "ra": 133.759825,
+  "dec": -7.24224,
+  "epoch": 2026.0,
+  "motion": {
+   "pm_ra": -8123.7,
+   "pm_dec": 673.2,
+   "parallax": 439.0
+  },
+  "track": [
+   {"epoch": 1, "mjd": 60801.2359, "ra": 133.761139, "dec": -7.24227},
+   {"epoch": 2, "mjd": 60991.3233, "ra": 133.76019, "dec": -7.242245},
+   {"epoch": 3, "mjd": 61161.9283, "ra": 133.758892, "dec": -7.242089}
+  ],
+  "catalog_name": "WISEA J085510.74-071442.5"
+ },
+ "field": "bfcb329969cde224",
+ "epochs": [
+  {"epoch": 1, "start": "2025-05-05", "end": "2025-05-06", "mjd_start": 60800.7007, "mjd_end": 60801.5193, "mjd_mean": 60801.2359, "n_exposures": 30},
+  {"epoch": 2, "start": "2025-10-31", "end": "2025-12-13", "mjd_start": 60979.7233, "mjd_end": 61022.3688, "mjd_mean": 60991.3233, "n_exposures": 128},
+  {"epoch": 3, "start": "2026-04-21", "end": "2026-05-14", "mjd_start": 61151.1986, "mjd_end": 61174.2879, "mjd_mean": 61161.9283, "n_exposures": 100}
+ ],
+ "series": [
+  {
+   "detector": 1,
+   "method": "aperture",
+   "preferred": true,
+   "status": "blended",
+   "relative_only": false,
+   "wave_min_um": 0.735,
+   "wave_max_um": 1.126,
+   "reference_mjy": 0.6229,
+   "annulus": null,
+   "n_exposures": 36,
+   "n_measured": 34,
+   "n_points": 0,
+   "n_channels": 0,
+   "rejected": {
+    "masked": 2
+   },
+   "scatter": null,
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": null,
+   "epochs": [],
+   "bins": [],
+   "points": [],
+   "offset_arcsec": 5.69
+  },
+  {
+   "detector": 2,
+   "method": "aperture",
+   "preferred": true,
+   "status": "blended",
+   "relative_only": false,
+   "wave_min_um": 1.086,
+   "wave_max_um": 1.668,
+   "reference_mjy": 0.6377,
+   "annulus": null,
+   "n_exposures": 48,
+   "n_measured": 43,
+   "n_points": 0,
+   "n_channels": 0,
+   "rejected": {
+    "masked": 5
+   },
+   "scatter": null,
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": null,
+   "epochs": [],
+   "bins": [],
+   "points": [],
+   "offset_arcsec": 5.58
+  },
+  {
+   "detector": 3,
+   "method": "aperture",
+   "preferred": true,
+   "status": "blended",
+   "relative_only": false,
+   "wave_min_um": 1.616,
+   "wave_max_um": 2.439,
+   "reference_mjy": 0.5039,
+   "annulus": null,
+   "n_exposures": 45,
+   "n_measured": 40,
+   "n_points": 0,
+   "n_channels": 0,
+   "rejected": {
+    "masked": 5
+   },
+   "scatter": null,
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": null,
+   "epochs": [],
+   "bins": [],
+   "points": [],
+   "offset_arcsec": 4.8
+  },
+  {
+   "detector": 4,
+   "method": "aperture",
+   "preferred": true,
+   "status": "blended",
+   "relative_only": false,
+   "wave_min_um": 2.398,
+   "wave_max_um": 3.863,
+   "reference_mjy": 0.211,
+   "annulus": null,
+   "n_exposures": 36,
+   "n_measured": 33,
+   "n_points": 0,
+   "n_channels": 0,
+   "rejected": {
+    "masked": 3
+   },
+   "scatter": null,
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": null,
+   "epochs": [],
+   "bins": [],
+   "points": [],
+   "offset_arcsec": 5.13
+  },
+  {
+   "detector": 5,
+   "method": "aperture",
+   "preferred": true,
+   "status": "ok",
+   "relative_only": false,
+   "wave_min_um": 3.798,
+   "wave_max_um": 4.443,
+   "reference_mjy": 0.4572,
+   "annulus": null,
+   "n_exposures": 48,
+   "n_measured": 36,
+   "n_points": 32,
+   "n_channels": 13,
+   "rejected": {
+    "masked": 11,
+    "saturated": 1
+   },
+   "scatter": {
+    "points": 0.1306,
+    "residual": 0.1111,
+    "formal": 0.1943,
+    "excess": 0.0
+   },
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": {
+    "verdict": "marginal",
+    "amplitude": 0.293,
+    "amplitude_error": 0.068,
+    "significance": 4.3,
+    "brightest_epoch": 3,
+    "faintest_epoch": 1
+   },
+   "epochs": [
+    {"epoch": 1, "mjd": 60801.335, "date": "2025-05-06", "value": 0.777, "error": 0.0466, "n": 6},
+    {"epoch": 2, "mjd": 60996.784, "date": "2025-11-17", "value": 1.0, "error": 0.0439, "n": 14},
+    {"epoch": 3, "mjd": 61166.687, "date": "2026-05-06", "value": 1.07, "error": 0.0495, "n": 12}
+   ],
+   "bins": [
+    {"mjd": 60801.335, "date": "2025-05-06", "epoch": 1, "value": 0.7787, "error": 0.0487, "n": 6},
+    {"mjd": 60986.665, "date": "2025-11-07", "epoch": 2, "value": 1.0227, "error": 0.0523, "n": 10},
+    {"mjd": 61022.079, "date": "2025-12-13", "epoch": 2, "value": 0.9892, "error": 0.0735, "n": 4},
+    {"mjd": 61162.21, "date": "2026-05-02", "epoch": 3, "value": 1.07, "error": 0.0628, "n": 7},
+    {"mjd": 61172.955, "date": "2026-05-12", "epoch": 3, "value": 1.07, "error": 0.0722, "n": 5}
+   ],
+   "points": [
+    {"mjd": 60801.10726, "date": "2025-05-06", "epoch": 1, "value": 0.8381, "error": 0.1396, "wavelength_um": 4.2951, "channel": 13},
+    {"mjd": 60801.10875, "date": "2025-05-06", "epoch": 1, "value": 0.8304, "error": 0.1371, "wavelength_um": 4.332, "channel": 14},
+    {"mjd": 60801.44631, "date": "2025-05-06", "epoch": 1, "value": 0.6914, "error": 0.2636, "wavelength_um": 4.0387, "channel": 6},
+    {"mjd": 60801.4478, "date": "2025-05-06", "epoch": 1, "value": 0.727, "error": 0.2727, "wavelength_um": 4.0738, "channel": 7},
+    {"mjd": 60801.44929, "date": "2025-05-06", "epoch": 1, "value": 0.4909, "error": 0.2116, "wavelength_um": 4.1091, "channel": 8},
+    {"mjd": 60801.45078, "date": "2025-05-06", "epoch": 1, "value": 0.9617, "error": 0.163, "wavelength_um": 4.1448, "channel": 9},
+    {"mjd": 60986.24315, "date": "2025-11-07", "epoch": 2, "value": 1.0453, "error": 0.3297, "wavelength_um": 3.8546, "channel": 1},
+    {"mjd": 60986.24464, "date": "2025-11-07", "epoch": 2, "value": 1.0809, "error": 0.333, "wavelength_um": 3.8881, "channel": 2},
+    {"mjd": 60986.24613, "date": "2025-11-07", "epoch": 2, "value": 0.9734, "error": 0.3555, "wavelength_um": 3.9218, "channel": 3},
+    {"mjd": 60986.78496, "date": "2025-11-07", "epoch": 2, "value": 1.1238, "error": 0.2773, "wavelength_um": 4.0471, "channel": 6},
+    {"mjd": 60986.78645, "date": "2025-11-07", "epoch": 2, "value": 1.0688, "error": 0.3005, "wavelength_um": 4.0823, "channel": 7},
+    {"mjd": 60986.78794, "date": "2025-11-07", "epoch": 2, "value": 1.2103, "error": 0.2405, "wavelength_um": 4.1176, "channel": 8},
+    {"mjd": 60986.85584, "date": "2025-11-07", "epoch": 2, "value": 1.0, "error": 0.1797, "wavelength_um": 4.1889, "channel": 10},
+    {"mjd": 60986.85733, "date": "2025-11-07", "epoch": 2, "value": 0.9769, "error": 0.2014, "wavelength_um": 4.2248, "channel": 11},
+    {"mjd": 60986.92191, "date": "2025-11-07", "epoch": 2, "value": 0.7801, "error": 0.1543, "wavelength_um": 4.2972, "channel": 13},
+    {"mjd": 60986.92489, "date": "2025-11-07", "epoch": 2, "value": 0.8959, "error": 0.1775, "wavelength_um": 4.3708, "channel": 15},
+    {"mjd": 61021.82419, "date": "2025-12-12", "epoch": 2, "value": 1.0, "error": 0.2055, "wavelength_um": 4.1174, "channel": 8},
+    {"mjd": 61021.89287, "date": "2025-12-12", "epoch": 2, "value": 0.8079, "error": 0.1457, "wavelength_um": 4.1531, "channel": 9},
+    {"mjd": 61022.23175, "date": "2025-12-13", "epoch": 2, "value": 0.9785, "error": 0.1525, "wavelength_um": 4.1888, "channel": 10},
+    {"mjd": 61022.36877, "date": "2025-12-13", "epoch": 2, "value": 1.1173, "error": 0.179, "wavelength_um": 4.2247, "channel": 11},
+    {"mjd": 61161.58753, "date": "2026-05-01", "epoch": 3, "value": 1.07, "error": 0.3245, "wavelength_um": 3.8346, "channel": 1},
+    {"mjd": 61161.58903, "date": "2026-05-01", "epoch": 3, "value": 0.922, "error": 0.3004, "wavelength_um": 3.8675, "channel": 1},
+    {"mjd": 61161.59052, "date": "2026-05-01", "epoch": 3, "value": 0.9898, "error": 0.3155, "wavelength_um": 3.9011, "channel": 2},
+    {"mjd": 61161.59201, "date": "2026-05-01", "epoch": 3, "value": 1.0991, "error": 0.3542, "wavelength_um": 3.9348, "channel": 3},
+    {"mjd": 61162.67581, "date": "2026-05-02", "epoch": 3, "value": 0.9904, "error": 0.148, "wavelength_um": 4.2584, "channel": 12},
+    {"mjd": 61163.21638, "date": "2026-05-03", "epoch": 3, "value": 1.1109, "error": 0.165, "wavelength_um": 4.1803, "channel": 10},
+    {"mjd": 61163.21788, "date": "2026-05-03", "epoch": 3, "value": 1.0952, "error": 0.1862, "wavelength_um": 4.2163, "channel": 11},
+    {"mjd": 61171.56786, "date": "2026-05-11", "epoch": 3, "value": 1.0041, "error": 0.2008, "wavelength_um": 4.2221, "channel": 11},
+    {"mjd": 61172.17597, "date": "2026-05-12", "epoch": 3, "value": 1.1559, "error": 0.1645, "wavelength_um": 4.2583, "channel": 12},
+    {"mjd": 61173.06473, "date": "2026-05-13", "epoch": 3, "value": 1.07, "error": 0.15, "wavelength_um": 4.295, "channel": 13},
+    {"mjd": 61173.67684, "date": "2026-05-13", "epoch": 3, "value": 1.0011, "error": 0.138, "wavelength_um": 4.3318, "channel": 14},
+    {"mjd": 61174.28788, "date": "2026-05-14", "epoch": 3, "value": 1.1943, "error": 0.1544, "wavelength_um": 4.3688, "channel": 15}
+   ]
+  },
+  {
+   "detector": 6,
+   "method": "aperture",
+   "preferred": true,
+   "status": "ok",
+   "relative_only": false,
+   "wave_min_um": 4.402,
+   "wave_max_um": 5.025,
+   "reference_mjy": 0.5304,
+   "annulus": null,
+   "n_exposures": 45,
+   "n_measured": 38,
+   "n_points": 34,
+   "n_channels": 13,
+   "rejected": {
+    "masked": 7
+   },
+   "scatter": {
+    "points": 0.1469,
+    "residual": 0.1339,
+    "formal": 0.2638,
+    "excess": 0.0
+   },
+   "control": {
+    "name": "Epsilon Indi B",
+    "validated": true,
+    "epoch_floor": 0.0261,
+    "point_floor": 0.0402
+   },
+   "variability": {
+    "verdict": "constant",
+    "amplitude": 0.038,
+    "amplitude_error": 0.0784,
+    "significance": 0.5,
+    "brightest_epoch": 2,
+    "faintest_epoch": 3
+   },
+   "epochs": [
+    {"epoch": 2, "mjd": 60993.538, "date": "2025-11-14", "value": 1.038, "error": 0.059, "n": 14},
+    {"epoch": 3, "mjd": 61158.69, "date": "2026-04-28", "value": 1.0, "error": 0.0517, "n": 18}
+   ],
+   "bins": [
+    {"mjd": 60991.404, "date": "2025-11-12", "epoch": 2, "value": 1.0179, "error": 0.0543, "n": 13},
+    {"mjd": 61153.909, "date": "2026-04-23", "epoch": 3, "value": 1.0162, "error": 0.0559, "n": 12},
+    {"mjd": 61169.748, "date": "2026-05-09", "epoch": 3, "value": 1.0, "error": 0.0794, "n": 5}
+   ],
+   "points": [
+    {"mjd": 60800.70069, "date": "2025-05-05", "epoch": 1, "value": 0.2641, "error": 0.3031, "wavelength_um": 4.9674, "channel": 15},
+    {"mjd": 60800.8351, "date": "2025-05-05", "epoch": 1, "value": 0.5646, "error": 0.1841, "wavelength_um": 4.8599, "channel": 12},
+    {"mjd": 60989.29747, "date": "2025-11-10", "epoch": 2, "value": 1.0586, "error": 0.2264, "wavelength_um": 4.4178, "channel": 0},
+    {"mjd": 60989.29921, "date": "2025-11-10", "epoch": 2, "value": 1.2394, "error": 0.2398, "wavelength_um": 4.4493, "channel": 1},
+    {"mjd": 60989.3022, "date": "2025-11-10", "epoch": 2, "value": 0.8179, "error": 0.264, "wavelength_um": 4.5139, "channel": 3},
+    {"mjd": 60989.36693, "date": "2025-11-10", "epoch": 2, "value": 0.8919, "error": 0.2541, "wavelength_um": 4.5797, "channel": 5},
+    {"mjd": 60989.36843, "date": "2025-11-10", "epoch": 2, "value": 0.9801, "error": 0.2408, "wavelength_um": 4.613, "channel": 6},
+    {"mjd": 60989.97766, "date": "2025-11-10", "epoch": 2, "value": 1.4505, "error": 0.2428, "wavelength_um": 4.6337, "channel": 6},
+    {"mjd": 60989.97915, "date": "2025-11-10", "epoch": 2, "value": 0.7417, "error": 0.3075, "wavelength_um": 4.6678, "channel": 7},
+    {"mjd": 60993.50876, "date": "2025-11-14", "epoch": 2, "value": 0.9642, "error": 0.3187, "wavelength_um": 4.7703, "channel": 10},
+    {"mjd": 60993.51025, "date": "2025-11-14", "epoch": 2, "value": 1.0179, "error": 0.2749, "wavelength_um": 4.8049, "channel": 11},
+    {"mjd": 60993.57492, "date": "2025-11-14", "epoch": 2, "value": 0.4671, "error": 0.172, "wavelength_um": 4.8393, "channel": 12},
+    {"mjd": 60993.57641, "date": "2025-11-14", "epoch": 2, "value": 2.6295, "error": 0.7721, "wavelength_um": 4.8748, "channel": 13},
+    {"mjd": 60993.57939, "date": "2025-11-14", "epoch": 2, "value": 1.0832, "error": 0.4798, "wavelength_um": 4.9464, "channel": 14},
+    {"mjd": 60993.91355, "date": "2025-11-14", "epoch": 2, "value": 1.0901, "error": 0.3427, "wavelength_um": 4.9821, "channel": 15},
+    {"mjd": 61021.28349, "date": "2025-12-12", "epoch": 2, "value": 1.0644, "error": 0.2024, "wavelength_um": 4.6336, "channel": 6},
+    {"mjd": 61151.1986, "date": "2026-04-21", "epoch": 3, "value": 0.9806, "error": 0.2117, "wavelength_um": 4.4237, "channel": 0},
+    {"mjd": 61151.20009, "date": "2026-04-21", "epoch": 3, "value": 0.8375, "error": 0.2103, "wavelength_um": 4.4549, "channel": 1},
+    {"mjd": 61152.75797, "date": "2026-04-22", "epoch": 3, "value": 1.2691, "error": 0.249, "wavelength_um": 4.5186, "channel": 3},
+    {"mjd": 61152.76095, "date": "2026-04-22", "epoch": 3, "value": 1.1638, "error": 0.2339, "wavelength_um": 4.5841, "channel": 5},
+    {"mjd": 61153.43712, "date": "2026-04-23", "epoch": 3, "value": 0.9752, "error": 0.2087, "wavelength_um": 4.6173, "channel": 6},
+    {"mjd": 61153.43862, "date": "2026-04-23", "epoch": 3, "value": 1.3995, "error": 0.2776, "wavelength_um": 4.6511, "channel": 7},
+    {"mjd": 61153.44011, "date": "2026-04-23", "epoch": 3, "value": 0.9686, "error": 0.1899, "wavelength_um": 4.6851, "channel": 8},
+    {"mjd": 61153.4416, "date": "2026-04-23", "epoch": 3, "value": 1.0324, "error": 0.206, "wavelength_um": 4.7191, "channel": 8},
+    {"mjd": 61156.08618, "date": "2026-04-26", "epoch": 3, "value": 1.1385, "error": 0.2744, "wavelength_um": 4.8215, "channel": 11},
+    {"mjd": 61156.15489, "date": "2026-04-26", "epoch": 3, "value": 1.0766, "error": 0.2839, "wavelength_um": 4.7871, "channel": 10},
+    {"mjd": 61156.49385, "date": "2026-04-26", "epoch": 3, "value": 1.0, "error": 0.7211, "wavelength_um": 4.8954, "channel": 13},
+    {"mjd": 61156.49534, "date": "2026-04-26", "epoch": 3, "value": 0.5962, "error": 0.4019, "wavelength_um": 4.9313, "channel": 14},
+    {"mjd": 61160.77148, "date": "2026-04-30", "epoch": 3, "value": 1.0198, "error": 0.2661, "wavelength_um": 4.8249, "channel": 11},
+    {"mjd": 61168.9854, "date": "2026-05-08", "epoch": 3, "value": 0.8272, "error": 0.2767, "wavelength_um": 4.8249, "channel": 11},
+    {"mjd": 61169.19489, "date": "2026-05-09", "epoch": 3, "value": 1.0, "error": 0.199, "wavelength_um": 4.8597, "channel": 12},
+    {"mjd": 61169.52832, "date": "2026-05-09", "epoch": 3, "value": 0.616, "error": 0.76, "wavelength_um": 4.8954, "channel": 13},
+    {"mjd": 61169.93387, "date": "2026-05-09", "epoch": 3, "value": 1.0, "error": 0.4574, "wavelength_um": 4.9312, "channel": 14},
+    {"mjd": 61171.09702, "date": "2026-05-11", "epoch": 3, "value": 1.0, "error": 0.316, "wavelength_um": 4.9673, "channel": 15}
+   ]
+  }
+ ],
+ "warnings": [
+  {
+   "code": "offset_source",
+   "detectors": [1, 2, 3, 4],
+   "offset_arcsec": 5.69
+  }
+ ],
+ "provenance": {
+  "source": "SPHEREx / IRSA",
+  "n_exposures": 258,
+  "n_unreadable": 0,
+  "processing": ["l2b-v27"],
+  "channels_per_detector": 17,
+  "error_factor_median": 1.2533,
+  "computed_at": "2026-11-15T17:48:29Z"
+ },
+ "source": "precomputed"
+}
