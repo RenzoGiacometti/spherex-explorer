@@ -1,0 +1,354 @@
+== Tablas del esquema spherex ==
+-- 1.6 s, 6 filas
+spherex.artifact: SPHEREx CAOM Artifact Table
+spherex.obscore: IRSA ObsCore table of SPHEREx products
+spherex.observation: SPHEREx CAOM Observation Table
+spherex.plane: SPHEREx CAOM Plane Table
+spherex.provenance_input: Join tables for SPHEREx calibration files
+splices: The SPHEREx Target List of Ice Sources (SPLICES)
+
+== Columnas de spherex.artifact ==
+-- 0.6 s, 12 filas
+  planeid [char, ]: foreign key: caom.plane.planeid
+  artifactid [char, ]: unique artifact identifier: 32-bit UUID
+  uri [char, ]: artifact access url
+  producttype [char, ]: product type (e.g. science, calibration, auxiliary, preview, info)
+  releasetype [char, ]: release type (data, meta)
+  contenttype [char, ]: artifact file type
+  contentlength [long, byte]: artifact size in bytes
+  contentchecksum [char, ]: checksum of the content (URI of the form {algorithm}:{hex value})
+  ipac_gid [int, ]: IRSA access control identifier: group ID
+  mission_id [int, ]: IRSA access control identifier: mission ID
+  ipac_pub_date [char, ]: public release date (UTC)
+  lastmodified [char, ]: timestamp of last modification of this row
+
+== Columnas de spherex.obscore ==
+-- 0.5 s, 62 filas
+  obs_id [char, ]: Observation ID
+  obs_collection [char, ]: Data collection
+  s_ra [double, deg]: Central right ascension, ICRS
+  s_dec [double, deg]: Central declination, ICRS
+  energy_bandpassname [char, ]: Band name
+  em_min [double, m]: Minimum wavelength (in meters)
+  em_max [double, m]: Maximum wavelength (in meters)
+  t_min [double, d]: Observation start time (in MJD)
+  t_max [double, d]: Observation end time (in MJD)
+  t_exptime [double, s]: Exposure time
+  access_url [char, ]: Data access URL
+  access_format [char, ]: MIME type of access_url
+  dataproduct_type [char, ]: Data product type (e.g. image, spectrum, cube, measurements)
+  calib_level [short, ]: Calibration level (0, 1, 2, 3, 4)
+  target_name [char, ]: SPHEREx target field
+  obs_title [char, ]: Description of observation
+  facility_name [char, ]: Telescope name
+  instrument_name [char, ]: Instrument name
+  obs_creation_date [char, ]: Data product creation date
+  obs_creator_name [char, ]: Data product creator
+  obs_release_date [char, ]: Public release date
+  obs_publisher_did [char, ]: IVOA ID for the dataset, assigned by the publisher (IRSA)
+  publisher_id [char, ]: IVOA ID for the publisher (IRSA)
+  bib_reference [char, ]: IRSA documentation landing page
+  data_rights [char, ]: Data rights (Public, Secure, Proprietary)
+  s_fov [double, deg]: Field of view
+  s_region [char, ]: Sky region covered by the data product (ICRS)
+  s_resolution [double, arcsec]: Spatial resolution
+  s_xel1 [long, ]: Number of pixels along x-axis (NAXIS1)
+  s_xel2 [long, ]: Number of pixels along y-axis (NAXIS2)
+  s_ucd [char, ]: UCD for s_xel1/s_xel2 (pos or u,v data)
+  s_unit [char, ]: Units used for s_ra, s_dec
+  s_resolution_min [double, arcsec]: Minimum spatial resolution
+  s_resolution_max [double, arcsec]: Maximum spatial resolution
+  s_calib_status [char, ]: Astrometric calibration status
+  s_pixel_scale [double, arcsec]: Pixel size
+  t_xel [long, ]: Number of pixels along the time axis
+  t_resolution [double, s]: Resolution on the time axis
+  em_xel [long, ]: Number of pixels along the energy axis
+  em_calib_status [char, ]: Type of spectral coord calibration
+  em_res_power [double, ]: Spectral resolving power (R)
+  pol_xel [long, ]: Number of pixels along the polarization axis
+  proposal_id [char, ]: Proposal identifier
+  energy_emband [char, ]: Energy band (Radio,Millimeter,Infrared,Optical,...)
+  position_timedependent [boolean, ]: Position is time-dependent (0=false, 1=true)
+  obs_intent [char, ]: Intended purpose of data (science, calibration)
+  algorithm_name [char, ]: Algorithm (e.g. mosaic, exposure)
+  facility_keywords [char, ]: Telescope keywords formatted as a JSON string
+  instrument_keywords [char, ]: Instrument keywords formatted as a JSON string
+  environment_photometric [boolean, ]: Conditions were photometric (0=false, 1=true)
+  proposal_project [char, ]: Project that created/acquired the observation
+  target_type [char, ]: Classification of intended target (object, field)
+  target_standard [boolean, ]: Intended target is a standard (0=false, 1=true)
+  target_moving [boolean, ]: Intended target is moving (0=false, 1=true)
+  target_keywords [char, ]: Target keywords formatted as a JSON string
+  proposal_pi [char, ]: Proposal principal investigator
+  access_estsize [long, kbyte]: Estimated size of the download at access_url
+  o_ucd [char, ]: UCD of the observable (e.g. phot.flux.density, phot.count)
+  ipac_gid [int, ]: Internal IRSA column:  group ID
+  ipac_pub_date [char, ]: Internal IRSA column: public release date
+  pt [char, deg]: Internal IRSA column: Spatial index
+  poly [char, deg]: Internal IRSA column: Spatial index
+
+== Columnas de spherex.observation ==
+-- 0.5 s, 41 filas
+  obsid [char, ]: unique observation identifier: 32-bit UUID
+  collection [char, ]: data collection this observation belongs to
+  observationid [char, ]: unique observation identifier (human readable)
+  metarelease [char, ]: metadata public release date
+  sequencenumber [int, ]: sequence number of the observation
+  type [char, ]: type of data, often from FITS OBSTYPE keyword, e.g. exposure, spectrum, object, dark
+  intent [char, ]: intended purpose of data (one of: science, calibration)
+  algorithm_name [char, ]: algorithm that defines the observation (e.g. exposure, coadd, cube)
+  telescope_name [char, ]: name of telescope used to acquire observation
+  telescope_geolocationx [double, ]: x component of geocentric location of telescope
+  telescope_geolocationy [double, ]: y component of geocentric location of telescope
+  telescope_geolocationz [double, ]: z component of geocentric location of telescope
+  telescope_keywords [char, ]: telescope keywords (JSON of key/value pairs)
+  instrument_name [char, ]: name of instrument used to acquire observation
+  instrument_keywords [char, ]: instrument keywords (JSON of key/value pairs)
+  environment_seeing [double, arcsec]: atmospheric seeing (FWHM)
+  environment_humidity [double, ]: humidity at telescope during observation
+  environment_elevation [double, deg]: elevation above horizon (0 to 90)
+  environment_tau [double, ]: zenith optical depth
+  environment_wavelengthtau [double, m]: wavelength at which Tau has been measured
+  environment_ambienttemp [double, C]: ambient temperature telescope during observation
+  environment_photometric [boolean, ]: conditions were photometric (0=false, 1=true)
+  proposal_id [char, ]: collection-specific unique proposal identifier
+  proposal_pi [char, ]: proposal principal investigator
+  proposal_project [char, ]: project that created/acquired the observation
+  proposal_title [char, ]: proposal title
+  proposal_keywords [char, ]: proposal keywords (JSON of key/value pairs)
+  target_name [char, ]: name of intended target
+  target_type [char, ]: classification of intended target
+  target_redshift [double, ]: redshift of intended target
+  target_standard [boolean, ]: intended target is a standard (0=false, 1=true)
+  target_moving [boolean, ]: flag for moving target
+  target_keywords [char, ]: target keywords (JSON of key/value pairs)
+  targetposition_coordinates [char, deg]: coordiantes of the target position
+  targetposition_coordsys [char, ]: coordinate system for target position
+  targetposition_equinox [double, ]: equinox of target position coordinate system
+  requirements_flag [char, ]: flag describing satisfied proposal requirements (possible values: fail,null)
+  ipac_gid [int, ]: IRSA access control identifier: group ID
+  mission_id [int, ]: IRSA access control identifier: mission ID
+  ipac_pub_date [char, ]: public release date (UTC)
+  lastmodified [char, ]: timestamp of last modification of this row
+
+== Columnas de spherex.plane ==
+-- 0.5 s, 54 filas
+  obsid [char, ]: foreign key: caom.observation.obsid
+  planeid [char, ]: unique plane identifier: 32-bit UUID
+  productid [char, ]: name of this product
+  creatorid [char, ]: unique creator identifier for this product
+  metarelease [char, ]: date the metadata for a plane is public (UTC)
+  datarelease [char, ]: public release date
+  calibrationlevel [short, ]: IVOA ObsCore calibration level   (-1,0,1,2,3,4)
+  dataproducttype [char, ]: IVOA ObsCore data product type + extensions
+  quality_flag [char, ]: flag describing the data quality
+  metrics_sourcenumberdensity [double, deg-2]: number density of sources
+  metrics_background [double, Jy/pix]: background intensity
+  metrics_backgroundstddev [double, Jy/pix]: standard deviation in background
+  metrics_fluxdensitylimit [double, Jy]: flux density limit where S:N=5 for point source
+  metrics_maglimit [double, ]: AB magnitude limit where S:N=5 for point source
+  position_dimension_naxis1 [long, ]: dimensions (number of pixels) along one spatial axis
+  position_dimension_naxis2 [long, ]: dimensions (number of pixels) along other spatial axis
+  position_resolution [double, arcsec]: median spatial resolution (FWHM)
+  position_samplesize [double, arcsec]: median sample (pixel) size on spatial axes
+  position_timedependent [boolean, ]: flag indicating that the position is time-dependent (0=false, 1=true)
+  energy_bounds_lower [double, m]: lower bound on energy axis (barycentric wavelength)
+  energy_bounds_upper [double, m]: upper bound on energy axis (barycentric wavelength)
+  energy_bounds_samples [double, m]: detailed energy coverage (barycentric wavelength)
+  energy_emband [char, ]: comma-separated energy band names (e.g. Infrared, Optical)
+  energy_dimension [long, ]: dimension (number of pixels) along energy axis
+  energy_resolvingpower [double, ]: median spectral resolving power (R)
+  energy_samplesize [double, m]: median sample (pixel) size on energy axis
+  energy_bandpassname [char, ]: collection-specific name for energy band (e.g. filter name)
+  energy_transition_species [char, ]: atom or molecule
+  energy_transition_transition [char, ]: specific energy transition of species
+  energy_restwav [double, m]: rest wavelength of target spectral feature (barycentric)
+  time_bounds_lower [double, d]: lower bound on time axis (Modified Julian Day)
+  time_bounds_upper [double, d]: upper bound on time axis (Modified Julian Day)
+  time_bounds_samples [double, d]: detailed time coverage (Modified Julian Day)
+  time_dimension [long, ]: dimension (number of pixels) along time axis
+  time_resolution [double, d]: median resolution on the time axis
+  time_samplesize [double, d]: median sample (pixel) size on time axis
+  time_exposure [double, s]: median exposure time per pixel
+  polarization_states [char, ]: polarization letter codes - not populated at IRSA
+  polarization_dimension [long, ]: number of samples (pixels) along polarization axis
+  provenance_name [char, ]: name of the process that created this plane
+  provenance_reference [char, ]: external reference (URL)
+  provenance_version [char, ]: version of the process/software
+  provenance_project [char, ]: responsible entity (e.g. person)
+  provenance_producer [char, ]: responsible entity (e.g. person)
+  provenance_runid [char, ]: responsible entity (e.g. person)
+  provenance_lastexecuted [char, ]: date this process was last executed
+  provenance_keywords [char, ]: provenance keywords (JSON of key/value pairs)
+  ipac_gid [int, ]: IRSA access control identifier: group ID
+  mission_id [int, ]: IRSA access control identifier: mission ID
+  poly [char, deg]: IRSA internal spatial index descriptor
+  pt [char, deg]: IRSA internal spatial index descriptor
+  ipac_pub_date [char, ]: public release date (UTC)
+  lastmodified [char, ]: timestamp of last modification of this row
+  obs_publisher_did [char, ]: IVOA ID for the dataset, assigned by the publisher (IRSA)
+
+== Columnas de spherex.provenance_input ==
+-- 0.4 s, 2 filas
+  inputid [char, ]: calibration input plane identifier (plane.planeid)
+  outputid [char, ]: science output plane identifier (plane.planeid)
+
+== Columnas de splices ==
+-- 0.7 s, 157 filas
+  source_id [long, ]: SPLICES source ID
+  designation [char, ]: Source Designation
+  ra [double, deg]: Right Ascension (J2000)
+  dec [double, deg]: Declination (J2000)
+  gal_long [double, deg]: Galactic Longitude
+  gal_lat [double, deg]: Galactic Latitude
+  tmassdesignation [char, ]: 2MASS source designation
+  tmassra [double, deg]: 2MASS right ascension
+  tmassdec [double, deg]: 2MASS declination
+  j [float, mag]: 2MASS J magnitude
+  jerr [float, mag]: 2MASS J magnitude uncertainty
+  h [float, mag]: 2MASS H magnitude
+  herr [float, mag]: 2MASS H magnitude uncertainty
+  k [float, mag]: 2MASS K magnitude
+  kerr [float, mag]: 2MASS K magnitude uncertainty
+  ph_qual [char, ]: 2MASS photometric quality flag
+  rd_flg [long, ]: 2MASS rd_flg
+  prox [double, arcsec]: 2MASS prox value
+  w1 [float, mag]: WISE band 1 magnitude
+  w1err [float, mag]: WISE band 1 magnitude uncertainty
+  w2 [float, mag]: WISE band 2 magnitude
+  w2err [float, mag]: WISE band 2 magnitude uncertainty
+  w3 [float, mag]: WISE band 3 magnitude
+  w3err [float, mag]: WISE band 3 magnitude uncertainty
+  w4 [float, mag]: WISE band 4 magnitude
+  w4err [float, mag]: WISE band 4 magnitude uncertainty
+  cc_flags [char, ]: WISE cc_flags
+  ext_flg [long, ]: WISE ext_flg
+  var_flg [char, ]: WISE var_flg
+  irac_designation [char, ]: IRAC source designation
+  ra_irac [double, deg]: IRAC right ascension
+  dec_irac [double, deg]: IRAC declination
+  mag3_6 [float, mag]: IRAC 3.6 micron magnitude
+  d3_6m [float, mag]: IRAC 3.6 micron magnitude uncertainty
+  mag4_5 [float, mag]: IRAC 4.5 micron magnitude
+  d4_5m [float, mag]: IRAC 4.5 micron magnitude uncertainty
+  mag5_8 [float, mag]: IRAC 5.8 micron magnitude
+  d5_8m [float, mag]: IRAC 5.8 micron magnitude uncertainty
+  mag8_0 [float, mag]: IRAC 8.0 micron magnitude
+  d8_0m [float, mag]: IRAC 8.0 micron magnitude uncertainty
+  sel_type [char, ]: Source selection method
+  class_1 [char, ]: Source Class
+  yso_pub [long, ]: Publication source of YSO classification
+  stype_ml [char, ]: Machine Learning Source Class
+  stype_ml_prob1 [double, ]: Machine Learning Source Type Probability Stage 1
+  stype_ml_prob2 [double, ]: Machine Learning Source Type Probability Stage 2
+  name [char, ]: Proper Name
+  gaia_dr3 [long, ]: Gaia DR3 source designation
+  gaiadr3_g [float, mag]: Gaia G band magnitude
+  gaiadr3_gerr [double, mag]: Gaia G band magnitude uncertainty
+  gaiadr3_b [float, mag]: Gaia B band magnitude
+  gaiadr3_berr [double, mag]: Gaia B band magnitude
+  gaiadr3_r [float, mag]: Gaia R band magnitude
+  gaiadr3_rerr [double, mag]: Gaia R band magnitude
+  plx [double, mas]: Gaia parallax
+  e_plx [float, mas]: Gaia parallax uncertainty
+  pmra [double, mas.yr**-1]: Right ascension proper motion
+  pmra_err [float, mas.yr**-1]: Right ascension proper motion uncertainty
+  pmdec [double, mas.yr**-1]: Declination proper motion
+  pmdec_err [float, mas.yr**-1]: Declination proper motion uncertainty
+  gaiadist [float, pc]: Distance derived by Gaia
+  e_dist_upper [float, pc]: Upper limit of distance 68% confidence range
+  e_dist_lower [float, pc]: Lower limit of distance 68% confidence range
+  classvar [char, ]: Source Class from variability analysis
+  w1var [long, ]: W1 variability flag
+  w1var_class [char, ]: W1 variability class
+  w2var [long, ]: W2 variability flag
+  w2var_class [char, ]: W2 variability class
+  w1varavg [double, mag]: NEOWISE W1 mean mag
+  w2varavg [double, mag]: NEOWISE W2 mean mag
+  w1varamp [double, mag]: NEOWISE W1 variability amplitude
+  w2varamp [double, mag]: NEOWISE W2 variability amplitude
+  av [double, mag]: Estimate of Av from H-W2 or K-W2
+  mc [char, ]: Molecular Cloud name
+  mc_lon [double, deg]: Galactic longitude of cloud sightline
+  mc_lat [double, deg]: Galactic latitude of cloud sightline
+  mc_dist [double, pc]: Distance of cloud
+  mc_avf [double, mag]: Foreground Av to cloud
+  mc_los [char, ]: Position class
+  numgaianb [long, ]: Number of Gaia sources &lt;7.6 arcsec from target
+  maxrmag [float, mag]: Maximum Gaia R mag of neighbors
+  sumrflux [double, uJy]: Sum of Gaia R band fluxes of neighbors
+  mainrflux [double, uJy]: SPLICES target Gaia R flux
+  fluxratiogaia [double, %]: Ratio of bkgnd Gaia flux to SPLICES source flux
+  mingaiadist [float, arcsec]: Distance to nearest Gaia neighbor
+  mindistgaiaflux [double, uJy]: Flux of nearest Gaia neighbor
+  noc [long, ]: Number of clouds along the line of sight (Dame et al.)
+  noc_gl [double, deg]: Galactic longitude of Dame et al. pixel
+  noc_gb [double, deg]: Galactic latitude of Dame et al. pixel
+  numiracnbors [long, ]: Number of IRAC sources &lt;7.6 arcsec from target
+  mindistirac [float, arcsec]: Distance of closest neighbor
+  i1mag [float, mag]: I1 mag of SPLICES target
+  maxi1mag [float, mag]: I1 mag of brightest neighbor
+  sumi1flux [double, uJy]: Sum of I1 neighbor fluxes
+  maini1flux [double, uJy]: I1 Flux of SPLICES target
+  mindisti1flux [double, uJy]: I1 Flux of closest neighbor
+  i2mag [float, mag]: I2 mag of SPLICES target
+  maxi2mag [float, mag]: I2 mag of brightest neighbor
+  sumi2flux [double, uJy]: Sum of I2 neighbor fluxes
+  maini2flux [double, uJy]: I2 Flux of SPLICES target
+  mindisti2flux [double, uJy]: I2 Flux of closest neighbor
+  fluxratioi1 [double, %]: Ratio of bkgnd I1 flux to SPLICES source flux
+  fluxratioi2 [double, %]: Ratio of bkgnd I2 flux to SPLICES source flux
+  numvvvneighbors [long, ]: Number of VVV sources &lt;7.6 arcsec from target
+  mindistvvv [float, arcsec]: Distance to nearest VVV neighbor
+  vvvjmag [float, mag]: VVVJ mag of SPLICES target
+  maxvvvjmag [float, mag]: VVVJ mag of brightest nearby source
+  sumvvvjflux [double, uJy]: Sum of VVVJ fluxes of background sources
+  mainvvvjflux [double, uJy]: J band Flux of SPLICES source
+  mindistvvvjflux [double, uJy]: Flux of nearest VVVJ background source
+  vvvhmag [float, mag]: VVVH mag of SPLICES target
+  maxvvvhmag [float, mag]: VVVH mag of brightest nearby source
+  sumvvvhflux [double, uJy]: Sum of VVVH fluxes of background sources
+  mainvvvhflux [double, uJy]: H band Flux of SPLICES source
+  mindistvvvhflux [double, uJy]: Flux of nearest VVVH background source
+  vvvkmag [float, mag]: VVVK band mag of SPLICES source
+  maxvvvkmag [float, mag]: VVVK mag of brightest nearby source
+  sumvvvkflux [double, uJy]: Sum of VVVK fluxes of background sources
+  mainvvvkflux [double, uJy]: K band Flux of SPLICES source
+  mindistvvvkflux [double, uJy]: Flux of nearest VVVK background source
+  fluxratiovvvj [double, %]: Ratio of bkgnd VVVJ flux to SPLICES source flux
+  fluxratiovvvh [double, %]: Ratio of bkgnd VVVH flux to SPLICES source flux
+  fluxratiovvvk [double, %]: Ratio of bkgnd VVVK flux to SPLICES source flux
+  numuksnbors [long, ]: Number of UKIDSS sources &lt;7.6 arcsec from target
+  mindistuks [float, arcsec]: Distance to closest UKIDSS neighbor
+  uksjmag [float, mag]: UKSJ band mag of SPLICES source
+  maxuksjmag [float, mag]: UKSJ mag of brightest nearby source
+  sumuksjflux [double, uJy]: Sum of UKSJ fluxes of background sources
+  mainuksjflux [double, uJy]: J band Flux of SPLICES source
+  mindistuksjflux [double, uJy]: Flux of nearest UKSJ background source
+  ukshmag [float, mag]: UKSH band mag of SPLICES source
+  maxukshmag [float, mag]: UKSH mag of brightest nearby source
+  sumukshflux [double, uJy]: Sum of UKSH fluxes of background sources
+  mainukshflux [double, uJy]: H band Flux of SPLICES source
+  mindistukshflux [double, uJy]: Flux of nearest UKSH background source
+  ukskmag [float, mag]: UKSK band mag of SPLICES source
+  maxukskmag [float, mag]: UKSK mag of brightest nearby source
+  sumukskflux [double, uJy]: Sum of UKSK fluxes of background sources
+  mainukskflux [double, uJy]: K band Flux of SPLICES source
+  mindistukskflux [double, uJy]: Flux of nearest UKSK background source
+  fluxratiouksj [double, %]: Ratio of bkgnd UKSJ flux to SPLICES source flux
+  fluxratiouksh [double, %]: Ratio of bkgnd UKSH flux to SPLICES source flux
+  fluxratiouksk [double, %]: Ratio of bkgnd UKSK flux to SPLICES source flux
+  varclassgaia [char, ]: Gaia Variability best class
+  varclassgaiasc [double, ]: Score of the best Gaia class
+  sv_w1 [char, ]: NEOWISE W1 short-term variability flag
+  sv_w1_v [double, ]: Number of W1 variable short-term epoch
+  sv_w1_t [double, ]: Number of W1 total short-term epochs
+  sv_w2 [char, ]: NEOWISE W2 short-term variability flag
+  sv_w2_v [double, ]: Number of W2 variable short-term epochs
+  sv_w2_t [double, ]: Number of W2 total short-term epochs
+  x [double, ]: unit sphere (x,y,z) position x value
+  y [double, ]: unit sphere (x,y,z) position y value
+  z [double, ]: unit sphere (x,y,z) position z value
+  spt_ind [long, ]: Spatial (x,y,z) index key
+  htm20 [long, ]: HTM20 spatial index key
+  cntr [long, ]: entry counter (key) number (unique within table)

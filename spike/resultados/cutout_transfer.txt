@@ -1,0 +1,24 @@
+[recorte completo, sin compresion] HTTP 200; primer byte a 1.11 s; 4000 kB en 9.23 s
+    cabeceras: {'Content-Type': 'application/fits', 'Transfer-Encoding': 'chunked', 'content-disposition': 'attachment; filename=level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits'}
+    primeros 200 kB a los 1.87 s
+    velocidad de transferencia: 0.49 MB/s
+[recorte completo, gzip] HTTP 200; primer byte a 1.11 s; 4000 kB en 9.77 s
+    cabeceras: {'Content-Type': 'application/fits', 'Transfer-Encoding': 'chunked', 'content-disposition': 'attachment; filename=level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits'}
+    primeros 200 kB a los 2.04 s
+    velocidad de transferencia: 0.46 MB/s
+[recorte, Range 0-199999] HTTP 200; primer byte a 1.08 s; 4000 kB en 6.72 s
+    cabeceras: {'Content-Type': 'application/fits', 'Transfer-Encoding': 'chunked', 'content-disposition': 'attachment; filename=level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits'}
+    primeros 200 kB a los 1.69 s
+    velocidad de transferencia: 0.71 MB/s
+[recorte, cortando a los 200 kB] HTTP 200; primer byte a 1.11 s; 232 kB en 1.89 s
+    cabeceras: {'Content-Type': 'application/fits', 'Transfer-Encoding': 'chunked', 'content-disposition': 'attachment; filename=level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits'}
+    primeros 200 kB a los 1.89 s
+    velocidad de transferencia: 0.29 MB/s
+[archivo completo, Range 0-199999] HTTP 206; primer byte a 1.08 s; 200 kB en 1.94 s
+    cabeceras: {'Content-Type': 'application/fits', 'Content-Length': '200000', 'accept-ranges': 'bytes', 'content-range': 'bytes 0-199999/65160000'}
+    primeros 200 kB a los 1.94 s
+    velocidad de transferencia: 0.23 MB/s
+[archivo completo, primeros 8 MB] HTTP 200; primer byte a 1.07 s; 8061 kB en 19.97 s
+    cabeceras: {'Content-Type': 'application/fits', 'Content-Length': '65160000', 'accept-ranges': 'bytes'}
+    primeros 200 kB a los 1.69 s
+    velocidad de transferencia: 0.43 MB/s

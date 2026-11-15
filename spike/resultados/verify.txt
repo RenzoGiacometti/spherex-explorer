@@ -1,0 +1,147 @@
+== 1a. Escala de pixel segun ObsCore (SIA2) ==
+spherex_dr1: 246 imagenes en 9.0 s; ('obs_collection', 's_pixel_scale', 's_fov', 's_xel1', 's_xel2', 's_resolution')
+    ('spherex_dr1', '6.15', '3.485', '2040', '2040', '3.075'): 246 filas
+spherex_qr3: 130 imagenes en 15.0 s; ('obs_collection', 's_pixel_scale', 's_fov', 's_xel1', 's_xel2', 's_resolution')
+    ('spherex_qr3', '6.15', '3.485', '2040', '2040', '3.075'): 130 filas
+
+== 1b. Escala de pixel segun el WCS del archivo completo ==
+archivo completo: ok, 65.2 MB en 100.9 s
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(2040, 2040) BUNIT=MJy / sr
+      HDU 2: FLAGS     CompImageHDU  shape=(2040, 2040) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(2040, 2040) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(2040, 2040) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 2040 x 2040; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 3.4737 x 3.4839 grados
+      centro pedido cae en pixel (x=1107.32, y=1115.86); centro geometrico (1019.5, 1019.5)
+      Bits de FLAGS (MSKNnnnn / MSKDnnnn):
+         0  TRANSIENT     Transient detected during SUR
+         1  OVERFLOW      Overflow detected during SUR
+         2  SUR_ERROR     Error in onboard processing
+         6  NONFUNC       Permanently unusable
+         7  DICHROIC      Low efficiency due to dichroic
+         9  MISSING_DATA  Onboard data lost
+        10  HOT           Hot pixel
+        11  COLD          Anomalously low signal
+        12  FULLSAMPLE    Pixel full sample history is available
+        14  PHANMISS      Phantom correction was not applied
+        15  NONLINEAR     Nonlinearity correction cannot be applied reliably
+        17  PERSIST       Persistent charge above threshold
+        19  OUTLIER       Pixel flagged by Detect Outliers
+        20  CROSSTALK     Pixel affected by crosstalk.
+        21  SOURCE        Pixel mapped to a known source
+        22  GHOST         Affected by a bright source inside the exposure
+        23  GHOST_FPA     Affected by a bright source on another detector
+        24  GHOST_EXT     Pixel affected by a bright source outside FOV
+        25  STREAK        Pixel affected by a streak
+        26  BLOOM         Pixel part of a bloom artifact
+        27  SNOWBALL      Pixel part of a snowball artifact
+        28  HALO          Pixel part of a transient halo
+      IMAGE.DETECTOR = 2
+      IMAGE.OBSID = 2025W21_2C_0401_1
+      IMAGE.DATE-OBS = 2025-05-24T21:52:33.088
+      IMAGE.DATE-AVG = 2025-05-24T21:53:30.647
+      IMAGE.MJD-OBS = 60819.911494074
+      IMAGE.MJD-AVG = 60819.912160263
+      IMAGE.EXPTIME = None
+      IMAGE.XPOSURE = 113.5826
+      IMAGE.PSF_FWHM = 7.46070125580342
+      PRIMARY: {'SIMPLE': True, 'BITPIX': 8, 'NAXIS': 0, 'EXTEND': True, 'VERSION': '7.0.5'}
+
+== 2. Formato de la URL de recorte ==
+size=0.1: ok, 4000 kB en 8.8 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=0.1
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 2: FLAGS     ImageHDU      shape=(59, 59) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(59, 59) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 59 x 59; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 0.1005 x 0.1008 grados
+      centro pedido cae en pixel (x=29.32, y=28.86); centro geometrico (29.0, 29.0)
+size=0.1deg: ok, 4000 kB en 10.5 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=0.1deg
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 2: FLAGS     ImageHDU      shape=(59, 59) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(59, 59) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 59 x 59; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 0.1005 x 0.1008 grados
+      centro pedido cae en pixel (x=29.32, y=28.86); centro geometrico (29.0, 29.0)
+size=6arcmin: HTTP 503: 'Server busy, retry later.', 0 kB en 0.9 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=6arcmin
+size=360arcsec: HTTP 503: 'Server busy, retry later.', 0 kB en 0.9 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=360arcsec
+size=59px: ok, 4000 kB en 11.2 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=59px
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 2: FLAGS     ImageHDU      shape=(59, 59) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(59, 59) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(59, 59) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 59 x 59; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 0.1005 x 0.1008 grados
+      centro pedido cae en pixel (x=29.32, y=28.86); centro geometrico (29.0, 29.0)
+size=0.05: ok, 3966 kB en 10.1 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=0.05
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(29, 29) BUNIT=MJy / sr
+      HDU 2: FLAGS     ImageHDU      shape=(29, 29) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(29, 29) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(29, 29) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 29 x 29; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 0.0494 x 0.0495 grados
+      centro pedido cae en pixel (x=14.32, y=13.86); centro geometrico (14.0, 14.0)
+size=0.1,0.05: ok, 3977 kB en 9.5 s
+   https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W21_2C/l2b-v27-2026-199/2/level2_2025W21_2C_0401_1D2_spx_l2b-v27-2026-199.fits?center=210.80227,54.34895d&size=0.1,0.05
+      HDU 0: PRIMARY   PrimaryHDU    shape=() BUNIT=None
+      HDU 1: IMAGE     ImageHDU      shape=(29, 59) BUNIT=MJy / sr
+      HDU 2: FLAGS     ImageHDU      shape=(29, 59) BUNIT=
+      HDU 3: VARIANCE  ImageHDU      shape=(29, 59) BUNIT=MJy2 / sr2
+      HDU 4: ZODI      ImageHDU      shape=(29, 59) BUNIT=MJy / sr
+      HDU 5: EPSF      BinTableHDU   shape=() BUNIT=None
+      HDU 6: WCS-WAVE  BinTableHDU   shape=() BUNIT=None
+      NAXIS1 x NAXIS2 = 59 x 29; CTYPE = ['RA---TAN-SIP', 'DEC--TAN-SIP']; SIP = True
+      escala WCS = 6.1301 x 6.1480 arcsec/px
+      lado = 0.1005 x 0.0495 grados
+      centro pedido cae en pixel (x=29.32, y=13.86); centro geometrico (29.0, 14.0)
+
+== 2b. Variantes del parametro center ==
+center=210.80227,54.34895: ok, 4000 kB en 8.0 s
+      59 x 59, centro pedido en (x=29.32, y=28.86)
+center=210.80227,54.34895deg: ok, 4000 kB en 10.1 s
+      59 x 59, centro pedido en (x=29.32, y=28.86)
+center=210.80227d,54.34895d: HTTP 422: 'Error in \'center\': Value error, Invalid format. Accepted formats are: \'<value><unit>\' or \'<value1>,<value2><unit>\'. Valid units: p, px, pix, pixel, pixels, ", arcsec, asec, arc-sec, a-sec, arcseconds,', 0 kB en 0.9 s
+
+== 2c. Recorte fuera de la imagen ==
+center a 10 grados: HTTP 422: 'Arrays do not overlap.', 22 bytes en 1.0 s
+
+== 2d. Contenido de un recorte (size=0.1) ==
+      IMAGE dtype=>f4 mediana=0.8644 NaN=0
+      ZODI mediana=0.1247; IMAGE-ZODI mediana=0.7399
+      VARIANCE mediana=0.001044 (sigma=0.0323)
+      FLAGS dtype=>i4; bits presentes:
+         0 TRANSIENT     11 px
+         2 SUR_ERROR     5 px
+         6 NONFUNC       3 px
+        17 PERSIST       69 px
+        21 SOURCE        3466 px
+        28 HALO          50 px
+      EPSF: 441 filas; WCS-WAVE: ['X', 'Y', 'VALUES']
+      longitud de onda en el centro = 1.3120 um, ancho = 0.0315 um

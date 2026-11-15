@@ -1,0 +1,14 @@
+[project]
+name = "spherex-spike"
+version = "0.1.0"
+description = "Etapa 0: prueba tecnica contra IRSA (descartable)"
+requires-python = ">=3.12"
+dependencies = [
+    "astropy>=8.0.2",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pyvo>=1.10.0",
+    "reproject>=0.21.0",
+    "requests>=2.34.2",
+    "scipy>=1.18.1",
+]

@@ -1,0 +1,49 @@
+== D1: 7 recortes ==
+   columnas: {'X': (9,), 'Y': (9,), 'VALUES': (9, 9, 2)}
+   X = [   1  256  511  766 1021 1275 1530 1785 2040]
+   Y = [   1  256  511  766 1021 1275 1530 1785 2040]
+   claves W del primero (level2_2025W35_2A_0611_1D1_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -1497.0, 'CRPIX2W': -895.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 7/7; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 7 (ej. [(-1185.0, -74.0), (-1204.0, -880.0), (-1218.0, -1455.0)])
+   longitud de onda en el centro del recorte [um]: [0.762, 0.823, 0.843, 0.925, 0.926, 1.017, 1.092]
+== D2: 7 recortes ==
+   columnas: {'X': (11,), 'Y': (11,), 'VALUES': (11, 11, 2)}
+   X = [   1  205  409  613  817 1021 1224 1428 1632 1836 2040]
+   Y = [   1  205  409  613  817 1021 1224 1428 1632 1836 2040]
+   claves W del primero (level2_2026W11_2A_0501_4D2_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -811.0, 'CRPIX2W': -266.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 7/7; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 7 (ej. [(-1004.0, -1197.0), (-1010.0, -1657.0), (-62.0, -355.0)])
+   longitud de onda en el centro del recorte [um]: [1.167, 1.282, 1.285, 1.347, 1.409, 1.539, 1.554]
+== D3: 6 recortes ==
+   columnas: {'X': (9,), 'Y': (14,), 'VALUES': (14, 9, 2)}
+   X = [   1  256  511  766 1021 1275 1530 1785 2040]
+   Y = [   1   36   71  105  140  141  379  617  855 1091 1326 1564 1802 2040]
+   claves W del primero (level2_2025W33_2C_0321_1D3_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -1599.0, 'CRPIX2W': -249.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 6/6; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 6 (ej. [(-1599.0, -249.0), (-428.0, -11.0), (-434.0, -932.0)])
+   longitud de onda en el centro del recorte [um]: [1.67, 1.836, 2.013, 2.223, 2.308, 2.411]
+== D4: 2 recortes ==
+   columnas: {'X': (13,), 'Y': (20,), 'VALUES': (20, 13, 2)}
+   X = [   1  171  341  511  681  851 1021 1190 1360 1530 1700 1870 2040]
+   Y = [   1  151  301  451  601  751  901 1050 1200 1350 1500 1650 1800 1801
+ 1841 1881 1921 1960 2000 2040]
+   claves W del primero (level2_2025W35_1A_0658_1D4_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -1524.0, 'CRPIX2W': -1801.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 2/2; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 2 (ej. [(-1524.0, -1801.0), (-596.0, -346.0)])
+   longitud de onda en el centro del recorte [um]: [2.498, 3.509]
+== D5: 8 recortes ==
+   columnas: {'X': (11,), 'Y': (11,), 'VALUES': (11, 11, 2)}
+   X = [   1  205  409  613  817 1021 1224 1428 1632 1836 2040]
+   Y = [   1  205  409  613  817 1021 1224 1428 1632 1836 2040]
+   claves W del primero (level2_2025W34_2B_0090_4D5_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -1138.0, 'CRPIX2W': -1931.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 8/8; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 8 (ej. [(-1107.0, -436.0), (-1116.0, -897.0), (-1122.0, -1127.0)])
+   longitud de onda en el centro del recorte [um]: [3.822, 3.91, 3.956, 4.06, 4.131, 4.276, 4.29, 4.407]
+== D6: 8 recortes ==
+   columnas: {'X': (9,), 'Y': (9,), 'VALUES': (9, 9, 2)}
+   X = [   1  256  511  766 1021 1275 1530 1785 2040]
+   Y = [   1  256  511  766 1021 1275 1530 1785 2040]
+   claves W del primero (level2_2025W34_2B_0030_1D6_spx_l2b-v27-2...): {'WCSNAMEW': 'Approximated per-pixel wavelength and bandwidth', 'CRPIX1W': -732.0, 'CRPIX2W': -1382.0, 'CDELT1W': 1, 'CDELT2W': 1, 'CUNIT1W': 'um', 'CUNIT2W': 'um', 'CTYPE1W': 'WAVE-TAB', 'CTYPE2W': 'WAVE-TAB', 'CRVAL1W': 1, 'CRVAL2W': 1, 'PV1_3W': 1, 'PV2_3W': 2, 'PS1_0W': 'WCS-WAVE', 'PS2_0W': 'WCS-WAVE', 'PS1_1W': 'VALUES', 'PS2_1W': 'VALUES', 'PS1_2W': 'X', 'PS2_2W': 'Y'}
+   tablas identicas a la primera: 8/8; diferencia maxima en VALUES: 0.000e+00
+   CRPIX1W/CRPIX2W distintos: 8 (ej. [(-1328.0, -1751.0), (-428.0, -694.0), (-613.0, -759.0)])
+   longitud de onda en el centro del recorte [um]: [4.434, 4.475, 4.563, 4.58, 4.596, 4.767, 4.789, 4.819]

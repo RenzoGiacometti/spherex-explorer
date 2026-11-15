@@ -1,0 +1,25 @@
+== epsindb: fraccion de pixeles con al menos una exposicion / con al menos la mitad del maximo ==
+  epoca 1: D1 0.84/0.68 (max 3); D2 0.88/0.86 (max 32); D3 0.88/0.86 (max 25); D4 0.84/0.81 (max 3); D5 0.88/0.85 (max 30); D6 0.87/0.86 (max 24)
+  epoca 2: D1 0.88/0.86 (max 24); D2 0.88/0.86 (max 30); D3 0.87/0.85 (max 23); D4 0.88/0.85 (max 23); D5 0.88/0.86 (max 24); D6 0.86/0.84 (max 21)
+  epoca 3: D1 0.86/0.84 (max 19); D2 0.87/0.86 (max 7); D3 0.88/0.86 (max 12); D4 0.86/0.84 (max 18); D5 0.87/0.86 (max 6); D6 0.87/0.86 (max 11)
+  epoca 4: D1 0.00/0.00 (max 0); D2 0.87/0.86 (max 24); D3 0.86/0.84 (max 34); D4 0.00/0.00 (max 0); D5 0.88/0.86 (max 24); D6 0.86/0.84 (max 36)
+  minimo sobre todos los planos: 0.84
+  esquina sin datos en algun plano: True
+== rwaur: fraccion de pixeles con al menos una exposicion / con al menos la mitad del maximo ==
+  epoca 1: D1 0.98/0.93 (max 19); D2 0.98/0.96 (max 18); D3 0.98/0.95 (max 19); D4 0.98/0.94 (max 19); D5 0.98/0.96 (max 18); D6 0.98/0.95 (max 19)
+  epoca 2: D1 0.97/0.93 (max 19); D2 0.98/0.94 (max 19); D3 0.99/0.97 (max 18); D4 0.96/0.92 (max 18); D5 0.98/0.95 (max 19); D6 0.98/0.97 (max 19)
+  epoca 3: D1 0.97/0.93 (max 18); D2 0.98/0.96 (max 18); D3 0.98/0.95 (max 18); D4 0.98/0.95 (max 18); D5 0.98/0.97 (max 19); D6 0.98/0.96 (max 18)
+  minimo sobre todos los planos: 0.96
+  esquina sin datos en algun plano: True
+== rdra: fraccion de pixeles con al menos una exposicion / con al menos la mitad del maximo ==
+  epoca 1: D1 0.84/0.79 (max 22); D2 0.97/0.89 (max 33); D3 0.90/0.83 (max 23); D4 0.80/0.75 (max 21); D5 0.95/0.87 (max 32); D6 0.89/0.84 (max 22)
+  epoca 2: D1 0.96/0.85 (max 45); D2 0.97/0.87 (max 37); D3 0.84/0.79 (max 24); D4 0.91/0.80 (max 43); D5 0.96/0.86 (max 37); D6 0.84/0.80 (max 24)
+  epoca 3: D1 0.85/0.79 (max 24); D2 0.97/0.93 (max 19); D3 0.92/0.81 (max 44); D4 0.82/0.76 (max 23); D5 0.96/0.91 (max 19); D6 0.91/0.81 (max 45)
+  minimo sobre todos los planos: 0.80
+  esquina sin datos en algun plano: True
+== wise0855-10min: fraccion de pixeles con al menos una exposicion / con al menos la mitad del maximo ==
+  epoca 1: D1 1.00/0.99 (max 4); D2 1.00/1.00 (max 8); D3 1.00/0.93 (max 3); D4 1.00/1.00 (max 4); D5 1.00/1.00 (max 8); D6 1.00/0.99 (max 3)
+  epoca 2: D1 1.00/0.99 (max 18); D2 1.00/1.00 (max 25); D3 1.00/0.99 (max 20); D4 1.00/1.00 (max 18); D5 1.00/1.00 (max 25); D6 1.00/1.00 (max 21)
+  epoca 3: D1 1.00/1.00 (max 14); D2 1.00/1.00 (max 15); D3 1.00/1.00 (max 21); D4 1.00/1.00 (max 14); D5 1.00/1.00 (max 15); D6 1.00/1.00 (max 21)
+  minimo sobre todos los planos: 1.00
+  esquina sin datos en algun plano: True

@@ -1,0 +1,58 @@
+Barnard's Star: 358 recortes en cache
+
+== nucleo (r <= 1.5 px): 2526 pixeles, enmascarados 99.3%, de ellos con IMAGE finito 74.9%
+   SOURCE        100.0%
+   BLOOM          97.6%
+   SUR_ERROR      69.2%
+   OVERFLOW       59.5%
+   TRANSIENT      45.2%
+   DICHROIC        0.9%
+   NONFUNC         0.6%
+   PERSIST         0.4%
+   HOT             0.3%
+   HALO            0.1%
+   IMAGE enmascarado / maximo valido del recorte: p10 1.60, mediana 10.24, p90 33.67, negativos 0.0%
+
+== anillo (1.5 < r <= 3 px): 7571 pixeles, enmascarados 78.5%, de ellos con IMAGE finito 99.9%
+   SOURCE        100.0%
+   BLOOM          77.8%
+   TRANSIENT      76.9%
+   SUR_ERROR      67.9%
+   OVERFLOW        1.6%
+   PERSIST         0.9%
+   DICHROIC        0.8%
+   NONFUNC         0.4%
+   HALO            0.3%
+   COLD            0.0%
+   IMAGE enmascarado / maximo valido del recorte: p10 0.23, mediana 0.63, p90 3.78, negativos 0.0%
+
+== halo (3 < r <= 6 px): 30409 pixeles, enmascarados 19.6%, de ellos con IMAGE finito 99.8%
+   SOURCE        100.0%
+   TRANSIENT      17.4%
+   BLOOM          17.0%
+   SUR_ERROR       8.0%
+   PERSIST         1.0%
+   DICHROIC        0.9%
+   HALO            0.7%
+   NONFUNC         0.5%
+   OVERFLOW        0.1%
+   COLD            0.1%
+   CROSSTALK       0.0%
+   IMAGE enmascarado / maximo valido del recorte: p10 0.10, mediana 0.21, p90 0.44, negativos 0.6%
+
+== combinaciones de flags en pixeles enmascarados del nucleo (sin SOURCE) ==
+    38.0%  BLOOM + SUR_ERROR + TRANSIENT
+    27.8%  BLOOM + OVERFLOW
+    24.5%  BLOOM + OVERFLOW + SUR_ERROR
+     5.3%  BLOOM + OVERFLOW + SUR_ERROR + TRANSIENT
+     1.1%  OVERFLOW
+     0.9%  BLOOM + TRANSIENT
+     0.7%  BLOOM + DICHROIC + SUR_ERROR + TRANSIENT
+     0.3%  NONFUNC + OVERFLOW + SUR_ERROR
+     0.3%  NONFUNC + OVERFLOW
+     0.3%  BLOOM + HOT + SUR_ERROR + TRANSIENT
+     0.2%  BLOOM + OVERFLOW + PERSIST + SUR_ERROR
+     0.1%  BLOOM + DICHROIC + OVERFLOW + SUR_ERROR
+
+== fraccion del nucleo enmascarada por detector (media sobre recortes) ==
+   D1 1.00 (n=60); D2 1.00 (n=61); D3 1.00 (n=59); D4 1.00 (n=59); D5 1.00 (n=61); D6 0.96 (n=58)

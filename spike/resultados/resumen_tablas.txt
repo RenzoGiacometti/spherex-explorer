@@ -1,0 +1,153 @@
+
+## Barnard's Star (barnard)
+objetivo: {'name': "Barnard's Star", 'ra': 269.4520769586187, 'dec': 4.69336496657667, 'pm_ra': -801.551, 'pm_dec': 10362.394, 'parallax': 546.9759, 'radial_velocity': -110.11, 'ref_epoch': 2000.0, 'source': "Sesame/SIMBAD (NAME Barnard's star)"}
+centro: {'ra': 269.446287, 'dec': 4.768255, 'epoch': 2026.0}, grilla {'pixel_scale_arcsec': 3.075, 'oversample': 2, 'shape': [117, 117]}
+consulta: {'source': 'sia', 'seconds': 11.600000000000001, 'from_cache': False, 'collections': {'spherex_dr1': {'rows': 239, 'seconds': 10.55, 'queried_at': '2026-11-15T06:21:09Z', 'from_cache': False, 'refresh_error': None}, 'spherex_qr3': {'rows': 119, 'seconds': 1.05, 'queried_at': '2026-11-15T06:21:10Z', 'from_cache': False, 'refresh_error': None}}, 'skipped_products': {}, 's_pixel_scale': {'6.15': 358}}
+exposiciones: {'rows_returned': 358, 'duplicates_dropped': 0, 'total': 358, 'by_collection': {'spherex_dr1': 239, 'spherex_qr3': 119}, 'by_detector': {'D1': 60, 'D2': 61, 'D3': 59, 'D4': 59, 'D5': 61, 'D6': 58}, 'first': '2025-08-15', 'last': '2026-09-22'}
+
+| epoca | fechas | exposiciones | D1 | D2 | D3 | D4 | D5 | D6 | DR1 | QR3 | dias con datos |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2025-08-15 a 2025-10-01 | 118 | 24 | 18 | 18 | 23 | 18 | 17 | 118 | 0 | 15 |
+| 2 | 2026-03-11 a 2026-05-05 | 121 | 18 | 18 | 24 | 18 | 19 | 24 | 121 | 0 | 11 |
+| 3 | 2026-08-16 a 2026-09-22 | 119 | 18 | 25 | 17 | 18 | 24 | 17 | 0 | 119 | 13 |
+  epoca 1 fechas: {'2025-08-15': 6, '2025-08-16': 4, '2025-08-18': 5, '2025-08-21': 10, '2025-08-24': 8, '2025-08-25': 16, '2025-08-27': 14, '2025-08-28': 8, '2025-08-29': 16, '2025-08-30': 9, '2025-08-31': 8, '2025-09-01': 2, '2025-09-05': 2, '2025-09-30': 6, '2025-10-01': 4}
+  epoca 2 fechas: {'2026-03-11': 36, '2026-03-15': 20, '2026-03-17': 8, '2026-03-19': 16, '2026-03-21': 11, '2026-03-22': 10, '2026-03-23': 8, '2026-03-25': 2, '2026-04-10': 2, '2026-05-04': 6, '2026-05-05': 2}
+  epoca 3 fechas: {'2026-08-16': 2, '2026-08-17': 12, '2026-08-18': 16, '2026-08-19': 11, '2026-08-20': 2, '2026-08-21': 32, '2026-08-23': 6, '2026-08-24': 14, '2026-08-25': 10, '2026-08-28': 2, '2026-08-29': 8, '2026-09-02': 2, '2026-09-22': 2}
+
+corridas (la primera es en frio):
+  2026-11-15T05:48:06Z: consulta 6.0 s (cache=True), descarga 85.44 s, bajados 346, cache 12, fallidos 0, con reintento 59, MB 43.1, por recorte {'median': 1.74, 'p90': 4.82, 'max': 10.98}, proceso 14.59 s, total 103.73 s
+  2026-11-15T05:53:20Z: consulta 6.0 s (cache=True), descarga 0.03 s, bajados 0, cache 358, fallidos 0, con reintento 0, MB 0.0, por recorte None, proceso 10.76 s, total 14.38 s
+  2026-11-15T06:12:53Z: consulta 6.0 s (cache=True), descarga 0.03 s, bajados 0, cache 358, fallidos 0, con reintento 0, MB 0.0, por recorte None, proceso 11.85 s, total 16.07 s
+  2026-11-15T06:23:34Z: consulta 11.6 s (cache=False), descarga 123.98 s, bajados 358, cache 0, fallidos 0, con reintento 65, MB 44.6, por recorte {'median': 1.75, 'p90': 7.69, 'max': 32.44}, proceso 15.69 s, total 155.44 s
+fraccion enmascarada: 0.0465; flags: {'BLOOM': 13518, 'COLD': 605, 'CROSSTALK': 859, 'DICHROIC': 9066, 'FULLSAMPLE': 240, 'HALO': 17509, 'HOT': 7, 'NONFUNC': 4448, 'OUTLIER': 423, 'OVERFLOW': 2032, 'PERSIST': 11581, 'SNOWBALL': 29, 'SOURCE': 1212536, 'STREAK': 1233, 'SUR_ERROR': 14576, 'TRANSIENT': 19604}
+fondo residual mediana: {'D1': 0.19973, 'D2': 0.23088, 'D3': 0.17315, 'D4': 0.05638, 'D5': 0.08519, 'D6': 0.06752}; desvio entre recortes: {'D1': 0.22004, 'D2': 0.07395, 'D3': 0.03199, 'D4': 0.0115, 'D5': 0.00571, 'D6': 0.02195}
+
+| epoca | det | N | S/R forzada | flujo forzado mJy | S/R pico | centroide-esperado [arcsec] | ajuste-esperado [arcsec] | nucleo valido |
+|---|---|---|---|---|---|---|---|---|
+| 1 | D1 | 24 | None | None | None | - | 1.2 | 0.0 |
+| 1 | D2 | 18 | None | None | None | - | 0.6 | 0.0 |
+| 1 | D3 | 18 | None | None | None | - | 2.2 | 0.0 |
+| 1 | D4 | 23 | None | None | None | - | 1.4 | 0.0 |
+| 1 | D5 | 18 | None | None | None | - | 0.3 | 0.0 |
+| 1 | D6 | 17 | None | None | 554.0 | 10.7 | 0.9 | 0.0 |
+| 2 | D1 | 18 | None | None | None | - | 2.2 | 0.0 |
+| 2 | D2 | 18 | None | None | None | - | 1.5 | 0.0 |
+| 2 | D3 | 24 | None | None | None | - | 1.3 | 0.0 |
+| 2 | D4 | 18 | None | None | None | - | 0.2 | 0.0 |
+| 2 | D5 | 19 | None | None | None | - | 0.6 | 0.0 |
+| 2 | D6 | 24 | None | None | 540.44 | 10.9 | 0.4 | 0.0 |
+| 3 | D1 | 18 | None | None | None | - | 0.4 | 0.0 |
+| 3 | D2 | 25 | None | None | None | - | 0.8 | 0.0 |
+| 3 | D3 | 17 | None | None | None | - | 0.9 | 0.0 |
+| 3 | D4 | 18 | None | None | None | - | 0.7 | 0.0 |
+| 3 | D5 | 24 | None | None | None | - | 0.7 | 0.0 |
+| 3 | D6 | 17 | None | None | 575.23 | 12.5 | 0.2 | 0.0 |
+
+| det | epocas | dias | medido E [arcsec] | medido N | esperado E | esperado N |
+|---|---|---|---|---|---|---|
+| D1 | 1 a 3 | 354.3 | -0.13 | 11.01 | -0.75 | 10.13 |
+| D2 | 1 a 3 | 361.1 | -0.18 | 9.31 | -0.78 | 10.29 |
+| D3 | 1 a 3 | 362.3 | 0.59 | 11.36 | -0.78 | 10.32 |
+| D4 | 1 a 3 | 354.1 | -2.64 | 9.23 | -0.74 | 10.12 |
+| D5 | 1 a 3 | 361.3 | -0.9 | 9.98 | -0.78 | 10.3 |
+| D6 | 1 a 3 | 362.1 | -0.55 | 11.01 | -0.78 | 10.32 |
+  east: medido -0.64 +/- 1.10 (desvio entre 6 detectores, error de la media 0.45); esperado -0.77
+  north: medido 10.32 +/- 0.93 (desvio entre 6 detectores, error de la media 0.38); esperado 10.25
+  modulo medido: 10.34 arcsec = 1.68 px nativos
+
+posicion ajustada por epoca y detector (RA, Dec) y desvio respecto de lo esperado (E, N) en arcsec:
+  epoca 1 D1: 269.44590 +4.76722  dE=-1.0 dN=-0.7  limite=False
+  epoca 1 D2: 269.44604 +4.76740  dE=-0.6 dN=+0.2  limite=False
+  epoca 1 D3: 269.44561 +4.76713  dE=-2.1 dN=-0.7  limite=False
+  epoca 1 D4: 269.44654 +4.76756  dE=+1.3 dN=+0.5  limite=False
+  epoca 1 D5: 269.44616 +4.76727  dE=-0.1 dN=-0.3  limite=False
+  epoca 1 D6: 269.44614 +4.76706  dE=-0.2 dN=-0.9  limite=False
+  epoca 2 D1: 269.44698 +4.76885  dE=+2.2 dN=-0.0  limite=False
+  epoca 2 D2: 269.44677 +4.76878  dE=+1.5 dN=-0.5  limite=False
+  epoca 2 D3: 269.44654 +4.76872  dE=+0.7 dN=-1.1  limite=False
+  epoca 2 D4: 269.44641 +4.76889  dE=+0.1 dN=+0.1  limite=False
+  epoca 2 D5: 269.44645 +4.76878  dE=+0.3 dN=-0.5  limite=False
+  epoca 2 D6: 269.44647 +4.76900  dE=+0.4 dN=-0.1  limite=False
+  epoca 3 D1: 269.44587 +4.77028  dE=-0.4 dN=+0.2  limite=False
+  epoca 3 D2: 269.44599 +4.76998  dE=+0.0 dN=-0.8  limite=False
+  epoca 3 D3: 269.44578 +4.77028  dE=-0.8 dN=+0.4  limite=False
+  epoca 3 D4: 269.44580 +4.77013  dE=-0.6 dN=-0.4  limite=False
+  epoca 3 D5: 269.44591 +4.77004  dE=-0.2 dN=-0.6  limite=False
+  epoca 3 D6: 269.44599 +4.77012  dE=-0.0 dN=-0.2  limite=False
+
+## WISE J085510.83-071442.5 (wise0855)
+objetivo: {'name': 'WISE J085510.83-071442.5', 'ra': 133.81890825, 'dec': -7.247048, 'pm_ra': -8123.7, 'pm_dec': 673.2, 'parallax': 439.0, 'radial_velocity': 0.0, 'ref_epoch': 2000.0, 'source': 'Sesame/SIMBAD (WISEA J085510.74-071442.5)'}
+centro: {'ra': 133.759825, 'dec': -7.24224, 'epoch': 2026.0}, grilla {'pixel_scale_arcsec': 3.075, 'oversample': 2, 'shape': [117, 117]}
+consulta: {'source': 'sia', 'seconds': 3.9, 'from_cache': False, 'collections': {'spherex_dr1': {'rows': 258, 'seconds': 3.31, 'queried_at': '2026-11-15T06:18:52Z'}, 'spherex_qr3': {'rows': 0, 'seconds': 0.59, 'queried_at': '2026-11-15T06:18:53Z'}}, 'skipped_products': {}, 's_pixel_scale': {'6.15': 258}}
+exposiciones: {'rows_returned': 258, 'duplicates_dropped': 0, 'total': 258, 'by_collection': {'spherex_dr1': 258}, 'by_detector': {'D1': 36, 'D2': 48, 'D3': 45, 'D4': 36, 'D5': 48, 'D6': 45}, 'first': '2025-05-05', 'last': '2026-05-14'}
+
+| epoca | fechas | exposiciones | D1 | D2 | D3 | D4 | D5 | D6 | DR1 | QR3 | dias con datos |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2025-05-05 a 2025-05-06 | 30 | 4 | 8 | 3 | 4 | 8 | 3 | 30 | 0 | 2 |
+| 2 | 2025-10-31 a 2025-12-13 | 128 | 18 | 25 | 21 | 18 | 25 | 21 | 128 | 0 | 9 |
+| 3 | 2026-04-21 a 2026-05-14 | 100 | 14 | 15 | 21 | 14 | 15 | 21 | 100 | 0 | 16 |
+  epoca 1 fechas: {'2025-05-05': 6, '2025-05-06': 24}
+  epoca 2 fechas: {'2025-10-31': 24, '2025-11-03': 12, '2025-11-07': 34, '2025-11-08': 2, '2025-11-10': 20, '2025-11-14': 18, '2025-12-11': 2, '2025-12-12': 10, '2025-12-13': 6}
+  epoca 3 fechas: {'2026-04-21': 6, '2026-04-22': 6, '2026-04-23': 8, '2026-04-26': 10, '2026-04-30': 2, '2026-05-01': 10, '2026-05-02': 14, '2026-05-03': 12, '2026-05-04': 6, '2026-05-05': 6, '2026-05-08': 2, '2026-05-09': 6, '2026-05-11': 4, '2026-05-12': 2, '2026-05-13': 4, '2026-05-14': 2}
+
+corridas (la primera es en frio):
+  2026-11-15T05:51:20Z: consulta 56.7 s (cache=False), descarga 112.8 s, bajados 247, cache 0, fallidos 11, con reintento 105, MB 30.8, por recorte {'median': 1.84, 'p90': 8.72, 'max': 18.11}, proceso 10.14 s, total 185.1 s
+  2026-11-15T05:51:52Z: consulta 56.7 s (cache=True), descarga 5.32 s, bajados 11, cache 247, fallidos 0, con reintento 1, MB 1.4, por recorte {'median': 2.0, 'p90': 2.04, 'max': 5.3}, proceso 8.42 s, total 17.29 s
+  2026-11-15T05:53:02Z: consulta 56.7 s (cache=True), descarga 0.02 s, bajados 0, cache 258, fallidos 0, con reintento 0, MB 0.0, por recorte None, proceso 8.05 s, total 11.53 s
+  2026-11-15T06:12:34Z: consulta 56.7 s (cache=True), descarga 0.03 s, bajados 0, cache 258, fallidos 0, con reintento 0, MB 0.0, por recorte None, proceso 8.79 s, total 12.78 s
+  2026-11-15T06:20:35Z: consulta 3.9 s (cache=False), descarga 86.6 s, bajados 258, cache 0, fallidos 0, con reintento 45, MB 32.2, por recorte {'median': 1.77, 'p90': 7.49, 'max': 32.59}, proceso 11.43 s, total 105.83 s
+fraccion enmascarada: 0.0265; flags: {'COLD': 465, 'CROSSTALK': 143, 'DICHROIC': 4564, 'HALO': 12971, 'NONFUNC': 3002, 'OUTLIER': 13761, 'OVERFLOW': 209, 'PERSIST': 2479, 'SNOWBALL': 20, 'SOURCE': 401368, 'STREAK': 545, 'SUR_ERROR': 3595, 'TRANSIENT': 5134}
+fondo residual mediana: {'D1': 0.02844, 'D2': 0.02831, 'D3': 0.01838, 'D4': 0.01439, 'D5': 0.02076, 'D6': 0.02862}; desvio entre recortes: {'D1': 0.33851, 'D2': 0.01399, 'D3': 0.00355, 'D4': 0.00493, 'D5': 0.0099, 'D6': 0.00728}
+
+| epoca | det | N | S/R forzada | flujo forzado mJy | S/R pico | centroide-esperado [arcsec] | ajuste-esperado [arcsec] | nucleo valido |
+|---|---|---|---|---|---|---|---|---|
+| 1 | D1 | 4 | 3.13 | 0.2382 | 30.96 | 11.2 | 11.5 | 1.0 |
+| 1 | D2 | 8 | 3.25 | 0.1867 | 56.87 | 11.4 | 11.4 | 1.0 |
+| 1 | D3 | 3 | 2.14 | 0.1323 | 27.9 | 11.4 | 11.4 | 1.0 |
+| 1 | D4 | 4 | 1.11 | 0.0508 | 10.59 | 11.4 | 11.2 | 1.0 |
+| 1 | D5 | 8 | 7.73 | 0.3423 | 12.17 | 1.6 | 1.8 | 1.0 |
+| 1 | D6 | 3 | 2.46 | 0.2605 | 4.14 | 1.3 | 0.8 | 1.0 |
+| 2 | D1 | 18 | 14.28 | 0.5019 | 81.96 | 8.4 | 8.6 | 1.0 |
+| 2 | D2 | 25 | 10.58 | 0.4911 | 72.37 | 8.1 | 8.1 | 1.0 |
+| 2 | D3 | 21 | 6.13 | 0.3261 | 44.19 | 7.9 | 8.0 | 1.0 |
+| 2 | D4 | 18 | 3.61 | 0.1576 | 19.22 | 7.9 | 8.0 | 1.0 |
+| 2 | D5 | 25 | 7.64 | 0.3366 | 13.01 | 3.6 | 3.2 | 1.0 |
+| 2 | D6 | 21 | 10.04 | 0.4887 | 14.55 | 1.4 | 1.2 | 1.0 |
+| 3 | D1 | 14 | 27.9 | 0.9137 | 78.74 | 4.3 | 4.5 | 1.0 |
+| 3 | D2 | 15 | 17.64 | 0.8359 | 77.53 | 4.2 | 4.0 | 1.0 |
+| 3 | D3 | 21 | 10.37 | 0.5455 | 41.33 | 4.3 | 4.2 | 1.0 |
+| 3 | D4 | 14 | 5.99 | 0.2782 | 27.91 | 3.9 | 4.0 | 1.0 |
+| 3 | D5 | 15 | 10.64 | 0.4211 | 18.78 | 1.8 | 1.8 | 1.0 |
+| 3 | D6 | 21 | 10.07 | 0.5027 | 18.32 | 1.0 | 1.0 | 1.0 |
+
+| det | epocas | dias | medido E [arcsec] | medido N | esperado E | esperado N |
+|---|---|---|---|---|---|---|
+| D1 | 1 a 3 | 362.2 | -0.14 | -0.09 | -8.06 | 0.66 |
+| D2 | 1 a 3 | 364.6 | -0.08 | -0.26 | -8.11 | 0.67 |
+| D3 | 1 a 3 | 357.2 | 0.07 | -0.26 | -7.94 | 0.63 |
+| D4 | 1 a 3 | 362.2 | 0.18 | 0.45 | -8.06 | 0.66 |
+| D5 | 1 a 3 | 364.6 | -7.5 | 1.35 | -8.11 | 0.67 |
+| D6 | 1 a 3 | 357.2 | -7.73 | 1.28 | -7.94 | 0.63 |
+  east: medido -2.53 +/- 3.94 (desvio entre 6 detectores, error de la media 1.61); esperado -8.04
+  north: medido 0.41 +/- 0.75 (desvio entre 6 detectores, error de la media 0.30); esperado 0.65
+  modulo medido: 2.57 arcsec = 0.42 px nativos
+
+posicion ajustada por epoca y detector (RA, Dec) y desvio respecto de lo esperado (E, N) en arcsec:
+  epoca 1 D1: 133.75817 -7.24106  dE=-10.6 dN=+4.3  limite=False
+  epoca 1 D2: 133.75813 -7.24117  dE=-10.7 dN=+3.9  limite=False
+  epoca 1 D3: 133.75816 -7.24111  dE=-10.6 dN=+4.2  limite=False
+  epoca 1 D4: 133.75813 -7.24135  dE=-10.7 dN=+3.3  limite=False
+  epoca 1 D5: 133.76070 -7.24204  dE=-1.6 dN=+0.8  limite=False
+  epoca 1 D6: 133.76093 -7.24220  dE=-0.8 dN=+0.2  limite=False
+  epoca 2 D1: 133.75811 -7.24117  dE=-7.7 dN=+3.8  limite=False
+  epoca 2 D2: 133.75815 -7.24122  dE=-7.2 dN=+3.7  limite=False
+  epoca 2 D3: 133.75818 -7.24122  dE=-7.1 dN=+3.7  limite=False
+  epoca 2 D4: 133.75827 -7.24122  dE=-7.1 dN=+3.7  limite=False
+  epoca 2 D5: 133.75939 -7.24183  dE=-2.8 dN=+1.5  limite=False
+  epoca 2 D6: 133.75986 -7.24212  dE=-1.1 dN=+0.5  limite=False
+  epoca 3 D1: 133.75813 -7.24109  dE=-2.7 dN=+3.6  limite=False
+  epoca 3 D2: 133.75811 -7.24125  dE=-2.7 dN=+3.0  limite=False
+  epoca 3 D3: 133.75819 -7.24118  dE=-2.6 dN=+3.3  limite=False
+  epoca 3 D4: 133.75818 -7.24122  dE=-2.5 dN=+3.1  limite=False
+  epoca 3 D5: 133.75860 -7.24166  dE=-1.0 dN=+1.5  limite=False
+  epoca 3 D6: 133.75877 -7.24185  dE=-0.5 dN=+0.9  limite=False

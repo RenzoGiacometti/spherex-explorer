@@ -1,0 +1,6 @@
+campo     lado pedido         px      bytes  primer byte    total
+5'           0.1247 d    73x73        161 k       1.23 s   1.83 s  (intento 2)
+10'          0.2425 d   142x142       403 k       1.25 s   2.30 s  (intento 1)
+20'          0.4782 d   281x280      1336 k       1.05 s   4.20 s  (intento 1)
+30'          0.7139 d   419x418      2880 k       1.00 s   8.75 s  (intento 1)
+1 grado      1.4210 d   835x832     11186 k       1.16 s  31.22 s  (intento 1)
