@@ -325,6 +325,11 @@ export function SpherePage({
 
   /** Punto del cielo elegido con un clic o un toque: lleva la mira y la tarjeta. */
   const [pick, setPick] = useState<SkyPosition | null>(null);
+  /**
+   * Estrella brillante elegida al tocar su nombre. Vale mientras el punto
+   * elegido siga siendo el suyo: otro toque sobre el cielo la deja de lado.
+   */
+  const [pickStar, setPickStar] = useState<(SkyPosition & { name: string }) | null>(null);
   const [coarsePointer] = useState(
     () =>
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
@@ -538,9 +543,19 @@ export function SpherePage({
   }
 
   /** Clic o toque corto sobre el cielo: deja la mira ahi y abre la tarjeta del punto. */
-  /** Toque sobre un nombre del cielo. El de una constelacion vuela hasta encuadrarla. */
+  /**
+   * Toque sobre un nombre del cielo. El de una constelacion vuela hasta
+   * encuadrarla. El de una estrella (o la estrella misma) la elige como punto,
+   * y la tarjeta avisa que una estrella asi de brillante satura en SPHEREx.
+   */
   function handleLabelTap(label: SkyLabel): void {
-    if (openingRef.current || label.kind === "star") return;
+    if (openingRef.current) return;
+    if (label.kind === "star") {
+      const position = { ra: wrapDegrees(label.ra), dec: label.dec };
+      setPick(position);
+      setPickStar({ ...position, name: label.text });
+      return;
+    }
     const figure = figures?.find((candidate) => candidate.id === label.id);
     const sphere = sphereRef.current;
     if (figure === undefined || sphere === null) return;
@@ -578,6 +593,11 @@ export function SpherePage({
 
   /** Campo guardado cuya huella contiene al punto elegido, o null: lo que dice la tarjeta. */
   const pickSaved = pick === null ? null : skyPointField(pick).saved;
+  /** Nombre de la estrella brillante elegida, si el punto elegido es una. */
+  const pickedStar =
+    pick !== null && pickStar !== null && pickStar.ra === pick.ra && pickStar.dec === pick.dec
+      ? pickStar.name
+      : null;
 
   /** Abre el punto elegido en el visor. */
   function handlePickOpen(): void {
@@ -931,6 +951,9 @@ export function SpherePage({
                       name: constellationLabel(constellationAt(pick), language),
                     })}
                   </p>
+                  {pickedStar === null ? null : (
+                    <p role="status">{t("pick.star", { name: pickedStar })}</p>
+                  )}
                   <p className={styles.pickNote} role="status">
                     {pickSaved === null
                       ? t("pick.new")

@@ -14,6 +14,7 @@
     "title": "Punto elegido",
     "close": "Quitar la mira",
     "constellation": "Constelación: {{name}}",
+    "star": "{{name}}. Estrella brillante: en SPHEREx aparece saturada.",
     "new": "Campo nuevo: armarlo tarda unos minutos.",
     "saved": "Campo guardado de {{name}}: abre al instante.",
     "open": "Abrir este campo"
