@@ -1,10 +1,10 @@
-# SPHEREx Explorer
+# SkyBlink
 
 [Versión en español](README.md)
 
-A web tool for looking at SPHEREx's infrared sky over time. It shows the images of a patch of sky from each pass of the survey, so you can find objects that move or change in brightness, and it extracts their spectrum between 0.75 and 5 µm. It was built for the SPHEREx challenge of NASA Space Apps 2026.
+SkyBlink is a web tool for looking at the infrared sky of the SPHEREx mission over time. It shows the images of a patch of sky from each pass of the survey, so you can find objects that move or change in brightness, and it extracts their spectrum between 0.75 and 5 µm. It was built for the SPHEREx challenge of NASA Space Apps 2026.
 
-**Public version:** `<PUBLIC_URL>` (to be filled in)
+**Public version:** https://spherex-explorer-p5tb.onrender.com
 
 ## What you can do
 
@@ -40,8 +40,8 @@ The 14 precomputed fields (`backend/data/fields`) open without a connection to I
 The public version is a single Docker image with the API, the built frontend and the precomputed fields:
 
 ```powershell
-docker build -t spherex-explorer .
-docker run --rm -p 7860:7860 spherex-explorer
+docker build -t skyblink .
+docker run --rm -p 7860:7860 skyblink
 ```
 
 Tests and style:
@@ -119,7 +119,8 @@ All of them come from real SPHEREx data downloaded from IRSA on 15 November 2026
 
 | What | Measured | Reference | Source |
 |---|---|---|---|
-| Proper motion of Barnard's Star, with the Measure tool (three epochs, band 3) | 10.31 ± 0.44 ″/yr | 10.39 ″/yr from the catalogue (SIMBAD). The tool compares against the field's catalogue track and gives 10.45, at 0.8 sigma | Browser check on the precomputed field |
+| Proper motion of Barnard's Star, with the Measure tool (three epochs, band 3) | 10.31 ± 0.44 ″/yr | 10.45 ″/yr: what the catalogue gives with the positions expected on those same dates, at 0.8 sigma. The catalogue proper motion is 10.39 ″/yr | Browser check on the precomputed field |
+| Proper motion of WISE 0855, with the Measure tool (three epochs, band 6) | 8.00 ± 1.47 ″/yr: 7.88 west and 1.35 north | 8.15 ″/yr from the catalogue, at 0.5 sigma | Browser check on the precomputed field, with one click on the object in each epoch; the click snaps to the centroid |
 | Shift of Barnard's Star between the first and the last epoch (12 months) | 10.3″ north and 0.6″ west | 10.25″ and 0.77″ expected from proper motion and parallax | [spike/RESULTADOS.md](spike/RESULTADOS.md), section 5 |
 | Shift of WISE 0855 between epochs 1 and 3, in bands 5 and 6 | 7.5″ and 7.7″ west, 1.3″ north | 8.0″ west and 0.65″ north expected; 8.15 ″/yr from the catalogue | [spike/RESULTADOS.md](spike/RESULTADOS.md), section 6 |
 | Detection of WISE 0855 | Signal-to-noise of 10 per epoch in band 6 (0.5 mJy) and 8 to 11 in band 5 | Not detected in bands 1 to 4 | [spike/RESULTADOS.md](spike/RESULTADOS.md), section 6 |
@@ -129,7 +130,6 @@ All of them come from real SPHEREx data downloaded from IRSA on 15 November 2026
 | How much a good epoch comparison helps (WISE 0855, band 6, red/cyan) | From 2.5 to 7.6 sigma when comparing the two best-covered epochs with a linear stretch | | Header of `frontend/src/features/guide/tour.ts` |
 | Time to build a field | 138 to 157 s for 258 to 458 exposures, with 10 parallel downloads | | [docs/contrato-cubo.md](docs/contrato-cubo.md), section 11 |
 
-The Measure tool was not run on WISE 0855 in the final check; its row comes from the initial technical spike.
 
 ## Known limits
 
@@ -157,8 +157,7 @@ The Measure tool was not run on WISE 0855 in the final check; its row comes from
   > This publication makes use of data products from the Two Micron All Sky Survey, which is a joint project of the University of Massachusetts and the Infrared Processing and Analysis Center/California Institute of Technology, funded by the National Aeronautics and Space Administration and the National Science Foundation.
 - **WISE (AllWISE).**
   > This publication makes use of data products from the Wide-field Infrared Survey Explorer, which is a joint project of the University of California, Los Angeles, and the Jet Propulsion Laboratory/California Institute of Technology, and NEOWISE, which is a project of the Jet Propulsion Laboratory/California Institute of Technology. WISE and NEOWISE are funded by the National Aeronautics and Space Administration.
-- **Gaia DR3.**
-  > This work has made use of data from the European Space Agency (ESA) mission Gaia (https://www.cosmos.esa.int/gaia), processed by the Gaia Data Processing and Analysis Consortium (DPAC, https://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the Gaia Multilateral Agreement.
+- **Gaia DR3.** ESA/Gaia/DPAC. Gaia data are distributed under the CC BY-NC 3.0 IGO license, which does not allow commercial use ([license](https://www.cosmos.esa.int/web/gaia-users/license), [credits](https://www.cosmos.esa.int/web/gaia-users/credits)).
 - **Digitized Sky Survey (DSS).** Plates downloaded from the STScI archive (MAST). They are not in the public domain. According to the [MAST data use page](https://archive.stsci.edu/publishing/data-use), they may be used freely for scientific, educational and non-profit purposes, under the CC BY-NC-SA 4.0 license, which forbids commercial use. The copyright holder depends on the plate, and the application shows it under each one:
   > Southern Hemisphere Surveys observed prior to 1993: The digitized images are copyright (c) 1976-1993, jointly by the UK SERC/PPARC (formerly Science and Engineering Research Council/Particle Physics and Astronomy Research Council, and currently the Science and Technology Facilities Council), and are distributed herein by agreement. All Rights Reserved.
   >
@@ -169,13 +168,13 @@ The Measure tool was not run on WISE 0855 in the final check; its row comes from
   > POSS-I/Quick-V Northern Hemisphere Surveys: All material not subject to one of the above copyright provisions is copyright (c) 1984-2004 by the Association of Universities for Research in Astronomy, Inc.
 - **Star map on the sphere.** "Deep Star Maps 2020", NASA Scientific Visualization Studio. Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio. Gaia DR2: ESA/Gaia/DPAC. It is visible light, not a SPHEREx image. Details in [frontend/src/features/sphere/assets/FUENTES.md](frontend/src/features/sphere/assets/FUENTES.md).
 - **Object names.** Sesame and SIMBAD, from CDS.
-  > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.
+  > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France. 2000, A&AS, 143, 9, "The SIMBAD astronomical database", Wenger et al.
 
-The SPHEREx and DSS texts were copied from their pages on 15 November 2026. Those of IRSA, 2MASS, WISE, Gaia and SIMBAD are each project's usual acknowledgments; check them against their pages before citing them in a publication.
+The quoted texts were copied from each project's pages on 15 November 2026: [SPHEREx](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_qr.html), [IRSA](https://irsa.ipac.caltech.edu/ack.html), [2MASS](https://irsa.ipac.caltech.edu/Missions/2mass.html), [AllWISE](https://irsa.ipac.caltech.edu/data/WISE/docs/release/AllWISE/expsup/sec1_6b.html), [DSS](https://archive.stsci.edu/publishing/data-use) and [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
 
 ## Use of AI in development
 
-The code, tests and documentation in this repository were written with Claude Code, Anthropic's coding agent, directed by the team. The work was done in stages, starting from a specification ([SPEC.md](SPEC.md)) and with the team's approval between one stage and the next. Several sessions worked in parallel, each on its own branch (spectrum, light curves, sphere, context, measuring tool, guided tour), and were merged at the end.
+SkyBlink's code was written with AI assistance (Claude, by Anthropic), under the team's direction and review. Specifically, the code, tests and documentation in this repository were written with Claude Code, Anthropic's coding agent. The work was done in stages, starting from a specification ([SPEC.md](SPEC.md)) and with the team's approval between one stage and the next. Several sessions worked in parallel, each on its own branch (spectrum, light curves, sphere, context, measuring tool, guided tour), and were merged at the end.
 
 - Decisions about scope, design and what to measure were made by the team.
 - The names of tables, columns and parameters of external services were looked up in their documentation or checked against the real service, and every assumption that turned out false was corrected in the specification.
@@ -185,4 +184,6 @@ The code, tests and documentation in this repository were written with Claude Co
 
 ## License
 
-The code is released under the MIT license ([LICENSE](LICENSE)). Third-party data shipped with the repository keep their own terms: in particular, the Digitized Sky Survey plates (`backend/data/context/*/dss*.f32`) may only be used for scientific, educational and non-profit purposes.
+The code is released under the MIT license ([LICENSE](LICENSE)). Third-party data shipped with the repository keep their own terms: in particular, the Digitized Sky Survey plates (`backend/data/context/*/dss*.f32`, CC BY-NC-SA 4.0) and the Gaia sources (`backend/data/context/*/gaia.json`, CC BY-NC 3.0 IGO) do not allow commercial use.
+
+SkyBlink is an independent project made for NASA Space Apps 2026. It is not a NASA product and does not imply NASA's endorsement.

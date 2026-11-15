@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Renzo Giacometti and the SPHEREx Explorer contributors
+Copyright (c) 2026 Renzo Giacometti and the SkyBlink contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,10 @@ in README.md):
   Attribution-NonCommercial-ShareAlike 4.0 license, and for-profit use is
   forbidden (https://archive.stsci.edu/publishing/data-use). The copyright
   holder of each plate is recorded in the optical.json next to it.
-- The SPHEREx, 2MASS, WISE and Gaia products under backend/data and the test
+- backend/data/context/*/gaia.json hold sources from Gaia DR3 (ESA/Gaia/DPAC).
+  Gaia data are distributed under the CC BY-NC 3.0 IGO license, which does not
+  allow commercial use (https://www.cosmos.esa.int/web/gaia-users/license).
+- The SPHEREx, 2MASS and WISE products under backend/data and the test
   fixtures come from the NASA/IPAC Infrared Science Archive and are used with
   the acknowledgments their projects ask for.
 - frontend/src/features/sphere/assets/cielo-nasa-svs-4k.jpg is derived from

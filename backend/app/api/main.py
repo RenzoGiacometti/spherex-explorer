@@ -136,7 +136,7 @@ def create_app(
 
     docs = settings.docs_enabled
     app = FastAPI(
-        title="SPHEREx Explorer API",
+        title="SkyBlink API",
         version=__version__,
         lifespan=lifespan,
         docs_url="/docs" if docs else None,
