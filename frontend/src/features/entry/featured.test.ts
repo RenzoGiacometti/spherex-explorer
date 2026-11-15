@@ -145,6 +145,14 @@ describe("savedFieldByName", () => {
     }
   });
 
+  it("un identificador de catalogo sin confirmar no es alias: va al servicio de nombres", () => {
+    for (const text of ["GJ 699", "HIP 87937", "NGC 5194", "NGC 1952", "CN Leo", "VZ Pic"]) {
+      expect(savedFieldByName(text), text).toBeNull();
+    }
+    // El que si confirma una respuesta guardada del servicio de nombres.
+    expect(savedFieldByName("WISEA J085510.74-071442.5")?.id).toBe("wise-0855");
+  });
+
   it("ningun alias es de dos campos", () => {
     for (const object of PRECOMPUTED_OBJECTS) {
       for (const text of [object.label, object.name, ...object.aliases]) {

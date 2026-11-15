@@ -40,6 +40,13 @@ export interface FeaturedObject {
    * Otras formas de escribir el nombre, ademas de `label` y `name`. El buscador
    * las reconoce sin distinguir mayusculas, espacios, guiones, apostrofos ni
    * acentos, y abre el campo sin pasar por el servicio de nombres.
+   *
+   * Un alias equivocado abre el objeto equivocado sin avisar. Por eso aca van
+   * solo nombres comunes y formas cortas del propio nombre; un identificador de
+   * catalogo (HIP, GJ, NGC, WISE largo, estrella variable) entra solo si lo
+   * confirma una respuesta guardada del servicio de nombres
+   * (backend/data/sesame). Los demas se resuelven por la red, como cualquier
+   * otro nombre.
    */
   readonly aliases: readonly string[];
 }
@@ -51,7 +58,7 @@ const BARNARD: FeaturedObject = {
   ra: 269.4463,
   dec: 4.7683,
   band: 3,
-  aliases: ["Barnard", "Barnard Star", "Estrella de Barnard", "GJ 699", "Gliese 699", "HIP 87937"],
+  aliases: ["Barnard", "Barnard Star", "Estrella de Barnard"],
 };
 
 const EPSILON_INDI_B: FeaturedObject = {
@@ -76,10 +83,12 @@ const WISE_0855: FeaturedObject = {
   band: 6,
   aliases: [
     "W0855",
+    // Formas cortas del nombre de catalogo de arriba: las mismas cifras, recortadas.
     "W0855-0714",
     "WISE 0855-0714",
     "WISE J0855-0714",
-    // Nombre principal con el que responde el servicio de nombres.
+    // Nombre principal con el que responde el servicio de nombres
+    // (backend/data/sesame/wise_j085510_83_071442_5-*.xml).
     "WISEA J085510.74-071442.5",
   ],
 };
@@ -144,7 +153,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 217.3698,
     dec: -62.6739,
     band: 3,
-    aliases: ["Proxima", "Proxima Cen", "Alpha Centauri C", "Alpha Cen C", "GJ 551", "Gliese 551"],
+    aliases: ["Proxima", "Proxima Cen", "Alpha Centauri C", "Alpha Cen C"],
   },
   {
     id: "luhman-16",
@@ -153,7 +162,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 162.2955,
     dec: -53.317,
     band: 5,
-    aliases: ["Luhman 16 AB", "WISE 1049-5319", "WISE J104915.57-531906.1"],
+    aliases: ["Luhman 16 AB"],
   },
   {
     id: "wolf-359",
@@ -162,7 +171,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 164.0925,
     dec: 6.9952,
     band: 6,
-    aliases: ["CN Leo", "CN Leonis", "GJ 406", "Gliese 406"],
+    aliases: [],
   },
   {
     id: "teegarden",
@@ -180,7 +189,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 148.9685,
     dec: 69.6797,
     band: 1,
-    aliases: ["Messier 82", "NGC 3034", "Cigar Galaxy", "Galaxia del Cigarro"],
+    aliases: ["Messier 82", "Cigar Galaxy", "Galaxia del Cigarro"],
   },
   {
     id: "m-51",
@@ -189,7 +198,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 202.4696,
     dec: 47.1953,
     band: 3,
-    aliases: ["Messier 51", "NGC 5194", "Whirlpool Galaxy", "Galaxia del Remolino"],
+    aliases: ["Messier 51", "Whirlpool Galaxy", "Galaxia del Remolino"],
   },
   {
     id: "m-42",
@@ -200,7 +209,6 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     band: 3,
     aliases: [
       "Messier 42",
-      "NGC 1976",
       "Orion Nebula",
       "Great Orion Nebula",
       "Nebulosa de Orion",
@@ -214,7 +222,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 83.6324,
     dec: 22.0174,
     band: 3,
-    aliases: ["Messier 1", "NGC 1952", "Crab Nebula", "Nebulosa del Cangrejo"],
+    aliases: ["Messier 1", "Crab Nebula", "Nebulosa del Cangrejo"],
   },
   {
     id: "kapteyn",
@@ -223,7 +231,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 77.9853,
     dec: -45.0596,
     band: 3,
-    aliases: ["Kapteyn", "Kapteyn Star", "Estrella de Kapteyn", "GJ 191", "Gliese 191", "VZ Pic"],
+    aliases: ["Kapteyn", "Kapteyn Star", "Estrella de Kapteyn"],
   },
 ];
 
