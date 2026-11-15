@@ -1,0 +1,10 @@
+* text=auto
+
+# Datos binarios: git no debe convertir finales de linea.
+*.f32 binary
+*.bin binary
+*.fits binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.woff2 binary
