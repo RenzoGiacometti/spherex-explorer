@@ -8,7 +8,7 @@ SkyBlink is a web tool for looking at the infrared sky of the SPHEREx mission ov
 
 ## What you can do
 
-- **Find a place** by name or coordinates, spin the celestial sphere, or land on a "random place" among 13 precomputed fields.
+- **Find a place** by name or coordinates, spin the celestial sphere, pick any point of the sky with a click, turn on the constellations to get your bearings, or land on a "random place" among 13 precomputed fields. On a phone, the sphere works as a window to the sky: it shows what lies where you point it.
 - **Compare epochs.** Each field has 3 or 4 SPHEREx passes in six bands. You can blink them, subtract them (difference), add them, overlay them in red and cyan, or switch between two by holding a button.
 - **See the spectrum** of a source with one click: flux against wavelength, with error bars, H₂O, CH₄, CO₂ and CO bands, a "chemical fingerprint" labelled as a hint, and the option to listen to it.
 - **See the light curve** of that source, per band, in the next tab.
@@ -167,6 +167,7 @@ All of them come from real SPHEREx data downloaded from IRSA on 15 November 2026
   >
   > POSS-I/Quick-V Northern Hemisphere Surveys: All material not subject to one of the above copyright provisions is copyright (c) 1984-2004 by the Association of Universities for Research in Astronomy, Inc.
 - **Star map on the sphere.** "Deep Star Maps 2020", NASA Scientific Visualization Studio. Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio. Gaia DR2: ESA/Gaia/DPAC. It is visible light, not a SPHEREx image. Details in [frontend/src/features/sphere/assets/FUENTES.md](frontend/src/features/sphere/assets/FUENTES.md).
+- **Constellations on the sphere.** The figures and names come from [d3-celestial](https://github.com/ofrohn/d3-celestial), by Olaf Frohn (BSD 3-Clause license, "Copyright (c) 2015, Olaf Frohn"). The boundaries come from the table by Nancy Roman (1987, PASP 99, 695; CDS catalogue VI/42), taken from the astropy package (BSD 3-Clause). The text of both licenses and the details are in [frontend/src/features/sphere/assets/](frontend/src/features/sphere/assets/FUENTES.md).
 - **Object names.** Sesame and SIMBAD, from CDS.
   > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France. 2000, A&AS, 143, 9, "The SIMBAD astronomical database", Wenger et al.
 

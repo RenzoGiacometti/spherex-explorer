@@ -6,7 +6,16 @@ import { formatInteger } from "@/lib/format";
 import styles from "./AboutDialog.module.css";
 
 /** Fuentes de datos, en el orden en que se acreditan. Sus textos: `about:data.<id>`. */
-const DATA_CREDITS = ["spherex", "surveys", "gaia", "dss", "sky", "names", "code"] as const;
+const DATA_CREDITS = [
+  "spherex",
+  "surveys",
+  "gaia",
+  "dss",
+  "sky",
+  "constellations",
+  "names",
+  "code",
+] as const;
 
 export interface AboutDialogProps {
   /** Se llama cuando el dialogo se cerro: con su boton, con Escape o tocando afuera. */

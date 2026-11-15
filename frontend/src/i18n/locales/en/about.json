@@ -33,6 +33,10 @@
       "name": "Star map on the sphere",
       "body": "NASA/Goddard Space Flight Center Scientific Visualization Studio, “Deep Star Maps 2020”. Gaia DR2: ESA/Gaia/DPAC. It is visible light, not a SPHEREx image."
     },
+    "constellations": {
+      "name": "Constellations on the sphere",
+      "body": "Figures and names from d3-celestial, by Olaf Frohn (BSD 3-Clause license). Boundaries from the table by Nancy Roman (1987), taken from astropy (BSD 3-Clause license)."
+    },
     "names": {
       "name": "Object names",
       "body": "SIMBAD and Sesame, from the CDS (Strasbourg)."

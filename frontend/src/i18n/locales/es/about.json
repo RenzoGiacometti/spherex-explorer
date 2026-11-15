@@ -33,6 +33,10 @@
       "name": "Mapa estelar de la esfera",
       "body": "NASA/Goddard Space Flight Center Scientific Visualization Studio, «Deep Star Maps 2020». Gaia DR2: ESA/Gaia/DPAC. Es luz visible, no una imagen de SPHEREx."
     },
+    "constellations": {
+      "name": "Constelaciones de la esfera",
+      "body": "Figuras y nombres de d3-celestial, de Olaf Frohn (licencia BSD de 3 cláusulas). Límites de la tabla de Nancy Roman (1987), tomada de astropy (licencia BSD de 3 cláusulas)."
+    },
     "names": {
       "name": "Nombres de objetos",
       "body": "SIMBAD y Sesame, del CDS (Estrasburgo)."

@@ -8,7 +8,7 @@ SkyBlink es una herramienta web para mirar el cielo infrarrojo de la misión SPH
 
 ## Qué se puede hacer
 
-- **Buscar un lugar** por nombre o por coordenadas, girar la esfera celeste o caer en un "lugar al azar" entre 13 campos ya calculados.
+- **Buscar un lugar** por nombre o por coordenadas, girar la esfera celeste, elegir cualquier punto del cielo con un clic, prender las constelaciones para ubicarse o caer en un "lugar al azar" entre 13 campos ya calculados. En el teléfono, la esfera funciona como una ventana al cielo: muestra lo que hay hacia donde se apunta.
 - **Comparar épocas.** Cada campo tiene 3 o 4 pasadas de SPHEREx en seis bandas. Se pueden parpadear, restar (diferencia), sumar, superponer en rojo y cian o alternar manteniendo apretado.
 - **Ver el espectro** de una fuente con un clic: flujo contra longitud de onda, con barras de error, bandas de H₂O, CH₄, CO₂ y CO, una "huella química" rotulada como indicio y la opción de escucharlo.
 - **Ver la curva de luz** de esa fuente, por banda, en la pestaña de al lado.
@@ -167,6 +167,7 @@ Todos salen de datos reales de SPHEREx bajados de IRSA el 15 de noviembre de 202
   >
   > POSS-I/Quick-V Northern Hemisphere Surveys: All material not subject to one of the above copyright provisions is copyright (c) 1984-2004 by the Association of Universities for Research in Astronomy, Inc.
 - **Mapa estelar de la esfera.** "Deep Star Maps 2020", NASA Scientific Visualization Studio. Crédito: NASA/Goddard Space Flight Center Scientific Visualization Studio. Gaia DR2: ESA/Gaia/DPAC. Es luz visible, no una imagen de SPHEREx. Detalle en [frontend/src/features/sphere/assets/FUENTES.md](frontend/src/features/sphere/assets/FUENTES.md).
+- **Constelaciones de la esfera.** Las figuras y los nombres salen de [d3-celestial](https://github.com/ofrohn/d3-celestial), de Olaf Frohn (licencia BSD de 3 cláusulas, "Copyright (c) 2015, Olaf Frohn"). Los límites, de la tabla de Nancy Roman (1987, PASP 99, 695; catálogo VI/42 del CDS), tomada del paquete astropy (BSD de 3 cláusulas). Los textos de las dos licencias y el detalle van en [frontend/src/features/sphere/assets/](frontend/src/features/sphere/assets/FUENTES.md).
 - **Nombres de objetos.** Sesame y SIMBAD, del CDS.
   > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France. 2000, A&AS, 143, 9, "The SIMBAD astronomical database", Wenger et al.
 

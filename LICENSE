@@ -46,3 +46,8 @@ in README.md):
   Studio's "Deep Star Maps 2020"
   (NASA/Goddard Space Flight Center Scientific Visualization Studio; Gaia DR2:
   ESA/Gaia/DPAC).
+- frontend/src/features/sphere/assets/constelaciones/ holds constellation
+  figures and names derived from d3-celestial (Copyright (c) 2015, Olaf Frohn,
+  BSD 3-Clause) and constellation boundaries from Roman (1987) as distributed
+  with astropy (Copyright (c) 2011-2026, Astropy Developers, BSD 3-Clause).
+  Both license texts are kept in that folder.
