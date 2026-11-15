@@ -71,6 +71,7 @@ from app.api.headers import (
 )
 from app.api.static import FrontendFiles
 from app.config import Settings, get_settings
+from app.context.api import router as context_router
 from app.contract import FieldRequest, PriorityRequest
 from app.jobs.deps import JobDeps
 from app.jobs.events import PING, FieldEvent, encode_sse
@@ -217,6 +218,10 @@ def create_app(
 
     # `GET /api/spectrum` (app/spectrum/router.py). Toma la configuracion de `app.state.settings`.
     app.include_router(spectrum_router)
+    # Contexto de otras misiones (app/context/api.py): `GET /api/context`, `/api/context/gaia`,
+    # `/api/context/index` y `/api/survey`. Solo leen lo precalculado en data/context; nunca salen a la red,
+    # asi que valen igual con `SPHEREX_PRECOMPUTED_ONLY`.
+    app.include_router(context_router)
 
     if settings.static_dir:
         # Despliegue de un solo proceso: el frontend ya compilado (frontend/dist) sale del mismo

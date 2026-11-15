@@ -95,8 +95,10 @@ Rehacer el cubo desde recortes en caché tardaba de 10 a 16 s en la Etapa 0. El 
 | `GET /api/field/{id}/track?name=` | Posición esperada del objeto en cada época, con movimiento propio y paralaje |
 | `POST /api/field/{id}/priority {band}` | Adelanta los planos de una banda |
 | `GET /api/spectrum?ra=&dec=&field=` | Documento del espectro: puntos {longitud de onda, flujo, error, fecha, detector, flags}, promedios por tramo, épocas, detectores y avisos (`saturated_source`, con la forma del contrato del cubo, y `offset_source`). `pm_ra`, `pm_dec` y `epoch` opcionales para que la apertura siga a un objeto que se mueve. Con `field` de un campo precalculado el clic se ajusta a la fuente guardada más cercana dentro de 12″ (aviso `snapped_source`); si no hay ninguna responde 200 con `status: "no_source"`, `nearest` y `saved_sources`, sin puntos |
-| `GET /api/context?ra=&dec=&fov=` | fuentes de Gaia DR3 (posición, movimiento propio, paralaje), SIMBAD, SkyBoT |
-| `GET /api/survey?ra=&dec=&fov=&hips=` | recorte de otra misión vía hips2fits, reproyectado a la grilla del campo |
+| `GET /api/context?ra=&dec=&fov=` | Documento de contexto del campo: capas de otras misiones con su fecha y resumen de Gaia. Solo lo precalculado; un campo sin contexto responde `404 not_found` |
+| `GET /api/context/gaia?ra=&dec=&fov=` | Fuentes de Gaia DR3 del campo (posición en 2016,0, movimiento propio, paralaje, magnitud G) |
+| `GET /api/context/index` | Campos que tienen contexto guardado |
+| `GET /api/survey?ra=&dec=&fov=&layer=` | Una capa de otra misión (`twomass_ks`, `wise_w2`) en Float32, ya reproyectada a la grilla del campo. No usa hips2fits de CDS ni recibe `hips`: sirve capas precalculadas desde IRSA (`docs/contexto.md`, sección 5) |
 
 Espectro: fotometría de apertura sobre cada exposición individual (no sobre el coadd), fondo en anillo, longitud de onda tomada de WCS-WAVE en el píxel del objeto, error desde VARIANCE. WCS-WAVE va después de EPSF y la descarga cortada no la trae: bajar un recorte completo por detector y reutilizar su tabla con el encabezado de IMAGE de cada recorte.
 
@@ -145,6 +147,7 @@ Cada etapa termina en algo que se puede mostrar.
 - Overlay de Gaia con flechas de movimiento propio; objetos del sistema solar con SkyBoT.
 - Ficha del objeto (SIMBAD + Gaia) en lenguaje llano.
 - Cortina visible/infrarrojo y viaje en el tiempo entre misiones con `/survey`.
+- Estado: el contexto (2MASS Ks, WISE W2 y Gaia DR3) se precalcula desde IRSA con `backend/scripts/precompute_context.py` y queda en `backend/data/context/`; las rutas solo leen lo guardado, así que valen igual con `SPHEREX_PRECOMPUTED_ONLY`. SIMBAD y SkyBoT no están (son de CDS e IMCCE y no se probaron). "Viaje entre misiones" es un modo más del visor y la capa de Gaia se prende junto a la de flags; en un campo sin contexto guardado las dos cosas se muestran deshabilitadas con una explicación. El detalle está en `docs/contexto.md`.
 - **Hecho cuando:** el slider de misiones muestra a Barnard moviéndose a lo largo de décadas.
 
 ### Etapa 4 — Esfera (28, 23, 37)
