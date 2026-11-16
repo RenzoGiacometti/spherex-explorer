@@ -49,6 +49,7 @@ from app.config import Settings
 from app.domain import Exposure, ExposureList
 from app.irsa import transport
 from app.irsa.limits import get_limiter
+from app.irsa.releases import active_collections
 
 # Radio del circulo de busqueda: 1 segundo de arco, como en el spike. SIA2 devuelve
 # las imagenes cuya huella toca el circulo; con un radio tan chico, las que cubren el punto.
@@ -327,7 +328,7 @@ def _list_collection(collection: str, ra: float, dec: float, settings: Settings,
 
 def _merge_listings(listings: list[Any], settings: Settings) -> ExposureList:
     """Une las listas de cada coleccion en la lista del campo."""
-    exposures = deduplicate([item for listing in listings for item in listing.exposures], settings.collections)
+    exposures = deduplicate([item for listing in listings for item in listing.exposures], active_collections(settings))
     oldest = min((listing.queried_at for listing in listings), default=time.time())
     return ExposureList(
         exposures=exposures,
@@ -344,7 +345,7 @@ def list_exposures_parallel(ra: float, dec: float, settings: Settings, refresh: 
     nuevo esperaba 46 s solo por la lista. Si una coleccion falla, la otra igual
     termina su consulta (y queda en cache) antes de que salga el error.
     """
-    collections = settings.collections
+    collections = active_collections(settings)
     if len(collections) < 2:
         return list_exposures(ra, dec, settings, refresh)
     # `map` conserva el orden de las colecciones y vuelve a lanzar la primera excepcion.
@@ -354,7 +355,7 @@ def list_exposures_parallel(ra: float, dec: float, settings: Settings, refresh: 
 
 
 def list_exposures(ra: float, dec: float, settings: Settings, refresh: bool = False) -> ExposureList:
-    """Exposiciones de nivel 2 de las colecciones de `settings.collections` que cubren el punto.
+    """Exposiciones de nivel 2 de las colecciones vigentes (`active_collections`) que cubren el punto.
 
     - Una consulta SIA2 por coleccion, en VOTable (no CSV: la columna
       `cloud_access` trae comas sin entrecomillar), dentro de
@@ -381,5 +382,5 @@ def list_exposures(ra: float, dec: float, settings: Settings, refresh: bool = Fa
       una copia que todavia estaba vigente.
     - Bloqueante: hay que llamarla desde un hilo, no desde el bucle de asyncio.
     """
-    listings = [_list_collection(collection, ra, dec, settings, refresh) for collection in settings.collections]
+    listings = [_list_collection(collection, ra, dec, settings, refresh) for collection in active_collections(settings)]
     return _merge_listings(listings, settings)

@@ -59,7 +59,7 @@ from astropy.io import fits
 
 from app.config import Settings
 from app.domain import CutoutFile, Exposure
-from app.irsa import transport
+from app.irsa import s3, transport
 from app.irsa.limits import get_limiter
 
 Mode = Literal["truncated", "full"]
@@ -640,6 +640,68 @@ def _download(url: str, settings: Settings) -> tuple[bytes, Mode, int, str | Non
         raise IrsaTransient(f"fallo inesperado al leer la respuesta: {type(exc).__name__}: {exc}") from exc
 
 
+def _download_s3(
+    exposure: Exposure, ra: float, dec: float, side_deg: float, settings: Settings
+) -> tuple[bytes, int] | None:
+    """El recorte armado desde el bucket de AWS: `(bytes para guardar, bytes recibidos)`, o `None` si no salio de ahi.
+
+    Devuelve `None` cuando la URL no es de un archivo de IRSA, el bucket viene
+    fallando (`s3.available`) o este recorte no se pudo armar. Lo que devuelve
+    tiene el formato del modo `truncated` y ya paso la misma comprobacion. Solo lanza `IrsaPermanent`, si el punto cae
+    fuera de la imagen: es lo que el servicio de recortes responde con 422.
+    """
+    if not s3.available():
+        return None
+    url = s3.s3_url(exposure.url, settings)
+    if url is None:
+        return None
+    try:
+        payload, nbytes = s3.read_cutout(url, ra, dec, side_deg, settings)
+        _open_and_check(payload)
+    except s3.S3NoOverlap as exc:
+        s3.report(True)
+        raise IrsaPermanent(f"el recorte no toca la imagen: {exc}") from exc
+    except (s3.S3Unavailable, _Truncated, _InvalidCutout):
+        s3.report(False)
+        return None
+    s3.report(True)
+    return payload, nbytes
+
+
+def _download_from_source(
+    exposure: Exposure, ra: float, dec: float, side_deg: float, settings: Settings
+) -> tuple[bytes, Mode, int, str | None]:
+    """Baja el recorte de donde diga `settings.cutout_source`. Devuelve lo mismo que `_download` y lanza lo mismo.
+
+    - `irsa`: el servicio de recortes, y nada mas.
+    - `s3`: el bucket; si de ahi no sale, el servicio de recortes.
+    - `auto` (o cualquier otro valor): el servicio de recortes; si responde
+      ocupado o se corta (`IrsaBusy`, `IrsaTransient`), el bucket, en el mismo
+      intento y sin esperar el `Retry-After`. Si el bucket tampoco lo da, sale
+      el error de IRSA y el planificador reintenta como siempre.
+
+    Medido el 15 de noviembre de 2026 con 10 conexiones y 120 exposiciones de
+    Barnard (lado 0,1 grados): el servicio de recortes entrego 60 al primer
+    intento, a 5,7 por segundo y 0,12 MB cada uno, y respondio 503 a las otras
+    60; el bucket entrego las 120, a 5,2 por segundo y 1,9 MB cada uno (hay que
+    leer filas enteras del detector). Por eso `auto` es el valor por defecto.
+    """
+    source = settings.cutout_source.strip().lower()
+    if source == "s3":
+        from_bucket = _download_s3(exposure, ra, dec, side_deg, settings)
+        if from_bucket is not None:
+            return from_bucket[0], "truncated", from_bucket[1], None
+    try:
+        return _download(cutout_url(exposure, ra, dec, side_deg), settings)
+    except (IrsaBusy, IrsaTransient):
+        if source in ("irsa", "s3"):
+            raise
+        from_bucket = _download_s3(exposure, ra, dec, side_deg, settings)
+        if from_bucket is None:
+            raise
+        return from_bucket[0], "truncated", from_bucket[1], None
+
+
 # ------------------------------------------------------------------- escritura
 
 
@@ -727,7 +789,7 @@ def fetch_cutout(exposure: Exposure, ra: float, dec: float, side_deg: float, set
         if cached is not None:
             return cached
         with get_limiter(settings).cutout_slot():
-            payload, mode, nbytes, reason = _download(cutout_url(exposure, ra, dec, side_deg), settings)
+            payload, mode, nbytes, reason = _download_from_source(exposure, ra, dec, side_deg, settings)
         path = cutout_cache_path(exposure, ra, dec, side_deg, settings, mode)
         try:
             _write_atomic(path, payload)
