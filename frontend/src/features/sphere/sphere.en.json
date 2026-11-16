@@ -53,6 +53,14 @@
     "jump": "turn {{now}}  largest {{largest}}  jumps {{jumps}}  held {{held}}  flipped {{flipped}}"
   },
   "credit": "Sky: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC · Field images: SPHEREx / IRSA",
+  "creditShort": "Sky: NASA/GSFC SVS · Gaia: ESA/DPAC · SPHEREx / IRSA",
+  "rail": {
+    "label": "Shortcuts",
+    "journey": "Time travel",
+    "curtain": "Visible/IR",
+    "random": "Random",
+    "window": "Window"
+  },
   "shortcuts": {
     "journey": "Time travel",
     "curtain": "Visible and infrared"

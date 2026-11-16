@@ -2,6 +2,7 @@
   "launcher": {
     "start": "Recorrido guiado: encontrá a WISE 0855",
     "short": "Recorrido guiado",
+    "rail": "Recorrido",
     "detail": ": encontrá a WISE 0855"
   },
   "tour": {

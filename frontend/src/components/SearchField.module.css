@@ -132,4 +132,26 @@
   .example {
     display: block;
   }
+
+  /*
+   * Compacto: queda solo el campo. La etiqueta sigue en el documento para el
+   * lector de pantalla y el ejemplo, que aca es corto, vuelve adentro del campo.
+   */
+  .search[data-compact="true"] .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .search[data-compact="true"] .input::placeholder {
+    color: var(--color-text-dim);
+  }
+
+  .search[data-compact="true"] .example {
+    display: none;
+  }
 }

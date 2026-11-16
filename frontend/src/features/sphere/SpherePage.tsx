@@ -1,4 +1,12 @@
-import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -105,18 +113,14 @@ const COVER_ATTRIBUTE = "data-sky-cover";
 
 const NO_COVER: readonly SkyBox[] = [];
 
-/**
- * Aire, en pixeles, que tiene que quedar entre el centro de la mira del punto
- * elegido y la interfaz: medio lado de la mira (20 px) y 8 px mas.
- */
-const PICK_CLEARANCE = 28;
-/**
- * Si la tarjeta del punto elegido tapa la mira, el cielo sube hasta dejarla a
- * esta distancia del borde de la interfaz: se ve la mira y lo que la rodea.
- */
-const PICK_REST = 72;
-/** Corrimiento minimo, en pixeles, por el que se mueve el cielo para destapar la mira. */
-const PICK_MIN_SHIFT = 4;
+/** Cartel del punto elegido: distancia, en pixeles, entre el centro de la mira y el cartel. */
+const CALLOUT_GAP = 48;
+/** Donde empieza la linea que une la mira con el cartel: medio lado de la mira (20 px) y 2 px mas. */
+const CALLOUT_RETICLE = 22;
+/** Aire entre el cartel y el resto de la interfaz (barra, riel, franja de abajo). */
+const CALLOUT_MARGIN = 8;
+/** Aire entre el cartel y el borde de la ventana, y entre la linea y las esquinas del cartel. */
+const CALLOUT_EDGE = 12;
 
 /**
  * Tiempo que el acercamiento se queda sobre la imagen del campo antes de abrir
@@ -210,19 +214,19 @@ export interface SpherePageProps {
  * Pantalla de entrada de la aplicacion: lo que se ve cuando la URL no trae
  * coordenadas (SPEC.md, Etapa 4). El cielo a pantalla completa, los cinco
  * objetos de prueba marcados y tambien listados como accesos sobre el
- * buscador, el buscador, el boton "Lugar al azar", el que inicia el recorrido
- * guiado (src/features/guide) y, a su lado, dos accesos directos
- * (shortcuts.ts): el viaje en el tiempo y la cortina. Elegir un lugar acerca
+ * buscador, el buscador y, en un riel vertical sobre el borde derecho, el
+ * recorrido guiado (src/features/guide), dos accesos directos (shortcuts.ts:
+ * el viaje en el tiempo y la cortina) y "Lugar al azar". Elegir un lugar acerca
  * la camara al punto y abre su campo en el visor. En un telefono suma la
  * "ventana al cielo": la esfera sigue la direccion a la que apunta el aparato.
  *
- * Un clic sobre el cielo elige un punto: queda la mira y, sobre los accesos,
- * una tarjeta con sus coordenadas, su constelacion y el boton que lo abre. Si
+ * Un clic sobre el cielo elige un punto: queda la mira y, a su lado, un
+ * cartel con sus coordenadas, su constelacion y el boton que lo abre. Si
  * el punto cae dentro de la huella de un campo guardado abre ese campo
  * (targets.ts, `skyPointField`). Nada de esto se pisa: la esfera no dibuja
  * marcadores ni nombres de constelaciones debajo de la interfaz (los elementos
- * con `data-sky-cover`), y en el celular la tarjeta toma el lugar de los
- * destacados y los accesos mientras esta abierta.
+ * con `data-sky-cover`), y el cartel se ubica donde no tapa la mira, la
+ * barra, el riel ni el buscador.
  *
  * El buscador es uno solo: se ve como lo dibuja esta pantalla y busca con la
  * logica de src/features/entry (useObjectSearch). Si el navegador no puede
@@ -253,7 +257,6 @@ export function SpherePage({
   const sphereRef = useRef<SkySphereHandle>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const dockRef = useRef<HTMLElement>(null);
   /** Cuanto se ve la interfaz de abajo, de 0 a 1 (`setChrome`). */
   const chromeRef = useRef(1);
   const topbarRef = useRef<HTMLElement>(null);
@@ -261,6 +264,10 @@ export function SpherePage({
   const readoutRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const openingRef = useRef(false);
+  const railRef = useRef<HTMLElement>(null);
+  const calloutRef = useRef<HTMLElement>(null);
+  const leaderRef = useRef<SVGLineElement>(null);
+  const pickRef = useRef<SkyPosition | null>(null);
   const restoreTimerRef = useRef<number | null>(null);
 
   const [query, setQuery] = useState("");
@@ -340,6 +347,100 @@ export function SpherePage({
       typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)").matches ?? false),
   );
   const phone = usePhoneWidth();
+  const phoneRef = useRef(phone);
+  phoneRef.current = phone;
+  pickRef.current = pick;
+
+  /**
+   * Ubica el cartel del punto elegido al lado de la mira y tiende la linea que
+   * los une. Corre en cada cuadro en que cambia la vista, sin pasar por el
+   * estado: escribe la posicion directo en los elementos.
+   *
+   * El cartel no tapa la mira, la barra, el riel ni la franja de abajo. En
+   * escritorio sale a la derecha de la mira y, si no entra, a la izquierda; en
+   * el celular, debajo de la mira si el punto esta en la mitad de arriba y
+   * encima si esta en la de abajo. Si el punto sale de la vista, se oculta.
+   */
+  const placeCallout = useCallback((): void => {
+    const card = calloutRef.current;
+    const line = leaderRef.current;
+    const page = pageRef.current;
+    if (card === null || line === null || page === null) return;
+    const target = pickRef.current;
+    const point = target === null ? null : (sphereRef.current?.project(target) ?? null);
+    if (point === null) {
+      card.style.visibility = "hidden";
+      line.style.visibility = "hidden";
+      return;
+    }
+    const width = page.clientWidth;
+    const height = page.clientHeight;
+    const cardWidth = card.offsetWidth;
+    const cardHeight = card.offsetHeight;
+    const origin = page.getBoundingClientRect();
+    const rail = railRef.current?.getBoundingClientRect();
+    const ceiling = (topbarRef.current?.offsetHeight ?? 0) + CALLOUT_MARGIN;
+    const floor = height - (bottomRef.current?.offsetHeight ?? 0) - CALLOUT_MARGIN;
+    const rightLimit =
+      rail === undefined ? width - CALLOUT_EDGE : rail.left - origin.left - CALLOUT_MARGIN;
+    let left: number;
+    let top: number;
+    let fromX = point.x;
+    let fromY = point.y;
+    let toX: number;
+    let toY: number;
+    if (phoneRef.current) {
+      // Celular: debajo de la mira si el punto esta arriba y entra; si no, encima.
+      const below = point.y < (ceiling + floor) / 2 && point.y + CALLOUT_GAP + cardHeight <= floor;
+      left = clamp(
+        point.x - cardWidth / 2,
+        CALLOUT_EDGE,
+        Math.max(CALLOUT_EDGE, rightLimit - cardWidth),
+      );
+      top = below ? point.y + CALLOUT_GAP : point.y - CALLOUT_GAP - cardHeight;
+      top = clamp(top, ceiling, Math.max(ceiling, floor - cardHeight));
+      fromY = point.y + (below ? CALLOUT_RETICLE : -CALLOUT_RETICLE);
+      toX = clamp(point.x, left + CALLOUT_EDGE, left + cardWidth - CALLOUT_EDGE);
+      toY = below ? top : top + cardHeight;
+    } else {
+      // Escritorio: a la derecha de la mira; si no entra, a la izquierda.
+      const onRight = point.x + CALLOUT_GAP + cardWidth <= rightLimit;
+      left = onRight ? point.x + CALLOUT_GAP : point.x - CALLOUT_GAP - cardWidth;
+      left = Math.max(left, CALLOUT_EDGE);
+      top = clamp(point.y - cardHeight / 2, ceiling, Math.max(ceiling, floor - cardHeight));
+      fromX = point.x + (onRight ? CALLOUT_RETICLE : -CALLOUT_RETICLE);
+      toX = onRight ? left : left + cardWidth;
+      toY = clamp(point.y, top + CALLOUT_EDGE, top + cardHeight - CALLOUT_EDGE);
+    }
+    card.style.transform = `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px)`;
+    card.style.visibility = "visible";
+    line.setAttribute("x1", fromX.toFixed(1));
+    line.setAttribute("y1", fromY.toFixed(1));
+    line.setAttribute("x2", toX.toFixed(1));
+    line.setAttribute("y2", toY.toFixed(1));
+    line.style.visibility = "visible";
+  }, []);
+
+  // Al elegir un punto se ubica antes de pintar: el cartel no pasa por la esquina.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: se reubica con cada punto nuevo.
+  useLayoutEffect(() => {
+    placeCallout();
+  }, [pick, placeCallout]);
+
+  useEffect(() => {
+    window.addEventListener("resize", placeCallout);
+    return () => window.removeEventListener("resize", placeCallout);
+  }, [placeCallout]);
+
+  // Escape quita la mira y su cartel, salvo que haya un dialogo abierto encima.
+  useEffect(() => {
+    if (pick === null || aboutOpen) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") setPick(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [pick, aboutOpen]);
   const search = useObjectSearch(resolver);
   const { status } = search;
 
@@ -402,6 +503,7 @@ export function SpherePage({
   // la interfaz puede tapar otra parte del cielo aunque la vista no se mueva.
   useEffect(() => {
     sphereRef.current?.refresh();
+    placeCallout();
   });
 
   /**
@@ -611,37 +713,6 @@ export function SpherePage({
     openPosition(pick);
   }
 
-  // La tarjeta del punto se suma sobre el buscador y lo de abajo crece hacia
-  // arriba: puede tapar justo el punto que se acaba de elegir. Si la mira queda
-  // debajo, o pegada al borde, el cielo sube lo necesario para que se vea. En un
-  // celular alto no pasa: ahi la tarjeta ocupa el lugar de los destacados y los
-  // accesos, que miden mas que ella.
-  useEffect(() => {
-    if (pick === null) return;
-    const sphere = sphereRef.current;
-    const page = pageRef.current;
-    const dock = dockRef.current;
-    if (sphere === null || page === null || dock === null) return;
-    const point = sphere.project(pick);
-    if (point === null) return;
-    const origin = page.getBoundingClientRect();
-    const box = dock.getBoundingClientRect();
-    const dockTop = box.top - origin.top;
-    const beside =
-      point.x < box.left - origin.left - PICK_CLEARANCE ||
-      point.x > box.right - origin.left + PICK_CLEARANCE;
-    if (beside || point.y <= dockTop - PICK_CLEARANCE) return;
-    // Hasta donde puede subir: debajo de la barra y, en el celular, de la lectura del centro.
-    let ceiling = 0;
-    for (const cover of coveredBoxes()) {
-      if (cover.bottom <= dockTop) ceiling = Math.max(ceiling, cover.bottom);
-    }
-    ceiling += PICK_CLEARANCE;
-    const rest = Math.max(ceiling, dockTop - PICK_REST);
-    // Por un par de pixeles no vale la pena mover el cielo.
-    if (point.y - rest >= PICK_MIN_SHIFT) sphere.shiftBy(rest - point.y);
-  }, [pick, coveredBoxes]);
-
   function handleRandom(): void {
     setPick(null);
     // El anterior se recuerda fuera de esta pantalla (targets.ts): al volver del
@@ -678,6 +749,7 @@ export function SpherePage({
   }
 
   function handleViewChange(view: SkyView): void {
+    placeCallout();
     const element = readoutRef.current;
     if (element !== null) {
       const text = formatPosition(view.ra, view.dec);
@@ -746,7 +818,8 @@ export function SpherePage({
   });
 
   // Un solo renglon debajo del campo: lo que esta pasando o, en reposo, como se usa la esfera.
-  let hintText = sphereStatus === "no-webgl" ? undefined : t("hint");
+  // En el celular el renglon queda para lo que esta pasando: en reposo no se muestra.
+  let hintText = sphereStatus === "no-webgl" || phone ? undefined : t("hint");
   let liveText = "";
   if (opening !== null) {
     hintText = t("opening", { name: opening });
@@ -896,6 +969,117 @@ export function SpherePage({
         <span ref={readoutRef} className={styles.readoutValue} />
       </p>
 
+      {/*
+        Riel de accesos, vertical sobre el borde derecho: el recorrido guiado, los
+        dos accesos directos, "Lugar al azar" y, en un telefono, la ventana al
+        cielo. A la vista va un rotulo de una palabra; el nombre completo es el
+        nombre accesible y la ayuda al pasar el cursor.
+      */}
+      {windowOn ? null : (
+        <section
+          ref={railRef}
+          className={styles.rail}
+          aria-label={t("rail.label")}
+          data-sky-cover="chrome"
+        >
+          <GuideLauncher className={styles.cell} compact />
+          {ENTRY_SHORTCUTS.map((shortcut) => (
+            <Button
+              key={shortcut.id}
+              className={styles.cell}
+              variant="ghost"
+              icon={shortcut.icon}
+              disabled={busy}
+              disabledReason={busyReason}
+              aria-label={t(`shortcuts.${shortcut.id}`)}
+              title={
+                busy ? undefined : t(`shortcutDetail.${shortcut.id}`, { name: shortcut.label })
+              }
+              data-shortcut={shortcut.id}
+              onClick={() => handleShortcut(shortcut)}
+            >
+              {t(`rail.${shortcut.id}`)}
+            </Button>
+          ))}
+          <Button
+            className={styles.cell}
+            variant="ghost"
+            icon="shuffle"
+            disabled={busy}
+            disabledReason={busyReason}
+            aria-label={t("random")}
+            title={busy ? undefined : t("random")}
+            onClick={handleRandom}
+          >
+            {t("rail.random")}
+          </Button>
+          {showWindowButton ? (
+            <Button
+              className={styles.cell}
+              variant="ghost"
+              icon="compass"
+              disabled={busy || windowState.kind === "starting"}
+              disabledReason={busy ? busyReason : t("busy.sensors")}
+              aria-label={t("window.enter")}
+              title={busy ? undefined : t("window.enter")}
+              onClick={() => void skyWindow.start()}
+            >
+              {t("rail.window")}
+            </Button>
+          ) : null}
+        </section>
+      )}
+
+      {/*
+        Cartel del punto elegido: sale de la mira, unido a ella por una linea, y
+        la sigue cuando el cielo gira (`placeCallout`). Se lee de corrido: punto,
+        constelacion, si el campo esta guardado, abrir, cerrar.
+      */}
+      <svg className={styles.leader} aria-hidden="true">
+        <line ref={leaderRef} />
+      </svg>
+      {pick === null || windowOn ? null : (
+        <section
+          ref={calloutRef}
+          className={styles.pick}
+          aria-label={t("pick.title")}
+          data-sky-cover="chrome"
+        >
+          <div className={styles.pickPoint}>
+            <h2 className={styles.pickTitle}>{t("pick.title")}</h2>
+            <p className={styles.pickCoordinates}>{formatPosition(pick.ra, pick.dec)}</p>
+          </div>
+          <div className={styles.pickInfo}>
+            <p>
+              {t("pick.constellation", {
+                name: constellationLabel(constellationAt(pick), language),
+              })}
+            </p>
+            {pickedStar === null ? null : (
+              <p role="status">{t("pick.star", { name: pickedStar })}</p>
+            )}
+            <p className={styles.pickNote} role="status">
+              {pickSaved === null ? t("pick.new") : t("pick.saved", { name: pickSaved.label })}
+            </p>
+          </div>
+          <Button
+            className={classNames(styles.action, styles.pickOpen)}
+            variant="ghost"
+            icon="target"
+            disabled={busy}
+            onClick={handlePickOpen}
+          >
+            {t("pick.open")}
+          </Button>
+          <IconButton
+            className={styles.pickClose}
+            icon="close"
+            label={t("pick.close")}
+            onClick={() => setPick(null)}
+          />
+        </section>
+      )}
+
       <div ref={bottomRef} className={styles.bottom}>
         {windowOn ? (
           <main className={styles.windowDock}>
@@ -913,12 +1097,7 @@ export function SpherePage({
             </Button>
           </main>
         ) : (
-          <main
-            ref={dockRef}
-            className={styles.dock}
-            data-pick={pick !== null}
-            data-sky-cover="chrome"
-          >
+          <main className={styles.dock} data-sky-cover="chrome">
             {notices.map((notice) => (
               <p key={notice} className={styles.notice} role="status">
                 <Icon name="alert" size={18} className={styles.noticeIcon} />
@@ -940,72 +1119,6 @@ export function SpherePage({
                 </QuickLink>
               ))}
             </QuickLinkList>
-            {/*
-              Tarjeta del punto elegido. Se lee de corrido (punto, constelacion, si
-              el campo esta guardado, abrir, cerrar); donde va cada parte lo decide
-              la hoja de estilos, que en el celular la pone en lugar de los
-              destacados y los accesos.
-            */}
-            {pick === null ? null : (
-              <section className={styles.pick} aria-label={t("pick.title")}>
-                <div className={styles.pickPoint}>
-                  <h2 className={styles.pickTitle}>{t("pick.title")}</h2>
-                  <p className={styles.pickCoordinates}>{formatPosition(pick.ra, pick.dec)}</p>
-                </div>
-                <div className={styles.pickInfo}>
-                  <p>
-                    {t("pick.constellation", {
-                      name: constellationLabel(constellationAt(pick), language),
-                    })}
-                  </p>
-                  {pickedStar === null ? null : (
-                    <p role="status">{t("pick.star", { name: pickedStar })}</p>
-                  )}
-                  <p className={styles.pickNote} role="status">
-                    {pickSaved === null
-                      ? t("pick.new")
-                      : t("pick.saved", { name: pickSaved.label })}
-                  </p>
-                </div>
-                <Button
-                  className={classNames(styles.action, styles.pickOpen)}
-                  variant="ghost"
-                  icon="target"
-                  disabled={busy}
-                  onClick={handlePickOpen}
-                >
-                  {t("pick.open")}
-                </Button>
-                <IconButton
-                  className={styles.pickClose}
-                  icon="close"
-                  label={t("pick.close")}
-                  onClick={() => setPick(null)}
-                />
-              </section>
-            )}
-            {/* Renglon propio sobre el buscador: se ve con y sin esfera, y en el celular. */}
-            <div className={styles.shortcuts}>
-              <GuideLauncher className={classNames(styles.action, styles.guide)} />
-              {ENTRY_SHORTCUTS.map((shortcut) => (
-                <Button
-                  key={shortcut.id}
-                  className={styles.action}
-                  variant="ghost"
-                  icon={shortcut.icon}
-                  disabled={busy}
-                  disabledReason={busyReason}
-                  // El rotulo es corto para que los tres entren en una linea: el detalle va en la ayuda.
-                  title={
-                    busy ? undefined : t(`shortcutDetail.${shortcut.id}`, { name: shortcut.label })
-                  }
-                  data-shortcut={shortcut.id}
-                  onClick={() => handleShortcut(shortcut)}
-                >
-                  {t(`shortcuts.${shortcut.id}`)}
-                </Button>
-              ))}
-            </div>
             <div className={styles.searchRow} onSubmit={handleEmptySubmit}>
               <SearchField
                 className={styles.search}
@@ -1014,37 +1127,14 @@ export function SpherePage({
                 onChange={handleQueryChange}
                 onSubmit={(text) => void handleSubmit(text)}
                 submitLabel={tEntry("search.submit")}
-                placeholder={example}
+                placeholder={phone ? tEntry("search.short") : example}
                 hint={hintText}
                 error={errorText}
                 busy={busy}
                 busyReason={busyReason}
                 inputRef={inputRef}
+                compact={phone}
               />
-              <div className={styles.actions}>
-                <Button
-                  className={styles.action}
-                  variant="ghost"
-                  icon="shuffle"
-                  disabled={busy}
-                  disabledReason={busyReason}
-                  onClick={handleRandom}
-                >
-                  {t("random")}
-                </Button>
-                {showWindowButton ? (
-                  <Button
-                    className={styles.action}
-                    variant="ghost"
-                    icon="compass"
-                    disabled={busy || windowState.kind === "starting"}
-                    disabledReason={busy ? busyReason : t("busy.sensors")}
-                    onClick={() => void skyWindow.start()}
-                  >
-                    {t("window.enter")}
-                  </Button>
-                ) : null}
-              </div>
             </div>
           </main>
         )}
@@ -1053,7 +1143,7 @@ export function SpherePage({
           {liveText}
         </p>
         <p className={styles.credit} data-sky-cover="chrome">
-          {t("credit")}
+          {t(phone ? "creditShort" : "credit")}
         </p>
       </div>
     </div>
