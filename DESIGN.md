@@ -276,7 +276,7 @@ Las tres se cargan desde Google Fonts. Sustitutos: Arial Narrow, Helvetica Neue 
 - **Los nombres propios no van en mayúsculas.** Los objetos (Barnard's Star, Epsilon Indi B) se escriben como en el catálogo, en `{typography.title}`. Las mayúsculas quedan para titulares y etiquetas.
 - **Todo número es mono.** Si un valor se puede copiar a un catálogo o comparar con otro, va en `{typography.data}` con cifras tabulares. La unidad acompaña al valor en la misma familia.
 - **Formato de datos.** Ascensión recta `22h 04m 10s`, declinación `−56° 46′ 58″` con signo menos tipográfico y primas reales, fecha ISO `2025-12-03`, hora en UTC. En español el separador decimal es la coma (`0,75 µm`); en inglés, el punto (`0.75 µm`).
-- **Dos idiomas.** Los textos en español ocupan cerca de un 20 % más que en inglés: ningún control fija su ancho al texto y las etiquetas no se cortan con puntos suspensivos, salvo nombres largos dentro de una fila.
+- **Dos idiomas.** Los textos en español ocupan cerca de un 20 % más que en inglés: ningún control fija su ancho al texto y las etiquetas no se cortan con puntos suspensivos, salvo nombres largos dentro de una fila. La interfaz abre en inglés; el español se elige con el selector de idioma o con `?lang=es`.
 
 ## Layout
 
@@ -412,7 +412,7 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 - **Zona del pulgar.** En celular, todo control frecuente (reproducción, épocas, banda, modo) queda en el 45 % inferior de la pantalla. La parte superior solo muestra información y la salida.
 - **Objetivos táctiles** de 44px como mínimo, de alto y de ancho; el botón de reproducción mide 56 a 64px.
 - **Lo que cambia de lugar en celular.** El ejemplo del buscador va en un renglón debajo del campo, porque adentro no entra (315px de texto en 203px de campo a 390px de ancho). El riel de la barra de progreso va en su propio renglón, debajo de la etiqueta y el conteo. El texto del buscador sube a 16px, para que Safari de iOS no acerque la página al enfocarlo.
-- **Ventana al cielo.** Pantalla completa del cielo en la dirección del teléfono, mira central en `{colors.accent}`, nombre del objeto bajo la mira y un único `button-primary` para abrirlo en el visor. Está en beta: el botón de la entrada lleva la etiqueta "Beta" (píldora de borde `{colors.hairline-strong}`, texto `{colors.text-mute}`, sin relleno) y, con la ventana abierta, sobre el botón principal va una nota de vidrio baja, sin icono y de dos renglones como mucho, que dice que la orientación puede saltar en algunos teléfonos y que al salir el cielo se gira arrastrando.
+- **Ventana al cielo.** Pantalla completa del cielo en la dirección del teléfono, mira central en `{colors.accent}`, nombre del objeto bajo la mira y un único `button-primary` para abrirlo en el visor.
 - No se dibujan barras de estado ni teclados del sistema.
 
 ## Do's and Don'ts

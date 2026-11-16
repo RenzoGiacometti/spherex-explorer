@@ -1,13 +1,13 @@
-// i18next: espanol por defecto e ingles. Todo texto de interfaz sale de
+// i18next: ingles por defecto y espanol. Todo texto de interfaz sale de
 // locales/<idioma>/<namespace>.json; no hay textos sueltos en los componentes.
 
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { browserLanguages, detectLanguage } from "./detect";
+import { detectLanguage } from "./detect";
 import { DEFAULT_LANGUAGE, type Language, matchLanguage, SUPPORTED_LANGUAGES } from "./languages";
 import { DEFAULT_NAMESPACE, NAMESPACES, resources } from "./resources";
 
-export { browserLanguages, detectLanguage, LANGUAGE_PARAM } from "./detect";
+export { detectLanguage, LANGUAGE_PARAM } from "./detect";
 export {
   DEFAULT_LANGUAGE,
   isLanguage,
@@ -25,13 +25,12 @@ function applyDocumentLanguage(language: string): void {
 
 /**
  * Inicializa i18next. Las traducciones van empaquetadas, asi que termina de
- * forma sincronica y no hace falta Suspense. Sin argumento detecta el idioma
- * por el parametro "lang" de la URL y despues por el navegador.
+ * forma sincronica y no hace falta Suspense. Sin argumento toma el idioma del
+ * parametro "lang" de la URL y, si falta, el idioma por defecto.
  */
 export function initI18n(language?: Language): typeof i18n {
   const initial =
-    language ??
-    detectLanguage(typeof window === "undefined" ? "" : window.location.search, browserLanguages());
+    language ?? detectLanguage(typeof window === "undefined" ? "" : window.location.search);
 
   if (i18n.isInitialized) {
     if (i18n.language !== initial) void i18n.changeLanguage(initial);

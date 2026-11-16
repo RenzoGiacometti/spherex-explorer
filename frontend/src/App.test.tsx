@@ -20,8 +20,10 @@ vi.mock("@/features/sphere", () => ({
 }));
 
 const WISE = "?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink";
+// Sin `lang` la interfaz va en ingles: los tests que leen textos en espanol lo piden.
+const WISE_ES = `${WISE}&lang=es`;
 
-/** Idiomas preferidos del navegador de la prueba (jsdom viene en ingles). */
+/** Idiomas preferidos del navegador de la prueba: la interfaz no los consulta. */
 function browserPrefers(languages: string[]): void {
   vi.spyOn(window.navigator, "languages", "get").mockReturnValue(languages);
 }
@@ -30,7 +32,6 @@ let backend: FakeBackend;
 
 beforeEach(async () => {
   openUrl("");
-  browserPrefers(["es-AR", "es"]);
   initI18n("es");
   await setLanguage("es");
   installFakeBrowser();
@@ -62,7 +63,7 @@ describe("App", () => {
   });
 
   it("un link con coordenadas abre el visor y pide el campo", async () => {
-    openUrl(WISE);
+    openUrl(WISE_ES);
     render(<App />);
 
     expect(screen.queryByTestId("entry")).toBeNull();
@@ -105,19 +106,22 @@ describe("App", () => {
     await imageShown();
   });
 
-  it("sin lang usa el idioma del navegador", async () => {
-    browserPrefers(["en-US", "en"]);
+  it("sin lang abre en ingles, aunque el navegador prefiera espanol", async () => {
+    browserPrefers(["es-AR", "es"]);
     openUrl(WISE);
     render(<App />);
 
     expect(await screen.findByRole("region", { name: "Metadata" })).toBeTruthy();
     expect(document.documentElement.lang).toBe("en");
+    expect(i18n.language).toBe("en");
+    // No se escribe en la URL lo que nadie eligio.
+    expect(new URLSearchParams(window.location.search).has("lang")).toBe(false);
     await imageShown();
   });
 
-  it("lang manda sobre el idioma del navegador", async () => {
+  it("lang=es abre en espanol, aunque el navegador prefiera ingles", async () => {
     browserPrefers(["en-US", "en"]);
-    openUrl(`${WISE}&lang=es`);
+    openUrl(WISE_ES);
     render(<App />);
 
     expect(await screen.findByRole("region", { name: "Metadatos" })).toBeTruthy();
@@ -129,18 +133,27 @@ describe("App", () => {
     openUrl(WISE);
     render(<App />);
     await imageShown();
+    expect(await screen.findByRole("region", { name: "Metadata" })).toBeTruthy();
 
+    fireEvent.click(screen.getByRole("radio", { name: "Español" }));
+
+    expect(await screen.findByRole("region", { name: "Metadatos" })).toBeTruthy();
+    expect(new URLSearchParams(window.location.search).get("lang")).toBe("es");
+    expect(document.documentElement.lang).toBe("es");
+    // Con el otro separador decimal: 4,41 en vez de 4.41.
+    expect(await screen.findByRole("radio", { name: /^B6, de 4,41/ })).toBeTruthy();
+
+    // Y de vuelta: la eleccion queda escrita, tambien cuando es el idioma por defecto.
     fireEvent.click(screen.getByRole("radio", { name: "English" }));
-
     expect(await screen.findByRole("region", { name: "Metadata" })).toBeTruthy();
     expect(new URLSearchParams(window.location.search).get("lang")).toBe("en");
-    // Con el otro separador decimal: 4.41 en vez de 4,41.
-    expect(screen.getByRole("radio", { name: /^B6, 4\.41/ })).toBeTruthy();
+    expect(await screen.findByRole("radio", { name: /^B6, 4\.41/ })).toBeTruthy();
     // Cambiar de idioma no vuelve a pedir el campo.
     expect(backend.requests("field")).toHaveLength(1);
   });
 
   it("pasa de la entrada al visor cuando cambia la URL", async () => {
+    openUrl("?lang=es");
     render(<App />);
     expect(screen.getByTestId("entry")).toBeTruthy();
 
@@ -169,7 +182,7 @@ describe("App", () => {
   });
 
   it("volver a la entrada desde el visor cierra el campo", async () => {
-    openUrl(WISE);
+    openUrl(WISE_ES);
     render(<App />);
     await imageShown();
 
@@ -177,7 +190,8 @@ describe("App", () => {
 
     expect(await screen.findByTestId("entry")).toBeTruthy();
     expect(viewer()).toBeNull();
-    expect(window.location.search).toBe("");
+    // El idioma elegido sigue en la URL al volver.
+    expect(window.location.search).toBe("?lang=es");
     expect(useFieldStore.getState().phase).toBe("idle");
   });
 
@@ -197,7 +211,7 @@ describe("App", () => {
   });
 
   it("con embed=1 queda la imagen sola, con el enlace al visor completo", async () => {
-    openUrl(`${WISE}&embed=1`);
+    openUrl(`${WISE_ES}&embed=1`);
     render(<App />);
     await imageShown();
 
@@ -208,12 +222,14 @@ describe("App", () => {
     // El enlace lleva la misma vista, sin `embed`.
     expect(
       screen.getByRole("link", { name: "Abrir en el visor completo" }).getAttribute("href"),
-    ).toBe("/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5");
+    ).toBe(
+      "/?ra=133.7598&dec=-7.2422&fov=0.1667&band=6&mode=blink&name=WISE+J085510.83-071442.5&lang=es",
+    );
     expect(backend.requests("field")).toHaveLength(1);
   });
 
   it("sin embed el visor lleva toda su interfaz", async () => {
-    openUrl(WISE);
+    openUrl(WISE_ES);
     render(<App />);
     await imageShown();
 

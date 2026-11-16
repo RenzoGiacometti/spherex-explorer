@@ -28,7 +28,7 @@
 //            (src/features/sphere). Es de la entrada, no del campo: se escribe
 //            con y sin campo, asi al volver del visor la capa sigue prendida
 //   embed    1 oculta la interfaz alrededor del visor
-//   lang     es o en; sin el, el idioma sale del navegador
+//   lang     es o en; sin el, la interfaz va en ingles
 //
 // Un valor invalido no rompe nada: se reemplaza por su valor por defecto.
 

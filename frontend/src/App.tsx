@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { DevPageHost } from "@/dev/DevPageHost";
 import { GuideTour } from "@/features/guide";
 import { ViewerPage } from "@/features/viewer";
-import { browserLanguages, detectLanguage, setLanguage } from "@/i18n";
+import { DEFAULT_LANGUAGE, setLanguage } from "@/i18n";
 import { useFieldUrlSync } from "@/state/fieldUrlSync";
 import { useUrlState } from "@/state/urlState";
 
@@ -27,9 +27,9 @@ export function App() {
   // reordena y volver a la entrada lo cierra. Se une una sola vez, aca.
   useFieldUrlSync();
 
-  // El idioma sigue a la URL: `lang` manda y, si falta, decide el navegador.
+  // El idioma sigue a la URL: `lang` manda y, si falta, va el idioma por defecto.
   useEffect(() => {
-    void setLanguage(urlLanguage ?? detectLanguage("", browserLanguages()));
+    void setLanguage(urlLanguage ?? DEFAULT_LANGUAGE);
   }, [urlLanguage]);
 
   // Solo con `pnpm dev`: `/?dev=<id>` abre una pagina de desarrollo (src/dev/devPages.ts).

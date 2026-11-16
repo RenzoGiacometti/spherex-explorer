@@ -141,10 +141,10 @@ All of them come from real SPHEREx data downloaded from IRSA on 15 November 2026
 - **Dependence on IRSA.** A new field depends on IRSA answering. On 15 November 2026 the exposure listing was down for more than an hour and the cutout service answered "503 Server busy" to a good share of the requests; one field ended without 178 of its 458 cutouts. In that case the field is left "incomplete" and can be completed later.
 - **10-arcminute fields only** in the public version. The 30′ field exists in the code but was never tested with real data.
 - **Partial context.** There is no SIMBAD lookup and no solar-system objects. DSS plates are photographic densities, not fluxes: they are for looking, not for measuring. Two fields have a single plate with a reliable date.
-- **Sky window in beta.** On some phones the orientation may jump: it was seen on an Android when pointing near the zenith. The button carries a "Beta" tag and the window says so. Outside the window, the sky turns by dragging.
+- **Sky window.** It was tested on a single Android phone.
 - **Not verified:**
   - The molecular bands on the chart come from the literature and were not checked against SPHEREx spectra.
-  - It was not tested in Firefox, Safari, real phones or screen readers; only in desktop Chrome and Edge and in phone emulation.
+  - It was not tested in Firefox, Safari or screen readers; only in desktop Chrome and Edge and in phone emulation. On a real phone, only the sky window was tested.
   - "Complete the field" was tested through the API and with a simulated backend, not in a browser against IRSA.
   - Most of the interface was reviewed by hand and with short checks in a headless browser, not with an end-to-end test suite.
 

@@ -5,8 +5,11 @@ export const SUPPORTED_LANGUAGES = ["es", "en"] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
-/** Idioma por defecto cuando ni la URL ni el navegador piden uno admitido. */
-export const DEFAULT_LANGUAGE: Language = "es";
+/**
+ * Idioma por defecto: ingles. Es el que se ve sin `lang` en la URL, sea cual sea
+ * el idioma del navegador; el espanol se elige con el selector o con `?lang=es`.
+ */
+export const DEFAULT_LANGUAGE: Language = "en";
 
 export function isLanguage(value: unknown): value is Language {
   return typeof value === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(value);

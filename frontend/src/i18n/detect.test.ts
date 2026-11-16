@@ -4,34 +4,27 @@ import { detectLanguage } from "./detect";
 import { isLanguage, matchLanguage } from "./languages";
 
 describe("detectLanguage", () => {
-  it("usa espanol si nada pide otro idioma", () => {
-    expect(detectLanguage("", [])).toBe("es");
+  it("usa ingles si la URL no pide otro idioma", () => {
+    expect(detectLanguage("")).toBe("en");
+    expect(detectLanguage("?ra=10&dec=20")).toBe("en");
   });
 
-  it("el parametro lang de la URL manda sobre el navegador", () => {
-    expect(detectLanguage("?lang=en", ["es-AR", "es"])).toBe("en");
-    expect(detectLanguage("?ra=10&dec=20&lang=es", ["en-US"])).toBe("es");
+  it("el parametro lang de la URL manda", () => {
+    expect(detectLanguage("?lang=es")).toBe("es");
+    expect(detectLanguage("?lang=en")).toBe("en");
+    expect(detectLanguage("?ra=10&dec=20&lang=es")).toBe("es");
   });
 
-  it("sin lang usa el primer idioma admitido del navegador", () => {
-    expect(detectLanguage("", ["en-US", "es"])).toBe("en");
-    expect(detectLanguage("", ["es-AR", "en"])).toBe("es");
-    expect(detectLanguage("?ra=10&dec=20", ["fr-FR", "en-GB", "es"])).toBe("en");
-  });
-
-  it("cae en espanol si el navegador no pide ninguno admitido", () => {
-    expect(detectLanguage("", ["pt-BR", "fr"])).toBe("es");
-  });
-
-  it("ignora un lang que no esta admitido y sigue con el navegador", () => {
-    expect(detectLanguage("?lang=fr", ["en-US"])).toBe("en");
-    expect(detectLanguage("?lang=", ["en-US"])).toBe("en");
-    expect(detectLanguage("?lang=xx", [])).toBe("es");
+  it("ignora un lang que no esta admitido y cae en ingles", () => {
+    expect(detectLanguage("?lang=fr")).toBe("en");
+    expect(detectLanguage("?lang=")).toBe("en");
+    expect(detectLanguage("?lang=xx")).toBe("en");
   });
 
   it("acepta mayusculas y etiquetas con region en lang", () => {
-    expect(detectLanguage("?lang=EN", [])).toBe("en");
-    expect(detectLanguage("?lang=en-US", [])).toBe("en");
+    expect(detectLanguage("?lang=ES")).toBe("es");
+    expect(detectLanguage("?lang=es-AR")).toBe("es");
+    expect(detectLanguage("?lang=en-US")).toBe("en");
   });
 });
 

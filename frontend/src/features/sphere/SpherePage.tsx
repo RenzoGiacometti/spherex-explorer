@@ -899,13 +899,6 @@ export function SpherePage({
       <div ref={bottomRef} className={styles.bottom}>
         {windowOn ? (
           <main className={styles.windowDock}>
-            {/*
-              La ventana esta en beta: en algunos telefonos la orientacion salta. Adentro
-              el cielo no se arrastra (lo mueve el sensor), asi que la salida es afuera.
-            */}
-            <p className={classNames(styles.notice, styles.windowNote)} data-window-beta="">
-              {t("window.betaNote")}
-            </p>
             {/* El unico boton relleno de la vista: abre lo que esta en la mira. */}
             <Button
               variant="primary"
@@ -1049,8 +1042,6 @@ export function SpherePage({
                     onClick={() => void skyWindow.start()}
                   >
                     {t("window.enter")}
-                    {/* La orientacion salta en algunos telefonos: se avisa antes de entrar. */}
-                    <span className={styles.betaTag}>{t("window.beta")}</span>
                   </Button>
                 ) : null}
               </div>
