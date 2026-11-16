@@ -30,6 +30,8 @@
   },
   "window": {
     "enter": "Ventana al cielo",
+    "beta": "Beta",
+    "betaNote": "Beta: en algunos teléfonos la orientación puede saltar. Al salir, el cielo se gira arrastrando.",
     "exit": "Salir de la ventana al cielo",
     "starting": "Esperando los sensores del teléfono…",
     "open": "Abrir {{name}} en el visor",

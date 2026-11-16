@@ -412,7 +412,7 @@ Línea de `{effects.icon-stroke}` sobre una grilla de 24, extremos y uniones red
 - **Zona del pulgar.** En celular, todo control frecuente (reproducción, épocas, banda, modo) queda en el 45 % inferior de la pantalla. La parte superior solo muestra información y la salida.
 - **Objetivos táctiles** de 44px como mínimo, de alto y de ancho; el botón de reproducción mide 56 a 64px.
 - **Lo que cambia de lugar en celular.** El ejemplo del buscador va en un renglón debajo del campo, porque adentro no entra (315px de texto en 203px de campo a 390px de ancho). El riel de la barra de progreso va en su propio renglón, debajo de la etiqueta y el conteo. El texto del buscador sube a 16px, para que Safari de iOS no acerque la página al enfocarlo.
-- **Ventana al cielo.** Pantalla completa del cielo en la dirección del teléfono, mira central en `{colors.accent}`, nombre del objeto bajo la mira y un único `button-primary` para abrirlo en el visor.
+- **Ventana al cielo.** Pantalla completa del cielo en la dirección del teléfono, mira central en `{colors.accent}`, nombre del objeto bajo la mira y un único `button-primary` para abrirlo en el visor. Está en beta: el botón de la entrada lleva la etiqueta "Beta" (píldora de borde `{colors.hairline-strong}`, texto `{colors.text-mute}`, sin relleno) y, con la ventana abierta, sobre el botón principal va una nota de vidrio baja, sin icono y de dos renglones como mucho, que dice que la orientación puede saltar en algunos teléfonos y que al salir el cielo se gira arrastrando.
 - No se dibujan barras de estado ni teclados del sistema.
 
 ## Do's and Don'ts

@@ -141,6 +141,7 @@ Todos salen de datos reales de SPHEREx bajados de IRSA el 15 de noviembre de 202
 - **Dependencia de IRSA.** Un campo nuevo depende de que IRSA responda. El 15 de noviembre de 2026 el listado de exposiciones estuvo caído más de una hora y el servicio de recortes respondió "503 Server busy" a buena parte de los pedidos; un campo terminó sin 178 de sus 458 recortes. En ese caso el campo queda "incompleto" y se puede completar después.
 - **Solo campos de 10 minutos de arco** en la versión pública. El campo de 30′ existe en el código pero nunca se probó con datos reales.
 - **Contexto parcial.** No hay SIMBAD ni objetos del sistema solar. Las placas del DSS son densidades fotográficas, no flujos: sirven para mirar, no para medir. Dos campos tienen una sola placa con fecha fiable.
+- **Ventana al cielo en beta.** En algunos teléfonos la orientación puede saltar: se vio en un Android al apuntar cerca del cenit. El botón lleva la etiqueta "Beta" y la ventana lo avisa. Fuera de la ventana, el cielo se gira arrastrando.
 - **Sin verificar:**
   - Las bandas moleculares del gráfico salen de la bibliografía y no se contrastaron con espectros de SPHEREx.
   - No se probó en Firefox, en Safari, en teléfonos reales ni con lectores de pantalla; solo en Chrome y Edge de escritorio y en emulación de celular.

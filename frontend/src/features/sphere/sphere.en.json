@@ -30,6 +30,8 @@
   },
   "window": {
     "enter": "Sky window",
+    "beta": "Beta",
+    "betaNote": "Beta: on some phones the orientation may jump. After leaving, drag to turn the sky.",
     "exit": "Leave the sky window",
     "starting": "Waiting for the phone sensors…",
     "open": "Open {{name}} in the viewer",
