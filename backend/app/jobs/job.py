@@ -67,6 +67,7 @@ from app.contract import (
     StaleExposureListWarning,
 )
 from app.domain import CutoutFile, Exposure, ExposureList, NormalizedRequest, PlaneArrays
+from app.irsa.releases import active_collections
 from app.jobs.deps import JobDeps
 from app.jobs.document import (
     DETECTORS,
@@ -522,7 +523,7 @@ class FieldJob:
             if not listing.stale:
                 self.no_coverage_listed_at = listing.listed_at
             raise no_coverage(
-                f"ninguna exposicion de {', '.join(self.settings.collections)} cubre el punto "
+                f"ninguna exposicion de {', '.join(active_collections(self.settings))} cubre el punto "
                 f"({request.ra:.4f}, {request.dec:+.4f})"
             )
         return listing
@@ -606,7 +607,9 @@ class FieldJob:
             # Los bits de FLAGS salen del encabezado de los recortes: todavia no se leyo ninguno.
             meta.flags = []
             meta.provenance = Provenance(
-                collections=list(self.settings.collections), listed_at=listing.listed_at, list_stale=listing.stale
+                collections=list(active_collections(self.settings)),
+                listed_at=listing.listed_at,
+                list_stale=listing.stale,
             )
             meta.status = "downloading"
             progress = meta.progress

@@ -45,6 +45,9 @@ SAMPLE_PIPELINE_VERSION = "muestra-1"
 # variable de entorno puede bajarlo, no subirlo.
 IRSA_MAX_PARALLEL_DOWNLOADS = 10
 
+# Colecciones de SIA2 vigentes el 15 de noviembre de 2026 (SPEC.md, seccion 2).
+DEFAULT_COLLECTIONS: tuple[str, ...] = ("spherex_dr1", "spherex_qr3")
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -86,6 +89,15 @@ class Settings:
     # Maximo de `IrsaBusy.retry_after`, pida lo que pida IRSA: un `Retry-After` de horas no
     # puede dejar parado un recorte. Lo que pidio de verdad queda en `IrsaBusy.requested`.
     irsa_retry_after_max_s: float = 60.0
+    # De donde salen los pixeles de un recorte (app/irsa/cutouts.py, `_download_from_source`).
+    # `auto`: del servicio de recortes de IRSA y, si responde ocupado o se corta, del archivo
+    # completo en el bucket publico de AWS, leido por rangos (app/irsa/s3.py). `s3`: primero el
+    # bucket y despues IRSA. `irsa`: solo el servicio de recortes.
+    cutout_source: str = "auto"
+    # El bucket `nasa-irsa-spherex` (columna `cloud_access` de SIA2) tiene los mismos archivos,
+    # con la ruta que en `access_url` sigue a `irsa_data_prefix`.
+    s3_base_url: str = "https://nasa-irsa-spherex.s3.us-east-1.amazonaws.com"
+    irsa_data_prefix: str = "https://irsa.ipac.caltech.edu/ibe/data/spherex/"
     # Tope de disco de la cache de recortes (contrato, seccion 11); 0 o menos lo desactiva.
     cutout_cache_max_gb: float = 10.0
 
@@ -112,7 +124,17 @@ class Settings:
     pipeline_version: str = PIPELINE_VERSION
 
     # Colecciones que se listan por SIA2 (SPEC.md, seccion 2: DR1 y QR3, no QR2).
-    collections: tuple[str, ...] = ("spherex_dr1", "spherex_qr3")
+    # Es la lista fija: la que vale si no se pueden descubrir los releases, o si
+    # `SPHEREX_COLLECTIONS` la cambia (entonces no se descubre nada).
+    collections: tuple[str, ...] = DEFAULT_COLLECTIONS
+    # Releases descubiertos del listado del bucket publico de AWS (app/irsa/releases.py): todos
+    # los Data Release y el ultimo Quick Release. Con 0 se usa siempre `collections`.
+    discover_releases: bool = True
+    release_list_url: str = "https://nasa-irsa-spherex.s3.us-east-1.amazonaws.com/?list-type=2&delimiter=/"
+    release_list_cache_hours: float = 12.0
+    release_list_timeout_s: float = 10.0
+    # Con 1 se listan tambien las colecciones de los campos profundos (`spherex_<release>_deep`).
+    deep_collections: bool = False
     # Exposiciones separadas por mas de estos dias caen en epocas distintas.
     epoch_gap_days: float = 60.0
 
