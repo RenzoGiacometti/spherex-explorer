@@ -28,6 +28,11 @@ export interface SearchFieldProps {
   readonly busyReason?: string | undefined;
   /** Referencia al campo de texto, por ejemplo para darle el foco. */
   readonly inputRef?: Ref<HTMLInputElement> | undefined;
+  /**
+   * En celular, solo el campo: la etiqueta queda para el lector de pantalla y
+   * el ejemplo va adentro, sin renglon propio. El ejemplo tiene que ser corto.
+   */
+  readonly compact?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -48,6 +53,7 @@ export function SearchField({
   busy = false,
   busyReason,
   inputRef,
+  compact = false,
   className,
 }: SearchFieldProps) {
   const id = useId();
@@ -70,6 +76,7 @@ export function SearchField({
       onSubmit={handleSubmit}
       aria-labelledby={labelId}
       aria-busy={busy}
+      data-compact={compact}
     >
       <label id={labelId} htmlFor={id} className={styles.label}>
         {label}

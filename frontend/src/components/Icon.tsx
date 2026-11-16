@@ -157,6 +157,12 @@ const ICON_SHAPES = {
       <path d="M3 20.5h18" />
     </>
   ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7v5l3.5 2" />
+    </>
+  ),
 } as const satisfies Record<string, ReactElement>;
 
 /** Nombre de un icono del juego de DESIGN.md. */

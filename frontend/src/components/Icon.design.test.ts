@@ -17,7 +17,7 @@ describe("juego de iconos", () => {
   it("es el que nombra DESIGN.md, en el mismo orden", () => {
     const names = designIconNames();
 
-    expect(names).toHaveLength(24);
+    expect(names).toHaveLength(25);
     expect(ICON_NAMES).toEqual(names);
   });
 

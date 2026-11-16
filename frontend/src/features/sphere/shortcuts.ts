@@ -23,7 +23,7 @@ export const ENTRY_SHORTCUTS: readonly EntryShortcut[] = [
     // Viaje en el tiempo: Wolf 359 se mueve 4,7" por anio y el viaje va de la
     // placa de 1953 a SPHEREx en 2026. Banda 6: la que tiene exposiciones validas.
     id: "journey",
-    icon: "layers",
+    icon: "clock",
     label: "Wolf 359",
     patch: {
       ra: 164.0925,

@@ -2,6 +2,7 @@
   "search": {
     "label": "Search by name or coordinates",
     "submit": "Search",
+    "short": "Name or coordinates",
     "example": "{{name}} · {{coordinates}}",
     "resolving": "Searching for {{query}}…",
     "empty": "Type a name or coordinates.",
