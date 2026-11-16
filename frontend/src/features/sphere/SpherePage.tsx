@@ -359,7 +359,8 @@ export function SpherePage({
    * El cartel no tapa la mira, la barra, el riel ni la franja de abajo. En
    * escritorio sale a la derecha de la mira y, si no entra, a la izquierda; en
    * el celular, debajo de la mira si el punto esta en la mitad de arriba y
-   * encima si esta en la de abajo. Si el punto sale de la vista, se oculta.
+   * encima si esta en la de abajo. Si el punto sale de la vista, o la interfaz
+   * se retiro al acercarse a un campo, se oculta.
    */
   const placeCallout = useCallback((): void => {
     const card = calloutRef.current;
@@ -367,7 +368,10 @@ export function SpherePage({
     const page = pageRef.current;
     if (card === null || line === null || page === null) return;
     const target = pickRef.current;
-    const point = target === null ? null : (sphereRef.current?.project(target) ?? null);
+    // Con la interfaz retirada del todo (`setChrome`) el cartel tampoco se muestra:
+    // con opacidad 0 seguiria recibiendo el puntero y el foco.
+    const retired = page.dataset.chrome === "hidden";
+    const point = target === null || retired ? null : (sphereRef.current?.project(target) ?? null);
     if (point === null) {
       card.style.visibility = "hidden";
       line.style.visibility = "hidden";
@@ -545,14 +549,21 @@ export function SpherePage({
    * el cielo, para que nada tape la imagen: en un celular el buscador ocupa
    * casi media pantalla.
    */
-  const setChrome = useCallback((opacity: number) => {
-    const page = pageRef.current;
-    chromeRef.current = opacity;
-    if (page === null) return;
-    page.style.setProperty("--sphere-chrome", String(opacity));
-    // Invisible del todo, tampoco recibe el puntero ni el foco.
-    page.dataset.chrome = opacity <= 0.01 ? "hidden" : "shown";
-  }, []);
+  const setChrome = useCallback(
+    (opacity: number) => {
+      const page = pageRef.current;
+      chromeRef.current = opacity;
+      if (page === null) return;
+      page.style.setProperty("--sphere-chrome", String(opacity));
+      // Invisible del todo, tampoco recibe el puntero ni el foco.
+      const chrome = opacity <= 0.01 ? "hidden" : "shown";
+      if (page.dataset.chrome === chrome) return;
+      page.dataset.chrome = chrome;
+      // El cartel del punto elegido lleva su visibilidad en linea: se retira y vuelve con el resto.
+      placeCallout();
+    },
+    [placeCallout],
+  );
 
   /** Acerca la camara al lugar y abre su campo. Un arrastre a mitad de camino lo cancela. */
   const openPlace = useCallback(
