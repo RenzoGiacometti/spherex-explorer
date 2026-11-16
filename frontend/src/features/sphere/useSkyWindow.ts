@@ -4,7 +4,7 @@
 // esta orientada la camara trasera respecto del cielo: los tres angulos del
 // sensor dan la orientacion del telefono en el horizonte local, y la latitud
 // con el tiempo sidereo local la llevan al sistema ecuatorial. Todo va en un
-// cuaternion (`deviceToSceneQuaternion`, skyMath.ts) que la escena le asigna a
+// cuaternion (`cameraInScene`, skyMath.ts) que la escena le asigna a
 // la camara tal cual.
 //
 // Que hace falta, y que pasa si falta (la esfera queda en modo de arrastre y
@@ -27,9 +27,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  cameraInScene,
   createOrientationGate,
+  createTwinResolver,
   type DeviceAngles,
-  deviceToSceneQuaternion,
+  deviceToHorizonQuaternion,
   type Observer,
   type Quat,
   shortestDelta,
@@ -62,6 +64,8 @@ export interface SkyWindowReading {
   readonly screenAngle: number;
   /** Lecturas retenidas por la compuerta desde que se prendio la ventana. */
   readonly held: number;
+  /** Lecturas que llegaron invertidas (media vuelta alrededor del eje x) y se corrigieron. */
+  readonly flipped: number;
 }
 
 export interface SkyWindowOptions {
@@ -239,6 +243,10 @@ export function useSkyWindow({
     // lado opuesto. Lo unico que se filtra es la orientacion ya compuesta.
     const gate = createOrientationGate();
     let held = 0;
+    // Algunos Android entregan a veces la misma postura girada media vuelta
+    // alrededor del eje x del telefono: se resuelve antes de componer nada.
+    const resolveTwin = createTwinResolver();
+    let flipped = 0;
 
     const apply = (): void => {
       if (observer === null || latest === null) return;
@@ -247,9 +255,11 @@ export function useSkyWindow({
         setState({ kind: "on" });
       }
       const angle = screenAngle();
-      const reading = gate(deviceToSceneQuaternion(latest, angle, observer, new Date()));
+      const device = resolveTwin(deviceToHorizonQuaternion(latest, 0));
+      if (device.flipped) flipped += 1;
+      const reading = gate(cameraInScene(device.orientation, angle, observer, new Date()));
       if (reading.held) held += 1;
-      onReadingRef.current?.({ angles: latest, screenAngle: angle, held });
+      onReadingRef.current?.({ angles: latest, screenAngle: angle, held, flipped });
       onPointingRef.current(reading.orientation);
     };
     const onOrientation = (event: DeviceOrientationEvent): void => {

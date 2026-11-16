@@ -362,6 +362,76 @@ export function createOrientationGate(
   };
 }
 
+/** Lecturas que difieren en menos de estos grados de media vuelta exacta son gemelas. */
+export const TWIN_TOLERANCE = 25;
+
+/** Media vuelta alrededor del eje x del telefono. */
+const HALF_TURN_X: Quat = [1, 0, 0, 0];
+
+export interface ResolvedOrientation {
+  /** Orientacion del telefono en el horizonte que hay que usar. */
+  readonly orientation: Quat;
+  /** La lectura llego invertida y se le deshizo la media vuelta. */
+  readonly flipped: boolean;
+}
+
+/**
+ * Resuelve las lecturas invertidas de algunos Android. Con el telefono
+ * apuntando al cielo, hay telefonos que para la misma postura entregan a veces
+ * la terna que corresponde y a veces otra con beta corrido 180 grados y gamma
+ * con el signo cambiado: la misma orientacion girada media vuelta alrededor de
+ * su eje x, con la camara mirando al punto opuesto (lecturas reales en
+ * skyTwin.test.ts). Nadie da vuelta un telefono entre dos lecturas: si una
+ * lectura es la gemela de la anterior, es la misma postura informada al reves.
+ *
+ * De las dos gemelas se usa la que tiene la camara por encima del horizonte:
+ * en las lecturas tomadas, la invertida es siempre la que mira al piso. Recibe
+ * y devuelve la orientacion del telefono en el marco del horizonte (este,
+ * norte, cenit), sin la correccion de pantalla.
+ */
+export function createTwinResolver(
+  tolerance = TWIN_TOLERANCE,
+): (deviceInHorizon: Quat) => ResolvedOrientation {
+  let last: Quat | null = null;
+  /** Componente cenital de la direccion de la camara trasera (-z del telefono). */
+  const height = (q: Quat): number => quatRotate(q, [0, 0, -1])[2];
+  return (reading) => {
+    let orientation = reading;
+    let flipped = false;
+    if (last !== null) {
+      const twin = quatMultiply(reading, HALF_TURN_X);
+      if (quatAngle(last, twin) <= tolerance && height(twin) > height(reading)) {
+        // La anterior miraba al cielo y esta es su gemela invertida.
+        orientation = twin;
+        flipped = true;
+      }
+      // Si la gemela que mira al cielo es la que acaba de llegar, se la sigue:
+      // la serie habia empezado por la invertida.
+    }
+    last = orientation;
+    return { orientation, flipped };
+  };
+}
+
+/**
+ * Orientacion de la camara en la escena a partir de la del telefono en el
+ * horizonte: se le suma la correccion de pantalla y el giro del horizonte local
+ * al sistema de la escena.
+ */
+export function cameraInScene(
+  deviceInHorizon: Quat,
+  screenAngle: number,
+  observer: Observer,
+  date: Date,
+): Quat {
+  return quatNormalize(
+    quatMultiply(
+      horizonToSceneQuaternion(observer, date),
+      quatMultiply(deviceInHorizon, axisQuat(2, -screenAngle)),
+    ),
+  );
+}
+
 /**
  * Hacia donde mira y donde queda el arriba de una camara con esa orientacion.
  * La camara (three.js) mira hacia su -z y tiene el arriba en su +y.
