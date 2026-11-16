@@ -152,7 +152,7 @@ Después de precalcular o rearmar un campo hay que generar sus espectros guardad
 uv run python scripts/precompute_field_spectra.py --workers 4
 ```
 
-Deja `data/spectra/fields/<id>.json.gz` con el espectro del objeto con nombre y de hasta 20 fuentes brillantes del campo. Después se generan las curvas de luz de esas mismas fuentes (`data/lightcurves/fields/<id>.json.gz`, unos 10 minutos para los 14 campos):
+Deja `data/spectra/fields/<id>.json.gz` con el espectro del objeto con nombre y de hasta 20 fuentes brillantes del campo. Después se generan las curvas de luz de esas mismas fuentes (`data/lightcurves/fields/<id>.json.gz`, unos 10 minutos medidos con 14 campos; hoy son 22):
 
 ```powershell
 uv run python scripts/precompute_field_lightcurves.py --workers 4

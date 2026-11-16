@@ -90,7 +90,7 @@ La imagen se decodifica fuera del hilo principal (`createImageBitmap`) y sube a 
 Tercer nivel de detalle: la imagen real de SPHEREx de cada campo precalculado, dibujada sobre la esfera en la posición del campo. Aparece con un fundido cuando su lado ocupa entre 32 y 96 px de pantalla, y el acercamiento a un campo precalculado termina sobre ella antes de abrir el visor.
 
 - **Origen:** los planos guardados en `backend/data/fields` (el cubo de cada campo, armado con imágenes de SPHEREx bajadas de IRSA). No se baja nada.
-- **Contenido:** un PNG en escala de grises de 195 × 195 px por campo, con los píxeles del plano tal cual (3,075 segundos de arco por píxel, 10 minutos de arco de lado). 14 archivos, 297 KB en total (de 12 a 28 KB cada uno). Cada uno se pide recién cuando la vista se acerca a su campo.
+- **Contenido:** un PNG en escala de grises de 195 × 195 px por campo, con los píxeles del plano tal cual (3,075 segundos de arco por píxel, 10 minutos de arco de lado). 22 archivos, 449 KB en total (de 12 a 28 KB cada uno). Cada uno se pide recién cuando la vista se acerca a su campo.
 - **`parches.json`:** por campo, el archivo, el centro (`crval` de la grilla), el tamaño sobre el plano tangente en grados de la proyección TAN, la banda y la época elegidas.
 
 ### Regenerar
