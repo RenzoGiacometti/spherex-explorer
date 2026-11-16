@@ -197,6 +197,9 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 | Variable | Por defecto | Qué hace |
 |---|---|---|
 | `SPHEREX_SIA_URL` | SIA2 de IRSA | Servicio de la lista de exposiciones |
+| `SPHEREX_DISCOVER_RELEASES` | 1 | Las colecciones que se listan salen del listado del bucket público de AWS: todos los Data Release y el último Quick Release. Un release nuevo entra solo, sin editar nada. Con 0, o si se define `SPHEREX_COLLECTIONS`, vale la lista fija |
+| `SPHEREX_DEEP_COLLECTIONS` | 0 | Con 1 se listan también las colecciones de los campos profundos (`spherex_<release>_deep`) |
+| `SPHEREX_RELEASE_LIST_URL`, `SPHEREX_RELEASE_LIST_CACHE_HOURS`, `SPHEREX_RELEASE_LIST_TIMEOUT_S` | listado del bucket `nasa-irsa-spherex`, 12, 10 | De dónde sale la lista de releases, cuánto vale en caché y cuánto se la espera |
 | `SPHEREX_SIA_ATTEMPTS`, `SPHEREX_SIA_RETRY_WAIT_S` | 6, 2 | Intentos por colección y espera entre ellos |
 | `SPHEREX_IRSA_CONNECT_TIMEOUT_S`, `SPHEREX_IRSA_READ_TIMEOUT_S`, `SPHEREX_IRSA_TOTAL_TIMEOUT_S` | 15, 60, 180 | Topes de un pedido a IRSA: conexión, silencio entre tramos y total del cuerpo |
 | `SPHEREX_IRSA_RETRY_AFTER_DEFAULT_S`, `SPHEREX_IRSA_RETRY_AFTER_MAX_S` | 5, 60 | Espera si IRSA no manda `Retry-After`, y máximo que se respeta |
@@ -252,6 +255,7 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/api/headers.py` | Cabeceras del contrato, compartidas con el servidor falso | Hecho |
 | `app/fake.py` | Servidor falso | Hecho |
 | `app/irsa/limits.py` | Límite global de conexiones hacia IRSA | Hecho |
+| `app/irsa/releases.py` | Colecciones vigentes, descubiertas del listado del bucket de AWS | Hecho |
 | `app/irsa/sia.py` | Lista de exposiciones por SIA2, con caché y copia vencida como respaldo | Hecho |
 | `app/irsa/cutouts.py` | Descarga de un recorte, leyendo por HDU; caché en disco con tope | Hecho |
 | `app/irsa/s3.py` | El mismo recorte, armado leyendo por rangos el archivo completo del bucket de AWS | Hecho |
