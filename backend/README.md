@@ -200,6 +200,8 @@ Cada campo de `Settings` (`app/config.py`) se puede cambiar con una variable `SP
 | `SPHEREX_SIA_ATTEMPTS`, `SPHEREX_SIA_RETRY_WAIT_S` | 6, 2 | Intentos por colección y espera entre ellos |
 | `SPHEREX_IRSA_CONNECT_TIMEOUT_S`, `SPHEREX_IRSA_READ_TIMEOUT_S`, `SPHEREX_IRSA_TOTAL_TIMEOUT_S` | 15, 60, 180 | Topes de un pedido a IRSA: conexión, silencio entre tramos y total del cuerpo |
 | `SPHEREX_IRSA_RETRY_AFTER_DEFAULT_S`, `SPHEREX_IRSA_RETRY_AFTER_MAX_S` | 5, 60 | Espera si IRSA no manda `Retry-After`, y máximo que se respeta |
+| `SPHEREX_CUTOUT_SOURCE` | `auto` | De dónde salen los píxeles de un recorte. `auto`: del servicio de recortes de IRSA y, si responde ocupado o se corta, del archivo completo en el bucket público de AWS, leído por rangos. `s3`: primero el bucket y después IRSA. `irsa`: solo el servicio de recortes |
+| `SPHEREX_S3_BASE_URL`, `SPHEREX_IRSA_DATA_PREFIX` | bucket `nasa-irsa-spherex` y `https://irsa.ipac.caltech.edu/ibe/data/spherex/` | Con qué se arma la URL del bucket a partir de la de IRSA |
 | `SPHEREX_CUTOUT_CACHE_MAX_GB` | 10 | Tope de disco de la caché de recortes |
 | `SPHEREX_SESAME_URLS`, `SPHEREX_SESAME_TIMEOUT_S`, `SPHEREX_SESAME_TOTAL_TIMEOUT_S` | CDS y CfA, 10, 20 | Servidores de nombres, en orden, y sus plazos |
 | `SPHEREX_HIPS2FITS_URL`, `SPHEREX_PREVIEW_HIPS_W1`, `SPHEREX_PREVIEW_HIPS_W2` | hips2fits de CDS, `CDS/P/allWISE/W1` y `W2` | Servicio e imágenes de la vista provisoria |
@@ -252,6 +254,7 @@ El cubo no se guarda: `/cube` se arma concatenando los planos al servirlo.
 | `app/irsa/limits.py` | Límite global de conexiones hacia IRSA | Hecho |
 | `app/irsa/sia.py` | Lista de exposiciones por SIA2, con caché y copia vencida como respaldo | Hecho |
 | `app/irsa/cutouts.py` | Descarga de un recorte, leyendo por HDU; caché en disco con tope | Hecho |
+| `app/irsa/s3.py` | El mismo recorte, armado leyendo por rangos el archivo completo del bucket de AWS | Hecho |
 | `app/irsa/transport.py` | Sesión por hilo, timeouts, plazo total y lectura de `Retry-After` | Hecho |
 | `app/pipeline/exposure.py` | Cargar, enmascarar y reproyectar un recorte | Hecho |
 | `app/pipeline/coadd.py` | Coadd incremental de un plano | Hecho |
