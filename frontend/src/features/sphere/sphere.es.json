@@ -52,7 +52,7 @@
     "angles": "alfa {{alpha}}  beta {{beta}}  gamma {{gamma}}  pantalla {{screen}}",
     "quaternion": "q  {{x}}  {{y}}  {{z}}  {{w}}",
     "center": "centro  {{position}}",
-    "jump": "giro {{now}}  mayor {{largest}}  saltos {{jumps}}  retenidas {{held}}"
+    "jump": "giro {{now}}  mayor {{largest}}  saltos {{jumps}}  retenidas {{held}}  invertidas {{flipped}}"
   },
   "credit": "Cielo: NASA/Goddard Space Flight Center Scientific Visualization Studio · Gaia DR2: ESA/Gaia/DPAC · Imágenes de los campos: SPHEREx / IRSA",
   "shortcuts": {

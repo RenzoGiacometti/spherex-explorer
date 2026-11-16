@@ -98,6 +98,7 @@ export function SkyDebug({ sphereRef, readingRef }: SkyDebugProps) {
           largest: number(largest, 1),
           jumps,
           held: reading?.held ?? 0,
+          flipped: reading?.flipped ?? 0,
         }),
       ];
       const text = lines.join("\n");
