@@ -33,6 +33,8 @@ interface NameShape {
  * al pasarle el cursor.
  */
 const RING_REACH = 10;
+/** Medio lado del anillo dibujado de un marcador (12 px), con un pixel de aire. */
+const RING_RADIUS = 7;
 /** Medio lado de la mira del punto elegido (40 px). */
 const PICK_REACH = 20;
 /** Aire, en pixeles, entre un nombre de constelacion y lo que no tiene que tocar. */
@@ -288,6 +290,10 @@ export function SkySphere(props: SkySphereProps) {
       const covers = propsRef.current.occluders?.() ?? NO_BOXES;
       /** Lo que ya ocupa su lugar sobre el cielo: marcadores con su nombre y la mira. */
       const taken: SkyBox[] = [];
+      /** Marcadores a la vista con nombre: se decide despues de ubicar todos los anillos. */
+      const named: { element: HTMLElement; ring: SkyBox; box: SkyBox }[] = [];
+      /** Anillos ya dibujados, con su tamano en pantalla. */
+      const rings: SkyBox[] = [];
 
       for (const marker of propsRef.current.markers) {
         const element = elementsRef.current.get(marker.id);
@@ -306,29 +312,48 @@ export function SkySphere(props: SkySphereProps) {
           right: x + RING_REACH,
           bottom: y + RING_REACH,
         };
-        const covered = touchesAny(ring, covers);
+        // Tampoco se dibuja el anillo que cae sobre el de un marcador anterior
+        // (M 81 y M 82 con la vista abierta): queda uno solo hasta acercarse.
+        const drawn: SkyBox = {
+          left: x - RING_RADIUS,
+          top: y - RING_RADIUS,
+          right: x + RING_RADIUS,
+          bottom: y + RING_RADIUS,
+        };
+        const covered = touchesAny(ring, covers) || touchesAny(drawn, rings);
         setFlag(element, "covered", covered);
         if (covered) {
           setFlag(element, "crowded", false);
           continue;
         }
+        rings.push(drawn);
+        taken.push(ring);
         const shape = nameShape(marker, element);
         if (shape === null) {
           // Sin nombre a la vista (la ventana al cielo lo escribe debajo de la mira).
           setFlag(element, "crowded", false);
-          taken.push(ring);
           continue;
         }
-        const nameBox: SkyBox = {
-          left: x + shape.left,
-          top: y + shape.top,
-          right: x + shape.left + shape.width,
-          bottom: y + shape.top + shape.height,
-        };
-        const crowded = touchesAny(nameBox, covers);
+        named.push({
+          element,
+          ring,
+          box: {
+            left: x + shape.left,
+            top: y + shape.top,
+            right: x + shape.left + shape.width,
+            bottom: y + shape.top + shape.height,
+          },
+        });
+      }
+      // Los nombres van despues de todos los anillos y en el orden de la lista:
+      // el de un marcador no se escribe si toca el anillo de otro o un nombre ya
+      // escrito (M 81 y M 82 estan a 0,6 grados), y queda su anillo.
+      for (const { element, ring, box } of named) {
+        const crowded =
+          touchesAny(box, covers) ||
+          taken.some((other) => other !== ring && boxesTouch(box, other));
         setFlag(element, "crowded", crowded);
-        taken.push(ring);
-        if (!crowded) taken.push(nameBox);
+        if (!crowded) taken.push(box);
       }
 
       const pickElement = pickRef.current;
