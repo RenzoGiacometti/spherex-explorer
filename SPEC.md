@@ -217,4 +217,4 @@ Cada etapa termina en algo que se puede mostrar.
 ## 8. Pendiente de decidir
 
 - Hosting (necesita HTTPS para la etapa 4).
-- Con qué valor de `SPHEREX_CUTOUT_SOURCE` corre el despliegue público. Desde un servidor en la nube el ancho de banda no debería limitar la lectura desde S3 como en la prueba (sección 2, "Acceso"), y `s3` podría ser más rápido que `auto`. No medido.
+- Si `SPHEREX_CUTOUT_SOURCE=s3` sería más rápido que `auto` en el despliegue público, que corre con `auto` y `SPHEREX_DISCOVER_RELEASES=1` (escritos en `render.yaml`). Desde un servidor en la nube el ancho de banda no debería limitar la lectura desde S3 como en la prueba (sección 2, "Acceso"). No medido.

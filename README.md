@@ -37,6 +37,8 @@ pnpm dev
 
 Los 22 campos precalculados (`backend/data/fields`) abren sin conexión a IRSA. Abrir cualquier otro lugar descarga unos 300 a 500 recortes de IRSA.
 
+Configuración: el backend se ajusta con variables de entorno `SPHEREX_*`; la tabla completa está en [backend/README.md](backend/README.md). Dos deciden de dónde salen los datos de un campo nuevo, y en el despliegue público van escritas en [render.yaml](render.yaml): `SPHEREX_CUTOUT_SOURCE=auto` arma el recorte desde el bucket público de AWS (`nasa-irsa-spherex`) cuando el servicio de recortes de IRSA responde ocupado o corta la conexión, y `SPHEREX_DISCOVER_RELEASES=1` toma la lista de colecciones de las carpetas de ese bucket. Para volver al comportamiento anterior, `SPHEREX_CUTOUT_SOURCE=irsa` y `SPHEREX_DISCOVER_RELEASES=0`.
+
 La versión pública es una sola imagen de Docker con la API, el frontend compilado y los campos precalculados:
 
 ```powershell
@@ -171,6 +173,7 @@ Todos salen de datos reales de SPHEREx bajados de IRSA el 15 de noviembre de 202
 - **Constelaciones y nombres de estrellas de la esfera.** Las figuras, los nombres de las constelaciones y los nombres y posiciones de las 200 estrellas brillantes salen de [d3-celestial](https://github.com/ofrohn/d3-celestial), de Olaf Frohn (licencia BSD de 3 cláusulas, "Copyright (c) 2015, Olaf Frohn"), que toma las estrellas del catálogo XHIP (Anderson y Francis, 2012). Los límites, de la tabla de Nancy Roman (1987, PASP 99, 695; catálogo VI/42 del CDS), tomada del paquete astropy (BSD de 3 cláusulas). Los textos de las dos licencias y el detalle van en [frontend/src/features/sphere/assets/](frontend/src/features/sphere/assets/FUENTES.md).
 - **Nombres de objetos.** Sesame y SIMBAD, del CDS.
   > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France. 2000, A&AS, 143, 9, "The SIMBAD astronomical database", Wenger et al.
+- **Aportes al código.** La lectura de recortes desde el bucket público de AWS cuando IRSA responde ocupado y el descubrimiento de las colecciones desde ese bucket son de agusmelo (Agustin Melo), en el pull request #1.
 
 Los textos entre comillas se copiaron de las páginas de cada proyecto el 15 de noviembre de 2026: [SPHEREx](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_qr.html), [IRSA](https://irsa.ipac.caltech.edu/ack.html), [2MASS](https://irsa.ipac.caltech.edu/Missions/2mass.html), [AllWISE](https://irsa.ipac.caltech.edu/data/WISE/docs/release/AllWISE/expsup/sec1_6b.html), [DSS](https://archive.stsci.edu/publishing/data-use) y [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
 

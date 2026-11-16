@@ -37,6 +37,8 @@ pnpm dev
 
 The 22 precomputed fields (`backend/data/fields`) open without a connection to IRSA. Opening any other place downloads about 300 to 500 cutouts from IRSA.
 
+Configuration: the backend is tuned with `SPHEREX_*` environment variables; the full table is in [backend/README.md](backend/README.md). Two of them decide where the data of a new field come from, and the public deployment sets them in [render.yaml](render.yaml): `SPHEREX_CUTOUT_SOURCE=auto` builds the cutout from the public AWS bucket (`nasa-irsa-spherex`) when IRSA's cutout service answers busy or drops the connection, and `SPHEREX_DISCOVER_RELEASES=1` takes the list of collections from the folders of that bucket. To go back to the previous behaviour, set `SPHEREX_CUTOUT_SOURCE=irsa` and `SPHEREX_DISCOVER_RELEASES=0`.
+
 The public version is a single Docker image with the API, the built frontend and the precomputed fields:
 
 ```powershell
@@ -171,6 +173,7 @@ All of them come from real SPHEREx data downloaded from IRSA on 15 November 2026
 - **Constellations and star names on the sphere.** The figures, the constellation names and the names and positions of the 200 bright stars come from [d3-celestial](https://github.com/ofrohn/d3-celestial), by Olaf Frohn (BSD 3-Clause license, "Copyright (c) 2015, Olaf Frohn"), which takes the stars from the XHIP catalogue (Anderson and Francis, 2012). The boundaries come from the table by Nancy Roman (1987, PASP 99, 695; CDS catalogue VI/42), taken from the astropy package (BSD 3-Clause). The text of both licenses and the details are in [frontend/src/features/sphere/assets/](frontend/src/features/sphere/assets/FUENTES.md).
 - **Object names.** Sesame and SIMBAD, from CDS.
   > This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France. 2000, A&AS, 143, 9, "The SIMBAD astronomical database", Wenger et al.
+- **Code contributions.** Reading cutouts from the public AWS bucket when IRSA answers busy, and discovering the collections from that bucket, are by agusmelo (Agustin Melo), in pull request #1.
 
 The quoted texts were copied from each project's pages on 15 November 2026: [SPHEREx](https://irsa.ipac.caltech.edu/data/SPHEREx/docs/overview_qr.html), [IRSA](https://irsa.ipac.caltech.edu/ack.html), [2MASS](https://irsa.ipac.caltech.edu/Missions/2mass.html), [AllWISE](https://irsa.ipac.caltech.edu/data/WISE/docs/release/AllWISE/expsup/sec1_6b.html), [DSS](https://archive.stsci.edu/publishing/data-use) and [SIMBAD](https://simbad.cfa.harvard.edu/simbad/).
 

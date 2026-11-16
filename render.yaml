@@ -31,3 +31,13 @@ services:
       # los pedidos; con 4 responde bien.
       - key: SPHEREX_MAX_CUTOUT_DOWNLOADS
         value: "4"
+      # De donde salen los pixeles de un recorte (backend/app/config.py, `cutout_source`).
+      # `auto`: del servicio de recortes de IRSA y, si responde ocupado o se corta, del
+      # bucket publico de AWS en el mismo intento. `irsa` vuelve al comportamiento anterior:
+      # solo el servicio de recortes, esperando el Retry-After.
+      - key: SPHEREX_CUTOUT_SOURCE
+        value: auto
+      # Con 1, las colecciones que se listan salen de las carpetas del bucket publico de AWS
+      # (`discover_releases`). Con 0 vale la lista fija: spherex_dr1 y spherex_qr3.
+      - key: SPHEREX_DISCOVER_RELEASES
+        value: "1"
