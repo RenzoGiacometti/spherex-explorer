@@ -248,7 +248,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 10.6847,
     dec: 41.2687,
     band: 5,
-    aliases: ["Messier 31", "Andromeda Galaxy", "Galaxia de Andromeda"],
+    aliases: ["Messier 31", "Andromeda", "Andromeda Galaxy", "Galaxia de Andromeda"],
   },
   {
     id: "m-33",
@@ -284,7 +284,7 @@ const MORE_PRECOMPUTED_OBJECTS: readonly FeaturedObject[] = [
     ra: 189.9976,
     dec: -11.6231,
     band: 5,
-    aliases: ["Messier 104", "Sombrero Galaxy", "Galaxia del Sombrero"],
+    aliases: ["Messier 104", "Sombrero", "Sombrero Galaxy", "Galaxia del Sombrero"],
   },
   {
     id: "ugps-0722",
