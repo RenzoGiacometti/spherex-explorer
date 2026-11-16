@@ -129,6 +129,8 @@ export function ViewerPage() {
   const layout: ViewerLayout = embed ? "embed" : phone ? "phone" : "desktop";
 
   const gridShape = useFieldStore((state) => state.meta?.grid?.shape);
+  // El objeto del campo se mueve: en una capa de otra mision sin su posicion hay que decirlo.
+  const targetMoves = useFieldStore((state) => (state.target.resolved?.motion ?? null) !== null);
   const requestFov = useFieldStore((state) => state.request?.fov);
   const controller = useViewerController();
   const { view, scene, source, journey, gaia } = controller;
@@ -331,9 +333,15 @@ export function ViewerPage() {
 
   // Pie de la placa del DSS que se ve en el viaje: su credito y, si el objeto
   // estaba fuera del campo en esa fecha, el aviso.
+  const noPosition = journey.positionMissing && targetMoves;
   const plateCaption =
-    journeyOn && source === "survey" && journey.plate !== null ? (
-      <PlateCaption plate={journey.plate} outside={journey.outside} name={urlName} />
+    journeyOn && source === "survey" && (journey.plate !== null || noPosition) ? (
+      <PlateCaption
+        plate={journey.plate}
+        outside={journey.outside}
+        name={urlName}
+        noPosition={noPosition}
+      />
     ) : null;
 
   useEffect(() => {

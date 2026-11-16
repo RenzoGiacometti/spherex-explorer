@@ -108,6 +108,8 @@ export interface JourneyControl {
    * donde estaba respecto del centro; null si estaba adentro o no hay objeto.
    */
   readonly outside: TargetOffset | null;
+  /** La capa de otra mision que se ve se guardo sin la posicion del objeto del campo. */
+  readonly positionMissing: boolean;
   readonly playing: boolean;
   /** Elige un cuadro. Una epoca de SPHEREx pasa a ser la actual en la URL. */
   select(id: string): void;
@@ -709,6 +711,7 @@ export function useViewerController(): ViewerController {
     survey,
     plate: journeyPlate,
     outside: journeyOutside,
+    positionMissing: survey?.positionMissing === true,
     playing: journeyPlaying && mode === "journey",
     select: selectJourneyFrame,
     setPlaying: setJourneyPlaying,

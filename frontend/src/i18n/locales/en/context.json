@@ -20,6 +20,7 @@
     "noImage": "No image for this date",
     "target": "Expected position of the object",
     "outside": "In {{year}}, {{name}} was outside this field: {{distance}} to the {{direction}}. That is why it does not appear on this plate.",
+    "noPosition": "There is no computed position of {{name}} for this image: where it was cannot be pointed out.",
     "outsideObject": "the object of this field",
     "transportDisabled": "At least two images are needed to step through the journey."
   },

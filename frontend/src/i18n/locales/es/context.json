@@ -20,6 +20,7 @@
     "noImage": "Sin imagen para esta fecha",
     "target": "Posición esperada del objeto",
     "outside": "En {{year}}, {{name}} estaba fuera de este campo: a {{distance}} hacia el {{direction}}. Por eso no aparece en esta placa.",
+    "noPosition": "No hay posición calculada de {{name}} para esta imagen: no se puede señalar dónde estaba.",
     "outsideObject": "el objeto de este campo",
     "transportDisabled": "Hacen falta al menos dos imágenes para recorrer el viaje."
   },

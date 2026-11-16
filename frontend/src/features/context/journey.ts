@@ -44,6 +44,11 @@ export interface JourneyFrame {
   readonly image: FrameImage | null;
   /** Donde se espera al objeto en esa fecha, si tiene movimiento propio. */
   readonly target: FramePoint | null;
+  /**
+   * true si la capa se guardo sin la posicion del objeto del campo (UGPS J0722).
+   * No es lo mismo que un objeto que en esa fecha caia fuera del campo.
+   */
+  readonly positionMissing?: boolean;
 }
 
 const MJD_J2000 = 51544.5;
@@ -73,6 +78,7 @@ export function surveyFrame(
     image:
       values !== null && layer.display !== null ? { values, shape, display: layer.display } : null,
     target: layer.target?.in_field ? { x: layer.target.x, y: layer.target.y } : null,
+    positionMissing: (layer.target ?? null) === null,
   };
 }
 

@@ -177,6 +177,7 @@ export function opticalFrame(
     image:
       values !== null && layer.display !== null ? { values, shape, display: layer.display } : null,
     target: layer.target?.in_field ? { x: layer.target.x, y: layer.target.y } : null,
+    positionMissing: layer.target === null,
   };
 }
 

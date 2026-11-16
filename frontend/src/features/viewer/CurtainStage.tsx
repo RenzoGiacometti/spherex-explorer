@@ -68,12 +68,17 @@ export function CurtainStage({ controller }: CurtainStageProps) {
 }
 
 export interface PlateCaptionProps {
-  /** Placa del DSS que se esta viendo en el viaje. */
-  readonly plate: OpticalLayer;
+  /** Placa del DSS que se esta viendo en el viaje; null en una capa de 2MASS o de WISE. */
+  readonly plate: OpticalLayer | null;
   /** Donde estaba el objeto si en esa fecha caia fuera del campo; null si estaba adentro. */
   readonly outside: TargetOffset | null;
   /** Nombre del objeto del campo, si se conoce. */
   readonly name: string | null;
+  /**
+   * La capa se guardo sin la posicion de un objeto que se mueve (UGPS J0722):
+   * se dice, para que no se busque al objeto donde no se sabe si esta.
+   */
+  readonly noPosition?: boolean;
 }
 
 /**
@@ -83,12 +88,19 @@ export interface PlateCaptionProps {
  * 1991), el aviso que lo dice, para que el cuadro no quede sin su objeto y sin
  * explicacion.
  */
-export function PlateCaption({ plate, outside, name }: PlateCaptionProps) {
+export function PlateCaption({ plate, outside, name, noPosition = false }: PlateCaptionProps) {
   const { t } = useTranslation("context");
   const language = useLanguage();
   return (
-    <div className={styles.caption} data-plate={plate.key}>
-      {outside === null ? null : (
+    <div className={styles.caption} data-plate={plate?.key}>
+      {noPosition ? (
+        <div className={styles.outside} role="status" data-journey-no-position="">
+          <QualityNotice>
+            {t("journey.noPosition", { name: name ?? t("journey.outsideObject") })}
+          </QualityNotice>
+        </div>
+      ) : null}
+      {outside === null || plate === null ? null : (
         <div className={styles.outside} role="status" data-journey-outside="">
           <QualityNotice>
             {t("journey.outside", {
@@ -100,7 +112,9 @@ export function PlateCaption({ plate, outside, name }: PlateCaptionProps) {
           </QualityNotice>
         </div>
       )}
-      <OpticalCredit className={styles.credit} credit={plateCredit(plate)} />
+      {plate === null ? null : (
+        <OpticalCredit className={styles.credit} credit={plateCredit(plate)} />
+      )}
     </div>
   );
 }
