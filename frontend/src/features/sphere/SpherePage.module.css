@@ -436,8 +436,14 @@
     max-height: calc(100% - var(--sky-labels-inset, 0px) - 56px - 2 * var(--space-sm));
   }
 
+  /*
+   * El alto de cada celda sale de su contenido: con un rotulo de un renglon
+   * mide los mismos 52 px, y con uno de dos ("Time travel") crece en vez de
+   * dejar el icono contra el borde.
+   */
   .rail .cell {
-    flex-basis: 52px;
+    flex-basis: auto;
+    padding-block: var(--space-xxs);
   }
 
   /*
