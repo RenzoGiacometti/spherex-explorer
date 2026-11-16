@@ -8,6 +8,8 @@ import { TOUR_START } from "./tour";
 
 export interface GuideLauncherProps {
   readonly className?: string | undefined;
+  /** Rotulo de una palabra, para el riel de accesos de la entrada. */
+  readonly compact?: boolean | undefined;
 }
 
 /**
@@ -17,7 +19,7 @@ export interface GuideLauncherProps {
  *
  * Con `embed=1` no se ofrece: esa vista no tiene los controles del recorrido.
  */
-export function GuideLauncher({ className }: GuideLauncherProps) {
+export function GuideLauncher({ className, compact = false }: GuideLauncherProps) {
   const { t } = useTranslation("guide");
   const embed = useUrlState((state) => state.embed);
   if (embed || TOUR_START === null) return null;
@@ -32,7 +34,7 @@ export function GuideLauncher({ className }: GuideLauncherProps) {
       title={t("launcher.start")}
       onClick={startTour}
     >
-      {t("launcher.short")}
+      {t(compact ? "launcher.rail" : "launcher.short")}
       <span className={a11y.visuallyHidden}>{t("launcher.detail")}</span>
     </Button>
   );

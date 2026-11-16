@@ -122,8 +122,6 @@
 
 .searchRow {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
 }
 
 /*
@@ -150,23 +148,6 @@
   );
 }
 
-/*
- * Las acciones van a la altura del campo: bajan el renglon de la etiqueta y la
- * mitad de lo que les falta para los 56 px del campo.
- */
-.actions {
-  display: flex;
-  flex: none;
-  gap: var(--space-sm);
-  margin-top: calc(
-    var(--type-label-cap-size) *
-    var(--type-label-cap-line-height) +
-    var(--space-xs) +
-    (var(--search-field-height) - var(--button-ghost-height)) /
-    2
-  );
-}
-
 /* Sobre el cielo el boton fantasma lleva el mismo vidrio que el campo. */
 .action {
   background-color: var(--color-glass);
@@ -176,26 +157,79 @@
 }
 
 /*
- * Recorrido guiado: renglon propio sobre el buscador, del ancho de su texto.
- * En el celular ocupa todo el ancho, como las demas acciones.
+ * Riel de accesos: una tira de vidrio vertical sobre el borde derecho, con una
+ * celda por acceso (icono arriba, rotulo de una palabra abajo). Con lugar va
+ * centrado en la altura de la ventana: ahi no llega al buscador, que mide 760 px
+ * y va al centro. En una ventana angosta o baja si llegaria (ver mas abajo).
  */
-.guide {
-  align-self: flex-start;
-}
-
-/*
- * Renglon del recorrido guiado y los accesos directos (viaje en el tiempo,
- * cortina). Si no entran en una linea, pasan a la siguiente.
- */
-.shortcuts {
+.rail {
+  position: absolute;
+  top: 50%;
+  right: var(--space-lg);
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
+  flex-direction: column;
+  width: 88px;
+  max-height: calc(100% - var(--sky-labels-inset, 0px) - 64px - 2 * var(--space-sm));
+  overflow: hidden;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--glass-panel-radius);
+  background-color: var(--glass-panel-bg);
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  backdrop-filter: blur(var(--effect-glass-blur));
+  transform: translateY(-50%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .rail {
+    background-color: var(--color-glass-solid);
+  }
 }
 
 /*
- * Los cinco objetos del desafio como `quick-link`, en un renglon sobre los
- * accesos y alineados con ellos. El selector lleva `.dock` para ganarle al
+ * Celda del riel: un `button-ghost` sin pildora ni borde propio, separado del
+ * anterior por una linea. El selector lleva `.rail` para ganarle al boton
+ * (components/Button.module.css).
+ */
+.rail .cell {
+  flex: 1 1 64px;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  min-height: var(--button-ghost-height);
+  padding: var(--space-xs) var(--space-xxs);
+  border: 0;
+  border-top: 1px solid var(--color-divider);
+  border-radius: 0;
+  font: var(--type-label-cap-font);
+  letter-spacing: var(--type-label-cap-tracking);
+  text-transform: var(--type-label-cap-transform);
+}
+
+.rail .cell:first-child {
+  border-top: 0;
+}
+
+/* El riel recorta lo que sale de el: el anillo de foco va hacia adentro. */
+.rail .cell:focus-visible {
+  outline-offset: -2px;
+}
+
+/*
+ * Ventana angosta o baja: centrado, el riel quedaria detras del buscador y de
+ * los destacados. Ahi se apoya encima de la franja de abajo, cuyo alto mide la
+ * pagina (`--sky-labels-inset`, SpherePage.tsx).
+ */
+@media (max-width: 1023px), (max-height: 699px) {
+  .rail {
+    top: auto;
+    bottom: calc(var(--sky-labels-inset, 0px) + var(--space-sm));
+    transform: none;
+  }
+}
+
+/*
+ * Los cinco objetos del desafio como `quick-link`, en un renglon sobre el
+ * buscador y alineados con el. El selector lleva `.dock` para ganarle al
  * centrado de la lista (components/QuickLink.module.css).
  */
 .dock .featured {
@@ -242,19 +276,27 @@
 }
 
 /*
- * Tarjeta del punto elegido: vidrio, como el aviso. Coordenadas en mono, la
- * constelacion, si el campo ya esta guardado o hay que armarlo, y el boton.
- *
- * Es baja a proposito, dos renglones: va sobre los accesos y todo lo de abajo
- * crece hacia arriba con ella, sobre el cielo que se esta mirando. Arriba, el
- * punto con el boton de abrir y el de cerrar; abajo, la constelacion y el aviso.
+ * Cartel del punto elegido: vidrio, como el aviso. Sale de la mira y la sigue;
+ * la posicion la escribe la pagina en cada cuadro (`placeCallout`,
+ * SpherePage.tsx), por eso nace en la esquina y oculto. De arriba abajo: el
+ * rotulo con el boton de cerrar, las coordenadas en mono, la constelacion con
+ * el aviso de si el campo esta guardado, y el boton que lo abre.
  */
 .pick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    "point open close"
-    "info info info";
+    "title close"
+    "coords coords"
+    "info info"
+    "open open";
+  width: 288px;
+  visibility: hidden;
+  opacity: var(--sphere-chrome, 1);
   align-items: center;
   gap: var(--space-xs) var(--space-sm);
   padding: var(--glass-panel-padding);
@@ -274,12 +316,9 @@
   }
 }
 
+/* El rotulo y las coordenadas son celdas del cartel, no de este grupo. */
 .pickPoint {
-  grid-area: point;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxs);
-  min-width: 0;
+  display: contents;
 }
 
 /* La constelacion y el aviso, seguidos; si no entran en un renglon, el aviso baja. */
@@ -291,6 +330,7 @@
 }
 
 .pickTitle {
+  grid-area: title;
   color: var(--color-text-mute);
   font: var(--type-label-cap-font);
   letter-spacing: var(--type-label-cap-tracking);
@@ -298,6 +338,7 @@
 }
 
 .pickCoordinates {
+  grid-area: coords;
   font: var(--type-data-font);
   letter-spacing: var(--type-data-tracking);
   font-variant-numeric: var(--type-data-numeric);
@@ -313,6 +354,23 @@
 
 .pickClose {
   grid-area: close;
+}
+
+/* Linea de 1 px entre la mira y el cartel del punto elegido; la ubica la pagina. */
+.leader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  opacity: var(--sphere-chrome, 1);
+  pointer-events: none;
+}
+
+.leader line {
+  stroke: var(--color-hairline-strong);
+  stroke-width: 1;
+  visibility: hidden;
 }
 
 /* Credito de la imagen del cielo: NASA pide que se la nombre como fuente. */
@@ -340,25 +398,12 @@
 }
 
 /*
- * Anchos intermedios (tableta, ventana angosta): las acciones bajan a su
- * propio renglon, repartidas, para que el campo conserve su ejemplo entero.
+ * Tableta y ventana angosta: el buscador no reserva el renglon de los mensajes,
+ * para no dejar un hueco entre el campo y el credito.
  */
 @media (max-width: 899px) {
-  .searchRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .search {
     min-height: 0;
-  }
-
-  .actions {
-    margin-top: 0;
-  }
-
-  .action {
-    flex: 1;
   }
 }
 
@@ -384,8 +429,15 @@
     padding: 0 var(--space-sm) var(--space-sm);
   }
 
-  .actions {
-    flex-direction: column;
+  /* Riel mas angosto y a 12 px del borde, al alcance del pulgar. */
+  .rail {
+    right: var(--space-sm);
+    width: 76px;
+    max-height: calc(100% - var(--sky-labels-inset, 0px) - 56px - 2 * var(--space-sm));
+  }
+
+  .rail .cell {
+    flex-basis: 52px;
   }
 
   /*
@@ -406,29 +458,9 @@
     flex: none;
   }
 
-  .guide {
-    align-self: stretch;
-  }
-
-  /*
-   * En el celular no entra todo. Mientras hay un punto elegido, su tarjeta
-   * ocupa el lugar de los cinco objetos y de los accesos, que vuelven al
-   * cerrarla: el buscador y los botones de abajo no se mueven de la zona del
-   * pulgar. Con los accesos apilados la tarjeta mide menos que lo que
-   * reemplaza, asi que lo de abajo no crece sobre el cielo ni tapa el punto.
-   */
-  .dock[data-pick="true"] .featured,
-  .dock[data-pick="true"] .shortcuts {
-    display: none;
-  }
-
-  /* El boton de abrir baja a su propio renglon, a todo el ancho. */
+  /* Mas angosto, para entrar entre el borde de la pantalla y el riel. */
   .pick {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "point close"
-      "info info"
-      "open open";
+    width: min(248px, calc(100vw - 124px));
   }
 
   .credit {
@@ -439,38 +471,18 @@
 }
 
 /*
- * Celular bajo: un telefono chico, o uno comun con las barras del navegador a
- * la vista. Con los tres accesos apilados no queda cielo (a 360 x 640 px lo de
- * abajo llegaba hasta la lectura del centro, sin un pixel donde tocar). Ahi van
- * en un solo renglon que se desliza hacia el costado, igual que los destacados
- * que tienen encima. Desde 760 px de alto, apilados, quedan mas de 130 px de
- * cielo, y por eso el limite va ahi.
- */
-@media (max-width: 599px) and (max-height: 759px) {
-  .shortcuts {
-    flex-wrap: nowrap;
-    margin: calc(-1 * var(--space-xs)) calc(-1 * var(--space-sm));
-    padding: var(--space-xs) var(--space-sm);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .shortcuts .action {
-    flex: none;
-  }
-}
-
-/*
  * Al acercarse a un campo que tiene imagen, la interfaz de abajo se retira con
  * el cielo (`--sphere-chrome`, de 1 a 0) y queda la imagen sola: el buscador no
  * la tapa. Retirada del todo, tampoco recibe el puntero ni el foco.
  */
 .bottom,
+.rail,
 .readout {
   opacity: var(--sphere-chrome, 1);
 }
 
 .page[data-chrome="hidden"] .bottom,
+.page[data-chrome="hidden"] .rail,
 .page[data-chrome="hidden"] .readout {
   visibility: hidden;
 }

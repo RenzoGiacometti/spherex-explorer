@@ -2,6 +2,7 @@
   "launcher": {
     "start": "Guided tour: find WISE 0855",
     "short": "Guided tour",
+    "rail": "Tour",
     "detail": ": find WISE 0855"
   },
   "tour": {
