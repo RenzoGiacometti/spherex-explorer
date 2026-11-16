@@ -366,7 +366,13 @@ export function SpherePage({
     const card = calloutRef.current;
     const line = leaderRef.current;
     const page = pageRef.current;
-    if (card === null || line === null || page === null) return;
+    if (line === null || page === null) return;
+    if (card === null) {
+      // Sin cartel (se cerro, o esta la ventana al cielo) la linea no une nada: la
+      // linea vive fuera del cartel y, si no se la oculta aca, queda dibujada.
+      line.style.visibility = "hidden";
+      return;
+    }
     const target = pickRef.current;
     // Con la interfaz retirada del todo (`setChrome`) el cartel tampoco se muestra:
     // con opacidad 0 seguiria recibiendo el puntero y el foco.
